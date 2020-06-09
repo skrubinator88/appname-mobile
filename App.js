@@ -1,8 +1,13 @@
 // IMPORT
 import React, { useState } from "react";
-import { View } from "react-native";
+import { View, Platform } from "react-native";
 import styled from "styled-components/native";
 // import Icon from "react-native-vector-icons/FontAwesome";
+import { ResponsiveSize } from "./components/font-responsiveness";
+// import { ResponsiveSize } from "./components/device-responsiveness";
+
+// Interfaces
+import { CameraInterface } from "./interfaces/mapview-interfaces";
 
 // Expo
 import MapView, { Marker } from "react-native-maps";
@@ -18,21 +23,21 @@ export default function App() {
       setErrorMsg("Permission to access location was denied");
     }
     let location = await Location.getLastKnownPositionAsync();
-    // console.log(location);
-    // setInterval(() => {
-    //   setLocation(location);
-    // }, 1000);
+    setInterval(() => {
+      // setLocation(location);
+    }, 10000);
   })();
 
-  // Send location to API
-
   // Fetch each Job Posting in ratio from API
+  // 1. Send device location with a Get Method
+  // 2. Push data to state
+
   const [jobPostings, setJobPostings] = useState([
     {
       title: "Username",
       description: "Clean toilet",
       image: "imageSource",
-      coordinate: { latitude: 33.92, longitude: -84.28 },
+      coordinate: { latitude: 33.92, longitude: -84.32 },
       id: 123123,
     },
     {
@@ -40,46 +45,59 @@ export default function App() {
       title: "Username",
       description: "Fix TV",
       image: "imageSource",
-      coordinate: { latitude: 33.9, longitude: -84.39 },
+      coordinate: { latitude: 33.9, longitude: -84.34 },
     },
     {
       id: 123552,
       title: "Username",
       description: "Wall Work",
       image: "imageSource",
-      coordinate: { latitude: 33.926, longitude: -84.499 },
+      coordinate: { latitude: 33.91, longitude: -84.3 },
     },
   ]);
 
+  // Map Settings
+  const cameraSettings = CameraInterface({
+    latitude: 33.926,
+    longitude: -85.49,
+    altitude: 10,
+    pitch: 10,
+    heading: 10,
+    zoom: 2,
+  });
+  npm;
+  const regionSettings = {
+    latitude: 33.9204673,
+    longitude: -84.2805469,
+    latitudeDelta: 1,
+    longitudeDelta: 1,
+  };
+
   return (
-    // Map
-    <MapView
-      provider="google"
-      showsUserLocation={true} // iOS Working
-      followsUserLocation={true}
-      maxZoomLevel={18}
-      minZoomLevel={15} // 13
-      region={{
-        latitude: 33.9204673,
-        longitude: -84.2805469,
-        latitudeDelta: 0,
-        longitudeDelta: 1,
-      }}
-      style={{ flex: 1 }}
-    >
-      {/* Render each marker */}
-      {jobPostings.map(({ title, description, coordinate, id }) => (
-        <Marker
-          key={id}
-          title={title}
-          description={description}
-          coordinate={coordinate}
-        ></Marker>
-      ))}
+    <Container>
+      <MapView
+        provider="google"
+        showsUserLocation={true}
+        maxZoomLevel={18}
+        minZoomLevel={11} // 11
+        region={regionSettings}
+        camera={cameraSettings}
+        style={{ flex: 1 }}
+      >
+        {/* Render each marker */}
+        {jobPostings.map(({ title, description, coordinate, id }) => (
+          <Marker
+            key={id}
+            title={title}
+            description={description}
+            coordinate={coordinate}
+          ></Marker>
+        ))}
+      </MapView>
 
       {/* UI */}
 
-      <Container>
+      <Section>
         <ProfilePicture
           source={{
             uri: "https://i.insider.com/5899ffcf6e09a897008b5c04?width=1200",
@@ -103,7 +121,9 @@ export default function App() {
         </Row>
         <Row>
           <Column>
-            <Text medium>View Skills & Licenses</Text>
+            <Button>
+              <Text medium>View Skills & Licenses</Text>
+            </Button>
           </Column>
         </Row>
         <Row>
@@ -134,17 +154,24 @@ export default function App() {
             </Button>
           </Column>
         </Row>
-      </Container>
-    </MapView>
+      </Section>
+    </Container>
   );
 }
 
 // STYLES
 const Container = styled.View`
-  position: absolute;
+  flex: 1;
+  background: red;
+`;
+
+const Section = styled.View`
+  /* position: absolute; */
+  margin-top: -40px;
   left: 0;
   bottom: 0;
-  border-radius: 40px;
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
   background: white;
   width: 100%;
 `;
@@ -160,21 +187,21 @@ const Row = styled.View`
   flex-direction: row;
   justify-content: space-between;
   margin: ${(props) => {
-    if (props.last) {
-      return "0px 10px 30px 10px";
-    } else if (props.first) {
+    if (props.first) {
       return "10px 10px 0 10px";
+    } else if (props.last) {
+      return `20px 10px 20px 10px`;
     } else {
       return "0px 10px";
     }
   }};
-  border-bottom-color: #cecece;
+  border-bottom-color: #eaeaea;
   border-bottom-width: ${(props) => (props.last ? "0px" : "1px")};
 `;
 
 const Column = styled.View`
-  margin: 10px 0;
-  padding: 0 25px;
+  margin: 2% 0;
+  padding: 0 18px;
 `;
 
 const Text = styled.Text`
@@ -182,13 +209,13 @@ const Text = styled.Text`
   ${({ title, medium, small }) => {
     switch (true) {
       case title:
-        return `font-size: 24px`;
+        return `font-size: ${ResponsiveSize(19)}px`;
 
       case medium:
-        return `font-size: 21px`;
+        return `font-size: ${ResponsiveSize(15)}px`;
 
       case small:
-        return `font-size: 19px`;
+        return `font-size: ${ResponsiveSize(13)}px`;
     }
   }}
 
@@ -204,13 +231,24 @@ const Text = styled.Text`
 `;
 
 const Button = styled.TouchableOpacity`
+  /* background-color: red; */
+
   ${({ decline, accept, row }) => {
     switch (true) {
       case accept:
-        return "background: #00a0e5; padding: 10px 40px; border-radius: 8px;";
+        return `
+        background: #00a0e5; 
+        padding: 10px 40px; 
+        border-radius: 8px;
+        `;
 
       case decline:
-        return "background: white; padding: 10px 40px; border-radius: 8px;";
+        return `
+        border: 1px solid red; 
+        background: white; 
+        padding: 10px 40px; 
+        border-radius: 8px;
+        `;
     }
   }}
 `;
