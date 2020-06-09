@@ -65,7 +65,6 @@ export default function App() {
     heading: 10,
     zoom: 2,
   });
-  npm;
   const regionSettings = {
     latitude: 33.9204673,
     longitude: -84.2805469,
