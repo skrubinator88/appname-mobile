@@ -1,5 +1,5 @@
 // IMPORT
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Platform } from "react-native";
 import styled from "styled-components/native";
 // import Icon from "react-native-vector-icons/FontAwesome";
@@ -10,23 +10,37 @@ import { ResponsiveSize } from "./components/font-responsiveness";
 import { CameraInterface } from "./interfaces/mapview-interfaces";
 
 // Expo
+import { FontAwesome } from "@expo/vector-icons";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 
 // BODY
 export default function App() {
   const [location, setLocation] = useState(null);
+  let initialCameraSettings;
 
-  (async () => {
-    let { status } = await Location.requestPermissionsAsync();
-    if (status !== "granted") {
-      setErrorMsg("Permission to access location was denied");
-    }
-    let location = await Location.getLastKnownPositionAsync();
-    setInterval(() => {
-      // setLocation(location);
-    }, 10000);
-  })();
+  // Get initial location
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+      }
+      let position = await Location.getCurrentPositionAsync();
+      setLocation(position);
+    })();
+  }, []);
+
+  // Map Settings
+  if (location != null)
+    initialCameraSettings = CameraInterface({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      altitude: 0,
+      pitch: 0,
+      heading: 0,
+      zoom: 11,
+    });
 
   // Fetch each Job Posting in ratio from API
   // 1. Send device location with a Get Method
@@ -56,121 +70,136 @@ export default function App() {
     },
   ]);
 
-  // Map Settings
-  const cameraSettings = CameraInterface({
-    latitude: 33.926,
-    longitude: -85.49,
-    altitude: 10,
-    pitch: 10,
-    heading: 10,
-    zoom: 2,
-  });
-  const regionSettings = {
-    latitude: 33.9204673,
-    longitude: -84.2805469,
-    latitudeDelta: 1,
-    longitudeDelta: 1,
-  };
+  if (location != null) {
+    return (
+      <Container>
+        <MapView
+          // Common
+          provider="google"
+          maxZoomLevel={18} // 18
+          minZoomLevel={8} // 9
+          initialCamera={initialCameraSettings}
+          // iOS
+          showsUserLocation={true}
+          // Android
 
-  return (
-    <Container>
-      <MapView
-        provider="google"
-        showsUserLocation={true}
-        maxZoomLevel={18}
-        minZoomLevel={11} // 11
-        region={regionSettings}
-        camera={cameraSettings}
-        style={{ flex: 1 }}
-      >
-        {/* Render each marker */}
-        {jobPostings.map(({ title, description, coordinate, id }) => (
-          <Marker
-            key={id}
-            title={title}
-            description={description}
-            coordinate={coordinate}
-          ></Marker>
-        ))}
-      </MapView>
+          // Other props
+          style={{ flex: 1 }}
+        >
+          {/* Render each marker */}
+          {jobPostings.map(({ title, description, coordinate, id }) => (
+            <Marker
+              key={id}
+              title={title}
+              description={description}
+              coordinate={coordinate}
+            ></Marker>
+          ))}
+        </MapView>
 
-      {/* UI */}
+        {/* UI */}
 
-      <Section>
-        <ProfilePicture
-          source={{
-            uri: "https://i.insider.com/5899ffcf6e09a897008b5c04?width=1200",
-          }}
-        ></ProfilePicture>
+        <Card>
+          <ProfilePicture
+            source={{
+              uri: "https://i.insider.com/5899ffcf6e09a897008b5c04?width=1200",
+            }}
+          ></ProfilePicture>
 
-        <Row first>
-          <Column>
-            <Text title bold>
-              John Doe
-            </Text>
-            <Text small light>
-              Domestic Worker
-            </Text>
-            <Text bold>*Icon* 13 min</Text>
-          </Column>
-          <Column>
-            <Text>5 Stars</Text>
-            <Text>4.01</Text>
-          </Column>
-        </Row>
-        <Row>
-          <Column>
-            <Button>
-              <Text medium>View Skills & Licenses</Text>
-            </Button>
-          </Column>
-        </Row>
-        <Row>
-          <Column>
-            <Text medium>View Profile</Text>
-          </Column>
-        </Row>
-        <Row>
-          <Column>
-            <Button row>
-              <Text medium>Reviews</Text>
-            </Button>
-          </Column>
-        </Row>
-        <Row last>
-          <Column>
-            <Button decline>
-              <Text style={{ color: "red" }} medium>
-                Decline
+          <Row first>
+            <Column>
+              <Text title bold>
+                John Doe
               </Text>
-            </Button>
-          </Column>
-          <Column>
-            <Button accept>
-              <Text style={{ color: "white" }} medium>
-                Accept
+              <Text small light>
+                Domestic Worker
               </Text>
-            </Button>
-          </Column>
-        </Row>
-      </Section>
-    </Container>
-  );
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text bold>
+                  <FontAwesome name="map-marker" size={24} color="black" />
+                </Text>
+                <Text style={{ marginLeft: 10 }} bold>
+                  13 min
+                </Text>
+              </View>
+            </Column>
+            <Column>
+              {/* Iterate  from array of data pulled from server and render as stars */}
+              <View style={{ flexDirection: "row" }}>
+                <Text style={{ paddingHorizontal: 1 }}>
+                  <FontAwesome name="star" size={24} color="black" />
+                </Text>
+                <Text style={{ paddingHorizontal: 1 }}>
+                  <FontAwesome name="star" size={24} color="black" />
+                </Text>
+                <Text style={{ paddingHorizontal: 1 }}>
+                  <FontAwesome name="star" size={24} color="black" />
+                </Text>
+                <Text style={{ paddingHorizontal: 1 }}>
+                  <FontAwesome name="star" size={24} color="black" />
+                </Text>
+                <Text style={{ paddingHorizontal: 1 }}>
+                  <FontAwesome name="star-o" size={24} color="black" />
+                </Text>
+              </View>
+              <Text style={{ textAlign: "center" }} bold>
+                4.01
+              </Text>
+            </Column>
+          </Row>
+          <Row>
+            <Column>
+              <Button>
+                <Text medium>View Skills & Licenses</Text>
+              </Button>
+            </Column>
+          </Row>
+          <Row>
+            <Column>
+              <Text medium>View Profile</Text>
+            </Column>
+          </Row>
+          <Row>
+            <Column>
+              <Button row>
+                <Text medium>Reviews</Text>
+              </Button>
+            </Column>
+          </Row>
+          <Row last>
+            <Column>
+              <Button decline>
+                <Text style={{ color: "red" }} medium>
+                  Decline
+                </Text>
+              </Button>
+            </Column>
+            <Column>
+              <Button accept>
+                <Text style={{ color: "white" }} medium>
+                  Accept
+                </Text>
+              </Button>
+            </Column>
+          </Row>
+        </Card>
+      </Container>
+    );
+  } else {
+    return <View></View>;
+  }
 }
 
 // STYLES
 const Container = styled.View`
   flex: 1;
-  background: red;
 `;
 
-const Section = styled.View`
-  /* position: absolute; */
-  margin-top: -40px;
+const Card = styled.View`
+  position: absolute;
   left: 0;
   bottom: 0;
-  border-top-left-radius: 40px;
-  border-top-right-radius: 40px;
+  border-radius: 40px;
   background: white;
   width: 100%;
 `;
@@ -184,12 +213,23 @@ const ProfilePicture = styled.Image`
 
 const Row = styled.View`
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: ${({ first, last }) => {
+    switch (true) {
+      case first:
+        return "space-around";
+      case last:
+        return "space-around";
+
+      default:
+        return "flex-start";
+    }
+  }};
+  /* justify-content:  */
   margin: ${(props) => {
     if (props.first) {
-      return "10px 10px 0 10px";
+      return "30px 10px 0 10px";
     } else if (props.last) {
-      return `20px 10px 20px 10px`;
+      return `20px 10px 50px 10px`;
     } else {
       return "0px 10px";
     }
@@ -200,7 +240,6 @@ const Row = styled.View`
 
 const Column = styled.View`
   margin: 2% 0;
-  padding: 0 18px;
 `;
 
 const Text = styled.Text`
@@ -230,8 +269,6 @@ const Text = styled.Text`
 `;
 
 const Button = styled.TouchableOpacity`
-  /* background-color: red; */
-
   ${({ decline, accept, row }) => {
     switch (true) {
       case accept:
