@@ -17,31 +17,62 @@ import * as Location from "expo-location";
 // BODY
 export default function App() {
   const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState("");
   let initialCameraSettings;
+  let cameraSettings;
 
   // Get initial location
   useEffect(() => {
     (async () => {
+      let position;
       let { status } = await Location.requestPermissionsAsync();
       if (status !== "granted") {
         setErrorMsg("Permission to access location was denied");
       }
-      let position = await Location.getCurrentPositionAsync();
+      position = await Location.getLastKnownPositionAsync();
       setLocation(position);
+
+      return;
     })();
   }, []);
 
   // Map Settings
-  if (location != null)
-    initialCameraSettings = CameraInterface({
-      latitude: location.coords.latitude,
+  if (location != null) {
+    // Chart for displaying the gps location
+    // icon at the third of the screen.
+    // ========================
+    // = Zoom = Sub. Latitude =
+    // ========================
+    // = 18   =  -0.0009375   =
+    // = 17   =  -0.001875    =
+    // = 16   =  -0.00375     =
+    // = 15   =  -0.0075      =
+    // = 14   =  -0.015       =
+    // = 13   =  -0.03        =
+    // = 12   =  -0.06        =
+    // = 11   =  -0.12        =
+    // = 10   =  -0.24        =
+    // = 09   =  -0.48        =
+    // ========================
+    const zoom = 11;
+    const subLatitud = -0.12;
+    initialCameraSettings = new CameraInterface({
+      latitude: location.coords.latitude + subLatitud,
       longitude: location.coords.longitude,
       altitude: 0,
       pitch: 0,
       heading: 0,
-      zoom: 11,
+      zoom,
     });
-
+    // cameraSettings = new CameraInterface({
+    //   latitude: location.coords.latitude - 0.0009375,
+    //   longitude: location.coords.longitude,
+    //   altitude: 0,
+    //   pitch: 0,
+    //   heading: 0,
+    //   zoom: 18,
+    // });
+  }
   // Fetch each Job Posting in ratio from API
   // 1. Send device location with a Get Method
   // 2. Push data to state
@@ -77,8 +108,9 @@ export default function App() {
           // Common
           provider="google"
           maxZoomLevel={18} // 18
-          minZoomLevel={8} // 9
+          minZoomLevel={9} // 9
           initialCamera={initialCameraSettings}
+          // camera={cameraSettings}
           // iOS
           showsUserLocation={true}
           // Android
@@ -124,7 +156,7 @@ export default function App() {
               </View>
             </Column>
             <Column>
-              {/* Iterate  from array of data pulled from server and render as stars */}
+              {/* Iterate from array of data pulled from server and render as stars */}
               <View style={{ flexDirection: "row" }}>
                 <Text style={{ paddingHorizontal: 1 }}>
                   <FontAwesome name="star" size={24} color="black" />
@@ -216,10 +248,9 @@ const Row = styled.View`
   justify-content: ${({ first, last }) => {
     switch (true) {
       case first:
-        return "space-around";
+        return "space-between";
       case last:
         return "space-around";
-
       default:
         return "flex-start";
     }
@@ -231,15 +262,16 @@ const Row = styled.View`
     } else if (props.last) {
       return `20px 10px 50px 10px`;
     } else {
-      return "0px 10px";
+      return "0px 0px";
     }
   }};
+  padding: 0 30px;
   border-bottom-color: #eaeaea;
   border-bottom-width: ${(props) => (props.last ? "0px" : "1px")};
 `;
 
 const Column = styled.View`
-  margin: 2% 0;
+  margin: 5px 0;
 `;
 
 const Text = styled.Text`
