@@ -37,27 +37,34 @@ export default function App() {
   }, []);
 
   // Map Settings
+  // Chart for displaying the gps location
+  // icon at the third of the screen.
+  // ========================
+  // = Zoom = Sub. Latitude =
+  // ========================
+  // = 18   =  -0.0009375   =
+  // = 17   =  -0.001875    =
+  // = 16   =  -0.00375     =
+  // = 15   =  -0.0075      =
+  // = 14   =  -0.015       =
+  // = 13   =  -0.03        =
+  // = 12   =  -0.06        =
+  // = 11   =  -0.12        =
+  // = 10   =  -0.24        =
+  // = 09   =  -0.48        =
+  // = 08   =  -0.96        =
+  // = 07   =  -1.92        =
+  // = 06   =  -3.84        =
+  // = 05   =  -7.68        =
+  // = 04   =  -15.36       =
+  // = 03   =  -30.72       =
+  // = 02   =  -61.44       =
+  // ========================
   if (location != null) {
-    // Chart for displaying the gps location
-    // icon at the third of the screen.
-    // ========================
-    // = Zoom = Sub. Latitude =
-    // ========================
-    // = 18   =  -0.0009375   =
-    // = 17   =  -0.001875    =
-    // = 16   =  -0.00375     =
-    // = 15   =  -0.0075      =
-    // = 14   =  -0.015       =
-    // = 13   =  -0.03        =
-    // = 12   =  -0.06        =
-    // = 11   =  -0.12        =
-    // = 10   =  -0.24        =
-    // = 09   =  -0.48        =
-    // ========================
-    const zoom = 11;
-    const subLatitud = -0.12;
+    const zoom = 12; // Change the zoom between 2 and 20
+    const base = -115; // Change this number to set the position of the GPS Icon in the screen (Vertically only) between 1 and 130
     initialCameraSettings = new CameraInterface({
-      latitude: location.coords.latitude + subLatitud,
+      latitude: location.coords.latitude + (base / Math.pow(2, zoom - 1)),
       longitude: location.coords.longitude,
       altitude: 0,
       pitch: 0,
@@ -65,18 +72,17 @@ export default function App() {
       zoom,
     });
     // cameraSettings = new CameraInterface({
-    //   latitude: location.coords.latitude - 0.0009375,
+    //   latitude: location.coords.latitude + (base / Math.pow(2, zoom - 1)),
     //   longitude: location.coords.longitude,
     //   altitude: 0,
     //   pitch: 0,
     //   heading: 0,
-    //   zoom: 18,
+    //   zoom,
     // });
   }
   // Fetch each Job Posting in ratio from API
   // 1. Send device location with a Get Method
   // 2. Push data to state
-
   const [jobPostings, setJobPostings] = useState([
     {
       title: "Username",
@@ -107,8 +113,8 @@ export default function App() {
         <MapView
           // Common
           provider="google"
-          maxZoomLevel={18} // 18
-          minZoomLevel={9} // 9
+          // maxZoomLevel={18} // 18
+          // minZoomLevel={9} // 9
           initialCamera={initialCameraSettings}
           // camera={cameraSettings}
           // iOS
