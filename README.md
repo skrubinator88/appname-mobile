@@ -8,7 +8,7 @@
 | [expo](https://docs.expo.io/versions/latest/)                                        | Utilizacion de recursos o API del dispositivo tales como camaras, localizacion, etc. |
 | [react-navigation (Native)](https://reactnavigation.org/docs/getting-started)        | Sistema de rutas.                                                                    |
 | [styled-components](https://styled-components.com/docs)                              | CSS, mejor que la implementacion de stylos en react                                  |
-| [async-storage](https://react-native-community.github.io/async-storage/docs/install) | Para aplicar persistent data.                                                        |
+| [async-storage](https://react-native-community.github.io/async-storage/docs/install) | Para aplicar persistent data y guardar datos en el mobile localmente.                                                        |
 
 ## Notas:
 
