@@ -2,12 +2,13 @@
 
 ## Dependencias que se utilizaran.
 
-| **Dependencias**                                                              | **descripción**                                                                      |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| [axios](https://github.com/axios/axios)                                       | API para hacer peticiones HTTP                                                       |
-| [expo](https://docs.expo.io/versions/latest/)                                 | Utilizacion de recursos o API del dispositivo tales como camaras, localizacion, etc. |
-| [react-navigation (Native)](https://reactnavigation.org/docs/getting-started) | Sistema de rutas.                                                                    |
-| [styled-components](https://styled-components.com/docs)                       | CSS, mejor que la implementacion de stylos en react                                  |
+| **Dependencias**                                                                     | **descripción**                                                                      |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| [axios](https://github.com/axios/axios)                                              | API para hacer peticiones HTTP                                                       |
+| [expo](https://docs.expo.io/versions/latest/)                                        | Utilizacion de recursos o API del dispositivo tales como camaras, localizacion, etc. |
+| [react-navigation (Native)](https://reactnavigation.org/docs/getting-started)        | Sistema de rutas.                                                                    |
+| [styled-components](https://styled-components.com/docs)                              | CSS, mejor que la implementacion de stylos en react                                  |
+| [async-storage](https://react-native-community.github.io/async-storage/docs/install) | Para aplicar persistent data.                                                        |
 
 ## Notas:
 
