@@ -141,7 +141,7 @@ export default function App({ navigation }) {
     <AuthContext.Provider value={authContext}>
       <NavigationContainer>
         <Drawer.Navigator>
-          {/* <Drawer.Screen name="Example" component={Example} /> */}
+          {/* <Drawer.Screen name="Example" component={Example} />  */}
           <Drawer.Screen name="Home" component={HomeStackScreen} />
           <Drawer.Screen name="Profile" component={ProfileStackScreen} />
           <Drawer.Screen name="Help" component={HelpStackScreen} />
