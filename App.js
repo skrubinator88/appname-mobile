@@ -13,21 +13,29 @@ import AsyncStorage from "@react-native-community/async-storage";
 // navigation.navigate('RouteName', { /* params go here */ }) // pass data as params (props) between screens. (props.route): route.params
 // Note: navigation.navigate("routeName", {}) if the screen is below, it will work as goBack() function and you can send data back
 
+// React Native Navigation 5 IMPORTS
 import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 
-// Screens
-import HomeScreen from "./screens/authenticated/homeScreen";
-import SignInScreen from "./screens/not_authenticated/signInScreen";
-import SignUpScreen from "./screens/not_authenticated/signUpScreen";
-import ResetPasswordScreen from "./screens/not_authenticated/resetPasswordScreen";
+// Single Screens
+import Example from "./screens/example";
+// import SignInScreen from "./screens/not_authenticated/signInScreen";
+// import SignUpScreen from "./screens/not_authenticated/signUpScreen";
+// import ResetPasswordScreen from "./screens/not_authenticated/resetPasswordScreen";
 
+// Contexts
 import { AuthContext } from "./components/context";
 
-const Stack = createStackNavigator();
-function fetchAuthFromServer() {}
+// Stacks
+import { HomeStackScreen } from "./screens/authenticated/homeScreen";
+import { ProfileStackScreen } from "./screens/authenticated/profileScreen";
+import { HelpStackScreen } from "./screens/authenticated/helpScreen";
+import { SignUpStackScreen } from "./screens/not_authenticated/signUpScreen";
 
-export default function App() {
+// Navigators
+const Drawer = createDrawerNavigator();
+
+export default function App({ navigation }) {
   // User auth fetched from server (Simulation)
   // const [isLoading, setIsLoading] = useState(true);
   // const [userToken, setUserToken] = useState(null); //"AYjyMzY3ZDhiNmJkNTY";
@@ -113,6 +121,11 @@ export default function App() {
       } catch (e) {
         console.log(e);
       }
+
+      if (userToken)
+        dispatch({ type: "LOGIN", id: userName, token: userToken });
+
+      dispatch({ type: "RETRIEVE_TOKEN", token: userToken });
     }, 1000);
   }, []);
 
@@ -127,13 +140,12 @@ export default function App() {
   return (
     <AuthContext.Provider value={authContext}>
       <NavigationContainer>
-        {loginState.userToken === null ? (
-          <Stack.Navigator headerMode="none">
-            <Stack.Screen name="Home" component={SignInScreen} />
-          </Stack.Navigator>
-        ) : (
-          <HomeScreen />
-        )}
+        <Drawer.Navigator>
+          {/* <Drawer.Screen name="Example" component={Example} /> */}
+          <Drawer.Screen name="Home" component={HomeStackScreen} />
+          <Drawer.Screen name="Profile" component={ProfileStackScreen} />
+          <Drawer.Screen name="Help" component={HelpStackScreen} />
+        </Drawer.Navigator>
       </NavigationContainer>
     </AuthContext.Provider>
   );

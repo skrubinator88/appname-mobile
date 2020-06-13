@@ -1,8 +1,11 @@
 // IMPORT
 import React, { useState, useEffect } from "react";
-import { View, Platform } from "react-native";
+import { View, Platform, Dimensions } from "react-native";
 import styled from "styled-components/native";
-import { ResponsiveSize } from "../components/font-responsiveness";
+// import { ResponsiveSize } from "../components/font-responsiveness";
+
+const deviceHeight = Dimensions.get("window").height;
+const deviceWidth = Dimensions.get("window").width;
 
 // Interfaces
 import { CameraInterface } from "../interfaces/mapview-interfaces";
@@ -64,7 +67,7 @@ export default function App({ navigation }) {
   // ========================
   if (location != null) {
     const zoom = 12; // Change the zoom between 2 and 20
-    const base = -115; // Change this number to set the position of the GPS Icon in the screen (Vertically only) between 1 and 130
+    const base = -100; // Change this number to set the position of the GPS Icon in the screen (Vertically only) between 1 and 130
     initialCameraSettings = new CameraInterface({
       latitude: location.coords.latitude + base / Math.pow(2, zoom - 1),
       longitude: location.coords.longitude,
@@ -118,7 +121,7 @@ export default function App({ navigation }) {
           // maxZoomLevel={18} // 18
           // minZoomLevel={9} // 9
           initialCamera={initialCameraSettings}
-          // camera={cameraSettings}
+          // camera={initialCameraSettings}
           // iOS
           showsUserLocation={true}
           // Android
@@ -239,7 +242,9 @@ const Card = styled.View`
   position: absolute;
   left: 0;
   bottom: 0;
-  border-radius: 40px;
+  /* border-radius: 40px; */
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
   background: white;
   width: 100%;
 `;
@@ -265,10 +270,24 @@ const Row = styled.View`
   }};
   /* justify-content:  */
   margin: ${(props) => {
+    // iPhone 5, 6 SE
+    // Small Android phones
+    if (deviceHeight < 668) {
+      if (props.first) {
+        return "30px 5px 0 5px";
+      } else if (props.last) {
+        return "20px 10px 30px 10px";
+      } else {
+        return "0px 0px";
+      }
+    }
+
     if (props.first) {
       return "30px 10px 0 10px";
     } else if (props.last) {
-      return `20px 10px 50px 10px`;
+      return `${
+        Platform.OS == "ios" ? "20px 10px 50px 10px" : "20px 10px 30px 10px"
+      }`;
     } else {
       return "0px 0px";
     }
@@ -279,31 +298,54 @@ const Row = styled.View`
 `;
 
 const Column = styled.View`
-  margin: 5px 0;
+  margin: ${() => {
+    // iPhone 5, 6 SE
+    // Small Android phones
+    if (deviceHeight < 668) {
+      return "4px 0";
+    }
+
+    return Platform.OS == "ios" ? "5px 0" : "1px";
+  }};
 `;
 
 const Text = styled.Text`
   margin: 5px 0;
   ${({ title, medium, small }) => {
+    // iPhone 5, 6 SE
+    // Small Android phones
+    if (deviceHeight < 668) {
+      switch (true) {
+        case title:
+          return `font-size: ${Platform.OS == "ios" ? 20 : 15}px`;
+
+        case medium:
+          return `font-size: ${Platform.OS == "ios" ? 16 : 12}px`;
+
+        case small:
+          return `font-size: ${Platform.OS == "ios" ? 14 : 14}px`;
+      }
+    }
+
     switch (true) {
       case title:
-        return `font-size: ${ResponsiveSize(19)}px`;
+        return `font-size: ${Platform.OS == "ios" ? 30 : 25}px`;
 
       case medium:
-        return `font-size: ${ResponsiveSize(15)}px`;
+        return `font-size: ${Platform.OS == "ios" ? 22 : 17}px`;
 
       case small:
-        return `font-size: ${ResponsiveSize(13)}px`;
+        return `font-size: ${Platform.OS == "ios" ? 17 : 14}px`;
     }
   }}
 
   ${({ bold, light }) => {
     switch (true) {
       case bold:
-        return `font-weight: 800`;
+        return `font-weight: ${Platform.OS == "ios" ? 700 : "bold"}`;
 
       case light:
-        return `font-weight: 300; color: #999;`;
+        return `font-weight: ${Platform.OS == "ios" ? 300 : 100}; color: #999;`;
     }
   }}
 `;
