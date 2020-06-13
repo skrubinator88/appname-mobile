@@ -141,10 +141,10 @@ export default function App({ navigation }) {
           <Drawer.Navigator
             drawerContent={(props) => <DrawerContent {...props} />}
           >
+            {/* <Drawer.Screen name="Example" component={Example} /> */}
             <Drawer.Screen name="Home" component={HomeStackScreen} />
             <Drawer.Screen name="Profile" component={ProfileStackScreen} />
             <Drawer.Screen name="Help" component={HelpStackScreen} />
-            {/* <Drawer.Screen name="Example" component={Example} />  */}
           </Drawer.Navigator>
         ) : (
           // Root Stack Screen

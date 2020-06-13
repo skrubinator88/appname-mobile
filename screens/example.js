@@ -67,7 +67,7 @@ export default function App({ navigation }) {
   // ========================
   if (location != null) {
     const zoom = 12; // Change the zoom between 2 and 20
-    const base = -100; // Change this number to set the position of the GPS Icon in the screen (Vertically only) between 1 and 130
+    const base = -100; // Change this number to set the position of the GPS Icon in the screen (Vertically only) between 200 and -200
     initialCameraSettings = new CameraInterface({
       latitude: location.coords.latitude + base / Math.pow(2, zoom - 1),
       longitude: location.coords.longitude,
@@ -120,8 +120,8 @@ export default function App({ navigation }) {
           provider="google"
           // maxZoomLevel={18} // 18
           // minZoomLevel={9} // 9
-          initialCamera={initialCameraSettings}
-          // camera={initialCameraSettings}
+          // initialCamera={initialCameraSettings}
+          camera={initialCameraSettings}
           // iOS
           showsUserLocation={true}
           // Android
