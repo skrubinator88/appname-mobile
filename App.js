@@ -1,6 +1,6 @@
 // IMPORTS
 import React, { useState, useEffect, createContext, useReducer } from "react";
-import { View, Platform, ActivityIndicator } from "react-native";
+import { View, Platform, ActivityIndicator, Button } from "react-native";
 import styled from "styled-components/native";
 import AsyncStorage from "@react-native-community/async-storage";
 
@@ -33,14 +33,10 @@ import { HelpStackScreen } from "./screens/authenticated/helpScreen";
 import { SignUpStackScreen } from "./screens/not_authenticated/signUpScreen";
 
 // Navigators
+import { DrawerContent } from "./components/drawerContent";
 const Drawer = createDrawerNavigator();
 
 export default function App({ navigation }) {
-  // User auth fetched from server (Simulation)
-  // const [isLoading, setIsLoading] = useState(true);
-  // const [userToken, setUserToken] = useState(null); //"AYjyMzY3ZDhiNmJkNTY";
-  // const isSignOut = false;
-
   const initialLoginState = {
     isLoading: true,
     userName: null,
@@ -83,50 +79,51 @@ export default function App({ navigation }) {
 
   const authContext = React.useMemo(
     () => ({
-      signIn: async (userName, password) => {
-        // Fetch from Server API
-        let userToken = null;
-        if (userName == "user" && password == "pass") {
-          userToken = "AYjyMzY3ZDhiNmJkNTY";
-          try {
-            await AsyncStorage.setItem("userToken", userToken);
-          } catch (e) {
-            console.log(e);
-          }
+      signIn: async (foundUser) => {
+        // parameter foundUser: Array, Length: 1, Contains: Username and Token properties
+        console.log("Sign In");
+        // Fetch from Server API (DEMOSTRATION)
+        const userToken = String(foundUser[0].userToken);
+        const userName = foundUser[0].username;
+        try {
+          await AsyncStorage.setItem("userToken", userToken);
+        } catch (e) {
+          console.log(e);
         }
-        dispatch({ type: "LOGIN" });
+        dispatch({ type: "LOGIN", id: userName, token: userToken });
       },
       signOut: async () => {
-        // setUserToken(null);
-        // setIsLoading(false);
+        try {
+          await AsyncStorage.removeItem("userToken");
+        } catch (e) {
+          console.log(e);
+        }
+        dispatch({ type: "LOGOUT" });
         console.log("signed Out");
-        dispatch({ type: "LOGOUT", id: userName, token: userToken });
       },
       signUp: () => {
-        // Set user token
-        setUserToken("AYjyMzY3ZDhiNmJkNTY");
-        setIsLoading(false);
-        console.log("signing Up");
+        console.log("Sign In");
+        // setUserToken("AYjyMzY3ZDhiNmJkNTY");
+        // setIsLoading(false);
+        // console.log("signing Up");
       },
     }),
     []
   );
 
   useEffect(() => {
-    // Get TOKEN from AsyncStorage
+    // setTimeout(async () => {
     setTimeout(async () => {
       let userToken = null;
       try {
+        // Get TOKEN from AsyncStorage
         userToken = await AsyncStorage.getItem("userToken");
       } catch (e) {
         console.log(e);
       }
-
-      if (userToken)
-        dispatch({ type: "LOGIN", id: userName, token: userToken });
-
       dispatch({ type: "RETRIEVE_TOKEN", token: userToken });
     }, 1000);
+    // }, 1000);
   }, []);
 
   if (loginState.isLoading) {
@@ -140,12 +137,30 @@ export default function App({ navigation }) {
   return (
     <AuthContext.Provider value={authContext}>
       <NavigationContainer>
-        <Drawer.Navigator>
-          {/* <Drawer.Screen name="Example" component={Example} />  */}
-          <Drawer.Screen name="Home" component={HomeStackScreen} />
-          <Drawer.Screen name="Profile" component={ProfileStackScreen} />
-          <Drawer.Screen name="Help" component={HelpStackScreen} />
-        </Drawer.Navigator>
+        {loginState.userToken ? (
+          <Drawer.Navigator
+            drawerContent={(props) => <DrawerContent {...props} />}
+          >
+            <Drawer.Screen name="Home" component={HomeStackScreen} />
+            <Drawer.Screen name="Profile" component={ProfileStackScreen} />
+            <Drawer.Screen name="Help" component={HelpStackScreen} />
+            {/* <Drawer.Screen name="Example" component={Example} />  */}
+          </Drawer.Navigator>
+        ) : (
+          // Root Stack Screen
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <Button
+              title="Sign in"
+              onPress={() =>
+                authContext.signIn([
+                  { userToken: "AYjyMzY3ZDhiNmJkNTY", userName: "BryanEnid" },
+                ])
+              }
+            ></Button>
+          </View>
+        )}
       </NavigationContainer>
     </AuthContext.Provider>
   );
