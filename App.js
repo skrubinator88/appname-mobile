@@ -13,26 +13,21 @@ import AsyncStorage from "@react-native-community/async-storage";
 // navigation.navigate('RouteName', { /* params go here */ }) // pass data as params (props) between screens. (props.route): route.params
 // Note: navigation.navigate("routeName", {}) if the screen is below, it will work as goBack() function and you can send data back
 
-// React Native Navigation 5 IMPORTS
+// REACT NATIVE NAVIGATION 5 IMPORTS
 import { NavigationContainer } from "@react-navigation/native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 
-// Single Screens
-import Example from "./screens/example";
-// import SignInScreen from "./screens/not_authenticated/signInScreen";
-// import SignUpScreen from "./screens/not_authenticated/signUpScreen";
-// import ResetPasswordScreen from "./screens/not_authenticated/resetPasswordScreen";
-
-// Contexts
+// // Contexts
 import { AuthContext } from "./components/context";
 
-// Stacks
+//  // Stacks Screen
 import { HomeStackScreen } from "./screens/authenticated/homeScreen";
 import { ProfileStackScreen } from "./screens/authenticated/profileScreen";
 import { HelpStackScreen } from "./screens/authenticated/helpScreen";
 import { SignUpStackScreen } from "./screens/not_authenticated/signUpScreen";
+import Example from "./screens/example";
 
-// Navigators
+//  // Navigators
 import { DrawerContent } from "./components/drawerContent";
 const Drawer = createDrawerNavigator();
 
@@ -102,10 +97,7 @@ export default function App({ navigation }) {
         console.log("signed Out");
       },
       signUp: () => {
-        console.log("Sign In");
-        // setUserToken("AYjyMzY3ZDhiNmJkNTY");
-        // setIsLoading(false);
-        // console.log("signing Up");
+        console.log("Sign Up");
       },
     }),
     []
