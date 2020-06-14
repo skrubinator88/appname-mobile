@@ -8,7 +8,7 @@
 | [expo](https://docs.expo.io/versions/latest/)                                        | Utilizacion de recursos o API del dispositivo tales como camaras, localizacion, etc. |
 | [react-navigation (Native)](https://reactnavigation.org/docs/getting-started)        | Sistema de rutas.                                                                    |
 | [styled-components](https://styled-components.com/docs)                              | CSS, mejor que la implementacion de stylos en react                                  |
-| [async-storage](https://react-native-community.github.io/async-storage/docs/install) | Para aplicar persistent data y guardar datos en el mobile localmente.                                                        |
+| [async-storage](https://react-native-community.github.io/async-storage/docs/install) | Para aplicar persistent data y guardar datos en el mobile localmente.                |
 
 ## Notas:
 
@@ -16,6 +16,12 @@
 
 - **[Standard]** Utilizar Flexbox en CSS para el posicionamiento de los componentes. Aqui una guia: [A Complete Guide to Flexbox](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
 
-- **[Standard]** Utilizar React Hooks **`useState(), useEffect()`** y esto incluye componentes tipo **`function`** y no **`class`**. Documentacion: [Introducing Hooks](https://reactjs.org/docs/hooks-intro.html)
+- **[Standard]** Utilizar React Hooks **`useState(), useEffect()`**. Documentacion: [Introducing Hooks](https://reactjs.org/docs/hooks-intro.html)
+
+- **[Standard]** Utilizar componentes tipo **`export function componente()`** y no **`export class componente()`**. Documentacion: [Introducing Hooks](https://reactjs.org/docs/hooks-intro.html)
 
 - **[Standard]** Utilizar el estado de una aplicacion para simular datos viniendo del server y necesita ser comentado en ingles que tipo de informacion esta simulando.
+
+- **[Styling]** Botones que tengan que ser del mismo estilo entre los differentes sistemas operativos, hagan uso de **`TouchableOpacity`** y no **`Button`**. Luego le ponen estilos con `styled-components`.
+
+- **[Styling]** Botones azules deben utilizar este color: **`#548ff7`**

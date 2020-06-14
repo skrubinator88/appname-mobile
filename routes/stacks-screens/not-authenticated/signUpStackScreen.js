@@ -7,8 +7,8 @@ export const SignUpStack = createStackNavigator();
 
 export function SignUpStackScreen() {
   return (
-    <View style={{ justifyContent: "center", alignItems: "center", flex: 1 }}>
+    <Container>
       <Text>Sign Up Screen</Text>
-    </View>
+    </Container>
   );
 }

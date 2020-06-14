@@ -18,10 +18,11 @@ class contractorApp extends Component {
           <FontAwesome name="arrow-left" size={24} color="black" />
         </ContainerTop>
         <ContainerTopMiddle>
-          <TextSyled>Please enter your phone number</TextSyled>
+          <TextStyled>Please enter your phone number</TextStyled>
 
           <ContainerMiddle>
             <TextInputStyled
+              maxLength="1"
               underlineColorAndroid="transparent"
               keyboardType={"numeric"}
             />
@@ -77,7 +78,7 @@ const ContainerTopMiddle = styled.View`
   padding-left: 20px;
 `;
 
-const TextSyled = styled.Text`
+const TextStyled = styled.Text`
   font-size: 30px;
 `;
 

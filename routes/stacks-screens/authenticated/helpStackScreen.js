@@ -6,13 +6,8 @@ import styled from "styled-components/native";
 import { createStackNavigator } from "@react-navigation/stack";
 export const HelpStack = createStackNavigator();
 
-const HelpScreen = ({ navigation }) => {
-  return (
-    <View style={{ justifyContent: "center", alignItems: "center", flex: 1 }}>
-      <Text>Help Screen</Text>
-    </View>
-  );
-};
+// import pages
+import { HelpScreen } from "../screens/helpScreen";
 
 export function HelpStackScreen() {
   return (

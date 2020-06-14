@@ -1,12 +1,11 @@
 // IMPORTS
-import React, { useState, useEffect, createContext, useReducer } from "react";
-import { View, Platform, ActivityIndicator, Button } from "react-native";
-import styled from "styled-components/native";
+import React, { useEffect, useReducer } from "react";
+import { View, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-community/async-storage";
 
 // Navigation
-// navigator.push("screenName") || navigation.navigate("screenName") Adds another screen into the stack.
-// navigator.pop() || navigation.goBack() remove one screen from the stack. In other words goes back to previous screen.
+// navigation.navigate("screenName") Adds another screen into the stack.
+// navigation.goBack() remove one screen from the stack. In other words goes back to previous screen.
 // navigation.popToTop() goes back to first screen in stack
 
 // Passing data to routes
@@ -16,19 +15,12 @@ import AsyncStorage from "@react-native-community/async-storage";
 // REACT NATIVE NAVIGATION 5 IMPORTS
 import { NavigationContainer } from "@react-navigation/native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { RootStackScreen } from "./routes/stacks-screens/not_authenticated/rootScreen";
+import { AuthenticatedDrawerScreen } from "./routes/stacks-screens/authenticated/authenticatedDrawerScreen";
 
-// // Contexts
+// // Context
 import { AuthContext } from "./components/context";
 
-//  // Stacks Screen
-import { HomeStackScreen } from "./screens/authenticated/homeScreen";
-import { ProfileStackScreen } from "./screens/authenticated/profileScreen";
-import { HelpStackScreen } from "./screens/authenticated/helpScreen";
-import { SignUpStackScreen } from "./screens/not_authenticated/signUpScreen";
-import Example from "./screens/example";
-
-//  // Navigators
-import { DrawerContent } from "./components/drawerContent";
 const Drawer = createDrawerNavigator();
 
 export default function App({ navigation }) {
@@ -78,6 +70,7 @@ export default function App({ navigation }) {
         // parameter foundUser: Array, Length: 1, Contains: Username and Token properties
         console.log("Sign In");
         // Fetch from Server API (DEMOSTRATION)
+        console.log(foundUser);
         const userToken = String(foundUser[0].userToken);
         const userName = foundUser[0].username;
         try {
@@ -130,28 +123,9 @@ export default function App({ navigation }) {
     <AuthContext.Provider value={authContext}>
       <NavigationContainer>
         {loginState.userToken ? (
-          <Drawer.Navigator
-            drawerContent={(props) => <DrawerContent {...props} />}
-          >
-            {/* <Drawer.Screen name="Example" component={Example} /> */}
-            <Drawer.Screen name="Home" component={HomeStackScreen} />
-            <Drawer.Screen name="Profile" component={ProfileStackScreen} />
-            <Drawer.Screen name="Help" component={HelpStackScreen} />
-          </Drawer.Navigator>
+          <AuthenticatedDrawerScreen />
         ) : (
-          // Root Stack Screen
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
-            <Button
-              title="Sign in"
-              onPress={() =>
-                authContext.signIn([
-                  { userToken: "AYjyMzY3ZDhiNmJkNTY", userName: "BryanEnid" },
-                ])
-              }
-            ></Button>
-          </View>
+          <RootStackScreen />
         )}
       </NavigationContainer>
     </AuthContext.Provider>
