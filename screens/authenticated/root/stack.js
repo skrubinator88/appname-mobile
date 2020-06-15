@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { View, Platform } from "react-native";
 import styled from "styled-components/native";
-import { ResponsiveSize } from "../../components/font-responsiveness";
+// import { ResponsiveSize } from "../../components/font-responsiveness";
 
 // Interfaces
-import { CameraInterface } from "../../interfaces/mapview-interfaces";
+import { CameraInterface } from "../../../interfaces/mapview-interfaces";
 
 // Expo
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
@@ -17,7 +17,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 export const HomeStack = createStackNavigator();
 
 // BODY
-export default function HomeScreen({ navigation }) {
+export function AuthenticatedStackScreen({ navigation }) {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
   let initialCameraSettings;

@@ -11,20 +11,18 @@ export function RootScreen({ navigation }) {
   return (
     <Container>
       <ContainerLogo>
-        <Image source={require("../../assets/cheems2.jpg")} />
+        <Image source={require("../../../assets/cheems2.jpg")} />
       </ContainerLogo>
       <ContainerLogin>
         <ContainerLoginLeft>
-          <Button onPress={() => navigation.navigate("Sign In")}>
+          <Button onPress={() => navigation.navigate("SignIn")}>
             <Text style={{ color: "white" }}>Sign In</Text>
           </Button>
         </ContainerLoginLeft>
         <ContainerLoginRight>
           <Text small>
             New user?{"  "}
-            <TextStyled onPress={() => navigation.navigate("Sign Up")}>
-              Register
-            </TextStyled>
+            <TextStyled onPress={() => {}}>Register</TextStyled>
           </Text>
         </ContainerLoginRight>
       </ContainerLogin>

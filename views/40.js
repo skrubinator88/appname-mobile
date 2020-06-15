@@ -23,32 +23,31 @@ class contractorApp extends Component {
 
           <ContainerMiddle>
             <TextInputStyled
-              maxLength={1} 
+              maxLength={1}
               underlineColorAndroid="transparent"
               keyboardType={"numeric"}
             />
             <TextInputStyled
-              maxLength={1} 
+              maxLength={1}
               underlineColorAndroid="transparent"
               keyboardType={"numeric"}
             />
             <TextInputStyled
-              maxLength={1} 
+              maxLength={1}
               underlineColorAndroid="transparent"
               keyboardType={"numeric"}
             />
             <TextInputStyled
-              maxLength={1} 
+              maxLength={1}
               underlineColorAndroid="transparent"
               keyboardType={"numeric"}
             />
           </ContainerMiddle>
 
-<ContainerBottom>
-<TextSyledBottom>Didn`t get it?</TextSyledBottom>
-          <TextSyledBottomAction>Resend code</TextSyledBottomAction>
-</ContainerBottom>
-
+          <ContainerBottom>
+            <TextSyledBottom>Didn`t get it?</TextSyledBottom>
+            <TextSyledBottomAction>Resend code</TextSyledBottomAction>
+          </ContainerBottom>
         </ContainerTopMiddle>
       </Container>
     );
@@ -98,8 +97,8 @@ const TextSyledBottom = styled.Text`
 `;
 const TextSyledBottomAction = styled.Text`
   font-size: 17px;
-  font-weight:bold;
-  color: #4893EE;
+  font-weight: bold;
+  color: #4893ee;
 `;
 
 export default contractorApp;

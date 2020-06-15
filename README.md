@@ -16,7 +16,7 @@
 
 - **[Standard]** Utilizar Flexbox en CSS para el posicionamiento de los componentes. Aqui una guia: [A Complete Guide to Flexbox](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
 
-- **[Standard]** Utilizar React Hooks **`useState(), useEffect()`**. Documentacion: [Introducing Hooks](https://reactjs.org/docs/hooks-intro.html)
+- **[Standard]** Utilizar React Hooks **`useState(), useEffect()`**. Documentacion: [Introducing Hooks](https://reactjs.org/docs/hooks-intro.html).
 
 - **[Standard]** Utilizar componentes tipo **`export function componente()`** y no **`export class componente()`**. Documentacion: [Introducing Hooks](https://reactjs.org/docs/hooks-intro.html)
 
@@ -24,4 +24,8 @@
 
 - **[Styling]** Botones que tengan que ser del mismo estilo entre los differentes sistemas operativos, hagan uso de **`TouchableOpacity`** y no **`Button`**. Luego le ponen estilos con `styled-components`.
 
-- **[Styling]** Botones azules deben utilizar este color: **`#548ff7`**
+- **[Styling]** Botones azules deben utilizar este color: **`#548ff7`**.
+
+- **[UX]** Pantallas que muestren teclado, tienen que tener: \*\*`<TouchableWithoutFeedback onPress={() => {Keyboard.dismiss();}} { CODIGO } </TouchableWithoutFeedback>`\*\*.
+
+- **[UX]** Logicas (UX) deben implementarse.

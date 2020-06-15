@@ -10,10 +10,10 @@ export const AuthenticatedDrawer = createDrawerNavigator();
 // pages
 import { HomeStackScreen } from "./homeStackScreen";
 import { ProfileStackScreen } from "./profileStackScreen";
-import { HelpStackScreen } from "./helpStackScreen";
+import { HelpStackScreen } from "./helpScreen/stack";
 // import Example from "./screens/example";
 
-import { DrawerContent } from "../../components/drawerContent";
+import { DrawerContent } from "../../../components/drawerContent";
 
 export function AuthenticatedDrawerScreen() {
   return (

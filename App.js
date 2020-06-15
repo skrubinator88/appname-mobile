@@ -15,8 +15,8 @@ import AsyncStorage from "@react-native-community/async-storage";
 // REACT NATIVE NAVIGATION 5 IMPORTS
 import { NavigationContainer } from "@react-navigation/native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { RootStackScreen } from "./routes/stacks-screens/not_authenticated/rootScreen";
-import { AuthenticatedDrawerScreen } from "./routes/stacks-screens/authenticated/authenticatedDrawerScreen";
+import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
+import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 
 // // Context
 import { AuthContext } from "./components/context";
@@ -123,9 +123,9 @@ export default function App({ navigation }) {
     <AuthContext.Provider value={authContext}>
       <NavigationContainer>
         {loginState.userToken ? (
-          <AuthenticatedDrawerScreen />
+          <AuthenticatedStackScreen />
         ) : (
-          <RootStackScreen />
+          <NotAuthenticatedStackScreen />
         )}
       </NavigationContainer>
     </AuthContext.Provider>
