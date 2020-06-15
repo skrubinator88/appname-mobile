@@ -16,7 +16,7 @@ import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 
 // BODY
-export default function App({ navigation }) {
+export function Example({ navigation }) {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
   let initialCameraSettings;
@@ -66,7 +66,7 @@ export default function App({ navigation }) {
   // = 02   =  -61.44       =
   // ========================
   if (location != null) {
-    const zoom = 12; // Change the zoom between 2 and 20
+    const zoom = 10; // Change the zoom number between 2 and 20
     const base = -100; // Change this number to set the position of the GPS Icon in the screen (Vertically only) between 200 and -200
     initialCameraSettings = new CameraInterface({
       latitude: location.coords.latitude + base / Math.pow(2, zoom - 1),

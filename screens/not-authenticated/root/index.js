@@ -11,7 +11,7 @@ export function RootScreen({ navigation }) {
   return (
     <Container>
       <ContainerLogo>
-        <Image source={require("../../../assets/cheems2.jpg")} />
+        <Image source={require("../../../assets/rootWallpaper.jpg")} />
       </ContainerLogo>
       <ContainerLogin>
         <ContainerLoginLeft>
@@ -53,7 +53,7 @@ const Text = styled.Text`
 const Button = styled.TouchableOpacity`
   justify-content: center;
   align-items: center;
-  border-radius: 5px;
+  border-radius: 50px;
   padding: 10px 0;
   background-color: #548ff7;
 `;
@@ -71,8 +71,8 @@ const ContainerLogin = styled.View`
   justify-content: center;
   background-color: white;
   flex-direction: row;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
 `;
 
 const ContainerLoginLeft = styled.View`

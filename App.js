@@ -18,6 +18,8 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 
+import { Example } from "./screens/example";
+
 // // Context
 import { AuthContext } from "./components/context";
 
@@ -126,6 +128,7 @@ export default function App({ navigation }) {
           <AuthenticatedStackScreen />
         ) : (
           <NotAuthenticatedStackScreen />
+          // <Example />
         )}
       </NavigationContainer>
     </AuthContext.Provider>

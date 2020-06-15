@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
+import {
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  SafeAreaView,
+} from "react-native";
 import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
 
@@ -16,10 +21,13 @@ export function SignInScreen({ navigation }) {
     switch (inputPosNumber) {
       case 1:
         firstTextInput = input;
+        break;
       case 2:
         secondTextInput = input;
+        break;
       case 3:
         thirdTextInput = input;
+        break;
     }
   };
 
@@ -29,17 +37,20 @@ export function SignInScreen({ navigation }) {
         case 1:
           setFirstInput(text);
           secondTextInput.focus();
+          break;
         case 2:
           if (secondInput.length == 1 && text.length == 0) {
             firstTextInput.focus();
           }
           setSecondInput(text);
           thirdTextInput.focus();
+          break;
         case 3:
           if (thirdInput.length == 1 && text.length == 0) {
             secondTextInput.focus();
           }
           setThirdInput(text);
+          break;
       }
     }
 
@@ -48,9 +59,11 @@ export function SignInScreen({ navigation }) {
         case 2:
           setSecondInput(text);
           firstTextInput.focus();
+          break;
         case 3:
           setThirdInput(text);
           secondTextInput.focus();
+          break;
       }
     }
   };
@@ -66,10 +79,18 @@ export function SignInScreen({ navigation }) {
       onChange: (e) => {
         handleChange(e.nativeEvent.text, inputPosNumber, maxLength);
       },
+      onSubmitEditing: () => {
+        handleSubmit();
+      },
     };
   };
 
   const handleSubmit = (e) => {
+    if (firstInput.length + secondInput.length + thirdInput.length != 10) {
+      console.log("asd");
+      return;
+    }
+
     // Send phone number to backend
     const phoneNumber = `(${firstInput}) ${secondInput}-${thirdInput}`;
     navigation.navigate("SignIn2");
@@ -77,30 +98,32 @@ export function SignInScreen({ navigation }) {
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <Container>
-        <ContainerTop>
-          <AntDesign
-            name="arrowleft"
-            size={30}
-            color="black"
-            onPress={() => navigation.goBack()}
-          />
-        </ContainerTop>
+      <SafeAreaView style={{ flex: 1 }}>
+        <Container>
+          <ContainerTop>
+            <AntDesign
+              name="arrowleft"
+              size={30}
+              color="black"
+              onPress={() => navigation.goBack()}
+            />
+          </ContainerTop>
 
-        <ContainerTopMiddle>
-          <TextStyled>Please enter your phone number</TextStyled>
+          <ContainerTopMiddle>
+            <TextStyled>Please enter your phone number</TextStyled>
 
-          <ContainerMiddle>
-            <TextInputStyled {...handleSettingsProps(1, 3)} />
-            <TextInputStyled {...handleSettingsProps(2, 3)} />
-            <TextInputStyled {...handleSettingsProps(3, 4)} />
-          </ContainerMiddle>
+            <ContainerMiddle>
+              <TextInputStyled {...handleSettingsProps(1, 3)} />
+              <TextInputStyled {...handleSettingsProps(2, 3)} />
+              <TextInputStyled {...handleSettingsProps(3, 4)} />
+            </ContainerMiddle>
 
-          <ButtonStyled onPress={(e) => handleSubmit(e)}>
-            <Text style={{ color: "white" }}>Continue</Text>
-          </ButtonStyled>
-        </ContainerTopMiddle>
-      </Container>
+            <ButtonStyled onPress={(e) => handleSubmit(e)}>
+              <Text style={{ color: "white" }}>Continue</Text>
+            </ButtonStyled>
+          </ContainerTopMiddle>
+        </Container>
+      </SafeAreaView>
     </TouchableWithoutFeedback>
   );
 }
@@ -140,7 +163,7 @@ const ContainerMiddle = styled.View`
 `;
 
 const ContainerTop = styled.View`
-  margin-top: 70px;
+  margin-top: ${() => (Platform.OS == "ios" ? "40px" : "70px")};
   margin-left: 30px;
 `;
 const ContainerTopMiddle = styled.View`

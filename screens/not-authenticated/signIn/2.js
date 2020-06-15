@@ -1,132 +1,106 @@
-import React, { useState, useEffect } from "react";
-import { Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
+import React, { useState, useEffect, useContext } from "react";
+import {
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  SafeAreaView,
+} from "react-native";
 import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
+import SmoothPinCodeInput from "react-native-smooth-pincode-input";
+
+import { AuthContext } from "../../../components/context";
 
 export function SignInScreen2({ navigation }) {
-  const [firstInput, setFirstInput] = useState("");
-  const [secondInput, setSecondInput] = useState("");
-  const [thirdInput, setThirdInput] = useState("");
-  const [fourthInput, setFourthInput] = useState("");
+  const authContext = useContext(AuthContext);
 
-  let firstTextInput;
-  let secondTextInput;
-  let thirdTextInput;
-  let fourthTextInput;
+  const [pinCode, setPinCode] = useState("");
+  let pinInputRef;
+
+  const handleSettingsPinCodeProps = {
+    ref: (input) => {
+      pinInputRef = input;
+    },
+    value: pinCode.toString(),
+    onTextChange: (code) => setPinCode(code),
+    onFulfill: () => {
+      handleSubmit();
+    },
+    restrictToNumbers: true,
+    cellSpacing: 10,
+    cellStyle: {
+      borderWidth: 1,
+      borderRadius: 1,
+      borderColor: "#999",
+    },
+    cellStyleFocused: {
+      borderColor: "#4893ee",
+    },
+    textStyle: {
+      fontSize: 24,
+      color: "#333",
+    },
+    textStyleFocused: {
+      color: "crimson",
+    },
+  };
 
   const handleSubmit = (e) => {
     // Send phone number to backend
-    const phoneNumber = `(${firstInput}) ${secondInput}-${thirdInput}`;
-    navigation.navigate("SignIn2");
+    // const phoneNumber = `(${firstInput}) ${secondInput}-${thirdInput}`;
+    // navigation.navigate("SignIn2");
+    authContext.signIn([{ userToke: "adkjfhlakjdhf", userName: "User" }]);
   };
-
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <Container>
-        <ContainerTop>
-          <AntDesign
-            name="arrowleft"
-            size={30}
-            color="black"
-            onPress={() => navigation.goBack()}
-          />
-        </ContainerTop>
-        <ContainerTopMiddle>
-          <TextStyled>Please enter your phone number</TextStyled>
-          <ContainerMiddle>
-            <TextInputStyled
-              ref={(input) => {
-                firstTextInput = input;
-              }}
-              maxLength={1}
-              underlineColorAndroid="transparent"
-              keyboardType={"numeric"}
-              onChangeText={(text) => {
-                setFirstInput(text);
-                text.length == 1 && secondTextInput.focus();
-              }}
+      <SafeAreaView style={{ flex: 1 }}>
+        <Container>
+          <ContainerTop>
+            <AntDesign
+              name="arrowleft"
+              size={30}
+              color="black"
+              onPress={() => navigation.goBack()}
             />
-            <TextInputStyled
-              ref={(input) => {
-                secondTextInput = input;
-              }}
-              maxLength={1}
-              underlineColorAndroid="transparent"
-              keyboardType={"numeric"}
-              focusable={true}
-              onKeyPress={({ nativeEvent }) => {
-                if (nativeEvent.key == "Backspace") {
-                  firstTextInput.focus();
-                }
-              }}
-              onChangeText={(text) => {
-                if (secondInput.length == 1 && text.length == 0) {
-                  firstTextInput.focus();
-                }
-                setSecondInput(text);
-                text.length == 1 && thirdTextInput.focus();
-              }}
-            />
-            <TextInputStyled
-              ref={(input) => {
-                thirdTextInput = input;
-              }}
-              maxLength={1}
-              underlineColorAndroid="transparent"
-              keyboardType={"numeric"}
-              focusable={true}
-              onKeyPress={({ nativeEvent }) => {
-                if (nativeEvent.key == "Backspace") {
-                  secondTextInput.focus();
-                }
-              }}
-              onChangeText={(text) => {
-                if (thirdInput.length == 1 && text.length == 0) {
-                  secondTextInput.focus();
-                }
-                setThirdInput(text);
-                text.length == 1 && fourthTextInput.focus();
-              }}
-            />
-            <TextInputStyled
-              ref={(input) => {
-                fourthTextInput = input;
-              }}
-              maxLength={1}
-              underlineColorAndroid="transparent"
-              keyboardType={"numeric"}
-              onKeyPress={({ nativeEvent }) => {
-                if (nativeEvent.key == "Backspace") {
-                  thirdTextInput.focus();
-                }
-              }}
-              onChangeText={(text) => {
-                if (fourthInput.length == 1 && text.length == 0) {
-                  thirdTextInput.focus();
-                }
-                setFourthInput(text);
-              }}
-              onSubmitEditing={(e) => handleSubmit(e)}
-            />
-          </ContainerMiddle>
-          <ButtonStyled onPress={(e) => handleSubmit(e)}>
-            <Text style={{ color: "white" }}>Continue</Text>
-          </ButtonStyled>
-        </ContainerTopMiddle>
+          </ContainerTop>
+          <ContainerTopMiddle>
+            <TextStyled>Enter the 4-digit code sent to you at:</TextStyled>
+            <TextStyled style={{ marginTop: 0 }}>( xxx ) xxx - xxxx</TextStyled>
+            <ContainerMiddle>
+              <SmoothPinCodeInput {...handleSettingsPinCodeProps} />
+            </ContainerMiddle>
+            <ButtonStyled onPress={(e) => handleSubmit(e)}>
+              <Text style={{ color: "white" }}>Continue</Text>
+            </ButtonStyled>
 
-        <ContainerBottom>
-          <TextStyledBottom>Didn`t get it?</TextStyledBottom>
-          <TextStyledBottomAction>Resend code</TextStyledBottomAction>
-        </ContainerBottom>
-      </Container>
+            <ContainerBottom>
+              <TextStyledBottom>Didn't get it?</TextStyledBottom>
+              <TextStyledBottomAction>Resend code</TextStyledBottomAction>
+            </ContainerBottom>
+          </ContainerTopMiddle>
+        </Container>
+      </SafeAreaView>
     </TouchableWithoutFeedback>
   );
 }
 
 const ContainerBottom = styled.View`
-  flex: 0.1;
+  ${() => {
+    switch (Platform.OS) {
+      case "ios":
+        return `
+        flex: 1; 
+        justify-content: center;
+        `;
+        break;
+      case "android":
+        return `
+        margin: 30px 0;
+        `;
+        break;
+    }
+  }}
   align-items: center;
-  justify-content: center;
 `;
 
 const TextInputStyled = styled.TextInput`
@@ -173,7 +147,7 @@ const ContainerMiddle = styled.View`
 `;
 
 const ContainerTop = styled.View`
-  margin-top: 70px;
+  margin-top: ${() => (Platform.OS == "ios" ? "40px" : "70px")};
   margin-left: 30px;
 `;
 const ContainerTopMiddle = styled.View`
