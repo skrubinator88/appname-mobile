@@ -1,11 +1,10 @@
+// JAVASCRIPT DEPENDENCIES
 import React, { Component } from "react";
-
 import { Text, Image, Button, Alert, TextInput, View } from "react-native";
-
 import styled from "styled-components/native";
-
 import { FontAwesome } from "@expo/vector-icons";
 
+// BODY
 class contractorApp extends Component {
   SignIn = () => {
     Alert.alert("AQUI VA AXIOS");
@@ -41,6 +40,8 @@ class contractorApp extends Component {
     );
   }
 }
+
+// CSS
 const TextInputStyled = styled.TextInput`
   margin: 10px;
   border: black;

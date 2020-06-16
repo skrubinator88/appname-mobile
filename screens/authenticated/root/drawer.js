@@ -8,26 +8,25 @@ import { NavigationContainer } from "@react-navigation/native";
 export const AuthenticatedDrawer = createDrawerNavigator();
 
 // pages
-import { HomeStackScreen } from "./homeStackScreen";
-import { ProfileStackScreen } from "./profileStackScreen";
-import { HelpStackScreen } from "./helpScreen/stack";
+import { RootScreen } from "./index";
+import { ProfileStackScreen } from "../profile/";
+import { HelpScreen } from "../helpScreen/";
 // import Example from "./screens/example";
 
 import { DrawerContent } from "../../../components/drawerContent";
 
-export function AuthenticatedDrawerScreen() {
+export function Drawer() {
   return (
     <NavigationContainer independent={true}>
       <AuthenticatedDrawer.Navigator
         drawerContent={(props) => <DrawerContent {...props} />}
       >
-        {/* <AuthenticatedDrawer.Screen name="Example" component={Example} /> */}
-        <AuthenticatedDrawer.Screen name="Home" component={HomeStackScreen} />
+        <AuthenticatedDrawer.Screen name="Home" component={RootScreen} />
         <AuthenticatedDrawer.Screen
           name="Profile"
           component={ProfileStackScreen}
         />
-        <AuthenticatedDrawer.Screen name="Help" component={HelpStackScreen} />
+        {/* <AuthenticatedDrawer.Screen name="Help" component={HelpStackScreen} /> */}
       </AuthenticatedDrawer.Navigator>
     </NavigationContainer>
   );

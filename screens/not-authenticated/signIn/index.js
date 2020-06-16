@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
+// import SignInScreen from "path//////";
 
 export function SignInScreen({ navigation }) {
   const [firstInput, setFirstInput] = useState("");

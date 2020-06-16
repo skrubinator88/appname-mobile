@@ -127,6 +127,7 @@ export default function App({ navigation }) {
         {loginState.userToken ? (
           <AuthenticatedStackScreen />
         ) : (
+          // <Example />
           <NotAuthenticatedStackScreen />
           // <Example />
         )}
