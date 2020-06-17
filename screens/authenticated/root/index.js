@@ -111,13 +111,12 @@ export function RootScreen({ navigation }) {
         </MapView>
 
         {/* UI */}
-        <Menu>
+        <Menu onPress={() => navigation.openDrawer()}>
           <MaterialIcons
             backgroundColor="white"
             color="black"
             name="menu"
             size={30}
-            onPress={() => navigation.openDrawer()}
           />
         </Menu>
 
