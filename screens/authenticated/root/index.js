@@ -86,7 +86,6 @@ export function RootScreen({ navigation }) {
 
   if (location != null) {
     return (
-<<<<<<< HEAD
       <Container>
         <MapView
           // Common
@@ -129,60 +128,6 @@ export function RootScreen({ navigation }) {
           </Row>
         </Card>
       </Container>
-=======
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <Container>
-          <MapView
-            customMapStyle={mapStyle}
-            // Common
-            provider="google"
-            // maxZoomLevel={18} // 18
-            // minZoomLevel={9} // 9
-            initialCamera={initialCameraSettings}
-            // camera={initialCameraSettings}
-            // iOS
-            showsUserLocation={true}
-            // Android
-
-            // Other props
-            style={{ flex: 1 }}
-          >
-            {/* Render each marker */}
-            {jobPostings.map(({ title, description, coordinate, id }) => (
-              <Marker
-                key={id}
-                title={title}
-                description={description}
-                coordinate={coordinate}
-              ></Marker>
-            ))}
-          </MapView>
-
-          {/* UI */}
-          <Menu>
-            <MaterialIcons
-              backgroundColor="white"
-              color="black"
-              name="menu"
-              size={30}
-              onPress={() => navigation.openDrawer()}
-            />
-          </Menu>
-
-          <SearchBar
-            placeholder="Search Jobs"
-            onChangeText={(text) => setSearchBarValue(text)}
-            value={searchBarValue}
-          ></SearchBar>
-
-          <Card>
-            <Row last>
-              <Text medium>0.0.0.1</Text>
-            </Row>
-          </Card>
-        </Container>
-      </TouchableWithoutFeedback>
->>>>>>> 7f76b4f482b87c5d1fb6463a918114300fcba9ef
     );
   } else {
     return <View></View>;
