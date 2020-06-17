@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useTheme } from "@react-navigation/native";
 import {
   Platform,
   TouchableWithoutFeedback,
@@ -12,6 +13,7 @@ import SmoothPinCodeInput from "react-native-smooth-pincode-input";
 import { AuthContext } from "../../../components/context";
 
 export function SignInScreen2({ navigation }) {
+  const { colors } = useTheme();
   const authContext = useContext(AuthContext);
 
   const [pinCode, setPinCode] = useState("");
@@ -69,13 +71,18 @@ export function SignInScreen2({ navigation }) {
             <ContainerMiddle>
               <SmoothPinCodeInput {...handleSettingsPinCodeProps} />
             </ContainerMiddle>
-            <ButtonStyled onPress={(e) => handleSubmit(e)}>
+            <ButtonStyled
+              onPress={(e) => handleSubmit(e)}
+              style={{ backgroundColor: colors.primary }}
+            >
               <Text style={{ color: "white" }}>Continue</Text>
             </ButtonStyled>
 
             <ContainerBottom>
               <TextStyledBottom>Didn't get it?</TextStyledBottom>
-              <TextStyledBottomAction>Resend code</TextStyledBottomAction>
+              <TextStyledBottomAction style={{ color: colors.primary }}>
+                Resend code
+              </TextStyledBottomAction>
             </ContainerBottom>
           </ContainerTopMiddle>
         </Container>
@@ -119,11 +126,9 @@ const TextStyledBottom = styled.Text`
 const TextStyledBottomAction = styled.Text`
   font-size: 17px;
   font-weight: bold;
-  color: #4893ee;
 `;
 
 const ButtonStyled = styled.TouchableOpacity`
-  background-color: #548ff7;
   padding: ${() => (Platform.OS == "ios" ? "15px" : "10px")};
   width: 80%;
   border-radius: 6px;

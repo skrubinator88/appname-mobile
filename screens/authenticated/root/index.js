@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
+import { View, TouchableWithoutFeedback, Keyboard } from "react-native";
 import * as Location from "expo-location";
 import styled from "styled-components/native";
 
 // Interfaces
 import { CameraInterface } from "../../../interfaces/mapview-interfaces";
+import { mapStyle } from "../../../components/mapStyle";
 
 // Expo
 import { MaterialIcons } from "@expo/vector-icons";
@@ -13,6 +14,7 @@ import MapView, { Marker } from "react-native-maps";
 export function RootScreen({ navigation }) {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [searchBarValue, setSearchBarValue] = useState("");
   let initialCameraSettings;
   let cameraSettings;
 
@@ -84,6 +86,7 @@ export function RootScreen({ navigation }) {
 
   if (location != null) {
     return (
+<<<<<<< HEAD
       <Container>
         <MapView
           // Common
@@ -126,6 +129,60 @@ export function RootScreen({ navigation }) {
           </Row>
         </Card>
       </Container>
+=======
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <Container>
+          <MapView
+            customMapStyle={mapStyle}
+            // Common
+            provider="google"
+            // maxZoomLevel={18} // 18
+            // minZoomLevel={9} // 9
+            initialCamera={initialCameraSettings}
+            // camera={initialCameraSettings}
+            // iOS
+            showsUserLocation={true}
+            // Android
+
+            // Other props
+            style={{ flex: 1 }}
+          >
+            {/* Render each marker */}
+            {jobPostings.map(({ title, description, coordinate, id }) => (
+              <Marker
+                key={id}
+                title={title}
+                description={description}
+                coordinate={coordinate}
+              ></Marker>
+            ))}
+          </MapView>
+
+          {/* UI */}
+          <Menu>
+            <MaterialIcons
+              backgroundColor="white"
+              color="black"
+              name="menu"
+              size={30}
+              onPress={() => navigation.openDrawer()}
+            />
+          </Menu>
+
+          <SearchBar
+            placeholder="Search Jobs"
+            onChangeText={(text) => setSearchBarValue(text)}
+            value={searchBarValue}
+          ></SearchBar>
+
+          <Card>
+            <Row last>
+              <Text medium>0.0.0.1</Text>
+            </Row>
+          </Card>
+        </Container>
+      </TouchableWithoutFeedback>
+>>>>>>> 7f76b4f482b87c5d1fb6463a918114300fcba9ef
     );
   } else {
     return <View></View>;
@@ -139,11 +196,23 @@ const Container = styled.View`
 
 const Menu = styled.TouchableOpacity`
   position: absolute;
-  left: 8%;
-  top: 6%;
+  left: 40px;
+  top: 60px;
   border-radius: 50px;
   background: white;
   padding: 10px;
+`;
+
+const SearchBar = styled.TextInput`
+  position: absolute;
+  top: 120px;
+  left: 15%;
+  width: 70%;
+  font-size: 20px;
+  border: 1px solid #999;
+  border-radius: 50px;
+  background: white;
+  padding: 15px;
 `;
 
 const Card = styled.View`

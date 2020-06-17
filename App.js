@@ -13,17 +13,24 @@ import AsyncStorage from "@react-native-community/async-storage";
 // Note: navigation.navigate("routeName", {}) if the screen is below, it will work as goBack() function and you can send data back
 
 // REACT NATIVE NAVIGATION 5 IMPORTS
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 
 import { Example } from "./screens/example";
 
-// // Context
 import { AuthContext } from "./components/context";
 
 const Drawer = createDrawerNavigator();
+
+export const Theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: "#548ff7",
+  },
+};
 
 export default function App({ navigation }) {
   const initialLoginState = {
@@ -106,7 +113,7 @@ export default function App({ navigation }) {
         // Get TOKEN from AsyncStorage
         userToken = await AsyncStorage.getItem("userToken");
       } catch (e) {
-        console.log(e);
+        // console.log(e);
       }
       dispatch({ type: "RETRIEVE_TOKEN", token: userToken });
     }, 1000);
@@ -123,7 +130,7 @@ export default function App({ navigation }) {
 
   return (
     <AuthContext.Provider value={authContext}>
-      <NavigationContainer>
+      <NavigationContainer theme={Theme}>
         {loginState.userToken ? (
           <AuthenticatedStackScreen />
         ) : (

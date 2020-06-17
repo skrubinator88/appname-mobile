@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useTheme } from "@react-navigation/native";
+
 import {
   Platform,
   TouchableWithoutFeedback,
@@ -7,9 +9,9 @@ import {
 } from "react-native";
 import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
-// import SignInScreen from "path//////";
 
 export function SignInScreen({ navigation }) {
+  const { colors } = useTheme();
   const [firstInput, setFirstInput] = useState("");
   const [secondInput, setSecondInput] = useState("");
   const [thirdInput, setThirdInput] = useState("");
@@ -119,7 +121,10 @@ export function SignInScreen({ navigation }) {
               <TextInputStyled {...handleSettingsProps(3, 4)} />
             </ContainerMiddle>
 
-            <ButtonStyled onPress={(e) => handleSubmit(e)}>
+            <ButtonStyled
+              onPress={(e) => handleSubmit(e)}
+              style={{ backgroundColor: colors.primary }}
+            >
               <Text style={{ color: "white" }}>Continue</Text>
             </ButtonStyled>
           </ContainerTopMiddle>
@@ -140,7 +145,6 @@ const TextInputStyled = styled.TextInput`
 `;
 
 const ButtonStyled = styled.TouchableOpacity`
-  background-color: #548ff7;
   padding: ${() => (Platform.OS == "ios" ? "15px" : "10px")};
   width: 80%;
   border-radius: 6px;
