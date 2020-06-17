@@ -1,12 +1,14 @@
 import React, { useContext } from "react";
 import { Image, Alert } from "react-native";
 import styled from "styled-components/native";
+import { useTheme } from "@react-navigation/native";
 
 // Store
 import { AuthContext } from "../../../components/context";
 
 export function RootScreen({ navigation }) {
   const authContext = useContext(AuthContext);
+  const { colors } = useTheme();
 
   return (
     <Container>
@@ -15,14 +17,19 @@ export function RootScreen({ navigation }) {
       </ContainerLogo>
       <ContainerLogin>
         <ContainerLoginLeft>
-          <Button onPress={() => navigation.navigate("SignIn")}>
+          <Button
+            onPress={() => navigation.navigate("SignIn")}
+            style={{ backgroundColor: colors.primary }}
+          >
             <Text style={{ color: "white" }}>Sign In</Text>
           </Button>
         </ContainerLoginLeft>
         <ContainerLoginRight>
           <Text small>
             New user?{"  "}
-            <TextStyled onPress={() => {}}>Register</TextStyled>
+            <TextStyled onPress={() => {}} style={{ color: colors.primary }}>
+              Register
+            </TextStyled>
           </Text>
         </ContainerLoginRight>
       </ContainerLogin>
@@ -55,14 +62,12 @@ const Button = styled.TouchableOpacity`
   align-items: center;
   border-radius: 50px;
   padding: 10px 0;
-  background-color: #548ff7;
 `;
 
 const ContainerLogo = styled.View`
   flex: 1;
   align-items: center;
   justify-content: center;
-  /* background-color: red; */
 `;
 
 const ContainerLogin = styled.View`
@@ -86,5 +91,4 @@ const ContainerLoginRight = styled.View`
 
 const TextStyled = styled.Text`
   font-weight: bold;
-  color: #2680eb;
 `;
