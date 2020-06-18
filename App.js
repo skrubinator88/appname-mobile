@@ -132,9 +132,9 @@ export default function App({ navigation }) {
     <AuthContext.Provider value={authContext}>
       <NavigationContainer theme={Theme}>
         {loginState.userToken ? (
+          // <Example />
           <AuthenticatedStackScreen />
         ) : (
-          // <Example />
           <NotAuthenticatedStackScreen />
           // <Example />
         )}

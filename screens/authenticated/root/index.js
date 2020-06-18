@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, TouchableWithoutFeedback, Keyboard } from "react-native";
-import * as Location from "expo-location";
+
 import styled from "styled-components/native";
 
 // Interfaces
@@ -9,6 +9,7 @@ import { mapStyle } from "../../../components/mapStyle";
 
 // Expo
 import { MaterialIcons } from "@expo/vector-icons";
+import * as Location from "expo-location";
 import MapView, { Marker } from "react-native-maps";
 
 export function RootScreen({ navigation }) {
@@ -29,7 +30,7 @@ export function RootScreen({ navigation }) {
       try {
         position = await Location.getLastKnownPositionAsync();
       } catch (e) {
-        position = await Location.getCurrentPositionAsync();
+        // position = await Location.getCurrentPositionAsync();
       }
       setLocation(position);
 
@@ -113,7 +114,7 @@ export function RootScreen({ navigation }) {
         </MapView>
 
         {/* UI */}
-        <Menu onPress={() => navigation.openDrawer()}>
+        <Menu activeOpacity={0.9} onPress={() => navigation.openDrawer()}>
           <MaterialIcons
             backgroundColor="white"
             color="black"
