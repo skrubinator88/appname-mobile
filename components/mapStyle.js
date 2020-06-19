@@ -1,97 +1,66 @@
 export const mapStyle = [
   {
-    elementType: "geometry",
+    featureType: "administrative.land_parcel",
+    elementType: "labels",
     stylers: [
       {
-        color: "#242f3e",
+        visibility: "off",
       },
     ],
   },
   {
-    elementType: "labels.text.fill",
+    featureType: "landscape",
     stylers: [
       {
-        color: "#746855",
+        color: "#f6f6f4",
+      },
+      {
+        visibility: "off",
       },
     ],
   },
   {
-    elementType: "labels.text.stroke",
+    featureType: "landscape.natural",
+    elementType: "geometry.fill",
     stylers: [
       {
-        color: "#242f3e",
+        visibility: "off",
       },
     ],
   },
   {
-    featureType: "administrative.locality",
-    elementType: "labels.text.fill",
+    featureType: "landscape.natural.landcover",
     stylers: [
       {
-        color: "#d59563",
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "landscape.natural.terrain",
+    stylers: [
+      {
+        visibility: "on",
       },
     ],
   },
   {
     featureType: "poi",
-    elementType: "labels.text.fill",
+    elementType: "labels.text",
     stylers: [
       {
-        color: "#d59563",
-      },
-    ],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#263c3f",
-      },
-    ],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#6b9a76",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#38414e",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry.stroke",
-    stylers: [
-      {
-        color: "#212a37",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#9ca5b3",
+        visibility: "off",
       },
     ],
   },
   {
     featureType: "road.highway",
-    elementType: "geometry",
     stylers: [
       {
-        color: "#746855",
+        color: "#ffffff",
+      },
+      {
+        visibility: "simplified",
       },
     ],
   },
@@ -100,7 +69,10 @@ export const mapStyle = [
     elementType: "geometry.stroke",
     stylers: [
       {
-        color: "#1f2835",
+        color: "#9c9c9c",
+      },
+      {
+        weight: 0.5,
       },
     ],
   },
@@ -109,52 +81,69 @@ export const mapStyle = [
     elementType: "labels.text.fill",
     stylers: [
       {
-        color: "#f3d19c",
+        color: "#ffffff",
+      },
+      {
+        visibility: "simplified",
+      },
+    ],
+  },
+  {
+    featureType: "road.local",
+    elementType: "labels",
+    stylers: [
+      {
+        visibility: "off",
       },
     ],
   },
   {
     featureType: "transit",
-    elementType: "geometry",
+    elementType: "geometry.stroke",
     stylers: [
       {
-        color: "#2f3948",
+        saturation: 65,
+      },
+      {
+        weight: 5,
       },
     ],
   },
   {
-    featureType: "transit.station",
-    elementType: "labels.text.fill",
+    featureType: "transit.line",
     stylers: [
       {
-        color: "#d59563",
+        visibility: "on",
+      },
+    ],
+  },
+  {
+    featureType: "transit.line",
+    elementType: "geometry.fill",
+    stylers: [
+      {
+        visibility: "on",
+      },
+    ],
+  },
+  {
+    featureType: "transit.line",
+    elementType: "geometry.stroke",
+    stylers: [
+      {
+        visibility: "on",
       },
     ],
   },
   {
     featureType: "water",
-    elementType: "geometry",
+    elementType: "geometry.fill",
     stylers: [
       {
-        color: "#17263c",
+        color: "#c4daee",
       },
-    ],
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text.fill",
-    stylers: [
       {
-        color: "#515c6d",
-      },
-    ],
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text.stroke",
-    stylers: [
-      {
-        color: "#17263c",
+        visibility: "on",
       },
     ],
   },
