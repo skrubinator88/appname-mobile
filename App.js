@@ -1,6 +1,6 @@
 // IMPORTS
 import React, { useEffect, useReducer } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, Text, TextInput } from "react-native";
 import AsyncStorage from "@react-native-community/async-storage";
 
 // Navigation
@@ -23,6 +23,12 @@ import { Example } from "./screens/example";
 import { AuthContext } from "./components/context";
 
 const Drawer = createDrawerNavigator();
+
+// Disable Font Scaling
+Text.defaultProps = Text.defaultProps || {};
+Text.defaultProps.allowFontScaling = false;
+TextInput.defaultProps = TextInput.defaultProps || {};
+TextInput.defaultProps.allowFontScaling = false;
 
 export const Theme = {
   ...DefaultTheme,
@@ -77,30 +83,21 @@ export default function App({ navigation }) {
     () => ({
       signIn: async (foundUser) => {
         // parameter foundUser: Array, Length: 1, Contains: Username and Token properties
-        console.log("Sign In");
         // Fetch from Server API (DEMOSTRATION)
-        console.log(foundUser);
         const userToken = String(foundUser[0].userToken);
         const userName = foundUser[0].username;
         try {
           await AsyncStorage.setItem("userToken", userToken);
-        } catch (e) {
-          console.log(e);
-        }
+        } catch (e) {}
         dispatch({ type: "LOGIN", id: userName, token: userToken });
       },
       signOut: async () => {
         try {
           await AsyncStorage.removeItem("userToken");
-        } catch (e) {
-          console.log(e);
-        }
+        } catch (e) {}
         dispatch({ type: "LOGOUT" });
-        console.log("signed Out");
       },
-      signUp: () => {
-        console.log("Sign Up");
-      },
+      signUp: () => {},
     }),
     []
   );
