@@ -49,10 +49,10 @@ const Text = styled.Text`
 
     switch (true) {
       case small:
-        return `font-size: ${Platform.OS == "ios" ? 20 : 14}px`;
+        return `font-size: 15px`;
 
       default:
-        return `font-size: ${Platform.OS == "ios" ? 23 : 17}px`;
+        return `font-size: 20px`;
     }
   }}
 `;

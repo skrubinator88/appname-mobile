@@ -141,11 +141,11 @@ const TextInputStyled = styled.TextInput`
   text-align: center;
   height: 50px;
   width: 70px;
-  font-size: ${() => (Platform.OS == "ios" ? "25px" : "17px")};
+  font-size: 23px;
 `;
 
 const ButtonStyled = styled.TouchableOpacity`
-  padding: ${() => (Platform.OS == "ios" ? "15px" : "10px")};
+  padding: 15px;
   width: 80%;
   border-radius: 6px;
   margin: 0 auto;
@@ -157,7 +157,7 @@ const Container = styled.View`
   flex: 1;
 `;
 const Text = styled.Text`
-  font-size: ${() => (Platform.OS == "ios" ? "25px" : "17px")};
+  font-size: 20px;
 `;
 
 const ContainerMiddle = styled.View`

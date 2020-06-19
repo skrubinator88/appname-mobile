@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableWithoutFeedback, Keyboard } from "react-native";
+import {
+  View,
+  TouchableWithoutFeedback,
+  Keyboard,
+  KeyboardAvoidingView,
+  SafeAreaView,
+} from "react-native";
 
 import styled from "styled-components/native";
 
@@ -30,10 +36,9 @@ export function RootScreen({ navigation }) {
       try {
         position = await Location.getLastKnownPositionAsync();
       } catch (e) {
-        // position = await Location.getCurrentPositionAsync();
+        position = await Location.getCurrentPositionAsync();
       }
       setLocation(position);
-
       return;
     })();
   }, []);
@@ -87,48 +92,70 @@ export function RootScreen({ navigation }) {
 
   if (location != null) {
     return (
-      <Container>
-        <MapView
-          // Common
-          provider="google"
-          // maxZoomLevel={18} // 18
-          // minZoomLevel={9} // 9
-          initialCamera={initialCameraSettings}
-          // camera={initialCameraSettings}
-          // iOS
-          showsUserLocation={true}
-          // Android
+      <TouchableWithoutFeedback
+        onPress={() => {
+          Keyboard.dismiss();
+        }}
+      >
+        <Container>
+          <MapView
+            // Common
+            provider="google"
+            // maxZoomLevel={18} // 18
+            // minZoomLevel={9} // 9
+            initialCamera={initialCameraSettings}
+            // camera={initialCameraSettings}
+            // iOS
+            showsUserLocation={true}
+            // Android
 
-          // Other props
-          style={{ flex: 1 }}
-        >
-          {/* Render each marker */}
-          {jobPostings.map(({ title, description, coordinate, id }) => (
-            <Marker
-              key={id}
-              title={title}
-              description={description}
-              coordinate={coordinate}
-            ></Marker>
-          ))}
-        </MapView>
+            // Other props
+            style={{ flex: 1 }}
+          >
+            {/* Render each marker */}
+            {jobPostings.map(({ title, description, coordinate, id }) => (
+              <Marker
+                key={id}
+                title={title}
+                description={description}
+                coordinate={coordinate}
+              ></Marker>
+            ))}
+          </MapView>
 
-        {/* UI */}
-        <Menu activeOpacity={0.9} onPress={() => navigation.openDrawer()}>
-          <MaterialIcons
-            backgroundColor="white"
-            color="black"
-            name="menu"
-            size={30}
-          />
-        </Menu>
+          {/* UI */}
 
-        <Card>
-          <Row last>
-            <Text medium>0.0.0.1</Text>
-          </Row>
-        </Card>
-      </Container>
+          <Menu
+            activeOpacity={0.9}
+            onPress={() => {
+              Keyboard.dismiss();
+              navigation.openDrawer();
+            }}
+          >
+            <MaterialIcons
+              backgroundColor="white"
+              color="black"
+              name="menu"
+              size={30}
+            />
+          </Menu>
+
+          <SearchBar
+            placeholder="Search jobs"
+            placeholderTextColor="#777"
+          ></SearchBar>
+
+          <KeyboardAvoidingView behavior={{ behavior: "position" }}>
+            <Card>
+              <Row last>
+                <SafeAreaView>
+                  <Text medium>0.0.0.1</Text>
+                </SafeAreaView>
+              </Row>
+            </Card>
+          </KeyboardAvoidingView>
+        </Container>
+      </TouchableWithoutFeedback>
     );
   } else {
     return <View></View>;
@@ -142,8 +169,8 @@ const Container = styled.View`
 
 const Menu = styled.TouchableOpacity`
   position: absolute;
-  left: 40px;
-  top: 60px;
+  left: 6%;
+  top: 6%;
   border-radius: 50px;
   background: white;
   padding: 10px;
@@ -151,14 +178,15 @@ const Menu = styled.TouchableOpacity`
 
 const SearchBar = styled.TextInput`
   position: absolute;
-  top: 120px;
+  top: 15%;
   left: 15%;
   width: 70%;
-  font-size: 20px;
-  border: 1px solid #999;
+  font-size: 17px;
+  color: red;
+  border: 2px solid #ededed;
   border-radius: 50px;
   background: white;
-  padding: 15px;
+  padding: 7px 15px;
 `;
 
 const Card = styled.View`
@@ -187,7 +215,8 @@ const Row = styled.View`
     if (props.first) {
       return "30px 10px 0 10px";
     } else if (props.last) {
-      return `20px 10px 50px 10px`;
+      // return `20px 10px 50px 10px`;
+      return "30px 10px 0 10px";
     } else {
       return "0px 0px";
     }
