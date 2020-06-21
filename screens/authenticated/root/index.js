@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  TouchableWithoutFeedback,
-  Keyboard,
-  KeyboardAvoidingView,
-  SafeAreaView,
-} from "react-native";
+import { View, TouchableWithoutFeedback, Keyboard } from "react-native";
 
 import styled from "styled-components/native";
+
+import HandleCardUIComponents from "./HandleCardUIComponents";
 
 // Interfaces
 import { CameraInterface } from "../../../interfaces/mapview-interfaces";
@@ -22,6 +18,9 @@ export function RootScreen({ navigation }) {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [searchBarValue, setSearchBarValue] = useState("");
+  const [searching, setSearching] = useState(false);
+
+  let searchBar;
   let initialCameraSettings;
   let cameraSettings;
 
@@ -90,6 +89,11 @@ export function RootScreen({ navigation }) {
     },
   ]);
 
+  const handleSubmit = () => {
+    searchBar.clear();
+    searchBar.style.opacity = 0;
+  };
+
   if (location != null) {
     return (
       <TouchableWithoutFeedback
@@ -99,6 +103,10 @@ export function RootScreen({ navigation }) {
       >
         <Container>
           <MapView
+            style
+            onTouchStart={() => {
+              Keyboard.dismiss();
+            }}
             // Common
             provider="google"
             // maxZoomLevel={18} // 18
@@ -143,17 +151,13 @@ export function RootScreen({ navigation }) {
           <SearchBar
             placeholder="Search jobs"
             placeholderTextColor="#777"
+            ref={(searchBarRef) => {
+              searchBar = searchBarRef;
+            }}
+            onSubmitEditing={() => handleSubmit()}
           ></SearchBar>
 
-          <KeyboardAvoidingView behavior={{ behavior: "position" }}>
-            <Card>
-              <Row last>
-                <SafeAreaView>
-                  <Text medium>0.0.0.1</Text>
-                </SafeAreaView>
-              </Row>
-            </Card>
-          </KeyboardAvoidingView>
+          <HandleCardUIComponents state={{searching}}></HandleCardUIComponents>
         </Container>
       </TouchableWithoutFeedback>
     );
@@ -187,15 +191,6 @@ const SearchBar = styled.TextInput`
   border-radius: 50px;
   background: white;
   padding: 7px 15px;
-`;
-
-const Card = styled.View`
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  border-radius: 40px;
-  background: white;
-  width: 100%;
 `;
 
 const Row = styled.View`

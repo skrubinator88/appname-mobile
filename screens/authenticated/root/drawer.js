@@ -1,7 +1,7 @@
 // IMPORT
 import React, { useState, useEffect, useContext } from "react";
 import { useTheme } from "@react-navigation/native";
-import { View } from "react-native";
+import { View, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
 import { FontAwesome, MaterialIcons, Entypo } from "@expo/vector-icons";
 
@@ -69,14 +69,16 @@ function DrawerContent(props) {
           icon={() => <MaterialIcons name="settings" size={24} color="black" />}
         />
       </DrawerContentScrollView>
-      <DrawerItem
-        labelStyle={{ fontSize: 20 }}
-        label="Sign Out"
-        onPress={() => signOut()}
-        icon={() => (
-          <MaterialIcons name="exit-to-app" size={24} color="black" />
-        )}
-      />
+      <SafeAreaView>
+        <DrawerItem
+          labelStyle={{ fontSize: 20 }}
+          label="Sign Out"
+          onPress={() => signOut()}
+          icon={() => (
+            <MaterialIcons name="exit-to-app" size={24} color="black" />
+          )}
+        />
+      </SafeAreaView>
     </View>
   );
 }
