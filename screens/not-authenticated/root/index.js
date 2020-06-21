@@ -27,7 +27,7 @@ export function RootScreen({ navigation }) {
         <ContainerLoginRight>
           <Text small>
             New user?{"  "}
-            <TextStyled onPress={() => {}} style={{ color: colors.primary }}>
+            <TextStyled onPress={() => { navigation.navigate("SignUp") }} style={{ color: colors.primary }}>
               Register
             </TextStyled>
           </Text>
