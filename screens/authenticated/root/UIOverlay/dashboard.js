@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { SafeAreaView } from "react-native";
+import {
+  SafeAreaView,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import styled from "styled-components/native";
 
 import Card from "../../../../components/card";
@@ -7,8 +12,9 @@ import Text from "../../../../components/text";
 
 // Expo
 import { MaterialIcons } from "@expo/vector-icons";
+import { ScrollView } from "react-native-gesture-handler";
 
-export default function Dashboard() {
+export default function Dashboard({ navigation }) {
   const [searchBarValue, setSearchBarValue] = useState("");
   let searchBar;
 
@@ -40,11 +46,16 @@ export default function Dashboard() {
         }}
         onSubmitEditing={() => handleSubmit()}
       />
-      <Card>
-        <Row>
-          <Text medium>Dashboard</Text>
-        </Row>
-      </Card>
+      <KeyboardAvoidingView
+        enabled
+        behavior={Platform.OS == "ios" ? "height" : "height"}
+      >
+        <Card>
+          <Row>
+            <Text small>1.0.0.0</Text>
+          </Row>
+        </Card>
+      </KeyboardAvoidingView>
     </>
   );
 }
@@ -52,7 +63,7 @@ export default function Dashboard() {
 const Menu = styled.TouchableOpacity`
   position: absolute;
   left: 6%;
-  top: 6%;
+  top: ${() => (Platform.OS == "ios" ? "6%" : "40px")};
   border-radius: 50px;
   background: white;
   padding: 10px;
@@ -60,7 +71,7 @@ const Menu = styled.TouchableOpacity`
 
 const SearchBar = styled.TextInput`
   position: absolute;
-  top: 15%;
+  top: ${() => (Platform.OS == "ios" ? "15%" : "100px")};
   left: 15%;
   width: 70%;
   font-size: 17px;

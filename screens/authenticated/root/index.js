@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableWithoutFeedback, Keyboard } from "react-native";
+import {
+  View,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
+  Dimensions,
+} from "react-native";
 
 import styled from "styled-components/native";
 
@@ -12,6 +18,9 @@ import { mapStyle } from "../../../components/mapStyle";
 // Expo
 import * as Location from "expo-location";
 import MapView, { Marker } from "react-native-maps";
+import { ScrollView } from "react-native-gesture-handler";
+
+const { height } = Dimensions.get("window");
 
 const handleImage = (imageType) => {
   switch (imageType) {
@@ -104,7 +113,6 @@ export function RootScreen({ navigation }) {
       >
         <Container>
           <MapView
-            style
             onTouchStart={() => {
               Keyboard.dismiss();
             }}
@@ -124,9 +132,8 @@ export function RootScreen({ navigation }) {
             // Android
 
             // Other props
-            style={{ flex: 1 }}
+            style={{ height }}
           >
-            {/* Render each marker */}
             {jobPostings.map(
               ({ title, description, coordinate, id, image }) => (
                 <Marker
@@ -141,7 +148,11 @@ export function RootScreen({ navigation }) {
           </MapView>
 
           {/* UI */}
-          <HandleUIComponents screen={singlePageViewRoute} />
+
+          <HandleUIComponents
+            screen={singlePageViewRoute}
+            navigation={navigation}
+          />
         </Container>
       </TouchableWithoutFeedback>
     );

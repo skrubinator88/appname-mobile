@@ -5,16 +5,16 @@ import Dashboard from "./dashboard";
 import Searching from "./searching";
 import JobFound from "./jobFound";
 
-export default function HandleCardUIComponents({ screen }) {
-  switch ("dashboard") {
+export default function HandleCardUIComponents({ screen, navigation }) {
+  switch ("searching") {
     case "dashboard":
-      return <Dashboard />;
+      return <Dashboard navigation={navigation} />;
       break;
     case "searching":
-      return <Searching />;
+      return <Searching navigation={navigation} />;
       break;
     case "jobFound":
-      return <JobFound />;
+      return <JobFound navigation={navigation} />;
       break;
   }
 }

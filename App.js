@@ -88,16 +88,16 @@ export default function App({ navigation }) {
         const userName = foundUser[0].username;
         try {
           await AsyncStorage.setItem("userToken", userToken);
-        } catch (e) { }
+        } catch (e) {}
         dispatch({ type: "LOGIN", id: userName, token: userToken });
       },
       signOut: async () => {
         try {
           await AsyncStorage.removeItem("userToken");
-        } catch (e) { }
+        } catch (e) {}
         dispatch({ type: "LOGOUT" });
       },
-      signUp: () => { },
+      signUp: () => {},
     }),
     []
   );
@@ -132,9 +132,9 @@ export default function App({ navigation }) {
           // <Example />
           <AuthenticatedStackScreen />
         ) : (
-            <NotAuthenticatedStackScreen />
-            // <Example />
-          )}
+          <NotAuthenticatedStackScreen />
+          // <Example />
+        )}
       </NavigationContainer>
     </AuthContext.Provider>
   );
