@@ -21,48 +21,25 @@ import CheckBox from "@react-native-community/checkbox";
 import { Platform } from "react-native";
 import styled from "styled-components/native";
 
+// Components
+import Header from "../../../../components/header";
+
 export function SignUpContractorScreen2({ navigation }) {
   const [phone, setPhone] = useState("");
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
   let fieldRef = React.createRef();
 
-  // const onSubmit = () => {
-  //   let { current: field } = this.fieldRef;
-
-  //   console.log(field.value());
-  // };
-
-  // formatText = (text) => {
-  //   return text.replace(/[^+\d]/g, "");
-  // };
-  // const Cancel = (e) => {
-  //   Alert.alert("Cancel");
-  // };
-  // const Save = (e) => {
-  //   Alert.alert("Save");
-  // };
-
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Container>
-          <ContainerTop>
-            <TextStyledTittle
-              style={{ fontSize: 20 }}
-              // onPress={(e) => Cancel(e)}
-            >
-              Cancel
-            </TextStyledTittle>
-            <TextStyledTittle style={{ marginLeft: 50, marginRight: 50 }}>
-              Add Work
-            </TextStyledTittle>
-            <TextStyledTittle
-              style={{ fontSize: 20, fontWeight: "bold", color: "#1c55ef" }}
-              // onPress={(e) => Save(e)}
-            >
-              Save
-            </TextStyledTittle>
-          </ContainerTop>
+          <Header
+            navigation={navigation}
+            title="Add Work"
+            next="next"
+            nextTitle="Save"
+          />
+
           <Fields>
             <TextField label="Employer Name" />
 
@@ -76,9 +53,7 @@ export function SignUpContractorScreen2({ navigation }) {
                 margin: 8,
                 fontWeight: "bold",
               }}
-            >
-              OR ENTER ADDRESS MANUALLY
-            </Text>
+            ></Text>
           </Fields>
           <View style={{ backgroundColor: "#F2F2F2", height: 50 }}></View>
           <FieldsTwo>

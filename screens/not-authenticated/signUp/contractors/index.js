@@ -2,127 +2,97 @@ import React, { Component } from "react";
 
 import { Text, Image, Button, Alert, TextInput, View } from "react-native";
 
-import { Platform } from "react-native";
+import { Platform, ScrollView } from "react-native";
 import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
+// Components
+import Header from "../../../../components/header";
 export function SignUpContractorsScreen({ navigation }) {
-  // const EmployeeAgreement = (e) => {
-  //   Alert.alert("Employee Agreement");
-  // };
-  // const PrivacyPolicy = (e) => {
-  //   Alert.alert("Privacy Policy");
-  // };
-  // const TermsConditions = (e) => {
-  //   Alert.alert("Terms & Conditions");
-  // };
-
-  // const HideEmployee = (e) => {
-  //   Alert.alert("HideEmployee");
-  // };
-
-  // const HideEmployer = (e) => {
-  //   Alert.alert("HideEmployer");
-  // };
   return (
     <Container>
-      <ContainerTop>
-        <IconBack>
-          <AntDesign
-            name="arrowleft"
-            size={30}
-            color="black"
-            onPress={() => navigation.goBack()}
-          />
-          <Text
-            onPress={() => {
-              navigation.navigate("SignUpContractor2");
-            }}
-            style={{ fontSize: 17, color: "#1C55EF", fontWeight: "bold" }}
-          >
-            {" "}
-            Next
-          </Text>
-        </IconBack>
-        <TextStyledTittle>User Responsibilities</TextStyledTittle>
-      </ContainerTop>
-      <ContainerTopMiddle>
-        <TextStyledContent>Employer</TextStyledContent>
-        <TextStyledContent style={{ marginLeft: 30 }}>
-          Employee
-        </TextStyledContent>
-      </ContainerTopMiddle>
-      <ContainerMiddle>
-        <Employer>
-          <TextStyledInfo>
-            - Accept and follow the guidelines set for employees provided by
-            CONTRACTORAPP
-          </TextStyledInfo>
-          <TextStyledInfo>
-            - Create, manage, and post jobs for employees to find
-          </TextStyledInfo>
-          <TextStyledInfo>
-            - Provide an address for the work site
-          </TextStyledInfo>
-          <TextStyledInfo>
-            - Briefly describe appropriate tasks needed to be completed
-          </TextStyledInfo>
-          <TextStyledInfo>
-            - Be respectful of the employer, the work site, and other users of
-            CONTRACTORAPP
-          </TextStyledInfo>
-        </Employer>
+      <Header navigation={navigation} next="SignUpContractor2" />
 
-        <Employee>
-          <TextStyledInfo style={{ fontSize: 18 }}>
-            - Accept and follow the guidelines set for employees provided by
-            CONTRACTORAPP
-          </TextStyledInfo>
-          <TextStyledInfo>
-            - Arrive to the work site in a timely manner and complete tasks set
-            by the Employer
-          </TextStyledInfo>
-          <TextStyledInfo>
-            - Be respectful of the employer, the work site, and other users of
-            CONTRACTORAPP
-          </TextStyledInfo>
-        </Employee>
+      <TextStyledTittle>User Responsibilities</TextStyledTittle>
+      <ScrollView alwaysBounceVertical={false}>
+        <ContainerTopMiddle>
+          <TextStyledContent>Employer</TextStyledContent>
+          <TextStyledContent style={{ marginLeft: 30 }}>
+            Employee
+          </TextStyledContent>
+        </ContainerTopMiddle>
+        <ContainerMiddle>
+          <Employer>
+            <TextStyledInfo>
+              - Accept and follow the guidelines set for employees provided by
+              CONTRACTORAPP
+            </TextStyledInfo>
+            <TextStyledInfo>
+              - Create, manage, and post jobs for employees to find
+            </TextStyledInfo>
+            <TextStyledInfo>
+              - Provide an address for the work site
+            </TextStyledInfo>
+            <TextStyledInfo>
+              - Briefly describe appropriate tasks needed to be completed
+            </TextStyledInfo>
+            <TextStyledInfo>
+              - Be respectful of the employer, the work site, and other users of
+              CONTRACTORAPP
+            </TextStyledInfo>
+          </Employer>
 
-        <Terms>
-          <TextStyledInfo
-            style={{
-              fontSize: 17,
-              color: "#1C55EF",
-              fontWeight: "bold",
-              margin: 10,
-            }}
-            onPress={(e) => {}}
-          >
-            Employee Agreement
-          </TextStyledInfo>
-          <TextStyledInfo
-            style={{
-              fontSize: 17,
-              color: "#1C55EF",
-              fontWeight: "bold",
-              margin: 10,
-            }}
-            onPress={(e) => {}}
-          >
-            Privacy Policy Agreement
-          </TextStyledInfo>
-          <TextStyledInfo
-            style={{
-              fontSize: 17,
-              color: "#1C55EF",
-              fontWeight: "bold",
-              margin: 10,
-            }}
-            onPress={(e) => {}}
-          >
-            Terms & Conditions
-          </TextStyledInfo>
-        </Terms>
-      </ContainerMiddle>
+          <Employee>
+            <TextStyledInfo style={{ fontSize: 18 }}>
+              - Accept and follow the guidelines set for employees provided by
+              CONTRACTORAPP
+            </TextStyledInfo>
+            <TextStyledInfo>
+              - Arrive to the work site in a timely manner and complete tasks
+              set by the Employer
+            </TextStyledInfo>
+            <TextStyledInfo>
+              - Be respectful of the employer, the work site, and other users of
+              CONTRACTORAPP
+            </TextStyledInfo>
+          </Employee>
+
+          <Terms>
+            <TextStyledInfo
+              style={{
+                fontSize: 17,
+                color: "#1C55EF",
+                fontWeight: "bold",
+                margin: 10,
+              }}
+              onPress={(e) => {}}
+            >
+              Employee Agreement
+            </TextStyledInfo>
+            <TextStyledInfo
+              style={{
+                fontSize: 17,
+                color: "#1C55EF",
+                fontWeight: "bold",
+                margin: 10,
+              }}
+              onPress={(e) => {}}
+            >
+              Privacy Policy Agreement
+            </TextStyledInfo>
+            <TextStyledInfo
+              style={{
+                fontSize: 17,
+                color: "#1C55EF",
+                fontWeight: "bold",
+                margin: 10,
+              }}
+              onPress={(e) => {}}
+            >
+              Terms & Conditions
+            </TextStyledInfo>
+          </Terms>
+        </ContainerMiddle>
+      </ScrollView>
     </Container>
   );
 }

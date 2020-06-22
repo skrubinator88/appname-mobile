@@ -10,6 +10,9 @@ import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
 import SmoothPinCodeInput from "react-native-smooth-pincode-input";
 
+// Components
+import Header from "../../../components/header";
+
 import { AuthContext } from "../../../components/context";
 
 export function SignInScreen2({ navigation }) {
@@ -57,14 +60,7 @@ export function SignInScreen2({ navigation }) {
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <SafeAreaView style={{ flex: 1 }}>
         <Container>
-          <ContainerTop>
-            <AntDesign
-              name="arrowleft"
-              size={30}
-              color="black"
-              onPress={() => navigation.goBack()}
-            />
-          </ContainerTop>
+          <Header navigation={navigation} />
           <ContainerTopMiddle>
             <TextStyled>Enter the 4-digit code sent to you at:</TextStyled>
             <TextStyled style={{ marginTop: 0 }}>( xxx ) xxx - xxxx</TextStyled>
@@ -110,16 +106,6 @@ const ContainerBottom = styled.View`
   align-items: center;
 `;
 
-const TextInputStyled = styled.TextInput`
-  margin: 10px;
-  border: black;
-  border-radius: 1px;
-  text-align: center;
-  height: 50px;
-  width: 50px;
-  font-size: ${() => (Platform.OS == "ios" ? "25px" : "17px")};
-`;
-
 const TextStyledBottom = styled.Text`
   font-size: 17px;
 `;
@@ -151,10 +137,6 @@ const ContainerMiddle = styled.View`
   flex-direction: row;
 `;
 
-const ContainerTop = styled.View`
-  margin-top: ${() => (Platform.OS == "ios" ? "40px" : "70px")};
-  margin-left: 30px;
-`;
 const ContainerTopMiddle = styled.View`
   flex: 1;
   padding: 20px;

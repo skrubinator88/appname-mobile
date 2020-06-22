@@ -10,6 +10,9 @@ import {
 import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
 
+// Components
+import Header from "../../../components/header";
+
 export function SignInScreen({ navigation }) {
   const { colors } = useTheme();
   const [firstInput, setFirstInput] = useState("");
@@ -103,14 +106,7 @@ export function SignInScreen({ navigation }) {
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <SafeAreaView style={{ flex: 1 }}>
         <Container>
-          <ContainerTop>
-            <AntDesign
-              name="arrowleft"
-              size={30}
-              color="black"
-              onPress={() => navigation.goBack()}
-            />
-          </ContainerTop>
+          <Header navigation={navigation} />
 
           <ContainerTopMiddle>
             <TextStyled>Please enter your phone number</TextStyled>

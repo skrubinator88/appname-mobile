@@ -6,11 +6,14 @@ import { useTheme } from "@react-navigation/native";
 // Store
 import { AuthContext } from "../../../components/context";
 
+// import Example from "../../../views/25";
+
 export function RootScreen({ navigation }) {
   const authContext = useContext(AuthContext);
   const { colors } = useTheme();
 
   return (
+    // <Example></Example>
     <Container>
       <ContainerLogo>
         <Image source={require("../../../assets/rootWallpaper.jpg")} />
@@ -27,7 +30,12 @@ export function RootScreen({ navigation }) {
         <ContainerLoginRight>
           <Text small>
             New user?{"  "}
-            <TextStyled onPress={() => { navigation.navigate("SignUp") }} style={{ color: colors.primary }}>
+            <TextStyled
+              onPress={() => {
+                navigation.navigate("SignUp");
+              }}
+              style={{ color: colors.primary }}
+            >
               Register
             </TextStyled>
           </Text>
