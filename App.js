@@ -132,13 +132,13 @@ export default function App({ navigation }) {
       <NavigationContainer theme={Theme}>
         {loginState.userToken ? (
           <>
-            {/* <AuthenticatedStackScreen /> */}
-            <Screen60 />
+            <AuthenticatedStackScreen />
+            {/* <Screen60 /> */}
           </>
         ) : (
           <>
-            {/* <NotAuthenticatedStackScreen /> */}
-            <Screen60 />
+            <NotAuthenticatedStackScreen />
+            {/* <Screen60 /> */}
           </>
         )}
       </NavigationContainer>

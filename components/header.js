@@ -18,7 +18,10 @@ export default function Header({
   navigation, // @Required
 
   // General Settings
-  background = "transparent",
+  titleWeight = "700",
+  background = "#f5f5f5",
+  headerBackground = "transparent",
+  endBackground = "transparent",
   color = "black",
 
   // Back Button Properties
@@ -38,6 +41,7 @@ export default function Header({
   nextSize = 30,
   nextColor = "",
   nextAction,
+  children,
 }) {
   // @Required
   if (!navigation) throw Error("navigation: Navigation is Required");
@@ -83,33 +87,31 @@ export default function Header({
   // Structure
 
   return (
-    <ScrollView>
-      <SafeAreaView style={{ backgroundColor: background }}>
-        <Container>
-          <Column back>
-            <Text
-              style={{ color: backColor || color }}
-              onPress={() => navigation.goBack()}
-            >
-              {handleBackButton()}
-            </Text>
-          </Column>
+    <SafeAreaView style={{ backgroundColor: headerBackground }}>
+      <Container>
+        <Column back>
+          <Text
+            style={{ color: backColor || color }}
+            onPress={() => navigation.goBack()}
+          >
+            {handleBackButton()}
+          </Text>
+        </Column>
 
-          <Column middle>
-            <Title>{title}</Title>
-          </Column>
+        <Column middle>
+          <Title style={{ color, fontWeight: titleWeight }}>{title}</Title>
+        </Column>
 
-          <Column next>
-            <Text
-              style={{ color: nextColor || color, fontWeight: "700" }}
-              onPress={nextAction}
-            >
-              {handleNextButton()}
-            </Text>
-          </Column>
-        </Container>
-      </SafeAreaView>
-    </ScrollView>
+        <Column next>
+          <Text
+            style={{ color: nextColor || color, fontWeight: "700" }}
+            onPress={nextAction}
+          >
+            {handleNextButton()}
+          </Text>
+        </Column>
+      </Container>
+    </SafeAreaView>
   );
 }
 

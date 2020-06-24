@@ -9,6 +9,7 @@ const Font = styled.Text`
   color: ${(props) => props.color || "black"};
   font-weight: ${(props) => props.weight || "normal"};
   text-align: ${(props) => props.align || "auto"};
+  margin-bottom: ${(props) => props.marginBottom || "0"};
   ${({ title, medium, small }) => {
     switch (true) {
       case title:
@@ -21,6 +22,7 @@ const Font = styled.Text`
         return `font-size: 15px`;
     }
   }};
+
   ${({ bold, light }) => {
     switch (true) {
       case bold:

@@ -19,6 +19,7 @@ import { mapStyle } from "../../../components/mapStyle";
 import * as Location from "expo-location";
 import MapView, { Marker } from "react-native-maps";
 import { ScrollView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { height } = Dimensions.get("window");
 
@@ -148,7 +149,6 @@ export function RootScreen({ navigation }) {
           </MapView>
 
           {/* UI */}
-
           <HandleUIComponents
             screen={singlePageViewRoute}
             navigation={navigation}
