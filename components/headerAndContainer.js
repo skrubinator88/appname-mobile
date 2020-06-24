@@ -18,7 +18,10 @@ export default function Header({
   navigation, // @Required
 
   // General Settings
-  background = "transparent",
+  titleWeight = "700",
+  background = "#e4e4e4",
+  headerBackground = "transparent",
+  endBackground = "transparent",
   color = "black",
 
   // Back Button Properties
@@ -38,6 +41,7 @@ export default function Header({
   nextSize = 30,
   nextColor = "",
   nextAction,
+  children,
 }) {
   // @Required
   if (!navigation) throw Error("navigation: Navigation is Required");
@@ -83,8 +87,17 @@ export default function Header({
   // Structure
 
   return (
-    <ScrollView>
-      <SafeAreaView style={{ backgroundColor: background }}>
+    <ScrollView
+      contentInset={{ top: -SPACER_SIZE + 45, bottom: -SPACER_SIZE - 20 }}
+      contentOffset={{ y: SPACER_SIZE - 80 }}
+      style={{ backgroundColor: background }}
+    >
+      {isIos && (
+        <View
+          style={{ height: SPACER_SIZE, backgroundColor: headerBackground }}
+        />
+      )}
+      <SafeAreaView style={{ backgroundColor: headerBackground }}>
         <Container>
           <Column back>
             <Text
@@ -96,7 +109,7 @@ export default function Header({
           </Column>
 
           <Column middle>
-            <Title>{title}</Title>
+            <Title style={{ color, fontWeight: titleWeight }}>{title}</Title>
           </Column>
 
           <Column next>
@@ -109,6 +122,13 @@ export default function Header({
           </Column>
         </Container>
       </SafeAreaView>
+
+      {/* Childrens */}
+      {children}
+
+      {isIos && (
+        <View style={{ height: SPACER_SIZE, backgroundColor: endBackground }} />
+      )}
     </ScrollView>
   );
 }

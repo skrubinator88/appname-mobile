@@ -7,7 +7,7 @@ import styled from "styled-components/native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 
 // Components
-import Header from "../components/header";
+import Container from "../components/headerAndContainer";
 import Text from "../components/text";
 
 const isIos = Platform.OS === "ios";
@@ -16,23 +16,16 @@ const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
 export function Screen57({ navigation }) {
   return (
     <Container
-      contentInset={{ top: -SPACER_SIZE + 35 }}
-      contentOffset={{ y: SPACER_SIZE - 20 }}
+      navigation={true}
+      nextTitle="Save"
+      color="white"
+      headerBackground="#3869f3"
+      endBackground="white"
+      nextProvider="Entypo"
+      nextIcon="dots-three-horizontal"
+      nextSize={25}
+      nextAction={() => {}}
     >
-      {isIos && (
-        <View style={{ height: SPACER_SIZE, backgroundColor: "#3869f3" }} />
-      )}
-      <Header
-        navigation={true}
-        nextTitle="Save"
-        color="white"
-        background="#3869f3"
-        nextProvider="Entypo"
-        nextIcon="dots-three-horizontal"
-        nextSize={25}
-        nextAction={() => {}}
-      />
-
       {/* Profile Section */}
 
       <ProfileSection>
@@ -222,10 +215,10 @@ export function Screen57({ navigation }) {
   );
 }
 
-const Container = styled.ScrollView`
-  flex: 1;
-  background: #e4e4e4;
-`;
+// const Container = styled.ScrollView`
+//   flex: 1;
+//   background: #e4e4e4;
+// `;
 
 const ProfileSection = styled.View`
   background: #3869f3;
@@ -260,7 +253,7 @@ const DetailSection = styled.View`
   background: white;
   justify-content: center;
   align-items: center;
-  margin: 20px 0;
+  margin: 20px 0 0 0;
 `;
 
 const DetailItemRow = styled.View`
@@ -293,7 +286,7 @@ const CommentSection = styled.View`
   background: white;
   justify-content: center;
   align-items: center;
-  margin: 20px 0;
+  margin: 20px 0 0 0;
 `;
 
 const CommentSectionRow = styled.View`
