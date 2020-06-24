@@ -116,65 +116,107 @@ export function Screen57({ navigation }) {
       {/* Comments Section */}
 
       <CommentSection>
-        <CommentItemRow>
+        <CommentSectionRow>
           <CommentItemColumn>
-            <CommentItemRowLink>
+            <CommentTitleRowAndLink>
               <Text medium weight="700">
                 Compliments
               </Text>
               <Text small weight="700" color="#a0a0a0">
                 View All
               </Text>
-            </CommentItemRowLink>
-            {/*  */}
+            </CommentTitleRowAndLink>
+            {/* Compliments Item */}
             <Compliments
               horizontal={true}
               alwaysBounceHorizontal={true}
               alwaysBounceVertical={false}
               decelerationRate={0}
-              snapToInterval={150} //your element width
+              snapToInterval={170} //your element width
               snapToAlignment="start"
             >
               <ComplimentItem>
-                <Text medium weight="700">
+                <Text medium align="center" color="white">
                   Great Task Management
                 </Text>
               </ComplimentItem>
               <ComplimentItem>
-                <Text medium weight="700">
+                <Text medium align="center" color="white">
                   Great Task Management
                 </Text>
               </ComplimentItem>
               <ComplimentItem>
-                <Text medium weight="700">
+                <Text medium align="center" color="white">
                   Great Task Management
                 </Text>
               </ComplimentItem>
               <ComplimentItem>
-                <Text medium weight="700">
+                <Text medium align="center" color="white">
                   Great Task Management
                 </Text>
               </ComplimentItem>
               <ComplimentItem>
-                <Text medium weight="700">
+                <Text medium align="center" color="white">
+                  Great Task Management
+                </Text>
+              </ComplimentItem>
+              <ComplimentItem>
+                <Text medium align="center" color="white">
                   Great Task Management
                 </Text>
               </ComplimentItem>
             </Compliments>
             {/*  */}
           </CommentItemColumn>
-        </CommentItemRow>
+        </CommentSectionRow>
 
-        <CommentItemRow>
-          <CommentItemRowLink>
+        <CommentSectionColumn>
+          <CommentTitleRowAndLink>
             <Text medium weight="700">
-              Compliments
+              Comments
             </Text>
             <Text small weight="700" color="#a0a0a0">
               View All
             </Text>
-          </CommentItemRowLink>
-        </CommentItemRow>
+          </CommentTitleRowAndLink>
+          {/*  */}
+          <Comments>
+            <CommentItem>
+              <Text small bold>
+                Customer Name
+              </Text>
+              <Text>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam
+                alias asperiores quaerat ipsam ab sed vel commodi rerum autem,
+                itaque recusandae, voluptate perspiciatis iure dignissimos.
+                Voluptatibus, nostrum deleniti. Et, nisi?
+              </Text>
+            </CommentItem>
+            <CommentItem>
+              <Text small bold>
+                Customer Name
+              </Text>
+              <Text>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam
+                alias asperiores quaerat ipsam ab sed vel commodi rerum autem,
+                itaque recusandae, voluptate perspiciatis iure dignissimos.
+                Voluptatibus, nostrum deleniti. Et, nisi?
+              </Text>
+            </CommentItem>
+            <CommentItem>
+              <Text small bold>
+                Customer Name
+              </Text>
+              <Text>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam
+                alias asperiores quaerat ipsam ab sed vel commodi rerum autem,
+                itaque recusandae, voluptate perspiciatis iure dignissimos.
+                Voluptatibus, nostrum deleniti. Et, nisi?
+              </Text>
+            </CommentItem>
+          </Comments>
+          {/*  */}
+        </CommentSectionColumn>
       </CommentSection>
     </Container>
   );
@@ -254,12 +296,20 @@ const CommentSection = styled.View`
   margin: 20px 0;
 `;
 
-const CommentItemRow = styled.View`
-  padding: 10px;
+const CommentSectionRow = styled.View`
   flex-direction: row;
   width: 100%;
   justify-content: space-around;
   border: 1px solid #f5f5f5;
+  padding: 15px 0px;
+`;
+
+const CommentSectionColumn = styled.View`
+  flex-direction: column;
+  width: 100%;
+  justify-content: space-around;
+  border: 1px solid #f5f5f5;
+  padding: 15px 0px;
 `;
 
 const CommentItemColumn = styled.View`
@@ -269,9 +319,9 @@ const CommentItemColumn = styled.View`
   align-items: flex-start;
 `;
 
-const CommentItemRowLink = styled.View`
+const CommentTitleRowAndLink = styled.View`
   width: 100%;
-  padding: 0 5%;
+  padding: 0 30px;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
@@ -280,13 +330,24 @@ const CommentItemRowLink = styled.View`
 const Compliments = styled.ScrollView`
   width: 100%;
   flex-direction: row;
-  border: 1px solid black;
 `;
 
 const ComplimentItem = styled.View`
-  border: 1px solid black;
+  margin: 40px 10px;
+  background: #0070a0;
+  border-radius: 7px;
   width: 150px;
+  padding: 20px 0;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+`;
+
+const Comments = styled.View`
+  width: 100%;
+  flex-direction: column;
+`;
+
+const CommentItem = styled.View`
+  padding: 10px 30px;
 `;
