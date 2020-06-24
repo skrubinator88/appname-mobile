@@ -19,7 +19,7 @@ export default function Header({
 
   // General Settings
   titleWeight = "700",
-  background = "#e4e4e4",
+  background = "#f5f5f5",
   headerBackground = "transparent",
   endBackground = "transparent",
   color = "black",

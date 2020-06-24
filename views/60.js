@@ -4,7 +4,7 @@ import { Image, Button, Alert, TextInput, View } from "react-native";
 
 import { Platform, Dimensions } from "react-native";
 import styled from "styled-components/native";
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons, Octicons } from "@expo/vector-icons";
 
 // Components
 import Container from "../components/headerAndContainer";
@@ -87,14 +87,19 @@ export function Screen60({ navigation }) {
           </View>
         </SectionTitle>
 
-        <PaymentItemRow>
-          <PaymentItemRowLink>
-            <Text small weight="700" color="#4a4a4a">
-              APPLE PAY
+        <PrefferedPaymentItemRow>
+          <Column creditCardIcon>
+            <FontAwesome name="credit-card" size={70} color="#3869f3" />
+          </Column>
+          <Column creditCardIconDescription>
+            <Text medium bold color="#474747">
+              VISA ****0953
             </Text>
-            <Ionicons name="ios-arrow-forward" size={20} />
-          </PaymentItemRowLink>
-        </PaymentItemRow>
+            <Text medium color="#474747">
+              00/00
+            </Text>
+          </Column>
+        </PrefferedPaymentItemRow>
       </PaymentSection>
     </Container>
   );
@@ -130,4 +135,24 @@ const PaymentItemRowLink = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+`;
+
+// Preferred Section
+
+const PrefferedPaymentItemRow = styled.View`
+  background: white;
+  padding: 0 5%;
+  flex-direction: row;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: center;
+  border: 1px solid #f5f5f5;
+`;
+
+const Column = styled.View`
+  padding: 10px;
+  ${({ creditCardIcon, creditCardIconDescription }) => {
+    if (creditCardIcon) return "flex: 1";
+    if (creditCardIconDescription) return "flex: 3";
+  }}
 `;
