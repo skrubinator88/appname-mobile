@@ -10,7 +10,12 @@ import Header from "../../../../components/header";
 export function SignUpContractorsScreen({ navigation }) {
   return (
     <Container>
-      <Header navigation={navigation} next="SignUpContractor2" />
+      <Header
+        navigation={navigation}
+        nextTitle="Next"
+        nextColor="#548ff7"
+        nextAction={() => navigation.navigate("SignUpContractor2")}
+      />
 
       <TextStyledTittle>User Responsibilities</TextStyledTittle>
       <ScrollView alwaysBounceVertical={false}>

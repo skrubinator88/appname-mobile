@@ -66,9 +66,17 @@ export function Example({ navigation }) {
   // = 02   =  -61.44       =
   // ========================
   if (location != null) {
-    const zoom = 10; // Change the zoom number between 2 and 20
-    const base = -100; // Change this number to set the position of the GPS Icon in the screen (Vertically only) between 200 and -200
-    initialCameraSettings = new CameraInterface({
+    const zoom = 11; // Change the zoom number between 2 and 20
+    const base = 0; // Change this number to set the position of the GPS Icon in the screen (Vertically only) between 200 and -200
+    // initialCameraSettings = new CameraInterface({
+    //   latitude: location.coords.latitude + base / Math.pow(2, zoom - 1),
+    //   longitude: location.coords.longitude,
+    //   altitude: 0,
+    //   pitch: 0,
+    //   heading: 0,
+    //   zoom,
+    // });
+    cameraSettings = new CameraInterface({
       latitude: location.coords.latitude + base / Math.pow(2, zoom - 1),
       longitude: location.coords.longitude,
       altitude: 0,
@@ -76,14 +84,6 @@ export function Example({ navigation }) {
       heading: 0,
       zoom,
     });
-    // cameraSettings = new CameraInterface({
-    //   latitude: location.coords.latitude + (base / Math.pow(2, zoom - 1)),
-    //   longitude: location.coords.longitude,
-    //   altitude: 0,
-    //   pitch: 0,
-    //   heading: 0,
-    //   zoom,
-    // });
   }
   // Fetch each Job Posting in ratio from API
   // 1. Send device location with a Get Method

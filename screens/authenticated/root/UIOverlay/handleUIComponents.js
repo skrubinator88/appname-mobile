@@ -6,7 +6,7 @@ import Searching from "./searching";
 import JobFound from "./jobFound";
 
 export default function HandleCardUIComponents({ screen, navigation }) {
-  switch ("searching") {
+  switch ("dashboard") {
     case "dashboard":
       return <Dashboard navigation={navigation} />;
       break;

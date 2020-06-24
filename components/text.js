@@ -6,7 +6,9 @@ export default function Text(props) {
 }
 
 const Font = styled.Text`
-  margin: 5px 0;
+  color: ${(props) => props.color || "black"};
+  font-weight: ${(props) => props.weight || "normal"};
+  text-align: ${(props) => props.align || "auto"};
   ${({ title, medium, small }) => {
     switch (true) {
       case title:
@@ -18,8 +20,7 @@ const Font = styled.Text`
       case small:
         return `font-size: 15px`;
     }
-  }}
-
+  }};
   ${({ bold, light }) => {
     switch (true) {
       case bold:
@@ -28,12 +29,11 @@ const Font = styled.Text`
       case light:
         return `font-weight: 300; color: #999;`;
     }
-  }}
-
-${({ cancel }) => {
-  switch (true) {
-    case cancel:
-      return `color: red`;
-  }
-}}
+  }};
+  ${({ cancel }) => {
+    switch (true) {
+      case cancel:
+        return `color: red`;
+    }
+  }};
 `;

@@ -58,10 +58,10 @@ export function RootScreen({ navigation }) {
   }, []);
 
   if (location != null) {
-    const zoom = 13; // Change the zoom between 2 and 20
-    const base = -90; // Change this number to set the position of the GPS Icon (Vertically only) between -200 and 200 Default: -100
+    const zoom = 12; // Change the zoom between 2 and 20
+    const base = 80; // Change this number to set the position of the GPS Icon (Vertically only) between -200 and 200 Default: -100
     initialCameraSettings = new CameraInterface({
-      latitude: location.coords.latitude + base / Math.pow(2, zoom - 1),
+      latitude: location.coords.latitude - base / Math.pow(2, zoom - 1),
       longitude: location.coords.longitude,
       altitude: 0,
       pitch: 0,
@@ -126,7 +126,7 @@ export function RootScreen({ navigation }) {
             showsCompass={false}
             showsTraffic={false}
             initialCamera={initialCameraSettings}
-            // camera={initialCameraSettings}
+            camera={initialCameraSettings}
             // iOS
             showsUserLocation={true}
             // Android

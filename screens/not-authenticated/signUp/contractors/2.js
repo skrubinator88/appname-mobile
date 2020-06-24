@@ -35,9 +35,11 @@ export function SignUpContractorScreen2({ navigation }) {
         <Container>
           <Header
             navigation={navigation}
+            backTitle="Cancel"
             title="Add Work"
-            next="next"
             nextTitle="Save"
+            nextColor="#548ff7"
+            nextAction={() => navigation.navigate("SignUpContractor2")}
           />
 
           <Fields>
