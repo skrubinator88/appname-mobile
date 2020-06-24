@@ -2,77 +2,74 @@ import React, { Component } from "react";
 
 import {
   Text,
- CheckBox,
+  CheckBox,
   Alert,
   TouchableWithoutFeedback,
   TextInput,
   View,
   Keyboard,
   ScrollView,
-  FlatList
-  
+  FlatList,
 } from "react-native";
+
+import {
+  TextField,
+  FilledTextField,
+  OutlinedTextField,
+} from "react-native-material-textfield";
 
 import { Platform } from "react-native";
 import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
-
+import StarRating from "react-native-star-rating";
 class contractorApp extends Component {
   state = {
-    search: '',
+    search: "",
     DATA: [
       {
         id: "1",
-        title: "Licence",
-        licNum: "1",
-        date: "00.00.00",
-        expires: "00.00.00"
+        image: "./assets/cheems2.jpg",
+        title: "Great Task Management",
       },
       {
         id: "2",
-        title: "Licence",
-        licNum: "2",
-        date: "00.00.00",
-        expires: "00.00.00"
+        image: "./assets/cheems2.jpg",
+        title: "Excellent Service",
       },
       {
         id: "3",
-        title: "Licence",
-        licNum: "3",
-        date: "00.00.00",
-        expires: "00.00.00"
+        image: "./assets/cheems2.jpg",
+        title: "Excellent Negotiator",
       },
       {
         id: "4",
-        title: "Licence",
-        licNum: "4",
-        date: "00.00.00",
-        expires: "00.00.00"
+        image: "./assets/cheems2.jpg",
+        title: "Great Task Management",
       },
       {
         id: "5",
-        title: "Licence",
-        licNum: "5",
-        date: "00.00.00",
-        expires: "00.00.00"
+        image: "./assets/cheems2.jpg",
+        title: "Great Task Management",
       },
       {
         id: "6",
-        title: "Licence",
-        licNum: "6",
-        date: "00.00.00",
-        expires: "00.00.00"
+        image: "./assets/cheems2.jpg",
+        title: "Great Task Management",
       },
-    ]
-    
+    ],
   };
-
 
 
   updateSearch = (search) => {
     this.setState({ search });
     console.log(search)
   };
+
+  onStarRatingPress(rating) {
+    this.setState({
+      starCount: rating,
+    });
+  }
   render() {
     const { search } = this.state;
     const Cancel = (e) => {
@@ -82,105 +79,141 @@ class contractorApp extends Component {
       Alert.alert("Save");
     };
 
-    function Item({ title,licNum,date,expires }) {
+    function Item({ title, image }) {
       return (
-        <LicResult>
-          <TextResult>{title}</TextResult>
-          <TextResult>Licence No: {licNum}</TextResult>
-          <TextResult>Date obtained: {date}</TextResult>
-          <TextResult>Expires: {expires}</TextResult>
-
+      <Margin>
+          <LicResult>
+           <CompImage source={require("./assets/cheems2.jpg")} />
+          <TextResult style={{ color: "black", width:120 }}>{title}</TextResult>
         </LicResult>
+      </Margin>
       );
     }
 
-
     return (
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-  
-          <Container>
-            <ContainerTop>
-  {/* aqui va el header */}
-            </ContainerTop>
-            <Fields>
-              <TextStyledContent>
-                Begin typing a licence name and select it from the suggestions. if you don't see your licence type, select other.
-              </TextStyledContent>
-<SearchBox>
-<TextInput style={{ marginLeft: 40, fontSize:20,  }}
-        placeholder="Search licenses"
-        lightTheme
-        leftIconContainerStyle
-        onChangeText={this.updateSearch}
-        value={search}
-      >
-      </TextInput>
-</SearchBox>
+        
+        <Container>
+        <ContainerTop>{/* aqui va el header */}</ContainerTop>
+        <Fields>
+        <UserImage source={require("./assets/cheems2.jpg")} />
+            <TextStyledContent>Jhon Doe</TextStyledContent>
+            <TextResult>Company Co. LLC</TextResult>
+            <RateBox>
+              <TextResult style={{ color: "black" }}>Good</TextResult>
+              <StarRating
+                disabled={false}
+                maxStars={5}
+                rating={this.state.starCount}
+                selectedStar={(rating) => this.onStarRatingPress(rating)}
+              />
+         
+            </RateBox>
+          <ResultBox>
+         
+          <TextResult style={{ color: "black", marginTop:10,marginBottom:10 }}>Give a compliment</TextResult>
+          
+            <FlatList
+              horizontal={true}
+              data={this.state.DATA}
+              renderItem={({ item }) => (
+                <Item
+                  title={item.title}
+                  image={item.image}
+                />
+              )}
+              keyExtractor={(item) => item.id}
+            />
 
-<ResultBox>
-<FlatList
-        data={this.state.DATA}
-        renderItem={({ item }) => <Item title={item.title} licNum={item.licNum} date={item.date} expires={item.expires} />}
-        keyExtractor={item => item.id}
-      />
-</ResultBox>
-            </Fields>
-          </Container>
-      
+          </ResultBox>          
+        </Fields>
+        <BtnContainer>
+        <TextField style={{margin: 100}} label="Leave a comment" />
+        </BtnContainer>
+          
+        </Container>
       </TouchableWithoutFeedback>
     );
   }
 }
 
-const Fields = styled.View`
-  flex: 0.4;
-  margin: 20px;
-`;
-const LicResult = styled.View`
-border-width:1px;
-border-left-width:0px;
-border-right-width:0px;
-border-top-width:0px;
-border-color: white;
-padding:5px;
-padding-top:15px;
-padding-bottom:15px;
+const UserImage = styled.Image`
+  width: 80px;
+  height: 80px;
+  border-radius: 50px;
+  margin-top: 20px;
 `;
 
-const SearchBox = styled.View`
+const CompImage = styled.Image`
+  width: 80px;
+  height: 80px;
+  border-radius: 50px;
+  margin-top: 10px;
+`;
+const Fields = styled.View`
+  justify-content: center;
+  align-items: center;
   margin: 20px;
-  border-width:1px;
-  padding:10px;
-  border-radius:20px;
-  margin-top:40px;
-  border-color: #E0E0E0;
+  margin-bottom:0px;
+`;
+const LicResult = styled.View`
+  padding-top: 15px;
+  padding-bottom: 15px;
+  align-items:center;
+
+`;
+
+const RateBox = styled.View`
+  margin: 20px;
+  padding: 10px;
+  margin-top: 5px;
 `;
 
 const Container = styled.View`
   flex: 1;
+  flex-direction:column;
+
+`;
+const BtnContainer = styled.View`
+  flex: 1;
+ 
+`;
+const Margin = styled.View`
+  margin-left:50px;
+  margin-right:50px;
+
 `;
 
 const ContainerTop = styled.View`
-  flex: 0.15;
-  background: red;
+  flex: 0.7;
+  background: #3869f3;
 `;
 
 const ResultBox = styled.View`
-  margin:20px;
-  margin-top:10px;
-  background: #F3F3F3;
- 
+  margin: 20px;
+  margin-top: 1px;
+  justify-content: center;
+  align-items: center;
+  border-width: 1px;
+  border-left-width: 0px;
+  border-right-width: 0px;
+  border-bottom-width: 0px;
+  width: 500px;
+  border-color: #efefef;
 `;
 
 const TextStyledContent = styled.Text`
-text-align: center;
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
   font-size: ${() => (Platform.OS == "ios" ? "25px" : "20px")};
 `;
 
 const TextResult = styled.Text`
-margin-left: 10px;
-color: #A5A5A5;
-  font-size: ${() => (Platform.OS == "ios" ? "25px" : "17px")};
+  color: #a5a5a5;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: ${() => (Platform.OS == "ios" ? "25px" : "18px")};
 `;
 
 export default contractorApp;
