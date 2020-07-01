@@ -4,7 +4,7 @@ import { View, Platform, Dimensions, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
 
 // Expo
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 
 // import Card from "../../../../components/card";
 import Text from "../../../../components/text";
@@ -43,68 +43,93 @@ export default function Screen45({ navigation }) {
 
             <Column>
               <View style={{ flexDirection: "row" }}>
-                <Column style={{ justifyContent: "center" }}>
+                <Column
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: 24,
+                    height: 24,
+                  }}
+                >
                   <FontAwesome name="star" size={24} color="black" />
                 </Column>
 
                 <Column style={{ paddingLeft: 5, justifyContent: "center" }}>
-                  <Text bold>4.01</Text>
+                  <Text bold>5.0</Text>
                 </Column>
               </View>
 
               <View style={{ flexDirection: "row" }}>
-                <Column style={{ justifyContent: "center" }}>
+                <Column
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: 24,
+                    height: 24,
+                  }}
+                >
                   <FontAwesome name="map-marker" size={24} color="black" />
                 </Column>
 
                 <Column style={{ paddingLeft: 5, justifyContent: "center" }}>
-                  <Text bold>13 min</Text>
+                  <Text bold>15 min.</Text>
                 </Column>
               </View>
             </Column>
           </Column>
         </Row>
-        <Row>
-          <Column>
-            <JobDescription>
-              <Text small light marginBottom="5px">
-                Job Description
-              </Text>
-              <Text small marginBottom="5px">
-                $34/hr
-              </Text>
-            </JobDescription>
 
-            <Text>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              Vestibulum bibendum dui et lacinia elementum. Donec vitae diam eu
-              nisi pellentesque malesuada sagittis et ipsum. Donec eleifend nunc
-              et tincidunt viverra. Sed nec lacus vel erat auctor convallis. In
-              hac habitasse platea dictumst.
-            </Text>
+        <Row>
+          <Column style={{ flex: 1 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                flex: 1,
+                justifyContent: "space-between",
+              }}
+            >
+              <Column>
+                <Text small light marginBottom="5px">
+                  Location
+                </Text>
+                <Text small>32 Wallaway ST</Text>
+                <Text small>Atlanta, GA 30309</Text>
+              </Column>
+
+              <Column
+                style={{
+                  justifyContent: "center",
+                }}
+              >
+                <Button accept onPress={() => navigation.push("Home2")}>
+                  <Text style={{ color: "white" }} medium>
+                    Message
+                  </Text>
+                </Button>
+              </Column>
+            </View>
           </Column>
         </Row>
 
         <CardOptionItem row>
-          <Text small>Reviews</Text>
+          <Text small>QR Code</Text>
+          <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
 
-        <Row last>
-          <Column>
-            <Button decline onPress={() => navigation.pop()}>
-              <Text style={{ color: "red" }} medium>
-                Decline
-              </Text>
-            </Button>
-          </Column>
-          <Column>
-            <Button accept onPress={() => navigation.push("Home2")}>
-              <Text style={{ color: "white" }} medium>
-                Accept
-              </Text>
-            </Button>
-          </Column>
-        </Row>
+        <CardOptionItem row>
+          <Text small>View Job Description</Text>
+          <Ionicons name="ios-arrow-forward" size={24} />
+        </CardOptionItem>
+
+        <CardOptionItem row>
+          <Text small>View Profile</Text>
+          <Ionicons name="ios-arrow-forward" size={24} />
+        </CardOptionItem>
+
+        <CardOptionItem row>
+          <Text small>Report Job</Text>
+          <Ionicons name="ios-arrow-forward" size={24} />
+        </CardOptionItem>
       </View>
     </Card>
   );
@@ -156,11 +181,14 @@ const Row = styled.View`
 `;
 
 const Column = styled.View`
-  border: 1px solid black;
+  /* border: 1px solid black;  */
   flex-direction: column;
 `;
 
 const CardOptionItem = styled.TouchableOpacity`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
   padding: 10px 30px;
   width: 100%;
   border-bottom-color: #eaeaea;
@@ -188,7 +216,7 @@ const Button = styled.TouchableOpacity`
   }};
 `;
 
-const JobDescription = styled.View`
+const Title = styled.View`
   flex-direction: row;
   justify-content: space-between;
 `;
