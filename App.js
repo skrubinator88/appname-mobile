@@ -17,7 +17,7 @@ import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 
 
 // import { Example } from "./screens/example";
-// import { Example } from "./screens/example";
+
 import Example from "./views/65";
 
 import { AuthContext } from "./components/context";
