@@ -15,7 +15,7 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 
-// import { Screen45 } from "./views/45";
+
 // import { Example } from "./screens/example";
 import Example from "./views/65";
 
