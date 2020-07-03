@@ -5,6 +5,7 @@ import styled from "styled-components/native";
 // Components
 // import Container from "../components/headerAndContainer";
 // import Text from "../components/text";
+import { Icon } from "react-native-elements";
 
 export default function Screen60({ navigation }) {
   return (
@@ -17,7 +18,13 @@ export default function Screen60({ navigation }) {
           </TextBox>
           <TextBox>
             <Text>Job Title</Text>
-            <Text>stars</Text>
+            <IconBox>
+              <Icon name="star" type="foundation" />
+              <Icon name="star" type="foundation" />
+              <Icon name="star" type="foundation" />
+              <Icon name="star" type="foundation" />
+              <Icon name="star" type="foundation" color="#d0d0d0" />
+            </IconBox>
           </TextBox>
         </Row>
 
@@ -28,7 +35,13 @@ export default function Screen60({ navigation }) {
           </TextBox>
           <TextBox>
             <Text>Job Title</Text>
-            <Text>stars</Text>
+            <IconBox>
+              <Icon name="star" type="foundation" />
+              <Icon name="star" type="foundation" />
+              <Icon name="star" type="foundation" />
+              <Icon name="star" type="foundation" />
+              <Icon name="star" type="foundation" color="#d0d0d0" />
+            </IconBox>
           </TextBox>
         </Row>
 
@@ -39,7 +52,13 @@ export default function Screen60({ navigation }) {
           </TextBox>
           <TextBox>
             <Text>Job Title</Text>
-            <Text>stars</Text>
+            <IconBox>
+              <Icon name="star" type="foundation" />
+              <Icon name="star" type="foundation" />
+              <Icon name="star" type="foundation" />
+              <Icon name="star" type="foundation" />
+              <Icon name="star" type="foundation" color="#d0d0d0" />
+            </IconBox>
           </TextBox>
         </Row>
       </JobHistorySection>
@@ -75,3 +94,8 @@ const TextBox = styled.View`
 `;
 
 const Text = styled.Text``;
+
+const IconBox = styled.View`
+  justify-content: flex-end;
+  flex-direction: row;
+`;
