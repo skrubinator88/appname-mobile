@@ -13,7 +13,7 @@ import Text from "../components/text";
 const isIos = Platform.OS === "ios";
 const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
 
-export function Screen57({ navigation }) {
+export default function Screen57({ navigation }) {
   return (
     <Container
       navigation={true}

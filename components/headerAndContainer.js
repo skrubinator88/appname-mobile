@@ -1,4 +1,5 @@
 import React from "react";
+import { getStatusBarHeight } from "react-native-status-bar-height";
 
 import {
   Platform,
@@ -12,6 +13,7 @@ import * as VectorIcons from "@expo/vector-icons";
 
 const isIos = Platform.OS === "ios";
 const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
+const statusBarHeight = getStatusBarHeight();
 
 export default function Header({
   // Navigation
@@ -88,13 +90,19 @@ export default function Header({
 
   return (
     <ScrollView
-      contentInset={{ top: -SPACER_SIZE + 45, bottom: -SPACER_SIZE - 20 }}
-      contentOffset={{ y: SPACER_SIZE - 80 }}
+      contentInset={{
+        top: -SPACER_SIZE + statusBarHeight,
+        bottom: -SPACER_SIZE + statusBarHeight,
+      }}
+      contentOffset={{ y: SPACER_SIZE - statusBarHeight }}
       style={{ backgroundColor: background }}
     >
       {isIos && (
         <View
-          style={{ height: SPACER_SIZE, backgroundColor: headerBackground }}
+          style={{
+            height: SPACER_SIZE,
+            backgroundColor: headerBackground,
+          }}
         />
       )}
       <SafeAreaView style={{ backgroundColor: headerBackground }}>
@@ -135,9 +143,8 @@ export default function Header({
 
 // Styles
 const Container = styled.View`
-  flex: 1;
-  margin-top: ${() => (Platform.OS == "ios" ? "1%" : "6%")};
-  margin-bottom: 10%;
+  /* flex: 1; */
+  padding: 10px;
   flex-direction: row;
 `;
 

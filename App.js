@@ -17,7 +17,7 @@ import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 
 // import { Screen45 } from "./views/45";
 // import { Example } from "./screens/example";
-import Example from "./views/65";
+// import Example from "./views/60";
 
 import { AuthContext } from "./components/context";
 
@@ -121,16 +121,12 @@ export default function App({ navigation }) {
         {loginState.userToken ? (
           <>
             <AuthenticatedStackScreen />
-            {/* <Screen45 /> */}
-            {/* <AuthenticatedStackScreen /> */}
-            <Example />
+            {/* <Example /> */}
           </>
         ) : (
           <>
             <NotAuthenticatedStackScreen />
-            {/* <Screen45 /> */}
-            {/* <NotAuthenticatedStackScreen /> */}
-            <Example />
+            {/* <Example /> */}
           </>
         )}
       </NavigationContainer>
