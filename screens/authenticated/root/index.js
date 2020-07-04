@@ -107,54 +107,52 @@ export function RootScreen({ navigation }) {
 
   if (location != null) {
     return (
-      <TouchableWithoutFeedback
-        onPress={() => {
-          Keyboard.dismiss();
-        }}
-      >
-        <Container>
-          <MapView
-            onTouchStart={() => {
-              Keyboard.dismiss();
-            }}
-            // Common
-            customMapStyle={mapStyle}
-            provider="google"
-            // maxZoomLevel={18} // 18
-            // minZoomLevel={9} // 9
-            showsMyLocationButton={false}
-            showsPointsOfInterest={false}
-            showsCompass={false}
-            showsTraffic={false}
-            initialCamera={initialCameraSettings}
-            camera={initialCameraSettings}
-            // iOS
-            showsUserLocation={true}
-            // Android
+      // <TouchableWithoutFeedback
+      //   onPress={() => {
+      //     Keyboard.dismiss();
+      //   }}
+      // >
+      <Container>
+        <MapView
+          onTouchStart={() => {
+            Keyboard.dismiss();
+          }}
+          // Common
+          customMapStyle={mapStyle}
+          provider="google"
+          // maxZoomLevel={18} // 18
+          // minZoomLevel={9} // 9
+          showsMyLocationButton={false}
+          showsPointsOfInterest={false}
+          showsCompass={false}
+          showsTraffic={false}
+          initialCamera={initialCameraSettings}
+          camera={initialCameraSettings}
+          // iOS
+          showsUserLocation={true}
+          // Android
 
-            // Other props
-            style={{ height }}
-          >
-            {jobPostings.map(
-              ({ title, description, coordinate, id, image }) => (
-                <Marker
-                  key={id}
-                  title={title}
-                  description={description}
-                  coordinate={coordinate}
-                  icon={handleImage(image)}
-                ></Marker>
-              )
-            )}
-          </MapView>
+          // Other props
+          style={{ height }}
+        >
+          {jobPostings.map(({ title, description, coordinate, id, image }) => (
+            <Marker
+              key={id}
+              title={title}
+              description={description}
+              coordinate={coordinate}
+              icon={handleImage(image)}
+            ></Marker>
+          ))}
+        </MapView>
 
-          {/* UI */}
-          <HandleUIComponents
-            screen={singlePageViewRoute}
-            navigation={navigation}
-          />
-        </Container>
-      </TouchableWithoutFeedback>
+        {/* UI */}
+        <HandleUIComponents
+          screen={singlePageViewRoute}
+          navigation={navigation}
+        />
+      </Container>
+      // </TouchableWithoutFeedback>
     );
   } else {
     return <View></View>;

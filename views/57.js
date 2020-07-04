@@ -29,11 +29,7 @@ export default function Screen57({ navigation }) {
       {/* Profile Section */}
 
       <ProfileSection>
-        <ProfilePicture
-          source={{
-            uri: "https://i.insider.com/5899ffcf6e09a897008b5c04?width=1200",
-          }}
-        ></ProfilePicture>
+        <ProfilePicture source={{ uri: "https://i.insider.com/5899ffcf6e09a897008b5c04?width=1200" }} />
 
         <Text title color="white" weight="700">
           John Doe
@@ -179,10 +175,8 @@ export default function Screen57({ navigation }) {
                 Customer Name
               </Text>
               <Text>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam
-                alias asperiores quaerat ipsam ab sed vel commodi rerum autem,
-                itaque recusandae, voluptate perspiciatis iure dignissimos.
-                Voluptatibus, nostrum deleniti. Et, nisi?
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam alias asperiores quaerat ipsam ab sed vel commodi rerum
+                autem, itaque recusandae, voluptate perspiciatis iure dignissimos. Voluptatibus, nostrum deleniti. Et, nisi?
               </Text>
             </CommentItem>
             <CommentItem>
@@ -190,10 +184,8 @@ export default function Screen57({ navigation }) {
                 Customer Name
               </Text>
               <Text>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam
-                alias asperiores quaerat ipsam ab sed vel commodi rerum autem,
-                itaque recusandae, voluptate perspiciatis iure dignissimos.
-                Voluptatibus, nostrum deleniti. Et, nisi?
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam alias asperiores quaerat ipsam ab sed vel commodi rerum
+                autem, itaque recusandae, voluptate perspiciatis iure dignissimos. Voluptatibus, nostrum deleniti. Et, nisi?
               </Text>
             </CommentItem>
             <CommentItem>
@@ -201,10 +193,8 @@ export default function Screen57({ navigation }) {
                 Customer Name
               </Text>
               <Text>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam
-                alias asperiores quaerat ipsam ab sed vel commodi rerum autem,
-                itaque recusandae, voluptate perspiciatis iure dignissimos.
-                Voluptatibus, nostrum deleniti. Et, nisi?
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam alias asperiores quaerat ipsam ab sed vel commodi rerum
+                autem, itaque recusandae, voluptate perspiciatis iure dignissimos. Voluptatibus, nostrum deleniti. Et, nisi?
               </Text>
             </CommentItem>
           </Comments>

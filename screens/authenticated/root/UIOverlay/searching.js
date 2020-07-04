@@ -30,29 +30,5 @@ export default function Searching() {
 const Row = styled.View`
   flex-direction: row;
   justify-content: center;
-  /* justify-content: ${({ first, last }) => {
-    switch (true) {
-      case first:
-        return "space-between";
-      case last:
-        return "space-around";
-      default:
-        return "flex-start";
-    }
-  }}; */
-  /* justify-content:  */
-  /* margin: ${(props) => {
-    if (props.first) {
-      return "30px 10px 0 10px";
-    } else if (props.last) {
-      // return `20px 10px 50px 10px`;
-      return "30px 10px 0 10px";
-    } else {
-      return "0px 0px";
-    }
-  }};
-  */
   padding: 10px 0;
-  /* border-bottom-color: #eaeaea; */
-  /* border-bottom-width: ${(props) => (props.last ? "0px" : "1px")};  */
 `;
