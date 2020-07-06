@@ -4,15 +4,15 @@ import { View, Text } from "react-native";
 import styled from "styled-components/native";
 
 import { createStackNavigator } from "@react-navigation/stack";
-export const ProfileStack = createStackNavigator();
+export const SettingsStack = createStackNavigator();
 
 // import pages
-import ProfileScreen from ".";
+import SettingsScreen from ".";
 
-export function ProfileStackScreen() {
+export function SettingsStackScreen() {
   return (
-    <ProfileStack.Navigator>
-      <ProfileStack.Screen name="Help Center" component={ProfileScreen} />
-    </ProfileStack.Navigator>
+    <SettingsStack.Navigator>
+      <SettingsStack.Screen name="Help Center" component={SettingsScreen} />
+    </SettingsStack.Navigator>
   );
 }

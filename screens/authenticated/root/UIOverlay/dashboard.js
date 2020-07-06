@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { SafeAreaView, Keyboard, KeyboardAvoidingView, Platform, View, Text, Dimensions } from "react-native";
 import styled from "styled-components/native";
 
@@ -9,7 +9,7 @@ import Card from "../../../../components/card";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 
-import fethedSuggestedItems from "../../../../models/fetchedSuggestedItems";
+import fetchedSuggestedItems from "../../../../models/fetchedSuggestedItems";
 const height = Dimensions.get("screen").height;
 
 import { UIOverlayContext } from "../../../../components/context";
@@ -18,26 +18,25 @@ export default function Dashboard({ navigation, onUIChange }) {
   const { changeRoute } = useContext(UIOverlayContext);
   const [searchBarValue, setSearchBarValue] = useState("");
   const [searchBarFocus, setSearchBarFocus] = useState(false);
-  console.log();
   let searchBar;
 
   const handleSubmit = () => {
     searchBar.clear();
+    setSearchBarFocus(false);
     changeRoute("searching");
   };
 
-  const Suggestions = () => {
-    const style = searchBarFocus ? { opacity: 1 } : { opacity: 0, zIndex: -1 };
-
+  function Suggestions() {
+    const suggestionStyle = searchBarFocus ? { opacity: 1, zIndex: 1 } : { opacity: 0, zIndex: -1, position: "relative" };
     // Fetch before search
-    let suggestedItems = fethedSuggestedItems.filter((item) => {
+    let suggestedItems = fetchedSuggestedItems.filter((item) => {
       const title = item.toLowerCase();
       const input = searchBarValue.toLowerCase().trim();
       return title.indexOf(input) != -1;
     });
 
     return (
-      <SuggestionContainer enabled behavior="height" style={style}>
+      <SuggestionContainer enabled behavior="height" style={suggestionStyle}>
         <TopBar />
         <SuggestionScrollView
           keyboardShouldPersistTaps="always"
@@ -49,8 +48,8 @@ export default function Dashboard({ navigation, onUIChange }) {
                 onPress={() => {
                   setSearchBarValue(item);
                   setSearchBarFocus(false);
-                  handleSubmit();
                   searchBar.blur();
+                  handleSubmit();
                 }}
               >
                 {item}
@@ -60,10 +59,12 @@ export default function Dashboard({ navigation, onUIChange }) {
         />
       </SuggestionContainer>
     );
-  };
+  }
 
   return (
     <>
+      <Suggestions />
+
       <Menu
         activeOpacity={0.9}
         onPress={() => {
@@ -77,7 +78,6 @@ export default function Dashboard({ navigation, onUIChange }) {
       <SearchBar
         placeholder="Search jobs"
         placeholderTextColor="#777"
-        value={searchBarValue}
         onChangeText={(text) => setSearchBarValue(text)}
         ref={(searchBarRef) => (searchBar = searchBarRef)}
         onFocus={() => setSearchBarFocus(true)}
@@ -94,8 +94,6 @@ export default function Dashboard({ navigation, onUIChange }) {
       </KeyboardAvoidingView>
 
       {/* Search Bar on Focus UI */}
-
-      {Suggestions()}
     </>
   );
 }
@@ -130,11 +128,9 @@ const Row = styled.View`
 
 //  Search Bar on Focus UI *
 
-/* */
-
 const TopBar = styled.KeyboardAvoidingView`
   height: ${() => (Platform.OS == "ios" ? `${height * 0.15 + 54}px` : "100px")};
-  /* margin-top: 54px; */
+  margin-top: ${() => (Platform.OS == "ios" ? "" : "54px")};
   background: white;
   box-shadow: 2px 2px 2px #dcdcdc;
   z-index: 3;

@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Platform,
-  Dimensions,
-} from "react-native";
+import { View, TouchableWithoutFeedback, Keyboard, Platform, Dimensions } from "react-native";
 
 import styled from "styled-components/native";
 
@@ -21,7 +15,7 @@ import MapView, { Marker } from "react-native-maps";
 import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const { height } = Dimensions.get("window");
+const { height } = Dimensions.get("screen");
 
 const handleImage = (imageType) => {
   switch (imageType) {
@@ -139,21 +133,12 @@ export function RootScreen({ navigation }) {
           style={{ height }}
         >
           {jobPostings.map(({ title, description, coordinate, id, image }) => (
-            <Marker
-              key={id}
-              title={title}
-              description={description}
-              coordinate={coordinate}
-              icon={handleImage(image)}
-            ></Marker>
+            <Marker key={id} title={title} description={description} coordinate={coordinate} icon={handleImage(image)}></Marker>
           ))}
         </MapView>
 
         {/* UI */}
-        <HandleUIComponents
-          navigation={navigation}
-          onUIChange={handleUIChange}
-        />
+        <HandleUIComponents navigation={navigation} onUIChange={handleUIChange} />
       </Container>
       // </TouchableWithoutFeedback>
     );
@@ -165,58 +150,4 @@ export function RootScreen({ navigation }) {
 // STYLES
 const Container = styled.View`
   flex: 1;
-`;
-
-const Row = styled.View`
-  flex-direction: row;
-  justify-content: ${({ first, last }) => {
-    switch (true) {
-      case first:
-        return "space-between";
-      case last:
-        return "space-around";
-      default:
-        return "flex-start";
-    }
-  }};
-  /* justify-content:  */
-  margin: ${(props) => {
-    if (props.first) {
-      return "30px 10px 0 10px";
-    } else if (props.last) {
-      // return `20px 10px 50px 10px`;
-      return "30px 10px 0 10px";
-    } else {
-      return "0px 0px";
-    }
-  }};
-  padding: 0 30px;
-  border-bottom-color: #eaeaea;
-  border-bottom-width: ${(props) => (props.last ? "0px" : "1px")};
-`;
-
-const Text = styled.Text`
-  margin: 5px 0;
-  ${({ title, medium, small }) => {
-    switch (true) {
-      case title:
-        return `font-size: 22px`;
-
-      case medium:
-        return `font-size: 20px`;
-
-      case small:
-        return `font-size: 39px`;
-    }
-  }}
-
-  ${({ bold, light }) => {
-    switch (true) {
-      case bold:
-        return `font-weight: 800`;
-
-      case light:
-        return `font-weight: 300; color: #999;`;
-    }
-  }}
 `;

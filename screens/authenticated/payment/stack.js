@@ -4,15 +4,15 @@ import { View, Text } from "react-native";
 import styled from "styled-components/native";
 
 import { createStackNavigator } from "@react-navigation/stack";
-export const ProfileStack = createStackNavigator();
+export const HelpStack = createStackNavigator();
 
 // import pages
-import ProfileScreen from ".";
+import PaymentScreen from ".";
 
-export function ProfileStackScreen() {
+export function PaymentStackScreen() {
   return (
-    <ProfileStack.Navigator>
-      <ProfileStack.Screen name="Help Center" component={ProfileScreen} />
-    </ProfileStack.Navigator>
+    <HelpStack.Navigator>
+      <HelpStack.Screen name="Help Center" component={PaymentScreen} />
+    </HelpStack.Navigator>
   );
 }

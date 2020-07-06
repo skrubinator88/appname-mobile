@@ -7,16 +7,13 @@ import styled from "styled-components/native";
 import { FontAwesome, Ionicons, Octicons } from "@expo/vector-icons";
 
 // Components
-import Container from "../components/headerAndContainer";
-import Text from "../components/text";
+import Container from "../../../components/headerAndContainer";
+import Text from "../../../components/text";
 
-const isIos = Platform.OS === "ios";
-const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
-
-export default function Screen60({ navigation }) {
+export default function PaymentScreen({ navigation }) {
   return (
     <Container
-      navigation={true}
+      navigation={navigation}
       nextTitle="Save"
       color="white"
       title="Payment"

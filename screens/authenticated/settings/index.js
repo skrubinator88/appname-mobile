@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useContext } from "react";
 
 import { Image, Button, Alert, TextInput, View } from "react-native";
 
@@ -7,16 +7,19 @@ import styled from "styled-components/native";
 import { FontAwesome, Ionicons, Octicons } from "@expo/vector-icons";
 
 // Components
-import Container from "../components/headerAndContainer";
-import Text from "../components/text";
+import Container from "../../../components/headerAndContainer";
+import Text from "../../../components/text";
 
 const isIos = Platform.OS === "ios";
 const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
 
-export default function Screen65({ navigation }) {
+import { AuthContext } from "../../../components/context";
+
+export default function SettingsScreen({ navigation }) {
+  const { signOut } = useContext(AuthContext);
   return (
     <Container
-      navigation={true}
+      navigation={navigation}
       nextTitle="Save"
       color="white"
       title="Legal"
@@ -34,8 +37,7 @@ export default function Screen65({ navigation }) {
           <Column ProfilePicture>
             <ProfilePicture
               source={{
-                uri:
-                  "https://i.insider.com/5899ffcf6e09a897008b5c04?width=1200",
+                uri: "https://i.insider.com/5899ffcf6e09a897008b5c04?width=1200",
               }}
             ></ProfilePicture>
           </Column>
@@ -93,7 +95,7 @@ export default function Screen65({ navigation }) {
       </LegalSection>
 
       <SignOutSection>
-        <SignOutItemRow>
+        <SignOutItemRow onPress={() => signOut()}>
           <SignOutItemRowLink>
             <Text small weight="700" color="#ff4a4a">
               SIGN OUT

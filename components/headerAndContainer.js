@@ -1,13 +1,7 @@
 import React from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 
-import {
-  Platform,
-  SafeAreaView,
-  Dimensions,
-  View,
-  ScrollView,
-} from "react-native";
+import { Platform, SafeAreaView, Dimensions, View, ScrollView } from "react-native";
 import styled from "styled-components/native";
 import * as VectorIcons from "@expo/vector-icons";
 
@@ -87,7 +81,6 @@ export default function Header({
   }
 
   // Structure
-
   return (
     <ScrollView
       contentInset={{
@@ -108,10 +101,7 @@ export default function Header({
       <SafeAreaView style={{ backgroundColor: headerBackground }}>
         <Container>
           <Column back>
-            <Text
-              style={{ color: backColor || color }}
-              onPress={() => navigation.goBack()}
-            >
+            <Text style={{ color: backColor || color }} onPress={() => navigation.goBack()}>
               {handleBackButton()}
             </Text>
           </Column>
@@ -121,10 +111,7 @@ export default function Header({
           </Column>
 
           <Column next>
-            <Text
-              style={{ color: nextColor || color, fontWeight: "700" }}
-              onPress={nextAction}
-            >
+            <Text style={{ color: nextColor || color, fontWeight: "700" }} onPress={nextAction}>
               {handleNextButton()}
             </Text>
           </Column>
@@ -134,9 +121,7 @@ export default function Header({
       {/* Childrens */}
       {children}
 
-      {isIos && (
-        <View style={{ height: SPACER_SIZE, backgroundColor: endBackground }} />
-      )}
+      {isIos && <View style={{ height: SPACER_SIZE, backgroundColor: endBackground }} />}
     </ScrollView>
   );
 }
@@ -144,6 +129,7 @@ export default function Header({
 // Styles
 const Container = styled.View`
   /* flex: 1; */
+  margin-top: ${Platform.OS == "android" ? `${statusBarHeight}px` : "0px"};
   padding: 10px;
   flex-direction: row;
 `;
