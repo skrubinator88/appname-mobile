@@ -27,7 +27,6 @@ export default function Dashboard({ navigation, onUIChange }) {
   };
 
   function Suggestions() {
-    const suggestionStyle = searchBarFocus ? { opacity: 1, zIndex: 1 } : { opacity: 0, zIndex: -1, position: "relative" };
     // Fetch before search
     let suggestedItems = fetchedSuggestedItems.filter((item) => {
       const title = item.toLowerCase();
@@ -35,47 +34,41 @@ export default function Dashboard({ navigation, onUIChange }) {
       return title.indexOf(input) != -1;
     });
 
-    return (
-      <SuggestionContainer enabled behavior="height" style={suggestionStyle}>
-        <TopBar />
-        <SuggestionScrollView
-          keyboardShouldPersistTaps="always"
-          data={suggestedItems}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => {
-            return (
-              <SuggestedItem
-                onPress={() => {
-                  setSearchBarValue(item);
-                  setSearchBarFocus(false);
-                  searchBar.blur();
-                  handleSubmit();
-                }}
-              >
-                {item}
-              </SuggestedItem>
-            );
-          }}
-        />
-      </SuggestionContainer>
-    );
+    if (searchBarFocus) {
+      return (
+        <SuggestionContainer enabled behavior="height">
+          <TopBar />
+          <SuggestionScrollView
+            keyboardShouldPersistTaps="always"
+            data={suggestedItems}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => {
+              return (
+                <SuggestedItem
+                  onPress={() => {
+                    setSearchBarValue(item);
+                    setSearchBarFocus(false);
+                    searchBar.blur();
+                    handleSubmit();
+                  }}
+                >
+                  {item}
+                </SuggestedItem>
+              );
+            }}
+          />
+        </SuggestionContainer>
+      );
+    } else {
+      return;
+    }
   }
 
   return (
     <>
       {Suggestions()}
 
-      {searchBarFocus == false ? (
-        <Menu
-          activeOpacity={0.9}
-          onPress={() => {
-            Keyboard.dismiss();
-            navigation.openDrawer();
-          }}
-        >
-          <MaterialIcons backgroundColor="white" color="black" name="menu" size={30} />
-        </Menu>
-      ) : (
+      {searchBarFocus ? (
         <Menu
           activeOpacity={0.9}
           onPress={() => {
@@ -85,6 +78,16 @@ export default function Dashboard({ navigation, onUIChange }) {
           }}
         >
           <AntDesign backgroundColor="white" color="black" name="arrowleft" size={30} />
+        </Menu>
+      ) : (
+        <Menu
+          activeOpacity={0.9}
+          onPress={() => {
+            Keyboard.dismiss();
+            navigation.openDrawer();
+          }}
+        >
+          <MaterialIcons backgroundColor="white" color="black" name="menu" size={30} />
         </Menu>
       )}
 
@@ -152,15 +155,12 @@ const TopBar = styled.KeyboardAvoidingView`
 
 const SuggestionContainer = styled.KeyboardAvoidingView`
   flex: 1;
-  z-index: 2;
-  position: absolute;
   background: white;
   height: 100%;
   width: 100%;
-  /* align-items: center; */
-  /* justify-content: flex-end; */
-  /* border-bottom-width: 30px; */
-  /* border-bottom-color: blue; */
+  opacity: 1;
+  z-index: 1;
+  position: absolute;
 `;
 
 const SuggestionScrollView = styled.FlatList`
