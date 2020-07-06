@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useMemo, useEffect } from "react";
 
 // Card UI Components
 import Dashboard from "./dashboard";
@@ -8,8 +8,10 @@ import AcceptedJob from "./acceptedJob";
 
 // import Example from "./example";
 
-export default function HandleCardUIComponents({ screen, navigation }) {
-  switch ("dashboard") {
+import { UIOverlayContext } from "../../../../components/context";
+
+function HandleOverlayUIComponents({ route, navigation }) {
+  switch (route) {
     case "dashboard":
       return <Dashboard navigation={navigation} />;
       break;
@@ -22,9 +24,32 @@ export default function HandleCardUIComponents({ screen, navigation }) {
     case "acceptedJob":
       return <AcceptedJob navigation={navigation} />;
       break;
-
     case "example":
       return <Example navigation={navigation} />;
       break;
   }
+}
+
+export default function UIComponents({ navigation }) {
+  const [route, setRoute] = useState("dashboard");
+
+  const uiOverlayContext = React.useMemo(
+    () => ({
+      changeRoute: (newRoute) => {
+        setRoute(newRoute);
+      },
+    }),
+    []
+  );
+
+  useEffect(() => {
+    
+    return;
+  }, [route]);
+
+  return (
+    <UIOverlayContext.Provider value={uiOverlayContext}>
+      <HandleOverlayUIComponents route={route} navigation={navigation} />
+    </UIOverlayContext.Provider>
+  );
 }

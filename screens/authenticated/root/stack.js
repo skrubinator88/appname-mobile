@@ -13,7 +13,7 @@ export function AuthenticatedStackScreen({ navigation }) {
   return (
     <NavigationContainer independent={true}>
       <HomeStack.Navigator headerMode="none">
-        <HomeStack.Screen name="HomeScreen" component={Drawer} />
+        <HomeStack.Screen name="Root" component={Drawer} />
       </HomeStack.Navigator>
     </NavigationContainer>
   );

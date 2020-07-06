@@ -6,15 +6,11 @@ import styled from "styled-components/native";
 import { FontAwesome, MaterialIcons, Entypo } from "@expo/vector-icons";
 
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import {
-  DrawerContentScrollView,
-  DrawerItem,
-  DrawerItemList,
-} from "@react-navigation/drawer";
+import { DrawerContentScrollView, DrawerItem, DrawerItemList } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
 export const AuthenticatedDrawer = createDrawerNavigator();
 
-// pages
+// Screens
 import { RootScreen } from "./index";
 import { ProfileStackScreen } from "../profile/";
 import { HelpScreen } from "../helpScreen/";
@@ -74,9 +70,7 @@ function DrawerContent(props) {
           labelStyle={{ fontSize: 20 }}
           label="Sign Out"
           onPress={() => signOut()}
-          icon={() => (
-            <MaterialIcons name="exit-to-app" size={24} color="black" />
-          )}
+          icon={() => <MaterialIcons name="exit-to-app" size={24} color="black" />}
         />
       </SafeAreaView>
     </View>
@@ -137,15 +131,12 @@ const ProfilePicture = styled.Image`
 export function Drawer() {
   return (
     <NavigationContainer independent={true}>
-      <AuthenticatedDrawer.Navigator
-        drawerContent={(props) => <DrawerContent {...props} />}
-      >
-        <AuthenticatedDrawer.Screen name="Home" component={RootScreen} />
-        <AuthenticatedDrawer.Screen
-          name="Profile"
-          component={ProfileStackScreen}
-        />
-        {/* <AuthenticatedDrawer.Screen name="Help" component={HelpStackScreen} /> */}
+      <AuthenticatedDrawer.Navigator drawerContent={(props) => <DrawerContent {...props} />}>
+        <AuthenticatedDrawer.Screen name="Root" component={RootScreen} />
+        <AuthenticatedDrawer.Screen name="Payment" component={RootScreen} />
+        <AuthenticatedDrawer.Screen name="Work History" component={RootScreen} />
+        <AuthenticatedDrawer.Screen name="Help Center" component={RootScreen} />
+        <AuthenticatedDrawer.Screen name="Settings" component={RootScreen} />
       </AuthenticatedDrawer.Navigator>
     </NavigationContainer>
   );

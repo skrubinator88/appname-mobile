@@ -1,5 +1,5 @@
 // IMPORT
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { View, Platform, Dimensions, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
 
@@ -11,8 +11,12 @@ import Text from "../../../../components/text";
 
 const deviceHeight = Dimensions.get("window").height;
 
+import { UIOverlayContext } from "../../../../components/context";
+
 // BODY
 export default function JobFound({ navigation }) {
+  const { changeRoute } = useContext(UIOverlayContext);
+
   return (
     <Card>
       <View>
@@ -90,14 +94,14 @@ export default function JobFound({ navigation }) {
 
         <Row last>
           <Column>
-            <Button decline onPress={() => navigation.pop()}>
+            <Button decline onPress={() => changeRoute("dashboard")}>
               <Text style={{ color: "red" }} medium>
                 Decline
               </Text>
             </Button>
           </Column>
           <Column>
-            <Button accept onPress={() => navigation.push("Home2")}>
+            <Button accept onPress={() => changeRoute("acceptedJob")}>
               <Text style={{ color: "white" }} medium>
                 Accept
               </Text>

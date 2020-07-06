@@ -31,10 +31,13 @@ const handleImage = (imageType) => {
   }
 };
 
+const handleUIChange = (e) => {
+  console.log(e);
+};
+
 export function RootScreen({ navigation }) {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
-  const [singlePageViewRoute, setSinglePageViewRoute] = useState("dashboard");
   const [searching, setSearching] = useState(false);
 
   let initialCameraSettings;
@@ -148,8 +151,8 @@ export function RootScreen({ navigation }) {
 
         {/* UI */}
         <HandleUIComponents
-          screen={singlePageViewRoute}
           navigation={navigation}
+          onUIChange={handleUIChange}
         />
       </Container>
       // </TouchableWithoutFeedback>
