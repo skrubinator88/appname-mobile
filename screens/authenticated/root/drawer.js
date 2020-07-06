@@ -8,6 +8,7 @@ import { FontAwesome, MaterialIcons, Entypo } from "@expo/vector-icons";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { DrawerContentScrollView, DrawerItem, DrawerItemList } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
+
 export const AuthenticatedDrawer = createDrawerNavigator();
 
 import { AuthContext } from "../../../components/context/";
@@ -70,7 +71,7 @@ function DrawerContent({ navigation }) {
         <DrawerItem
           labelStyle={{ fontSize: 20 }}
           label="Sign Out"
-          onPress={() => navigation.navigate("Payment")}
+          onPress={() => signOut()}
           icon={() => <MaterialIcons name="exit-to-app" size={24} color="black" />}
         />
       </SafeAreaView>

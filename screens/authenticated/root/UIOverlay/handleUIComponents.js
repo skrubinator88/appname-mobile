@@ -43,7 +43,6 @@ export default function UIComponents({ navigation }) {
   );
 
   useEffect(() => {
-    
     return;
   }, [route]);
 

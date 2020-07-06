@@ -6,7 +6,7 @@ import Card from "../../../../components/card";
 // import Text from "../../../../components/text";
 
 // Expo
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 
 import fetchedSuggestedItems from "../../../../models/fetchedSuggestedItems";
@@ -63,17 +63,30 @@ export default function Dashboard({ navigation, onUIChange }) {
 
   return (
     <>
-      <Suggestions />
+      {Suggestions()}
 
-      <Menu
-        activeOpacity={0.9}
-        onPress={() => {
-          Keyboard.dismiss();
-          navigation.openDrawer();
-        }}
-      >
-        <MaterialIcons backgroundColor="white" color="black" name="menu" size={30} />
-      </Menu>
+      {searchBarFocus == false ? (
+        <Menu
+          activeOpacity={0.9}
+          onPress={() => {
+            Keyboard.dismiss();
+            navigation.openDrawer();
+          }}
+        >
+          <MaterialIcons backgroundColor="white" color="black" name="menu" size={30} />
+        </Menu>
+      ) : (
+        <Menu
+          activeOpacity={0.9}
+          onPress={() => {
+            Keyboard.dismiss();
+            setSearchBarFocus(false);
+            searchBar.blur();
+          }}
+        >
+          <AntDesign backgroundColor="white" color="black" name="arrowleft" size={30} />
+        </Menu>
+      )}
 
       <SearchBar
         placeholder="Search jobs"
@@ -130,7 +143,7 @@ const Row = styled.View`
 
 const TopBar = styled.KeyboardAvoidingView`
   height: ${() => (Platform.OS == "ios" ? `${height * 0.15 + 54}px` : "100px")};
-  margin-top: ${() => (Platform.OS == "ios" ? "" : "54px")};
+  margin-top: ${() => (Platform.OS == "ios" ? "0" : "54px")};
   background: white;
   box-shadow: 2px 2px 2px #dcdcdc;
   z-index: 3;
