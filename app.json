@@ -17,7 +17,10 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "com.example.contractor-app",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "config": {
+        "googleMapsApiKey": "AIzaSyB8xVAMRa2hoq8lRXEG1wXG3v2yR1KkHsQ"
+      }
     },
     "sdkVersion": "37.0.0"
   }
