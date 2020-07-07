@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "appname-mobile",
-    "slug": "appname-mobile",
+    "name": "contractor-app",
+    "slug": "contractor-app",
     "platforms": ["ios", "android", "web"],
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,7 +16,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "bundleIdentifier": "com.example.bremen-contracting",
+      "bundleIdentifier": "com.example.contractor-app",
       "supportsTablet": false
     },
     "sdkVersion": "37.0.0"
