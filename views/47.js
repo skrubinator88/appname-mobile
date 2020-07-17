@@ -29,32 +29,32 @@ class Screen47 extends Component {
     DATA: [
       {
         id: "1",
-        image: "./assets/cheems2.jpg",
+        image: "../assets/cheems2.jpg",
         title: "Great Task Management",
       },
       {
         id: "2",
-        image: "./assets/cheems2.jpg",
+        image: "../assets/cheems2.jpg",
         title: "Excellent Service",
       },
       {
         id: "3",
-        image: "./assets/cheems2.jpg",
+        image: "../assets/cheems2.jpg",
         title: "Excellent Negotiator",
       },
       {
         id: "4",
-        image: "./assets/cheems2.jpg",
+        image: "../assets/cheems2.jpg",
         title: "Great Task Management",
       },
       {
         id: "5",
-        image: "./assets/cheems2.jpg",
+        image: "../assets/cheems2.jpg",
         title: "Great Task Management",
       },
       {
         id: "6",
-        image: "./assets/cheems2.jpg",
+        image: "../assets/cheems2.jpg",
         title: "Great Task Management",
       },
     ],
@@ -75,17 +75,15 @@ class Screen47 extends Component {
     Alert.alert("Confirm");
   };
 
-
   Problem = () => {
     Alert.alert("Problem");
   };
   render() {
-
     function Item({ title, image }) {
       return (
         
           <LicResult>
-            <CompImage source={require("./assets/cheems2.jpg")} />
+            <CompImage source={require("../assets/cheems2.jpg")} />
             <TextResult style={{ color: "black", width: 120 }}>
               {title}
             </TextResult>
@@ -96,14 +94,11 @@ class Screen47 extends Component {
 
     return (
       <KeyboardAvoidingView behavior="padding" enabled style={{ flex: 1 }}>
-         
-      
-       
           <Container> 
-            
+
             <ContainerTop>{/* aqui va el header */}</ContainerTop>
             <Fields>
-              <UserImage source={require("./assets/cheems2.jpg")} />
+              <UserImage source={require("../assets/cheems2.jpg")} />
               <TextStyledContent>Jhon Doe</TextStyledContent>
               <TextResult>Company Co. LLC</TextResult>
               <RateBox>
@@ -135,19 +130,20 @@ class Screen47 extends Component {
             </Fields>
             <BtnContainer>
               <TextField style={{ margin: 0 }} placeholder="Leave a comment" />
-              <Text style={{ textAlign: 'center', marginTop: 30, marginBottom:20  }} onPress={this.Problem}>Had any issues?</Text>
-              
+              <Text
+                style={{ textAlign: "center", marginTop: 30, marginBottom: 20 }}
+                onPress={this.Problem}
+              >
+                Had any issues?
+              </Text>
+
               <StyledBtn title={"Confirm"} onPress={this.Confirm} />
             </BtnContainer>
-         
           </Container>
-       
-        
-       
       </KeyboardAvoidingView>
     );
   }
-} 
+}
 
 const StyledBtn = styled.Button`
   background: #3869f3;
@@ -191,8 +187,8 @@ const Container = styled.View`
 `;
 const BtnContainer = styled.View`
   margin-left: 30px;
-  margin-right:30px;
-  margin-top:0px;
+  margin-right: 30px;
+  margin-top: 0px;
 `;
 
 const ContainerTop = styled.View`

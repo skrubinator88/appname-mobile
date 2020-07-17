@@ -1,17 +1,13 @@
 import React from "react";
+import { getStatusBarHeight } from "react-native-status-bar-height";
 
-import {
-  Platform,
-  SafeAreaView,
-  Dimensions,
-  View,
-  ScrollView,
-} from "react-native";
+import { Platform, SafeAreaView, Dimensions, View, ScrollView } from "react-native";
 import styled from "styled-components/native";
 import * as VectorIcons from "@expo/vector-icons";
 
 const isIos = Platform.OS === "ios";
 const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
+const statusBarHeight = getStatusBarHeight();
 
 export default function Header({
   // Navigation
@@ -85,25 +81,27 @@ export default function Header({
   }
 
   // Structure
-
   return (
     <ScrollView
-      contentInset={{ top: -SPACER_SIZE + 45, bottom: -SPACER_SIZE - 20 }}
-      contentOffset={{ y: SPACER_SIZE - 80 }}
+      contentInset={{
+        top: -SPACER_SIZE + statusBarHeight,
+        bottom: -SPACER_SIZE + statusBarHeight,
+      }}
+      contentOffset={{ y: SPACER_SIZE - statusBarHeight }}
       style={{ backgroundColor: background }}
     >
       {isIos && (
         <View
-          style={{ height: SPACER_SIZE, backgroundColor: headerBackground }}
+          style={{
+            height: SPACER_SIZE,
+            backgroundColor: headerBackground,
+          }}
         />
       )}
       <SafeAreaView style={{ backgroundColor: headerBackground }}>
         <Container>
           <Column back>
-            <Text
-              style={{ color: backColor || color }}
-              onPress={() => navigation.goBack()}
-            >
+            <Text style={{ color: backColor || color }} onPress={() => navigation.goBack()}>
               {handleBackButton()}
             </Text>
           </Column>
@@ -113,10 +111,7 @@ export default function Header({
           </Column>
 
           <Column next>
-            <Text
-              style={{ color: nextColor || color, fontWeight: "700" }}
-              onPress={nextAction}
-            >
+            <Text style={{ color: nextColor || color, fontWeight: "700" }} onPress={nextAction}>
               {handleNextButton()}
             </Text>
           </Column>
@@ -126,18 +121,16 @@ export default function Header({
       {/* Childrens */}
       {children}
 
-      {isIos && (
-        <View style={{ height: SPACER_SIZE, backgroundColor: endBackground }} />
-      )}
+      {isIos && <View style={{ height: SPACER_SIZE, backgroundColor: endBackground }} />}
     </ScrollView>
   );
 }
 
 // Styles
 const Container = styled.View`
-  flex: 1;
-  margin-top: ${() => (Platform.OS == "ios" ? "1%" : "6%")};
-  margin-bottom: 10%;
+  /* flex: 1; */
+  margin-top: ${Platform.OS == "android" ? `${statusBarHeight}px` : "0px"};
+  padding: 10px;
   flex-direction: row;
 `;
 

@@ -7,12 +7,12 @@ import { createStackNavigator } from "@react-navigation/stack";
 export const HelpStack = createStackNavigator();
 
 // import pages
-import { HelpScreen } from ".";
+import HelpScreen from ".";
 
 export function HelpStackScreen() {
   return (
     <HelpStack.Navigator>
-      <HelpStack.Screen name="Help" component={HelpScreen} />
+      <HelpStack.Screen name="Help Center" component={HelpScreen} />
     </HelpStack.Navigator>
   );
 }

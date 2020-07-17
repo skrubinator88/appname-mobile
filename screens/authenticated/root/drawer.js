@@ -1,71 +1,69 @@
 // IMPORT
 import React, { useState, useEffect, useContext } from "react";
 import { useTheme } from "@react-navigation/native";
-import { View, SafeAreaView } from "react-native";
+import { View, SafeAreaView, Alert, TouchableWithoutFeedback } from "react-native";
 import styled from "styled-components/native";
 import { FontAwesome, MaterialIcons, Entypo } from "@expo/vector-icons";
 
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import {
-  DrawerContentScrollView,
-  DrawerItem,
-  DrawerItemList,
-} from "@react-navigation/drawer";
+import { DrawerContentScrollView, DrawerItem, DrawerItemList } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
-export const AuthenticatedDrawer = createDrawerNavigator();
 
-// pages
-import { RootScreen } from "./index";
-import { ProfileStackScreen } from "../profile/";
-import { HelpScreen } from "../helpScreen/";
+export const AuthenticatedDrawer = createDrawerNavigator();
 
 import { AuthContext } from "../../../components/context/";
 
-function DrawerContent(props) {
+function DrawerContent({ navigation }) {
   const { colors } = useTheme();
   const { signOut } = useContext(AuthContext);
 
   return (
     <View style={{ flex: 1 }}>
       <DrawerHeader style={{ backgroundColor: colors.primary }}>
-        <Row>
-          <Column>
-            <ProfilePicture
-              source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }} // fetch from server
-            />
-          </Column>
-          <Column>
-            <Text title>John Doe</Text>
-            <Text medium bold>
-              <FontAwesome name="star" size={17} color="white" /> 4.01
-            </Text>
-          </Column>
-        </Row>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            navigation.navigate("Profile");
+          }}
+        >
+          <Row>
+            <Column>
+              <ProfilePicture
+                source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }} // fetch from server
+              />
+            </Column>
+            <Column>
+              <Text title>John Doe</Text>
+              <Text medium bold>
+                <FontAwesome name="star" size={17} color="white" /> 4.01
+              </Text>
+            </Column>
+          </Row>
+        </TouchableWithoutFeedback>
       </DrawerHeader>
       <DrawerContentScrollView>
         <DrawerItem
           labelStyle={{ fontSize: 20 }}
           label="Payment"
-          onPress={() => {}}
+          onPress={() => navigation.navigate("Payment")}
           icon={() => <Entypo name="wallet" size={24} color="black" />}
         />
         <DrawerItem
           labelStyle={{ fontSize: 20 }}
           label="Work History"
-          onPress={() => {}}
+          onPress={() => navigation.navigate("Work History")}
           icon={() => <MaterialIcons name="history" size={24} color="black" />}
         />
         <Divider />
         <DrawerItem
           labelStyle={{ fontSize: 20 }}
           label="Help Center"
-          onPress={() => {}}
+          onPress={() => Alert.alert("Work in Progress", "Section still in development")}
           icon={() => <MaterialIcons name="help" size={24} color="black" />}
         />
         <DrawerItem
           labelStyle={{ fontSize: 20 }}
           label="Settings"
-          onPress={() => {}}
+          onPress={() => navigation.navigate("Settings")}
           icon={() => <MaterialIcons name="settings" size={24} color="black" />}
         />
       </DrawerContentScrollView>
@@ -74,9 +72,7 @@ function DrawerContent(props) {
           labelStyle={{ fontSize: 20 }}
           label="Sign Out"
           onPress={() => signOut()}
-          icon={() => (
-            <MaterialIcons name="exit-to-app" size={24} color="black" />
-          )}
+          icon={() => <MaterialIcons name="exit-to-app" size={24} color="black" />}
         />
       </SafeAreaView>
     </View>
@@ -134,18 +130,22 @@ const ProfilePicture = styled.Image`
   border-radius: 60px;
 `;
 
+// Screens
+import { RootScreen } from "./index";
+import PaymentScreen from "../payment";
+import SettingsScreen from "../settings";
+import ProfileScreen from "../profile";
+
 export function Drawer() {
   return (
     <NavigationContainer independent={true}>
-      <AuthenticatedDrawer.Navigator
-        drawerContent={(props) => <DrawerContent {...props} />}
-      >
-        <AuthenticatedDrawer.Screen name="Home" component={RootScreen} />
-        <AuthenticatedDrawer.Screen
-          name="Profile"
-          component={ProfileStackScreen}
-        />
-        {/* <AuthenticatedDrawer.Screen name="Help" component={HelpStackScreen} /> */}
+      <AuthenticatedDrawer.Navigator drawerContent={(props) => <DrawerContent {...props} />}>
+        <AuthenticatedDrawer.Screen name="Root" component={RootScreen} />
+        <AuthenticatedDrawer.Screen name="Profile" component={ProfileScreen} />
+        <AuthenticatedDrawer.Screen name="Payment" component={PaymentScreen} />
+        <AuthenticatedDrawer.Screen name="Work History" component={RootScreen} />
+        <AuthenticatedDrawer.Screen name="Help Center" component={RootScreen} />
+        <AuthenticatedDrawer.Screen name="Settings" component={SettingsScreen} />
       </AuthenticatedDrawer.Navigator>
     </NavigationContainer>
   );

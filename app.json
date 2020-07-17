@@ -1,12 +1,8 @@
 {
   "expo": {
-    "name": "appname-mobile",
-    "slug": "appname-mobile",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "name": "contractor-app",
+    "slug": "contractor-app",
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,11 +14,13 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.example.contractor-app",
+      "supportsTablet": false,
+      "config": {
+        "googleMapsApiKey": "AIzaSyB8xVAMRa2hoq8lRXEG1wXG3v2yR1KkHsQ"
+      }
     },
     "sdkVersion": "37.0.0"
   }

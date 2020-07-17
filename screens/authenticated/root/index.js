@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Platform,
-  Dimensions,
-} from "react-native";
+import { View, TouchableWithoutFeedback, Keyboard, Platform, Dimensions } from "react-native";
 
 import styled from "styled-components/native";
 
@@ -21,7 +15,7 @@ import MapView, { Marker } from "react-native-maps";
 import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const { height } = Dimensions.get("window");
+const { height } = Dimensions.get("screen");
 
 const handleImage = (imageType) => {
   switch (imageType) {
@@ -31,10 +25,13 @@ const handleImage = (imageType) => {
   }
 };
 
+const handleUIChange = (e) => {
+  console.log(e);
+};
+
 export function RootScreen({ navigation }) {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
-  const [singlePageViewRoute, setSinglePageViewRoute] = useState("dashboard");
   const [searching, setSearching] = useState(false);
 
   let initialCameraSettings;
@@ -107,54 +104,43 @@ export function RootScreen({ navigation }) {
 
   if (location != null) {
     return (
-      <TouchableWithoutFeedback
-        onPress={() => {
-          Keyboard.dismiss();
-        }}
-      >
-        <Container>
-          <MapView
-            onTouchStart={() => {
-              Keyboard.dismiss();
-            }}
-            // Common
-            customMapStyle={mapStyle}
-            provider="google"
-            // maxZoomLevel={18} // 18
-            // minZoomLevel={9} // 9
-            showsMyLocationButton={false}
-            showsPointsOfInterest={false}
-            showsCompass={false}
-            showsTraffic={false}
-            initialCamera={initialCameraSettings}
-            camera={initialCameraSettings}
-            // iOS
-            showsUserLocation={true}
-            // Android
+      // <TouchableWithoutFeedback
+      //   onPress={() => {
+      //     Keyboard.dismiss();
+      //   }}
+      // >
+      <Container>
+        <MapView
+          onTouchStart={() => {
+            Keyboard.dismiss();
+          }}
+          // Common
+          customMapStyle={mapStyle}
+          provider="google"
+          // maxZoomLevel={18} // 18
+          // minZoomLevel={9} // 9
+          showsMyLocationButton={false}
+          showsPointsOfInterest={false}
+          showsCompass={false}
+          showsTraffic={false}
+          initialCamera={initialCameraSettings}
+          camera={initialCameraSettings}
+          // iOS
+          showsUserLocation={true}
+          // Android
 
-            // Other props
-            style={{ height }}
-          >
-            {jobPostings.map(
-              ({ title, description, coordinate, id, image }) => (
-                <Marker
-                  key={id}
-                  title={title}
-                  description={description}
-                  coordinate={coordinate}
-                  icon={handleImage(image)}
-                ></Marker>
-              )
-            )}
-          </MapView>
+          // Other props
+          style={{ height }}
+        >
+          {jobPostings.map(({ title, description, coordinate, id, image }) => (
+            <Marker key={id} title={title} description={description} coordinate={coordinate} icon={handleImage(image)}></Marker>
+          ))}
+        </MapView>
 
-          {/* UI */}
-          <HandleUIComponents
-            screen={singlePageViewRoute}
-            navigation={navigation}
-          />
-        </Container>
-      </TouchableWithoutFeedback>
+        {/* UI */}
+        <HandleUIComponents navigation={navigation} onUIChange={handleUIChange} />
+      </Container>
+      // </TouchableWithoutFeedback>
     );
   } else {
     return <View></View>;
@@ -164,58 +150,4 @@ export function RootScreen({ navigation }) {
 // STYLES
 const Container = styled.View`
   flex: 1;
-`;
-
-const Row = styled.View`
-  flex-direction: row;
-  justify-content: ${({ first, last }) => {
-    switch (true) {
-      case first:
-        return "space-between";
-      case last:
-        return "space-around";
-      default:
-        return "flex-start";
-    }
-  }};
-  /* justify-content:  */
-  margin: ${(props) => {
-    if (props.first) {
-      return "30px 10px 0 10px";
-    } else if (props.last) {
-      // return `20px 10px 50px 10px`;
-      return "30px 10px 0 10px";
-    } else {
-      return "0px 0px";
-    }
-  }};
-  padding: 0 30px;
-  border-bottom-color: #eaeaea;
-  border-bottom-width: ${(props) => (props.last ? "0px" : "1px")};
-`;
-
-const Text = styled.Text`
-  margin: 5px 0;
-  ${({ title, medium, small }) => {
-    switch (true) {
-      case title:
-        return `font-size: 22px`;
-
-      case medium:
-        return `font-size: 20px`;
-
-      case small:
-        return `font-size: 39px`;
-    }
-  }}
-
-  ${({ bold, light }) => {
-    switch (true) {
-      case bold:
-        return `font-weight: 800`;
-
-      case light:
-        return `font-weight: 300; color: #999;`;
-    }
-  }}
 `;
