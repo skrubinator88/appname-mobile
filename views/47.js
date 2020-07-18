@@ -81,21 +81,21 @@ class Screen47 extends Component {
   render() {
     function Item({ title, image }) {
       return (
-        <Margin>
+        
           <LicResult>
             <CompImage source={require("../assets/cheems2.jpg")} />
             <TextResult style={{ color: "black", width: 120 }}>
               {title}
             </TextResult>
           </LicResult>
-        </Margin>
+     
       );
     }
 
     return (
       <KeyboardAvoidingView behavior="padding" enabled style={{ flex: 1 }}>
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-          <Container>
+          <Container> 
+
             <ContainerTop>{/* aqui va el header */}</ContainerTop>
             <Fields>
               <UserImage source={require("../assets/cheems2.jpg")} />
@@ -117,7 +117,8 @@ class Screen47 extends Component {
                   Give a compliment
                 </TextResult>
 
-                <FlatList
+                <FlatList     style={{marginLeft:50, marginRight:50 }}
+                showsHorizontalScrollIndicator={false}
                   horizontal={true}
                   data={this.state.DATA}
                   renderItem={({ item }) => (
@@ -139,7 +140,6 @@ class Screen47 extends Component {
               <StyledBtn title={"Confirm"} onPress={this.Confirm} />
             </BtnContainer>
           </Container>
-        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     );
   }
@@ -175,7 +175,7 @@ const LicResult = styled.View`
 `;
 
 const RateBox = styled.View`
-  margin: 20px;
+  margin: 10px;
   padding: 10px;
   margin-top: 5px;
 `;
@@ -190,10 +190,6 @@ const BtnContainer = styled.View`
   margin-right: 30px;
   margin-top: 0px;
 `;
-const Margin = styled.View`
-  margin-left: 50px;
-  margin-right: 50px;
-`;
 
 const ContainerTop = styled.View`
   flex: 0.6;
@@ -201,7 +197,7 @@ const ContainerTop = styled.View`
 `;
 
 const ResultBox = styled.View`
-  margin: 20px;
+  margin: 0px;
   margin-top: 1px;
   justify-content: center;
   align-items: center;
@@ -215,7 +211,7 @@ const ResultBox = styled.View`
 
 const TextStyledContent = styled.Text`
   text-align: center;
-  margin-top: 10px;
+  margin-top: 0px;
   font-weight: bold;
   font-size: ${() => (Platform.OS == "ios" ? "25px" : "20px")};
 `;
