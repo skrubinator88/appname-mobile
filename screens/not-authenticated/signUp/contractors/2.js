@@ -1,150 +1,171 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useTheme } from "@react-navigation/native";
 
-import {
-  Text,
-  Alert,
-  TouchableWithoutFeedback,
-  TextInput,
-  View,
-  Keyboard,
-  ScrollView,
-} from "react-native";
-
-import {
-  TextField,
-  FilledTextField,
-  OutlinedTextField,
-} from "react-native-material-textfield";
-
-import CheckBox from "@react-native-community/checkbox";
-
-import { Platform } from "react-native";
+import { Platform, TouchableWithoutFeedback, Keyboard, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
+import { AntDesign } from "@expo/vector-icons";
 
 // Components
 import Header from "../../../../components/header";
 
 export function SignUpContractorScreen2({ navigation }) {
-  const [phone, setPhone] = useState("");
-  const [toggleCheckBox, setToggleCheckBox] = useState(false);
-  let fieldRef = React.createRef();
+  const { colors } = useTheme();
+  const [firstInput, setFirstInput] = useState("");
+  const [secondInput, setSecondInput] = useState("");
+  const [thirdInput, setThirdInput] = useState("");
+
+  let firstTextInput;
+  let secondTextInput;
+  let thirdTextInput;
+
+  const handleRef = (input, inputPosNumber) => {
+    switch (inputPosNumber) {
+      case 1:
+        firstTextInput = input;
+        break;
+      case 2:
+        secondTextInput = input;
+        break;
+      case 3:
+        thirdTextInput = input;
+        break;
+    }
+  };
+
+  const handleChange = (text, inputPosNumber, maxLength) => {
+    if (text.length == maxLength) {
+      switch (inputPosNumber) {
+        case 1:
+          setFirstInput(text);
+          secondTextInput.focus();
+          break;
+        case 2:
+          if (secondInput.length == 1 && text.length == 0) {
+            firstTextInput.focus();
+          }
+          setSecondInput(text);
+          thirdTextInput.focus();
+          break;
+        case 3:
+          if (thirdInput.length == 1 && text.length == 0) {
+            secondTextInput.focus();
+          }
+          setThirdInput(text);
+          break;
+      }
+    }
+
+    if (text.length == 0) {
+      switch (inputPosNumber) {
+        case 2:
+          setSecondInput(text);
+          firstTextInput.focus();
+          break;
+        case 3:
+          setThirdInput(text);
+          secondTextInput.focus();
+          break;
+      }
+    }
+  };
+
+  const handleSettingsProps = (inputPosNumber, maxLength) => {
+    return {
+      maxLength: maxLength,
+      underlineColorAndroid: "transparent",
+      keyboardType: "numeric",
+      ref: (input) => {
+        handleRef(input, inputPosNumber);
+      },
+      onChange: (e) => {
+        handleChange(e.nativeEvent.text, inputPosNumber, maxLength);
+      },
+      onSubmitEditing: () => {
+        handleSubmit();
+      },
+    };
+  };
+
+  const handleSubmit = (e) => {
+    if (firstInput.length + secondInput.length + thirdInput.length != 10) {
+      console.log("asd");
+      return;
+    }
+
+    // Send phone number to backend
+    const phoneNumber = `(${firstInput}) ${secondInput}-${thirdInput}`;
+    navigation.navigate("SignUpContractor3");
+  };
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <SafeAreaView style={{ flex: 1 }}>
         <Container>
-          <Header
-            navigation={navigation}
-            backTitle="Cancel"
-            title="Add Work"
-            nextTitle="Save"
-            nextColor="#548ff7"
-            nextAction={() => navigation.navigate("SignUpContractor2")}
-          />
+          <Header navigation={navigation} />
 
-          <Fields>
-            <TextField label="Employer Name" />
+          <ContainerTopMiddle>
+            <TextStyled>For authentication purposes, what is your phone number?</TextStyled>
 
-            <TextField label="Phone Number" keyboardType="phone-pad" />
+            <ContainerMiddle>
+              <TextInputStyled {...handleSettingsProps(1, 3)} />
+              <TextInputStyled {...handleSettingsProps(2, 3)} />
+              <TextInputStyled {...handleSettingsProps(3, 4)} />
+            </ContainerMiddle>
 
-            <TextField label="Address" />
-            <Text
-              style={{
-                fontSize: 15,
-                textAlign: "center",
-                margin: 8,
-                fontWeight: "bold",
-              }}
-            ></Text>
-          </Fields>
-          <View style={{ backgroundColor: "#F2F2F2", height: 50 }}></View>
-          <FieldsTwo>
-            <TextField label="Supervisor Name" />
-
-            <TextField label="Supervisor Title" />
-            <TextField label="Position Title" />
-            <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>
-              DATE STARTED
-            </Text>
-            <TextInput
-              style={{
-                borderWidth: 1,
-                padding: 8,
-                borderRadius: 10,
-                marginTop: 10,
-              }}
-            />
-            <View
-              style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
-            >
-              <Text style={{ marginTop: 10, fontSize: 20 }}>
-                I am a currently working here
-              </Text>
-              {/* <CheckBox
-                style={{ marginLeft: 11, marginTop: 10 }}
-                value={toggleCheckBox}
-                onValueChange={() =>
-                  toggleCheckBox
-                    ? setToggleCheckBox(false)
-                    : setToggleCheckBox(true)
-                }
-              /> */}
-            </View>
-            <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>
-              DATE ENDED
-            </Text>
-            <TextInput
-              style={{
-                borderWidth: 1,
-                padding: 8,
-                borderRadius: 10,
-                marginTop: 10,
-              }}
-            />
-            <TextField label="Salary" style={{ width: 10 }} />
-
-            <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>
-              BRIEF DESCRIPTION OF TASKS
-            </Text>
-            <TextInput
-              style={{
-                borderWidth: 1,
-                padding: 8,
-                borderRadius: 10,
-                marginTop: 10,
-                height: 200,
-              }}
-            />
-          </FieldsTwo>
+            <ButtonStyled onPress={(e) => handleSubmit(e)} style={{ backgroundColor: colors.primary }}>
+              <Text style={{ color: "white" }}>Continue</Text>
+            </ButtonStyled>
+          </ContainerTopMiddle>
         </Container>
-      </ScrollView>
+      </SafeAreaView>
     </TouchableWithoutFeedback>
   );
 }
 
-const Fields = styled.View`
-  flex: 0.4;
-
-  margin: 20px;
+const TextInputStyled = styled.TextInput`
+  margin: 10px;
+  border: black;
+  border-radius: 1px;
+  text-align: center;
+  height: 50px;
+  width: 70px;
+  font-size: 23px;
 `;
-const FieldsTwo = styled.View`
-  flex: 0.5;
 
-  margin: 20px;
+const ButtonStyled = styled.TouchableOpacity`
+  padding: 15px;
+  width: 80%;
+  border-radius: 6px;
+  margin: 0 auto;
+  align-items: center;
+  justify-content: center;
 `;
 
 const Container = styled.View`
   flex: 1;
 `;
-
-const ContainerTop = styled.View`
-  margin-top: 50px;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
+const Text = styled.Text`
+  font-size: 20px;
 `;
 
-const TextStyledTittle = styled.Text`
-  text-align: center;
-  font-size: ${() => (Platform.OS == "ios" ? "25px" : "28px")};
+const ContainerMiddle = styled.View`
+  align-items: center;
+  margin: 50px;
+  justify-content: center;
+  flex-direction: row;
+`;
+
+const ContainerTop = styled.View`
+  margin-top: ${() => (Platform.OS == "ios" ? "40px" : "70px")};
+  margin-left: 30px;
+`;
+const ContainerTopMiddle = styled.View`
+  flex: 1;
+  padding: 20px;
+  padding-left: 20px;
+`;
+
+const TextStyled = styled.Text`
+  margin: 20px 0;
+  font-size: 31px;
 `;

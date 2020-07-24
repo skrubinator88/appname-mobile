@@ -1,12 +1,6 @@
 import React from "react";
 
-import {
-  Platform,
-  SafeAreaView,
-  Dimensions,
-  View,
-  ScrollView,
-} from "react-native";
+import { Platform, SafeAreaView, Dimensions, View, ScrollView } from "react-native";
 import styled from "styled-components/native";
 import * as VectorIcons from "@expo/vector-icons";
 
@@ -84,16 +78,21 @@ export default function Header({
     }
   }
 
+  function handleBackAction() {
+    if (backTitle == " ") {
+      return "";
+    } else {
+      return navigation.goBack();
+    }
+  }
+
   // Structure
 
   return (
     <SafeAreaView style={{ backgroundColor: headerBackground }}>
       <Container>
         <Column back>
-          <Text
-            style={{ color: backColor || color }}
-            onPress={() => navigation.goBack()}
-          >
+          <Text style={{ color: backColor || color }} onPress={() => handleBackAction()}>
             {handleBackButton()}
           </Text>
         </Column>
@@ -103,10 +102,7 @@ export default function Header({
         </Column>
 
         <Column next>
-          <Text
-            style={{ color: nextColor || color, fontWeight: "700" }}
-            onPress={nextAction}
-          >
+          <Text style={{ color: nextColor || color, fontWeight: "700" }} onPress={nextAction}>
             {handleNextButton()}
           </Text>
         </Column>

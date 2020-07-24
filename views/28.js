@@ -1,20 +1,11 @@
 import React, { Component } from "react";
 
-import {
-  Text,
-  CheckBox,
-  Alert,
-  TouchableWithoutFeedback,
-  TextInput,
-  View,
-  Keyboard,
-  ScrollView,
-  FlatList,
-} from "react-native";
+import { Alert, TouchableWithoutFeedback, TextInput, FlatList } from "react-native";
+import Header from "../components/header";
 
 import { Platform } from "react-native";
 import styled from "styled-components/native";
-import { AntDesign } from "@expo/vector-icons";
+import Text from "../components/text";
 
 class contractorApp extends Component {
   state = {
@@ -90,50 +81,42 @@ class contractorApp extends Component {
     }
 
     return (
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <>
+        <Header
+          navigation={true}
+          title="Licenses"
+          nextTitle="Save"
+          nextColor="#548ff7"
+          nextAction={() => navigation.navigate("SignUpContractor2")}
+        />
         <Container>
-          <ContainerTop>{/* aqui va el header */}</ContainerTop>
-          <Fields>
-            <TextStyledContent>
-              Begin typing a licence name and select it from the suggestions. if
-              you don't see your licence type, select other.
-            </TextStyledContent>
-            <SearchBox>
-              <TextInput
-                style={{ marginLeft: 40, fontSize: 20 }}
-                placeholder="Search licenses"
-                lightTheme
-                leftIconContainerStyle
-                onChangeText={this.updateSearch}
-                value={search}
-              ></TextInput>
-            </SearchBox>
+          <Text align={"center"} small>
+            Begin typing a licence name and select it from the suggestions. if you don't see your licence type, select other.
+          </Text>
+          <SearchBox>
+            <TextInput
+              style={{ marginLeft: 40, fontSize: 17 }}
+              placeholder="Search licenses"
+              lightTheme
+              leftIconContainerStyle
+              onChangeText={this.updateSearch}
+              value={search}
+            ></TextInput>
+          </SearchBox>
 
-            <ResultBox>
-              <FlatList
-                data={this.state.DATA}
-                renderItem={({ item }) => (
-                  <Item
-                    title={item.title}
-                    licNum={item.licNum}
-                    date={item.date}
-                    expires={item.expires}
-                  />
-                )}
-                keyExtractor={(item) => item.id}
-              />
-            </ResultBox>
-          </Fields>
+          <ResultBox>
+            <FlatList
+              data={this.state.DATA}
+              renderItem={({ item }) => <Item title={item.title} licNum={item.licNum} date={item.date} expires={item.expires} />}
+              keyExtractor={(item) => item.id}
+            />
+          </ResultBox>
         </Container>
-      </TouchableWithoutFeedback>
+      </>
     );
   }
 }
 
-const Fields = styled.View`
-  flex: 0.4;
-  margin: 20px;
-`;
 const LicResult = styled.View`
   border-width: 1px;
   border-left-width: 0px;
@@ -146,38 +129,26 @@ const LicResult = styled.View`
 `;
 
 const SearchBox = styled.View`
-  margin: 20px;
+  margin: 20px 0;
   border-width: 1px;
-  padding: 10px;
-  border-radius: 20px;
-  margin-top: 40px;
+  padding: 7px;
+  border-radius: 50px;
   border-color: #e0e0e0;
 `;
 
 const Container = styled.View`
+  margin: 20px 30px 0 30px;
   flex: 1;
 `;
 
-const ContainerTop = styled.View`
-  flex: 0.15;
-  background: red;
-`;
-
 const ResultBox = styled.View`
-  margin: 20px;
-  margin-top: 10px;
   background: #f3f3f3;
-`;
-
-const TextStyledContent = styled.Text`
-  text-align: center;
-  font-size: ${() => (Platform.OS == "ios" ? "25px" : "20px")};
+  flex: 1;
 `;
 
 const TextResult = styled.Text`
   margin-left: 10px;
   color: #a5a5a5;
-  font-size: ${() => (Platform.OS == "ios" ? "25px" : "17px")};
 `;
 
 export default contractorApp;

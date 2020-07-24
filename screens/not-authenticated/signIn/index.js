@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "@react-navigation/native";
 
-import {
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
-  SafeAreaView,
-} from "react-native";
+import { Platform, TouchableWithoutFeedback, Keyboard, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
 
@@ -117,10 +112,7 @@ export function SignInScreen({ navigation }) {
               <TextInputStyled {...handleSettingsProps(3, 4)} />
             </ContainerMiddle>
 
-            <ButtonStyled
-              onPress={(e) => handleSubmit(e)}
-              style={{ backgroundColor: colors.primary }}
-            >
+            <ButtonStyled onPress={(e) => handleSubmit(e)} style={{ backgroundColor: colors.primary }}>
               <Text style={{ color: "white" }}>Continue</Text>
             </ButtonStyled>
           </ContainerTopMiddle>
@@ -167,6 +159,7 @@ const ContainerTop = styled.View`
   margin-top: ${() => (Platform.OS == "ios" ? "40px" : "70px")};
   margin-left: 30px;
 `;
+
 const ContainerTopMiddle = styled.View`
   flex: 1;
   padding: 20px;

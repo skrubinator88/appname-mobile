@@ -1,21 +1,8 @@
 import React, { Component } from "react";
 
-import {
-  Text,
- CheckBox,
-  Alert,
-  TouchableWithoutFeedback,
-  TextInput,
-  View,
-  Keyboard,
-  ScrollView,
-} from "react-native";
+import { Text, CheckBox, Alert, TouchableWithoutFeedback, TextInput, View, Keyboard, ScrollView } from "react-native";
 
-import {
-  TextField,
-  FilledTextField,
-  OutlinedTextField,
-} from "react-native-material-textfield";
+import { TextField, FilledTextField, OutlinedTextField } from "react-native-material-textfield";
 
 import { Platform } from "react-native";
 import styled from "styled-components/native";
@@ -52,19 +39,11 @@ class contractorApp extends Component {
         <ScrollView showsVerticalScrollIndicator={false}>
           <Container>
             <ContainerTop>
-              <TextStyledTittle
-                style={{ fontSize: 20 }}
-                onPress={(e) => Cancel(e)}
-              >
+              <TextStyledTittle style={{ fontSize: 20 }} onPress={(e) => Cancel(e)}>
                 Cancel
               </TextStyledTittle>
-              <TextStyledTittle style={{ marginLeft: 50, marginRight: 50 }}>
-                Add Work
-              </TextStyledTittle>
-              <TextStyledTittle
-                style={{ fontSize: 20, fontWeight: "bold", color: "#1c55ef" }}
-                onPress={(e) => Save(e)}
-              >
+              <TextStyledTittle style={{ marginLeft: 50, marginRight: 50 }}>Add Work</TextStyledTittle>
+              <TextStyledTittle style={{ fontSize: 20, fontWeight: "bold", color: "#1c55ef" }} onPress={(e) => Save(e)}>
                 Save
               </TextStyledTittle>
             </ContainerTop>
@@ -91,11 +70,7 @@ class contractorApp extends Component {
 
               <TextField label="Supervisor Title" />
               <TextField label="Position Title" />
-              <Text
-                style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}
-              >
-                DATE STARTED
-              </Text>
+              <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE STARTED</Text>
               <TextInput
                 style={{
                   borderWidth: 1,
@@ -104,15 +79,11 @@ class contractorApp extends Component {
                   marginTop: 10,
                 }}
               />
-             <View  style={{ flex: 1, flexDirection:"row", alignItems:"center" }}>
-             <Text  style={{  marginTop: 10, fontSize:20 }}>I am a currently working here</Text>
-              <CheckBox style={{  marginLeft: 11, marginTop: 10 }}/>
-             </View>
-             <Text
-                style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}
-              >
-                DATE ENDED
-              </Text>
+              <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
+                <Text style={{ marginTop: 10, fontSize: 20 }}>I am a currently working here</Text>
+                <CheckBox style={{ marginLeft: 11, marginTop: 10 }} />
+              </View>
+              <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE ENDED</Text>
               <TextInput
                 style={{
                   borderWidth: 1,
@@ -121,21 +92,16 @@ class contractorApp extends Component {
                   marginTop: 10,
                 }}
               />
-              <TextField label="Salary"style={{ width:10 }} />
+              <TextField label="Salary" style={{ width: 10 }} />
 
-              
-              <Text
-                style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}
-              >
-                BRIEF DESCRIPTION OF TASKS
-              </Text>
+              <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>BRIEF DESCRIPTION OF TASKS</Text>
               <TextInput
                 style={{
                   borderWidth: 1,
                   padding: 8,
                   borderRadius: 10,
                   marginTop: 10,
-                  height:200
+                  height: 200,
                 }}
               />
             </FieldsTwo>
@@ -157,7 +123,6 @@ const FieldsTwo = styled.View`
   margin: 20px;
 `;
 
-
 const Container = styled.View`
   flex: 1;
 `;
@@ -173,7 +138,5 @@ const TextStyledTittle = styled.Text`
   text-align: center;
   font-size: ${() => (Platform.OS == "ios" ? "25px" : "28px")};
 `;
-
-
 
 export default contractorApp;

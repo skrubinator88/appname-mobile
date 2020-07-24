@@ -14,11 +14,7 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 
-import {
-  TextField,
-  FilledTextField,
-  OutlinedTextField,
-} from "react-native-material-textfield";
+import { TextField, FilledTextField, OutlinedTextField } from "react-native-material-textfield";
 
 import { Platform } from "react-native";
 import styled from "styled-components/native";
@@ -80,14 +76,12 @@ class Screen49 extends Component {
         <Container>
           <ContainerTop>{/* aqui va el header */}</ContainerTop>
           <Fields>
-            <UserImage source={require("./assets/cheems2.jpg")} />
+            <UserImage source={require("../assets/cheems2.jpg")} />
             <TextStyledContent>Jhon Doe</TextStyledContent>
             <TextResult>Company Co. LLC</TextResult>
           </Fields>
           <RateBox>
-            <Text style={{ fontSize: 18, marginTop: 10, marginBottom: 10 }}>
-              Had any issues?
-            </Text>
+            <Text style={{ fontSize: 18, marginTop: 10, marginBottom: 10 }}>Had any issues?</Text>
 
             <FlatList
               contentContainerStyle={{ alignItems: "center" }}
@@ -110,10 +104,7 @@ class Screen49 extends Component {
           </RateBox>
 
           <ContainerInput>
-            <TextField
-              style={{ margin: 0 }}
-              placeholder="Please select at least one issue"
-            />
+            <TextField style={{ margin: 0 }} placeholder="Please select at least one issue" />
           </ContainerInput>
           <BtnContainer>
             <StyledBtn title={"Confirm"} onPress={this.Confirm} />
