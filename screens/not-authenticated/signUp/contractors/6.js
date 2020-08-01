@@ -5,82 +5,57 @@ import { useTheme } from "@react-navigation/native";
 
 import Header from "../../../../components/header";
 import Text from "../../../../components/text";
-import SchoolModal from "./schoolModal";
-import WorkModal from "./workModal";
+import LicenseModal from "./licenseModal";
 
 import { MaterialIcons } from "@expo/vector-icons";
 
-export function SignUpContractorScreen5({ navigation }) {
+export default function SignUpContractorScreen6({ navigation }) {
   const { colors } = useTheme();
-  const [schoolModalVisible, setSchoolModalVisible] = useState(false);
-  const [workModalVisible, setWorkModalVisible] = useState(false);
-  const handleSubmit = () => {
-    navigation.navigate("SignUpContractor6");
-  };
+  const [licenseModalVisible, setLicenseModalVisible] = useState(false);
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <>
-        <Header
-          navigation={navigation}
-          backTitle=""
-          nextTitle="Skip"
-          nextColor="grey"
-          nextAction={() => {
-            navigation.navigate("SignUpContractor6");
-          }}
-        />
+        <Header navigation={navigation} backTitle="" nextTitle="Skip" nextColor="grey" nextAction={() => {}} />
 
-        <SchoolModal
-          schoolModalVisible={schoolModalVisible}
-          onHandleCancel={() => {
-            setSchoolModalVisible(false);
-          }}
-          onHandleSave={() => {
-            setSchoolModalVisible(false);
-          }}
-        />
-
-        <WorkModal
-          navigation={navigation}
-          workModalVisible={workModalVisible}
-          onHandleCancel={() => {
-            setWorkModalVisible(false);
-          }}
-          onHandleSave={() => {
-            setWorkModalVisible(false);
-          }}
+        <LicenseModal
+          licenseModalVisible={licenseModalVisible}
+          onCancel={() => setLicenseModalVisible(false)}
+          onSave={() => setLicenseModalVisible(false)}
         />
 
         <ScrollView>
           <Container>
-            <Text align="center" title>
-              Provide your work and educational history
+            <Text align="center" title bold>
+              Skills & Licenses
+            </Text>
+            <Text align="center" medium>
+              We ask for this to enhance your experience with finding work that matches your abilities and permit
             </Text>
 
             <WorkHistorySection>
-              <Text small>WORK HISTORY</Text>
+              <Text small>SKILLS</Text>
               <AddButton
                 onPress={() => {
-                  setWorkModalVisible(true);
+                  navigation.navigate("AddSkills");
                 }}
               >
                 <Text small color="grey">
-                  Add a job
+                  Add a skill
                 </Text>
                 <MaterialIcons backgroundColor="white" color={colors.primary} name="add-circle" size={30} />
               </AddButton>
             </WorkHistorySection>
 
             <WorkHistorySection>
-              <Text small>EDUCATIONAL BACKGROUND</Text>
+              <Text small>LICENSES</Text>
               <AddButton
                 onPress={() => {
-                  setSchoolModalVisible(true);
+                  setLicenseModalVisible(true);
                 }}
               >
                 <Text small color="grey">
-                  Add a university/institute
+                  Add a license
                 </Text>
                 <MaterialIcons backgroundColor="white" color={colors.primary} name="add-circle" size={30} />
               </AddButton>

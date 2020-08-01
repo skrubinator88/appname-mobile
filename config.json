@@ -1,0 +1,8 @@
+{
+    "Development": {
+        "API_URL": "https://contractor-app-test-api.herokuapp.com"
+    },
+    "Production": {
+        "API_URL": "https://contractor-app-test-api.herokuapp.com"
+    }
+}

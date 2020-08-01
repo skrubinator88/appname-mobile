@@ -1,10 +1,7 @@
-import React from "react";
-import { View } from "react-native";
+import React, { useReducer, useEffect } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 
 export const RootStack = createStackNavigator();
-
-import { AntDesign } from "@expo/vector-icons";
 
 // Screens
 import { RootScreen } from "./index";
@@ -15,12 +12,26 @@ import { SignUpContractorsScreen } from "../signUp/contractors/";
 import { SignUpContractorScreen2 } from "../signUp/contractors/2";
 import { SignUpContractorScreen3 } from "../signUp/contractors/3";
 import { SignUpContractorScreen4 } from "../signUp/contractors/4";
+import { SignUpContractorScreen5 } from "../signUp/contractors/5";
+import SignUpContractorScreen6 from "../signUp/contractors/6";
+import AddSkills from "../signUp/contractors/addSkills";
 
 import { RegistrationContext } from "../../../components/context";
+import registrationReducer from "../../../reducers/registrationReducer";
 
 export function NotAuthenticatedStackScreen({ navigation }) {
+  const [registrationState, dispatch] = useReducer(registrationReducer, { formSended: false });
+  const registrationContext = React.useMemo(
+    () => ({
+      updateForm: (form, formSended_Boolean) => {
+        dispatch({ type: "UPDATE", form, formSended_Boolean });
+      },
+    }),
+    []
+  );
+
   return (
-    <RegistrationContext.Provider value={{}}>
+    <RegistrationContext.Provider value={{ registrationState, methods: registrationContext }}>
       <RootStack.Navigator headerMode="none">
         <RootStack.Screen name="Root" component={RootScreen} />
 
@@ -35,6 +46,9 @@ export function NotAuthenticatedStackScreen({ navigation }) {
         <RootStack.Screen name="SignUpContractor2" component={SignUpContractorScreen2} />
         <RootStack.Screen name="SignUpContractor3" component={SignUpContractorScreen3} />
         <RootStack.Screen name="SignUpContractor4" component={SignUpContractorScreen4} />
+        <RootStack.Screen name="SignUpContractor5" component={SignUpContractorScreen5} />
+        <RootStack.Screen name="SignUpContractor6" component={SignUpContractorScreen6} />
+        <RootStack.Screen name="AddSkills" component={AddSkills} />
 
         {/* <RootStack.Screen name="Sign Up" component={SignUpStackScreen} /> */}
       </RootStack.Navigator>

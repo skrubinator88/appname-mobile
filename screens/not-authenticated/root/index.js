@@ -3,27 +3,17 @@ import { Image, Alert } from "react-native";
 import styled from "styled-components/native";
 import { useTheme } from "@react-navigation/native";
 
-// Store
-import { AuthContext } from "../../../components/context";
-
-// import Example from "../../../views/25";
-
 export function RootScreen({ navigation }) {
-  const authContext = useContext(AuthContext);
   const { colors } = useTheme();
 
   return (
-    // <Example></Example>
     <Container>
       <ContainerLogo>
         <Image source={require("../../../assets/rootWallpaper.jpg")} />
       </ContainerLogo>
       <ContainerLogin>
         <ContainerLoginLeft>
-          <Button
-            onPress={() => navigation.navigate("SignIn")}
-            style={{ backgroundColor: colors.primary }}
-          >
+          <Button onPress={() => navigation.navigate("SignIn")} style={{ backgroundColor: colors.primary }}>
             <Text style={{ color: "white" }}>Sign In</Text>
           </Button>
         </ContainerLoginLeft>
@@ -50,11 +40,7 @@ const Container = styled.View`
 `;
 
 const Text = styled.Text`
-  /* font-size: ${() => (Platform.OS == "ios" ? "23px" : "17px")}; */
   ${({ small }) => {
-    // iPhone 5, 6 SE
-    // Small Android phones
-
     switch (true) {
       case small:
         return `font-size: 15px`;

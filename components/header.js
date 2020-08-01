@@ -24,6 +24,7 @@ export default function Header({
   backTitle = "",
   backSize = 30,
   backColor = "",
+  backAction = "",
 
   // Middle Section
   title = "",
@@ -38,7 +39,7 @@ export default function Header({
   children,
 }) {
   // @Required
-  if (!navigation) throw Error("navigation: Navigation is Required");
+  // if (!navigation) throw Error("navigation: Navigation is Required");
   if (nextTitle && !nextAction) throw Error("nextAction: Action is Required");
 
   function handleIcons(provider, properties) {
@@ -92,7 +93,7 @@ export default function Header({
     <SafeAreaView style={{ backgroundColor: headerBackground }}>
       <Container>
         <Column back>
-          <Text style={{ color: backColor || color }} onPress={() => handleBackAction()}>
+          <Text style={{ color: backColor || color }} onPress={backAction != "" ? backAction : () => handleBackAction()}>
             {handleBackButton()}
           </Text>
         </Column>
@@ -116,6 +117,7 @@ const Container = styled.View`
   flex: 1;
   margin-top: ${() => (Platform.OS == "ios" ? "1%" : "6%")};
   margin-bottom: 10%;
+  padding: 0 0 20px 0;
   flex-direction: row;
 `;
 

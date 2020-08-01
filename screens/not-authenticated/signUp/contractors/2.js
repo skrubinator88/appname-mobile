@@ -1,19 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useTheme } from "@react-navigation/native";
 
-import { Platform, TouchableWithoutFeedback, Keyboard, SafeAreaView } from "react-native";
+import { Platform, TouchableWithoutFeedback, Keyboard, SafeAreaView, TextInput } from "react-native";
 import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
+
+import { RegistrationContext } from "../../../../components/context";
+
+import env from "../../../../env";
 
 // Components
 import Header from "../../../../components/header";
 
 export function SignUpContractorScreen2({ navigation }) {
+  const { registrationState, methods } = useContext(RegistrationContext);
+  const { updateForm, sendForm } = methods;
+
   const { colors } = useTheme();
   const [firstInput, setFirstInput] = useState("");
   const [secondInput, setSecondInput] = useState("");
   const [thirdInput, setThirdInput] = useState("");
+  const [textInput, setTextInput] = useState("");
 
+  let hiddenTextInput;
   let firstTextInput;
   let secondTextInput;
   let thirdTextInput;
@@ -32,53 +41,18 @@ export function SignUpContractorScreen2({ navigation }) {
     }
   };
 
-  const handleChange = (text, inputPosNumber, maxLength) => {
-    if (text.length == maxLength) {
-      switch (inputPosNumber) {
-        case 1:
-          setFirstInput(text);
-          secondTextInput.focus();
-          break;
-        case 2:
-          if (secondInput.length == 1 && text.length == 0) {
-            firstTextInput.focus();
-          }
-          setSecondInput(text);
-          thirdTextInput.focus();
-          break;
-        case 3:
-          if (thirdInput.length == 1 && text.length == 0) {
-            secondTextInput.focus();
-          }
-          setThirdInput(text);
-          break;
-      }
-    }
-
-    if (text.length == 0) {
-      switch (inputPosNumber) {
-        case 2:
-          setSecondInput(text);
-          firstTextInput.focus();
-          break;
-        case 3:
-          setThirdInput(text);
-          secondTextInput.focus();
-          break;
-      }
-    }
-  };
-
-  const handleSettingsProps = (inputPosNumber, maxLength) => {
+  const handleSettingsProps = (inputPosNumber, maxLength, value) => {
     return {
+      value: value,
       maxLength: maxLength,
       underlineColorAndroid: "transparent",
       keyboardType: "numeric",
       ref: (input) => {
         handleRef(input, inputPosNumber);
       },
-      onChange: (e) => {
-        handleChange(e.nativeEvent.text, inputPosNumber, maxLength);
+
+      onFocus: () => {
+        hiddenTextInput.focus();
       },
       onSubmitEditing: () => {
         handleSubmit();
@@ -86,15 +60,22 @@ export function SignUpContractorScreen2({ navigation }) {
     };
   };
 
-  const handleSubmit = (e) => {
-    if (firstInput.length + secondInput.length + thirdInput.length != 10) {
-      console.log("asd");
+  const handleSubmit = async (e) => {
+    if (textInput.length == 10) {
+      const phone_number = textInput;
+      updateForm({ phone_number });
+
+      try {
+        navigation.navigate("SignUpContractor3");
+
+        const twilio = await fetch(`${env.API_URL}/v1/users/sms_registration?phone_number=${phone_number}&channel=sms`, {
+          method: "POST",
+        });
+      } catch (e) {
+        console.log(e.message);
+      }
       return;
     }
-
-    // Send phone number to backend
-    const phoneNumber = `(${firstInput}) ${secondInput}-${thirdInput}`;
-    navigation.navigate("SignUpContractor3");
   };
 
   return (
@@ -107,9 +88,26 @@ export function SignUpContractorScreen2({ navigation }) {
             <TextStyled>For authentication purposes, what is your phone number?</TextStyled>
 
             <ContainerMiddle>
-              <TextInputStyled {...handleSettingsProps(1, 3)} />
-              <TextInputStyled {...handleSettingsProps(2, 3)} />
-              <TextInputStyled {...handleSettingsProps(3, 4)} />
+              <HiddenTextInput
+                keyboardType="phone-pad"
+                maxLength={10}
+                ref={(ref) => (hiddenTextInput = ref)}
+                onChangeText={(text) => {
+                  if (text.length <= 10) {
+                    setTextInput(text);
+                    let first = text.slice(0, 3);
+                    let second = text.slice(3, 6);
+                    let third = text.slice(6, 10);
+
+                    setFirstInput(first);
+                    setSecondInput(second);
+                    setThirdInput(third);
+                  }
+                }}
+              />
+              <TextInputStyled {...handleSettingsProps(1, 3, firstInput)} />
+              <TextInputStyled {...handleSettingsProps(2, 3, secondInput)} />
+              <TextInputStyled {...handleSettingsProps(3, 4, thirdInput)} />
             </ContainerMiddle>
 
             <ButtonStyled onPress={(e) => handleSubmit(e)} style={{ backgroundColor: colors.primary }}>
@@ -121,6 +119,11 @@ export function SignUpContractorScreen2({ navigation }) {
     </TouchableWithoutFeedback>
   );
 }
+
+const HiddenTextInput = styled.TextInput`
+  position: absolute;
+  opacity: 0;
+`;
 
 const TextInputStyled = styled.TextInput`
   margin: 10px;

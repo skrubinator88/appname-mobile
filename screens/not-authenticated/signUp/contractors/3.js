@@ -2,56 +2,83 @@ import React, { useState, useEffect, useContext } from "react";
 import { useTheme } from "@react-navigation/native";
 import { Platform, TouchableWithoutFeedback, Keyboard, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
-import { AntDesign } from "@expo/vector-icons";
-import SmoothPinCodeInput from "react-native-smooth-pincode-input";
+
+import env from "../../../../env";
 
 // Components
 import Header from "../../../../components/header";
 
-import { AuthContext } from "../../../../components/context";
+import { RegistrationContext } from "../../../../components/context";
 
 export function SignUpContractorScreen3({ navigation }) {
+  const { registrationState, methods } = useContext(RegistrationContext);
   const { colors } = useTheme();
-  const authContext = useContext(AuthContext);
 
-  const [pinCode, setPinCode] = useState("");
-  let pinInputRef;
+  const [textInput, setTextInput] = useState("");
+  const [firstInput, setFirstInput] = useState("");
+  const [secondInput, setSecondInput] = useState("");
+  const [thirdInput, setThirdInput] = useState("");
+  const [fourthInput, setFourthInput] = useState("");
 
-  const handleSettingsPinCodeProps = {
-    ref: (input) => {
-      pinInputRef = input;
-    },
-    value: pinCode.toString(),
-    onTextChange: (code) => setPinCode(code),
-    onFulfill: () => {
-      handleSubmit();
-    },
-    restrictToNumbers: true,
-    cellSpacing: 10,
-    cellStyle: {
-      borderWidth: 1,
-      borderRadius: 1,
-      borderColor: "#999",
-    },
-    cellStyleFocused: {
-      borderColor: "#4893ee",
-    },
-    textStyle: {
-      fontSize: 24,
-      color: "#333",
-    },
-    textStyleFocused: {
-      color: "crimson",
-    },
+  let hiddenTextInput;
+  let firstTextInput;
+  let secondTextInput;
+  let thirdTextInput;
+  let fourthTextInput;
+
+  const phoneNumberRender = () => {
+    const first = registrationState.phone_number.slice(0, 3);
+    const second = registrationState.phone_number.slice(3, 6);
+    const third = registrationState.phone_number.slice(6, 10);
+
+    return `(${first}) ${second} - ${third}`;
   };
 
-  const handleSubmit = (e) => {
-    // Send phone number to backend
-    // const phoneNumber = `(${firstInput}) ${secondInput}-${thirdInput}`;
-    // navigation.navigate("SignIn2");
-    // authContext.signIn([{ userToken: "adkjfhlakjdhf", userName: "User" }]);
-    navigation.navigate("SignUpContractor4");
+  const handleSettingsProps = (inputPosNumber, maxLength, value) => {
+    return {
+      value: value,
+      maxLength: maxLength,
+      underlineColorAndroid: "transparent",
+      keyboardType: "numeric",
+      ref: (input) => {
+        handleRef(input, inputPosNumber);
+      },
+
+      onFocus: () => {
+        hiddenTextInput.focus();
+      },
+      onSubmitEditing: () => {
+        handleSubmit();
+      },
+    };
   };
+
+  const handleRef = (input, inputPosNumber) => {
+    switch (inputPosNumber) {
+      case 1:
+        firstTextInput = input;
+        break;
+      case 2:
+        secondTextInput = input;
+        break;
+      case 3:
+        thirdTextInput = input;
+        break;
+    }
+  };
+
+  const handleSubmit = async () => {
+    const code = textInput;
+
+    console.log(`${env.API_URL}/v1/users/sms_verification?phone_number=${registrationState.phone_number}&code=${code}`);
+    // const twilio = await fetch(`${env.API_URL}/v1/users/sms_verification?phone_number=${registrationState.phone_number}&code=${code}`, {
+    //   method: "POST",
+    // });
+
+    // const data = await twilio.json();
+    // navigation.navigate("SignUpContractor4");
+  };
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <SafeAreaView style={{ flex: 1 }}>
@@ -59,11 +86,33 @@ export function SignUpContractorScreen3({ navigation }) {
           <Header navigation={navigation} />
           <ContainerTopMiddle>
             <TextStyled>Enter the 4-digit code sent to you at:</TextStyled>
-            <TextStyled style={{ marginTop: 0 }}>( xxx ) xxx - xxxx</TextStyled>
+            <TextStyled style={{ marginTop: 0 }}>{phoneNumberRender()}</TextStyled>
             <ContainerMiddle>
-              <SmoothPinCodeInput {...handleSettingsPinCodeProps} />
+              <HiddenTextInput
+                keyboardType="numeric"
+                maxLength={4}
+                ref={(ref) => (hiddenTextInput = ref)}
+                onChangeText={(text) => {
+                  if (text.length <= 10) {
+                    setTextInput(text);
+                    let first = text.slice(0, 1);
+                    let second = text.slice(1, 2);
+                    let third = text.slice(2, 3);
+                    let fourth = text.slice(3, 4);
+
+                    setFirstInput(first);
+                    setSecondInput(second);
+                    setThirdInput(third);
+                    setFourthInput(fourth);
+                  }
+                }}
+              />
+              <TextInputStyled {...handleSettingsProps(1, 1, firstInput)} />
+              <TextInputStyled {...handleSettingsProps(2, 1, secondInput)} />
+              <TextInputStyled {...handleSettingsProps(3, 1, thirdInput)} />
+              <TextInputStyled {...handleSettingsProps(4, 1, fourthInput)} />
             </ContainerMiddle>
-            <ButtonStyled onPress={(e) => handleSubmit(e)} style={{ backgroundColor: colors.primary }}>
+            <ButtonStyled onPress={() => handleSubmit()} style={{ backgroundColor: colors.primary }}>
               <Text style={{ color: "white" }}>Continue</Text>
             </ButtonStyled>
 
@@ -95,6 +144,21 @@ const ContainerBottom = styled.View`
     }
   }}
   align-items: center;
+`;
+
+const HiddenTextInput = styled.TextInput`
+  position: absolute;
+  opacity: 0;
+`;
+
+const TextInputStyled = styled.TextInput`
+  margin: 10px;
+  border: black;
+  border-radius: 1px;
+  text-align: center;
+  height: 50px;
+  width: 50px;
+  font-size: 23px;
 `;
 
 const TextStyledBottom = styled.Text`

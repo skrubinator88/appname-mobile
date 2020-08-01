@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView } from "react-native";
 import styled from "styled-components/native";
 import { useTheme } from "@react-navigation/native";
@@ -7,8 +7,12 @@ import Header from "../../../../components/header";
 import Text from "../../../../components/text";
 import { TextField } from "react-native-material-textfield";
 
+import { RegistrationContext } from "../../../../components/context";
+
 export function SignUpContractorScreen4({ navigation }) {
   const { colors } = useTheme();
+  const { registrationState, methods } = useContext(RegistrationContext);
+  const { updateForm, sendForm } = methods;
   let firstNameRef;
   let lastNameRef;
   let occupationRef;
@@ -20,10 +24,33 @@ export function SignUpContractorScreen4({ navigation }) {
   const onSubmitOccupation = () => cityRef.focus();
   const onSubmitCity = () => stateRef.focus();
   const onSubmitState = () => emailRef.focus();
+
+  const [firstName, setFirsName] = useState();
+  const [lastName, setLastName] = useState();
+  const [occupation, setOccupation] = useState();
+  const [city, setCity] = useState();
+  const [state, setState] = useState();
+  const [email, setEmail] = useState();
+
   const handleSubmit = () => {
-    // navigation.navigate("root");
-    console.log("yes");
+    let form = {
+      firstName,
+      lastName,
+      occupation,
+      city,
+      state,
+      email,
+    };
+    updateForm(form);
+    navigation.navigate("SignUpContractor5");
   }; // Send to store
+
+  // THIS IS HOW GET DATA FROM STORE
+  // useEffect(() => {
+  //   if (registrationState.formSended == true) {
+  //     console.log(registrationState);
+  //   }
+  // }, [registrationState]);
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -37,25 +64,57 @@ export function SignUpContractorScreen4({ navigation }) {
           <TextField
             label="First Name"
             ref={(ref) => (firstNameRef = ref)}
+            value={firstName}
             returnKeyType="next"
+            onChangeText={(text) => setFirsName(text)}
             onSubmitEditing={() => onSubmitFirstName()}
           />
-          <TextField label="Last Name" ref={(ref) => (lastNameRef = ref)} returnKeyType="next" onSubmitEditing={() => onSubmitLastName()} />
+          <TextField
+            label="Last Name"
+            value={lastName}
+            ref={(ref) => (lastNameRef = ref)}
+            returnKeyType="next"
+            onChangeText={(text) => setLastName(text)}
+            onSubmitEditing={() => onSubmitLastName()}
+          />
           <TextField
             label="Occupation"
+            value={occupation}
             ref={(ref) => (occupationRef = ref)}
             returnKeyType="next"
+            onChangeText={(text) => setOccupation(text)}
             onSubmitEditing={() => onSubmitOccupation()}
           />
           <Row>
             <CityField>
-              <TextField label="City" ref={(ref) => (cityRef = ref)} returnKeyType="next" onSubmitEditing={() => onSubmitCity()} />
+              <TextField
+                label="City"
+                value={city}
+                ref={(ref) => (cityRef = ref)}
+                returnKeyType="next"
+                onChangeText={(text) => setCity(text)}
+                onSubmitEditing={() => onSubmitCity()}
+              />
             </CityField>
             <StateField>
-              <TextField label="State" ref={(ref) => (stateRef = ref)} returnKeyType="next" onSubmitEditing={() => onSubmitState()} />
+              <TextField
+                label="State"
+                value={state}
+                ref={(ref) => (stateRef = ref)}
+                returnKeyType="next"
+                onChangeText={(text) => setState(text)}
+                onSubmitEditing={() => onSubmitState()}
+              />
             </StateField>
           </Row>
-          <TextField label="Email Address" ref={(ref) => (emailRef = ref)} returnKeyType="done" onSubmitEditing={() => handleSubmit()} />
+          <TextField
+            label="Email Address"
+            value={email}
+            ref={(ref) => (emailRef = ref)}
+            returnKeyType="done"
+            onChangeText={(text) => setEmail(text)}
+            onSubmitEditing={() => handleSubmit()}
+          />
         </Form>
         {/* <KeyboardAvoidingView enabled behavior="padding" style={{ flex: 1 }}> */}
         <Terms>

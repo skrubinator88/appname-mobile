@@ -74,5 +74,5 @@ const ButtonStyled = styled.TouchableOpacity`
 
 const Container = styled.ScrollView`
   flex: 1;
-  padding: 0px 40px;
+  padding: 0 40px 30px 40px;
 `;
