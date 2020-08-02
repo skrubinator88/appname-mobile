@@ -3,14 +3,14 @@ import { useTheme } from "@react-navigation/native";
 import { Platform, TouchableWithoutFeedback, Keyboard, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
 
-import env from "../../../../env";
+import env from "../../../env";
 
 // Components
-import Header from "../../../../components/header";
+import Header from "../../../components/header";
 
-import { RegistrationContext } from "../../../../components/context";
+import { RegistrationContext } from "../../../components/context";
 
-export function SignUpContractorScreen3({ navigation }) {
+export default function ({ navigation }) {
   const { registrationState, methods } = useContext(RegistrationContext);
   const { colors } = useTheme();
 
@@ -68,15 +68,13 @@ export function SignUpContractorScreen3({ navigation }) {
   };
 
   const handleSubmit = async () => {
-    const code = textInput;
-
-    console.log(`${env.API_URL}/v1/users/sms_verification?phone_number=${registrationState.phone_number}&code=${code}`);
+    // const code = textInput.toString();
     // const twilio = await fetch(`${env.API_URL}/v1/users/sms_verification?phone_number=${registrationState.phone_number}&code=${code}`, {
     //   method: "POST",
     // });
-
-    // const data = await twilio.json();
-    // navigation.navigate("SignUpContractor4");
+    // const response = await twilio.json();
+    // if (response.data.valid) navigation.navigate("SignUp4");
+    navigation.navigate("SignUp4");
   };
 
   return (

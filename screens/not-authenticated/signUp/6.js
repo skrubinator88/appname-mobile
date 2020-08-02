@@ -3,8 +3,8 @@ import { View, TouchableWithoutFeedback, Keyboard, ScrollView } from "react-nati
 import styled from "styled-components/native";
 import { useTheme } from "@react-navigation/native";
 
-import Header from "../../../../components/header";
-import Text from "../../../../components/text";
+import Header from "../../../components/header";
+import Text from "../../../components/text";
 import LicenseModal from "./licenseModal";
 
 import { MaterialIcons } from "@expo/vector-icons";

@@ -7,7 +7,7 @@ import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { AuthContext } from "./components/context";
 // import { Screen45 } from "./views/45";
 // import { Example } from "./screens/example";
-import Example from "./views/work";
+import Example from "./views/27";
 
 // Disable Font Scaling
 Text.defaultProps = Text.defaultProps || {};
@@ -84,7 +84,7 @@ export default function App({ navigation }) {
       <NavigationContainer theme={Theme}>
         {loginState.userToken ? (
           <>
-            {/* <AuthenticatedStackScreen /> */}
+            <AuthenticatedStackScreen />
             {/* <Example /> */}
           </>
         ) : (

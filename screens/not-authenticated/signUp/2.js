@@ -5,14 +5,14 @@ import { Platform, TouchableWithoutFeedback, Keyboard, SafeAreaView, TextInput }
 import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
 
-import { RegistrationContext } from "../../../../components/context";
+import { RegistrationContext } from "../../../components/context";
 
-import env from "../../../../env";
+import env from "../../../env";
 
 // Components
-import Header from "../../../../components/header";
+import Header from "../../../components/header";
 
-export function SignUpContractorScreen2({ navigation }) {
+export default function ({ navigation }) {
   const { registrationState, methods } = useContext(RegistrationContext);
   const { updateForm, sendForm } = methods;
 
@@ -66,16 +66,18 @@ export function SignUpContractorScreen2({ navigation }) {
       updateForm({ phone_number });
 
       try {
-        navigation.navigate("SignUpContractor3");
-
-        const twilio = await fetch(`${env.API_URL}/v1/users/sms_registration?phone_number=${phone_number}&channel=sms`, {
-          method: "POST",
-        });
+        navigation.navigate("SignUp3");
+        // const twilio = await fetch(`${env.API_URL}/v1/users/sms_registration?phone_number=${phone_number}&channel=sms`, {
+        //   method: "POST",
+        // });
       } catch (e) {
         console.log(e.message);
       }
       return;
     }
+    // DISABLE AFTER DEV
+    updateForm({ phone_number: "4049901671" });
+    navigation.navigate("SignUp3");
   };
 
   return (

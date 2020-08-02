@@ -22,7 +22,7 @@ export function RootScreen({ navigation }) {
             New user?{"  "}
             <TextStyled
               onPress={() => {
-                navigation.navigate("SignUp");
+                navigation.navigate("SignUpIndex");
               }}
               style={{ color: colors.primary }}
             >

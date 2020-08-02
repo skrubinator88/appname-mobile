@@ -3,14 +3,14 @@ import { View, TouchableWithoutFeedback, Keyboard, ScrollView } from "react-nati
 import styled from "styled-components/native";
 import { useTheme } from "@react-navigation/native";
 
-import Header from "../../../../components/header";
-import Text from "../../../../components/text";
+import Header from "../../../components/header";
+import Text from "../../../components/text";
 import SchoolModal from "./schoolModal";
 import WorkModal from "./workModal";
 
 import { MaterialIcons } from "@expo/vector-icons";
 
-export function SignUpContractorScreen5({ navigation }) {
+export default function ({ navigation }) {
   const { colors } = useTheme();
   const [schoolModalVisible, setSchoolModalVisible] = useState(false);
   const [workModalVisible, setWorkModalVisible] = useState(false);
@@ -97,7 +97,7 @@ export function SignUpContractorScreen5({ navigation }) {
 }
 
 const WorkHistorySection = styled.View`
-  height: 250px;
+  /* height: 250px; */
   margin: 20px 0;
 `;
 

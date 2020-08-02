@@ -7,14 +7,14 @@ export const RootStack = createStackNavigator();
 import { RootScreen } from "./index";
 import { SignInScreen } from "../signIn";
 import { SignInScreen2 } from "../signIn/2";
-import { SignUpScreen } from "../signUp";
-import { SignUpContractorsScreen } from "../signUp/contractors/";
-import { SignUpContractorScreen2 } from "../signUp/contractors/2";
-import { SignUpContractorScreen3 } from "../signUp/contractors/3";
-import { SignUpContractorScreen4 } from "../signUp/contractors/4";
-import { SignUpContractorScreen5 } from "../signUp/contractors/5";
-import SignUpContractorScreen6 from "../signUp/contractors/6";
-import AddSkills from "../signUp/contractors/addSkills";
+import SignUpScreenIndex from "../signUp";
+import SignUpScreen1 from "../signUp/1";
+import SignUpScreen2 from "../signUp/2";
+import SignUpScreen3 from "../signUp/3";
+import SignUpScreen4 from "../signUp/4";
+import SignUpScreen5 from "../signUp/5";
+import SignUpScreen6 from "../signUp/6";
+import AddSkills from "../signUp/addSkills";
 
 import { RegistrationContext } from "../../../components/context";
 import registrationReducer from "../../../reducers/registrationReducer";
@@ -41,13 +41,13 @@ export function NotAuthenticatedStackScreen({ navigation }) {
 
         {/* Sign Up */}
 
-        <RootStack.Screen name="SignUp" component={SignUpScreen} />
-        <RootStack.Screen name="SignUpContractor" component={SignUpContractorsScreen} />
-        <RootStack.Screen name="SignUpContractor2" component={SignUpContractorScreen2} />
-        <RootStack.Screen name="SignUpContractor3" component={SignUpContractorScreen3} />
-        <RootStack.Screen name="SignUpContractor4" component={SignUpContractorScreen4} />
-        <RootStack.Screen name="SignUpContractor5" component={SignUpContractorScreen5} />
-        <RootStack.Screen name="SignUpContractor6" component={SignUpContractorScreen6} />
+        <RootStack.Screen name="SignUpIndex" component={SignUpScreenIndex} />
+        <RootStack.Screen name="SignUp1" component={SignUpScreen1} />
+        <RootStack.Screen name="SignUp2" component={SignUpScreen2} />
+        <RootStack.Screen name="SignUp3" component={SignUpScreen3} />
+        <RootStack.Screen name="SignUp4" component={SignUpScreen4} />
+        <RootStack.Screen name="SignUp5" component={SignUpScreen5} />
+        <RootStack.Screen name="SignUp6" component={SignUpScreen6} />
         <RootStack.Screen name="AddSkills" component={AddSkills} />
 
         {/* <RootStack.Screen name="Sign Up" component={SignUpStackScreen} /> */}

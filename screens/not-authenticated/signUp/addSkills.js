@@ -2,7 +2,7 @@ import React, { Component, useState } from "react";
 
 import { Text, CheckBox, Alert, TouchableWithoutFeedback, TextInput, View, Keyboard, ScrollView, FlatList } from "react-native";
 
-import Header from "../../../../components/header";
+import Header from "../../../components/header";
 
 import { Platform } from "react-native";
 import styled from "styled-components/native";

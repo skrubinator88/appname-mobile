@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Text, CheckBox, Alert, TouchableWithoutFeedback, TextInput, View, Keyboard, ScrollView, FlatList } from "react-native";
+import { CheckBox, Alert, TouchableWithoutFeedback, TextInput, View, Keyboard, ScrollView, FlatList } from "react-native";
 
 import { Platform } from "react-native";
 import styled from "styled-components/native";
@@ -8,6 +8,8 @@ import { AntDesign } from "@expo/vector-icons";
 
 import { TextField, FilledTextField, OutlinedTextField } from "react-native-material-textfield";
 import DateTimePicker from "@react-native-community/datetimepicker";
+
+import Text from "../components/text";
 
 function contractorApp() {
   let current_datetime = new Date();
@@ -71,7 +73,7 @@ function contractorApp() {
             <ContainerFields>
               <TextField label="Licence Number" />
 
-              <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE OBTAINED</Text>
+              <DatePickerTitle style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE OBTAINED</DatePickerTitle>
               <TouchableWithoutFeedback
                 onPress={() => {
                   setShow1(true);
@@ -80,10 +82,11 @@ function contractorApp() {
               >
                 <DatePicker>
                   <Text>{dateObtained && dateObtained.toLocaleDateString()}</Text>
+                  <AntDesign name="calendar" size={24} />
                 </DatePicker>
               </TouchableWithoutFeedback>
 
-              <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>EXPIRATION DATE</Text>
+              <DatePickerTitle style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>EXPIRATION DATE</DatePickerTitle>
               <TouchableWithoutFeedback
                 onPress={() => {
                   setShow2(true);
@@ -92,6 +95,7 @@ function contractorApp() {
               >
                 <DatePicker>
                   <Text>{expirationDate && expirationDate.toLocaleDateString()}</Text>
+                  <AntDesign name="calendar" size={24} />
                 </DatePicker>
               </TouchableWithoutFeedback>
 
@@ -150,10 +154,15 @@ const Fields = styled.View`
   border-color: #e3e3e3;
 `;
 
+const DatePickerTitle = styled.Text``;
+
 const DatePicker = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
   border-radius: 10px;
   border-width: 1px;
-  padding: 8px;
+  padding: 8px 12px;
 `;
 
 const SearchBox = styled.View`

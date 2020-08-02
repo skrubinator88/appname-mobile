@@ -6,59 +6,33 @@ import { Platform, ScrollView } from "react-native";
 import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
 // Components
-import Header from "../../../../components/header";
-export function SignUpContractorsScreen({ navigation }) {
+import Header from "../../../components/header";
+export default function ({ navigation }) {
   return (
     <Container>
-      <Header
-        navigation={navigation}
-        nextTitle="Next"
-        nextColor="#548ff7"
-        nextAction={() => navigation.navigate("SignUpContractor2")}
-      />
+      <Header navigation={navigation} nextTitle="Next" nextColor="#548ff7" nextAction={() => navigation.navigate("SignUp2")} />
 
       <TextStyledTittle>User Responsibilities</TextStyledTittle>
       <ScrollView alwaysBounceVertical={false}>
         <ContainerTopMiddle>
           <TextStyledContent>Employer</TextStyledContent>
-          <TextStyledContent style={{ marginLeft: 30 }}>
-            Employee
-          </TextStyledContent>
+          <TextStyledContent style={{ marginLeft: 30 }}>Employee</TextStyledContent>
         </ContainerTopMiddle>
         <ContainerMiddle>
           <Employer>
-            <TextStyledInfo>
-              - Accept and follow the guidelines set for employees provided by
-              CONTRACTORAPP
-            </TextStyledInfo>
-            <TextStyledInfo>
-              - Create, manage, and post jobs for employees to find
-            </TextStyledInfo>
-            <TextStyledInfo>
-              - Provide an address for the work site
-            </TextStyledInfo>
-            <TextStyledInfo>
-              - Briefly describe appropriate tasks needed to be completed
-            </TextStyledInfo>
-            <TextStyledInfo>
-              - Be respectful of the employer, the work site, and other users of
-              CONTRACTORAPP
-            </TextStyledInfo>
+            <TextStyledInfo>- Accept and follow the guidelines set for employees provided by CONTRACTORAPP</TextStyledInfo>
+            <TextStyledInfo>- Create, manage, and post jobs for employees to find</TextStyledInfo>
+            <TextStyledInfo>- Provide an address for the work site</TextStyledInfo>
+            <TextStyledInfo>- Briefly describe appropriate tasks needed to be completed</TextStyledInfo>
+            <TextStyledInfo>- Be respectful of the employer, the work site, and other users of CONTRACTORAPP</TextStyledInfo>
           </Employer>
 
           <Employee>
             <TextStyledInfo style={{ fontSize: 18 }}>
-              - Accept and follow the guidelines set for employees provided by
-              CONTRACTORAPP
+              - Accept and follow the guidelines set for employees provided by CONTRACTORAPP
             </TextStyledInfo>
-            <TextStyledInfo>
-              - Arrive to the work site in a timely manner and complete tasks
-              set by the Employer
-            </TextStyledInfo>
-            <TextStyledInfo>
-              - Be respectful of the employer, the work site, and other users of
-              CONTRACTORAPP
-            </TextStyledInfo>
+            <TextStyledInfo>- Arrive to the work site in a timely manner and complete tasks set by the Employer</TextStyledInfo>
+            <TextStyledInfo>- Be respectful of the employer, the work site, and other users of CONTRACTORAPP</TextStyledInfo>
           </Employee>
 
           <Terms>

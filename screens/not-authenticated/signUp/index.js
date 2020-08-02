@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useContext } from "react";
 
 import { Text, Image, Button, Alert, TextInput, View } from "react-native";
 
@@ -9,7 +9,17 @@ import { AntDesign } from "@expo/vector-icons";
 // Components
 import Header from "../../../components/header";
 
-export function SignUpScreen({ navigation }) {
+import { RegistrationContext } from "../../../components/context";
+
+export default function ({ navigation }) {
+  const { registrationState, methods } = useContext(RegistrationContext);
+  const { updateForm, sendForm } = methods;
+
+  const handleChosenOption = (chosenOption) => {
+    updateForm({ role: chosenOption });
+    navigation.navigate("SignUp1");
+  };
+
   return (
     <Container>
       <Header navigation={navigation} />
@@ -18,35 +28,17 @@ export function SignUpScreen({ navigation }) {
       </ContainerTop>
       <ContainerTopMiddle>
         <TextStyledContent>
-          With CONTRACTOR APP, you choose how yo want to work. You can be an
-          employer and create, post, and manage jobs, or you can be an employee
-          and find work.
+          With CONTRACTOR APP, you choose how yo want to work. You can be an employer and create, post, and manage jobs, or you can be an
+          employee and find work.
         </TextStyledContent>
         <ContainerMiddle>
-          <ButtonStyled
-            onPress={(e) => {
-              Alert.alert(
-                "Still in Development",
-                "This section still is in progress"
-              );
-            }}
-          >
-            <TextStyledBtn style={{ color: "white" }}>
-              I want to post jobs
-            </TextStyledBtn>
+          <ButtonStyled onPress={(e) => handleChosenOption("project_manager")}>
+            <TextStyledBtn style={{ color: "white" }}>I want to post jobs</TextStyledBtn>
           </ButtonStyled>
-          <ButtonStyledWork
-            onPress={(e) => {
-              navigation.navigate("SignUpContractor");
-            }}
-          >
-            <TextStyledBtn style={{ color: "black" }}>
-              I want to find work
-            </TextStyledBtn>
+          <ButtonStyledWork onPress={(e) => handleChosenOption("contractor")}>
+            <TextStyledBtn style={{ color: "black" }}>I want to find work</TextStyledBtn>
           </ButtonStyledWork>
-          <TextStyledHelp onPress={(e) => {}}>
-            Need help choosing?
-          </TextStyledHelp>
+          <TextStyledHelp onPress={(e) => {}}>Need help choosing?</TextStyledHelp>
         </ContainerMiddle>
       </ContainerTopMiddle>
     </Container>
