@@ -19,12 +19,34 @@ import AddSkills from "../signUp/addSkills";
 import { RegistrationContext } from "../../../components/context";
 import registrationReducer from "../../../reducers/registrationReducer";
 
+const initialState = {
+  role: "",
+  first_name: "",
+  last_name: "",
+  occupation: "",
+  city: "",
+  state: "",
+  email: "",
+  phone_number: "",
+  profile_bio: "",
+  date_created: "",
+  account_status: "Pending",
+  formSended: false,
+  work_history: [],
+  educational_background: [],
+  skills: [],
+  licenses: [],
+};
+
 export function NotAuthenticatedStackScreen({ navigation }) {
-  const [registrationState, dispatch] = useReducer(registrationReducer, { formSended: false });
+  const [registrationState, dispatch] = useReducer(registrationReducer, initialState);
   const registrationContext = React.useMemo(
     () => ({
       updateForm: (form, formSended_Boolean) => {
         dispatch({ type: "UPDATE", form, formSended_Boolean });
+      },
+      pushItemFormField: (item, field) => {
+        dispatch({ type: "PUSH", item, field });
       },
     }),
     []

@@ -4,13 +4,22 @@ const registrationReducer = (prevState, action) => {
       return {
         ...prevState,
         ...action.form,
-        formSended: action.formSended,
+        formSended: action.formSended || prevState.formSended,
       };
-    // case "UPDATE":
-    //   return {
-    //     ...prevState,
-    //     formSended: true,
-    //   };
+
+    case "PUSH":
+      let newState = {
+        ...prevState,
+      };
+      if (newState[action.field][action.item.id]) {
+        newState[action.field][action.item.id] = action.item;
+      } else {
+        newState[action.field].push(action.item);
+      }
+      return newState;
+
+    case "DELETE":
+      return {};
   }
 };
 
