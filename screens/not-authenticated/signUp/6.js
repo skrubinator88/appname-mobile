@@ -17,24 +17,24 @@ export default function signUp6({ navigation }) {
   const [licenseModalState, setLicenseModalState] = useState({});
   const [licenses_items, setLicenseItems] = useState([]);
 
-  const [workModalVisible, setWorkModalVisible] = useState(false);
-  const [workModalState, setWorkModalState] = useState({});
-  const [work_history_items, setWorkHistoryItems] = useState([]);
+  // const [workModalVisible, setWorkModalVisible] = useState(false);
+  // const [workModalState, setWorkModalState] = useState({});
+  // const [work_history_items, setWorkHistoryItems] = useState([]);
 
   const { registrationState, methods } = useContext(RegistrationContext);
   const { pushItemFormField } = methods;
 
   const handleSubmit = () => {
-    // navigation.navigate("SignUpContractor6");
+    navigation.navigate("SignUp7");
   };
 
   useEffect(() => {
     // if (registrationState.work_history.length != 0) {
     //   setWorkHistoryItems(registrationState.work_history);
     // }
-    // if (registrationState.educational_background.length != 0) {
-    //   setEducationalBackgroundItems(registrationState.educational_background);
-    // }
+    if (registrationState.licenses.length != 0) {
+      setLicenseItems(registrationState.licenses);
+    }
   }, [registrationState]);
 
   return (
@@ -43,7 +43,8 @@ export default function signUp6({ navigation }) {
         <Header
           navigation={navigation}
           backTitle=""
-          // nextTitle="Skip"
+          headerBackground="white"
+          background="white"
           nextColor="grey"
           nextAction={() => {
             // navigation.navigate("SignUpContractor6");
@@ -70,10 +71,10 @@ export default function signUp6({ navigation }) {
             Skills & licenses
           </Text>
           <Text align="center" medium>
-            We ask fro this to enhance your experience with finding work that matches your abilities and permit.
+            We ask for this to enhance your experience with finding work that matches your abilities and permit.
           </Text>
 
-          <WorkHistorySection>
+          {/* <WorkHistorySection>
             <Text small>SKILLS</Text>
             <AddButton
               onPress={() => {
@@ -102,7 +103,7 @@ export default function signUp6({ navigation }) {
                 </WorkHistoryItem>
               </TouchableWithoutFeedback>
             ))}
-          </WorkHistorySection>
+          </WorkHistorySection> */}
 
           <WorkHistorySection>
             <Text small>LICENSES</Text>
@@ -121,8 +122,8 @@ export default function signUp6({ navigation }) {
               <TouchableWithoutFeedback
                 key={index}
                 onPress={() => {
-                  setEducationalBackgroundModalState({ ...item, edit: true });
-                  setEducationalBackgroundModalVisible(true);
+                  setLicenseModalState({ ...item, edit: true });
+                  setLicenseModalVisible(true);
                 }}
               >
                 <WorkHistoryItem>
@@ -131,10 +132,10 @@ export default function signUp6({ navigation }) {
                     <Entypo color="black" name="pencil" size={16} />
                   </Row>
                   <Row>
-                    <Text small>Date Obtained: {item.date_obtained}</Text>
+                    <Text small>Date Obtained: {item.date_obtained_string}</Text>
                   </Row>
                   <Row>
-                    <Text small>Expires: {item.expiration_date}</Text>
+                    <Text small>Expires: {item.expiration_date_string}</Text>
                   </Row>
                 </WorkHistoryItem>
               </TouchableWithoutFeedback>
@@ -185,6 +186,7 @@ const ButtonStyled = styled.TouchableOpacity`
 `;
 
 const Container = styled.ScrollView`
+  background: white;
   flex: 1;
   padding: 0 40px 30px 40px;
 `;

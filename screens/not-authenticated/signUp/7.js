@@ -8,7 +8,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 
 // Components
-import Text from "../components/text";
+import Text from "../../../components/text";
 
 export default function ({ navigation }) {
   const { colors } = useTheme();
@@ -22,9 +22,9 @@ export default function ({ navigation }) {
         provided information is safe, secure and never shared.
       </Text>
 
-      <Image source={require("../assets/backgroundCheck.png")} />
+      <Image source={require("../../../assets/backgroundCheck.png")} />
 
-      <ButtonStyled onPress={(e) => handleSubmit(e)} style={{ backgroundColor: colors.primary }}>
+      <ButtonStyled onPress={(e) => navigation.navigate("SignUp8")} style={{ backgroundColor: colors.primary }}>
         <Text style={{ color: "white" }}>Continue</Text>
       </ButtonStyled>
     </Container>
@@ -32,6 +32,7 @@ export default function ({ navigation }) {
 }
 
 const Container = styled.View`
+  background: white;
   flex: 1;
   padding: 7%;
   align-items: center;

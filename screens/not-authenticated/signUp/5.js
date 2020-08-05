@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { View, TouchableWithoutFeedback, Keyboard, ScrollView } from "react-native";
+import { View, TouchableWithoutFeedback, Keyboard, ScrollView, BackHandler } from "react-native";
 import styled from "styled-components/native";
 import { useTheme } from "@react-navigation/native";
 
@@ -45,6 +45,8 @@ export default function ({ navigation }) {
           backTitle=""
           nextTitle="Skip"
           nextColor="grey"
+          headerBackground="white"
+          background="white"
           nextAction={() => {
             navigation.navigate("SignUp6");
           }}
@@ -203,6 +205,7 @@ const ButtonStyled = styled.TouchableOpacity`
 `;
 
 const Container = styled.ScrollView`
+  background: white;
   flex: 1;
   padding: 0 40px 30px 40px;
 `;

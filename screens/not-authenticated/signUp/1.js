@@ -102,6 +102,7 @@ const ButtonStyledWork = styled.TouchableOpacity`
 
 const Container = styled.View`
   flex: 1;
+  background: white;
 `;
 
 var Employer = styled.View``;

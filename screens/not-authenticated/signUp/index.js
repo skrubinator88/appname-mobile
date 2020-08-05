@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 
-import { Text, Image, Button, Alert, TextInput, View } from "react-native";
+import { BackHandler } from "react-native";
 
 import { Platform } from "react-native";
 import styled from "styled-components/native";
@@ -19,6 +19,12 @@ export default function ({ navigation }) {
     updateForm({ role: chosenOption });
     navigation.navigate("SignUp1");
   };
+
+  useEffect(() => {
+    BackHandler.addEventListener("hardwareBackPress", function () {
+      return true;
+    });
+  }, []);
 
   return (
     <Container>
@@ -70,6 +76,7 @@ const ButtonStyledWork = styled.TouchableOpacity`
 `;
 
 const Container = styled.View`
+  background: white;
   flex: 1;
 `;
 const TextStyledBtn = styled.Text`

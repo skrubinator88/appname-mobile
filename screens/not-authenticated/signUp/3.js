@@ -68,13 +68,12 @@ export default function ({ navigation }) {
   };
 
   const handleSubmit = async () => {
-    // const code = textInput.toString();
-    // const twilio = await fetch(`${env.API_URL}/v1/users/sms_verification?phone_number=${registrationState.phone_number}&code=${code}`, {
-    //   method: "POST",
-    // });
-    // const response = await twilio.json();
-    // if (response.data.valid) navigation.navigate("SignUp4");
-    navigation.navigate("SignUp4");
+    const code = textInput.toString();
+    const twilio = await fetch(`${env.API_URL}/v1/users/sms_verification?phone_number=${registrationState.phone_number}&code=${code}`, {
+      method: "POST",
+    });
+    const response = await twilio.json();
+    if (response.data.valid) navigation.navigate("SignUp4");
   };
 
   return (
@@ -178,6 +177,7 @@ const ButtonStyled = styled.TouchableOpacity`
 
 const Container = styled.View`
   flex: 1;
+  background: white;
 `;
 const Text = styled.Text`
   font-size: ${() => (Platform.OS == "ios" ? "25px" : "17px")};

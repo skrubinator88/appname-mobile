@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView } from "react-native";
+import { View, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, BackHandler } from "react-native";
 import styled from "styled-components/native";
 import { useTheme } from "@react-navigation/native";
 
@@ -9,7 +9,7 @@ import { TextField } from "react-native-material-textfield";
 
 import { RegistrationContext } from "../../../components/context";
 
-export default function ({ navigation }) {
+export default function SignUp4({ navigation }) {
   const { colors } = useTheme();
   const { registrationState, methods } = useContext(RegistrationContext);
   const { updateForm, sendForm } = methods;
@@ -100,15 +100,7 @@ export default function ({ navigation }) {
       updateForm(form);
       navigation.navigate("SignUp5");
     }
-    navigation.navigate("SignUp5");
   };
-
-  // THIS IS HOW GET DATA FROM STORE
-  // useEffect(() => {
-  //   if (registrationState.formSended == true) {
-  //     console.log(registrationState);
-  //   }
-  // }, [registrationState]);
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -207,6 +199,7 @@ const ButtonStyled = styled.TouchableOpacity`
 const Container = styled.ScrollView`
   flex: 1;
   padding: 0px 40px;
+  background: white;
 `;
 
 const Form = styled.View``;

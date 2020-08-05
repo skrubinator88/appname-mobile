@@ -1,19 +1,21 @@
 // IMPORTS
 import React, { useEffect, useReducer } from "react";
-import { View, ActivityIndicator, Text, TextInput } from "react-native";
+import { View, ActivityIndicator, Text, TextInput, BackHandler } from "react-native";
 import AsyncStorage from "@react-native-community/async-storage";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 
 import { AuthContext } from "./components/context";
 // import { Screen45 } from "./views/45";
 // import Example from "./screens/not-authenticated/signUp/schoolModal";
-// import Example from "./views/27";
+import Example from "./views/work";
 
 // Disable Font Scaling
 Text.defaultProps = Text.defaultProps || {};
 Text.defaultProps.allowFontScaling = false;
 TextInput.defaultProps = TextInput.defaultProps || {};
 TextInput.defaultProps.allowFontScaling = false;
+
+// Disable back press
 
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
@@ -48,6 +50,7 @@ import loginReducer from "./reducers/loginReducer";
 
 export default function App({ navigation }) {
   const [loginState, dispatch] = useReducer(loginReducer, initialLoginState);
+
   const authContext = React.useMemo(
     () => ({
       signIn: async (foundUser) => {

@@ -53,30 +53,24 @@ function formatDate(date) {
 export default function licenseModal({ navigation, onHandleCancel, onHandleSave, licenseModalVisible, state }) {
   const { registrationState, methods } = useContext(RegistrationContext);
 
-  const [type_school, setTypeSchool] = useState("High School");
-  const [institute_name, setInstituteName] = useState("");
-  const [degree_area, setDegreeArea] = useState("");
-  const [years_attended, setYearsAttended] = useState("");
-
-  // Switch
-  const [graduated, setGraduated] = useState(false);
+  const [license_number, setLicenseNumber] = useState("");
 
   // Date Obtained
-  const [date_started, setDateStarted] = useState(new Date());
+  const [date_obtained, setDateObtained] = useState(new Date());
   const [show1, setShow1] = useState(false);
   const onChangeDateObtained = (event, selectedDate) => {
     const currentDate = selectedDate || date_started;
     setShow1(Platform.OS === "ios");
-    setDateStarted(currentDate);
+    setDateObtained(currentDate);
   };
 
   // Expiration Date
-  const [date_ended, setDateEnded] = useState(new Date());
+  const [expiration_date, setExpirationDate] = useState(new Date());
   const [show2, setShow2] = useState(false);
   const onChangeExpirationDate = (event, selectedDate) => {
     const currentDate = selectedDate || date_started;
     setShow2(Platform.OS === "ios");
-    setDateEnded(currentDate);
+    setExpirationDate(currentDate);
   };
 
   const commonInputProps = (elementValue, setElementValue) => {
@@ -88,37 +82,31 @@ export default function licenseModal({ navigation, onHandleCancel, onHandleSave,
     };
   };
 
-  const toggleSwitch = () => {
-    setGraduated((previousState) => !previousState);
-    Keyboard.dismiss();
-  };
-
   const checkFormPayload = () => {
+    const date_obtained_string = formatDate(date_obtained);
+    const expiration_date_string = formatDate(expiration_date);
+
     const form = {
       id: state.edit ? state.id : registrationState.educational_background.length,
-      type_school,
-      institute_name,
-      degree_area,
-      years_attended,
-      graduated,
+      license_number,
+      date_obtained,
+      expiration_date,
+      date_obtained_string,
+      expiration_date_string,
     };
     return form;
   };
 
   useEffect(() => {
-    setTypeSchool(state.type_school || "High School");
-    setInstituteName(state.institute_name);
-    setDegreeArea(state.degree_area);
-    setYearsAttended(state.years_attended);
-    setGraduated(state.graduated);
+    setLicenseNumber(state.type_school || "");
+    setDateObtained(state.date_obtained || date_obtained);
+    setExpirationDate(state.expiration_date || expiration_date);
   }, [state]);
 
   function clear() {
-    setTypeSchool("High School");
-    setInstituteName("");
-    setDegreeArea("");
-    setYearsAttended("");
-    setGraduated(false);
+    setLicenseNumber("");
+    setDateObtained(new Date());
+    setExpirationDate(new Date());
   }
 
   return (
@@ -129,7 +117,7 @@ export default function licenseModal({ navigation, onHandleCancel, onHandleSave,
             <ScrollView>
               <Fields>
                 <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>LICENSE NUMBER</Text>
-                <TextField label="License Number" {...commonInputProps(state.institute_name || institute_name, setInstituteName)} />
+                <TextField label="License Number" {...commonInputProps(state.license_number || license_number, setLicenseNumber)} />
 
                 <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE STARTED</Text>
                 <TouchableWithoutFeedback
@@ -140,7 +128,7 @@ export default function licenseModal({ navigation, onHandleCancel, onHandleSave,
                   }}
                 >
                   <DatePicker>
-                    <Text>{date_started && formatDate(date_started)}</Text>
+                    <Text>{date_obtained && formatDate(date_obtained)}</Text>
                     <AntDesign name="calendar" size={24} />
                   </DatePicker>
                 </TouchableWithoutFeedback>
@@ -154,7 +142,7 @@ export default function licenseModal({ navigation, onHandleCancel, onHandleSave,
                   }}
                 >
                   <DatePicker>
-                    <Text>{date_ended && formatDate(date_ended)}</Text>
+                    <Text>{expiration_date && formatDate(expiration_date)}</Text>
                     <AntDesign name="calendar" size={24} />
                   </DatePicker>
                 </TouchableWithoutFeedback>
@@ -175,7 +163,7 @@ export default function licenseModal({ navigation, onHandleCancel, onHandleSave,
         {show1 && (
           <DateTimePicker
             testID="dateTimePicker"
-            value={date_started}
+            value={date_obtained}
             mode="date"
             is24Hour={true}
             display="default"
@@ -185,7 +173,7 @@ export default function licenseModal({ navigation, onHandleCancel, onHandleSave,
         {show2 && (
           <DateTimePicker
             testID="dateTimePicker"
-            value={date_ended}
+            value={expiration_date}
             mode="date"
             is24Hour={true}
             display="default"

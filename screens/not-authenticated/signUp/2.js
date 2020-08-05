@@ -67,17 +67,17 @@ export default function ({ navigation }) {
 
       try {
         navigation.navigate("SignUp3");
-        // const twilio = await fetch(`${env.API_URL}/v1/users/sms_registration?phone_number=${phone_number}&channel=sms`, {
-        //   method: "POST",
-        // });
+        const twilio = await fetch(`${env.API_URL}/v1/users/sms_registration?phone_number=${phone_number}&channel=sms`, {
+          method: "POST",
+        });
       } catch (e) {
         console.log(e.message);
       }
       return;
     }
     // DISABLE AFTER DEV
-    updateForm({ phone_number: "4049901671" });
-    navigation.navigate("SignUp3");
+    // updateForm({ phone_number: "4049901671" });
+    // navigation.navigate("SignUp3");
   };
 
   return (
@@ -148,6 +148,7 @@ const ButtonStyled = styled.TouchableOpacity`
 
 const Container = styled.View`
   flex: 1;
+  background: white;
 `;
 const Text = styled.Text`
   font-size: 20px;
