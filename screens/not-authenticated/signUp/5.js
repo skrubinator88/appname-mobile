@@ -13,22 +13,27 @@ import { RegistrationContext } from "../../../components/context";
 
 export default function ({ navigation }) {
   const { colors } = useTheme();
-  const [schoolModalVisible, setSchoolModalVisible] = useState(false);
+  const [educationalBackgroundModalVisible, setEducationalBackgroundModalVisible] = useState(false);
+  const [educationalBackgroundModalState, setEducationalBackgroundModalState] = useState({});
+  const [educational_background_items, setEducationalBackgroundItems] = useState([]);
+
   const [workModalVisible, setWorkModalVisible] = useState(false);
   const [workModalState, setWorkModalState] = useState({});
+  const [work_history_items, setWorkHistoryItems] = useState([]);
 
   const { registrationState, methods } = useContext(RegistrationContext);
   const { pushItemFormField } = methods;
 
-  const [work_history_items, setWorkHistoryItems] = useState([]);
-
   const handleSubmit = () => {
-    navigation.navigate("SignUpContractor6");
+    navigation.navigate("SignUp6");
   };
 
   useEffect(() => {
     if (registrationState.work_history.length != 0) {
       setWorkHistoryItems(registrationState.work_history);
+    }
+    if (registrationState.educational_background.length != 0) {
+      setEducationalBackgroundItems(registrationState.educational_background);
     }
   }, [registrationState]);
 
@@ -41,7 +46,7 @@ export default function ({ navigation }) {
           nextTitle="Skip"
           nextColor="grey"
           nextAction={() => {
-            navigation.navigate("SignUpContractor6");
+            navigation.navigate("SignUp6");
           }}
         />
 
@@ -61,13 +66,18 @@ export default function ({ navigation }) {
         />
 
         <SchoolModal
-          schoolModalVisible={schoolModalVisible}
+          navigation={navigation}
+          educationalBackgroundModalVisible={educationalBackgroundModalVisible}
           onHandleCancel={() => {
-            setSchoolModalVisible(false);
+            setEducationalBackgroundModalState({});
+            setEducationalBackgroundModalVisible(false);
           }}
-          onHandleSave={() => {
-            setSchoolModalVisible(false);
+          onHandleSave={(form) => {
+            setEducationalBackgroundModalState({});
+            setEducationalBackgroundModalVisible(false);
+            pushItemFormField(form, "educational_background");
           }}
+          state={educationalBackgroundModalState}
         />
 
         <Container>
@@ -117,7 +127,7 @@ export default function ({ navigation }) {
             <Text small>EDUCATIONAL BACKGROUND</Text>
             <AddButton
               onPress={() => {
-                setSchoolModalVisible(true);
+                setEducationalBackgroundModalVisible(true);
               }}
             >
               <Text small color="grey">
@@ -125,6 +135,28 @@ export default function ({ navigation }) {
               </Text>
               <MaterialIcons color={colors.primary} name="add-circle" size={30} />
             </AddButton>
+
+            {educational_background_items.map((item, index) => (
+              <TouchableWithoutFeedback
+                key={index}
+                onPress={() => {
+                  setEducationalBackgroundModalState({ ...item, edit: true });
+                  setEducationalBackgroundModalVisible(true);
+                }}
+              >
+                <WorkHistoryItem>
+                  <Row>
+                    <Text small>{item.institute_name}</Text>
+                    <Entypo color="black" name="pencil" size={16} />
+                  </Row>
+
+                  <Row>
+                    <Text>{item.degree_area}</Text>
+                    <Text> </Text>
+                  </Row>
+                </WorkHistoryItem>
+              </TouchableWithoutFeedback>
+            ))}
           </WorkHistorySection>
 
           <ButtonStyled onPress={(e) => handleSubmit(e)} style={{ backgroundColor: colors.primary }}>

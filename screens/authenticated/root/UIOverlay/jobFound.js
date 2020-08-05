@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, Platform, Dimensions, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
+import config from "../../../../env";
+import StarRating from "react-native-star-rating";
 
 // Expo
 import { FontAwesome } from "@expo/vector-icons";
@@ -13,9 +15,29 @@ const deviceHeight = Dimensions.get("window").height;
 
 import { UIOverlayContext } from "../../../../components/context";
 
+const fetchProjectManagerInfo = async (id) => {};
+
 // BODY
-export default function JobFound({ navigation }) {
+export default function JobFound({ navigation, data }) {
+  const [jobData] = data;
   const { changeRoute } = useContext(UIOverlayContext);
+  const [name, setName] = useState("");
+  const [occupation, setOccupation] = useState("");
+  const [starRate, setStarRate] = useState("");
+  const [tasks, setTasks] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const response = await fetch(`${config.API_URL}/users/${jobData.posted_by}`, { method: "GET" });
+      const project_manager = await response.json();
+      setName(`${project_manager.first_name} ${project_manager.last_name}`);
+      setOccupation(project_manager.occupation);
+      setStarRate(project_manager.star_rate);
+
+      console.log(data);
+      setDescription(jobData.tasks);
+    })();
+  }, []);
 
   return (
     <Card>
@@ -29,10 +51,10 @@ export default function JobFound({ navigation }) {
         <Row first>
           <Column>
             <Text title bold marginBottom="5px">
-              John Doe
+              {name}
             </Text>
             <Text small light marginBottom="5px">
-              Domestic Worker
+              {occupation}
             </Text>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Text bold marginBottom="5px">
@@ -46,24 +68,10 @@ export default function JobFound({ navigation }) {
           <Column>
             {/* Iterate from array of data pulled from server and render as stars */}
             <View style={{ flexDirection: "row", marginBottom: 10 }}>
-              <Text style={{ paddingHorizontal: 1 }}>
-                <FontAwesome name="star" size={24} color="black" />
-              </Text>
-              <Text style={{ paddingHorizontal: 1 }}>
-                <FontAwesome name="star" size={24} color="black" />
-              </Text>
-              <Text style={{ paddingHorizontal: 1 }}>
-                <FontAwesome name="star" size={24} color="black" />
-              </Text>
-              <Text style={{ paddingHorizontal: 1 }}>
-                <FontAwesome name="star" size={24} color="black" />
-              </Text>
-              <Text style={{ paddingHorizontal: 1 }}>
-                <FontAwesome name="star-o" size={24} color="black" />
-              </Text>
+              <StarRating disabled={true} maxStars={5} rating={starRate} starSize={25} />
             </View>
             <Text style={{ textAlign: "center" }} bold>
-              4.01
+              {starRate}
             </Text>
           </Column>
         </Row>
@@ -78,13 +86,7 @@ export default function JobFound({ navigation }) {
               </Text>
             </JobDescription>
 
-            <Text>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              Vestibulum bibendum dui et lacinia elementum. Donec vitae diam eu
-              nisi pellentesque malesuada sagittis et ipsum. Donec eleifend nunc
-              et tincidunt viverra. Sed nec lacus vel erat auctor convallis. In
-              hac habitasse platea dictumst.
-            </Text>
+            <Text>{description}</Text>
           </Column>
         </Row>
 

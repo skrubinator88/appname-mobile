@@ -51,7 +51,7 @@ function formatDate(date) {
 import { RegistrationContext } from "../../../components/context";
 import { set } from "react-native-reanimated";
 
-export default function SignUpContractorScreen5({ navigation, onHandleCancel, onHandleSave, workModalVisible, state }) {
+export default function workModal({ navigation, onHandleCancel, onHandleSave, workModalVisible, state }) {
   const { registrationState, methods } = useContext(RegistrationContext);
 
   const [employer_name, setEmployerName] = useState("");
@@ -158,100 +158,101 @@ export default function SignUpContractorScreen5({ navigation, onHandleCancel, on
   return (
     <Modal coverScreen={false} isVisible={workModalVisible} onModalHide={() => clear()}>
       <ModalBackground>
-        <Filter style={{ opacity: show1 || show2 ? 0.5 : 1 }}>
-          <Header
-            backAction={() => onHandleCancel()}
-            backTitle="Cancel"
-            title="Add Work"
-            nextTitle="Save"
-            nextColor="#548ff7"
-            nextAction={() => onHandleSave(checkFormPayload())}
-          />
+        <Header
+          backAction={() => onHandleCancel()}
+          backTitle="Cancel"
+          title="Add Work"
+          nextTitle="Save"
+          nextColor="#548ff7"
+          nextAction={() => onHandleSave(checkFormPayload())}
+        />
 
-          <KeyboardAvoidingView enabled behavior="height" style={{ flex: 1 }}>
-            <ScrollView>
-              <TouchableWithoutFeedback
-                style={{ flex: 1 }}
-                onPress={() => {
-                  Keyboard.dismiss();
-                  setShow1(false);
-                  setShow2(false);
-                }}
-              >
-                <Container>
-                  <Fields>
-                    <TextField label="Employer Name" {...commonInputProps(state.employer_name || employer_name, setEmployerName)} />
+        <KeyboardAvoidingView enabled behavior={Platform.OS == "android" ? "height" : "padding"} style={{ flex: 1 }}>
+          <ScrollView>
+            <TouchableWithoutFeedback
+              style={{ flex: 1 }}
+              onPress={() => {
+                Keyboard.dismiss();
+                setShow1(false);
+                setShow2(false);
+              }}
+            >
+              <Container>
+                <Fields>
+                  <TextField label="Employer Name" {...commonInputProps(state.employer_name || employer_name, setEmployerName)} />
 
-                    <TextField
-                      label="Phone Number"
-                      keyboardType="phone-pad"
-                      {...commonInputProps(state.employer_phone_number || employer_phone_number, setEmployerPhoneNumber)}
+                  <TextField
+                    label="Phone Number"
+                    keyboardType="phone-pad"
+                    {...commonInputProps(state.employer_phone_number || employer_phone_number, setEmployerPhoneNumber)}
+                  />
+
+                  <TextField
+                    {...commonInputProps(state.employer_address || state.employer_address, setEmployerAddress)}
+                    labelOffset={{ x0: 0, y0: 0, x1: -40, y1: -6 }}
+                    contentInset={{ top: 16, left: 0, right: 0, label: 4, input: 8 }}
+                    label="Address"
+                    renderLeftAccessory={() => (
+                      <View style={{ width: 30 }}>
+                        <Ionicons name="ios-search" size={24} />
+                      </View>
+                    )}
+                  />
+                </Fields>
+                <View style={{ backgroundColor: "#F2F2F2", height: 50 }}></View>
+
+                <FieldsTwo>
+                  <TextField label="Supervisor Name" {...commonInputProps(state.supervisor_name || supervisor_name, setSupervisorName)} />
+
+                  <TextField
+                    label="Supervisor Title"
+                    {...commonInputProps(state.supervisor_title || supervisor_title, setSupervisorTitle)}
+                  />
+                  <TextField
+                    label="Your Position Title"
+                    {...commonInputProps(state.user_position_title || user_position_title, setPositionTitle)}
+                  />
+
+                  <WageInput>
+                    <SalaryField>
+                      <TextField label="Salary" keyboardType="numeric" {...commonInputProps(state.salary || salary, setSalary)} />
+                    </SalaryField>
+                    <WageTimeField>
+                      <WageTimeFieldInput selectedValue={wage} onValueChange={(value) => setWage(value)}>
+                        <WageTimeFieldInput.Item label="/Year" value="yr" />
+                        <WageTimeFieldInput.Item label="/Hour" value="hr" />
+                      </WageTimeFieldInput>
+                    </WageTimeField>
+                  </WageInput>
+
+                  <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE STARTED</Text>
+                  <TouchableWithoutFeedback
+                    onPress={() => {
+                      setShow1(true);
+                      setShow2(false);
+                      Keyboard.dismiss();
+                    }}
+                  >
+                    <DatePicker>
+                      <Text>{date_started && formatDate(date_started)}</Text>
+                      <AntDesign name="calendar" size={24} />
+                    </DatePicker>
+                  </TouchableWithoutFeedback>
+
+                  <SwitchContainer>
+                    <Text small>I am currently working here</Text>
+                    <Switch
+                      trackColor={{ false: "#767577", true: "#81b0ff" }}
+                      thumbColor={actual_job ? "#f4f3f4" : "#f4f3f4"}
+                      ios_backgroundColor="#3e3e3e"
+                      onValueChange={toggleSwitch}
+                      value={actual_job}
                     />
+                  </SwitchContainer>
 
-                    <TextField
-                      {...commonInputProps(state.employer_address || state.employer_address, setEmployerAddress)}
-                      labelOffset={{ x0: 0, y0: 0, x1: -40, y1: -6 }}
-                      contentInset={{ top: 16, left: 0, right: 0, label: 4, input: 8 }}
-                      label="Address"
-                      renderLeftAccessory={() => (
-                        <View style={{ width: 30 }}>
-                          <Ionicons name="ios-search" size={24} />
-                        </View>
-                      )}
-                    />
-                  </Fields>
-                  <View style={{ backgroundColor: "#F2F2F2", height: 50 }}></View>
-
-                  <FieldsTwo>
-                    <TextField label="Supervisor Name" {...commonInputProps(state.supervisor_name || supervisor_name, setSupervisorName)} />
-
-                    <TextField
-                      label="Supervisor Title"
-                      {...commonInputProps(state.supervisor_title || supervisor_title, setSupervisorTitle)}
-                    />
-                    <TextField
-                      label="Your Position Title"
-                      {...commonInputProps(state.user_position_title || user_position_title, setPositionTitle)}
-                    />
-
-                    <WageInput>
-                      <SalaryField>
-                        <TextField label="Salary" keyboardType="numeric" {...commonInputProps(state.salary || salary, setSalary)} />
-                      </SalaryField>
-                      <WageTimeField>
-                        <WageTimeFieldInput selectedValue={wage} onValueChange={(value) => setWage(value)}>
-                          <WageTimeFieldInput.Item label="/Year" value="yr" />
-                          <WageTimeFieldInput.Item label="/Hour" value="hr" />
-                        </WageTimeFieldInput>
-                      </WageTimeField>
-                    </WageInput>
-
-                    <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE STARTED</Text>
-                    <TouchableWithoutFeedback
-                      onPress={() => {
-                        setShow1(true);
-                        setShow2(false);
-                        Keyboard.dismiss();
-                      }}
-                    >
-                      <DatePicker>
-                        <Text>{date_started && formatDate(date_started)}</Text>
-                        <AntDesign name="calendar" size={24} />
-                      </DatePicker>
-                    </TouchableWithoutFeedback>
-
-                    <SwitchContainer>
-                      <Text small>I am currently working here</Text>
-                      <Switch
-                        trackColor={{ false: "#767577", true: "#81b0ff" }}
-                        thumbColor={actual_job ? "#f4f3f4" : "#f4f3f4"}
-                        ios_backgroundColor="#3e3e3e"
-                        onValueChange={toggleSwitch}
-                        value={actual_job}
-                      />
-                    </SwitchContainer>
-
-                    {!actual_job && (
+                  {!actual_job && (
+                    <>
+                      <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE ENDED</Text>
                       <TouchableWithoutFeedback
                         onPress={() => {
                           setShow1(false);
@@ -264,53 +265,52 @@ export default function SignUpContractorScreen5({ navigation, onHandleCancel, on
                           <AntDesign name="calendar" size={24} />
                         </DatePicker>
                       </TouchableWithoutFeedback>
-                    )}
+                    </>
+                  )}
 
-                    <SafeAreaView>
-                      <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>BRIEF DESCRIPTION OF TASKS</Text>
-                      <TextInput
-                        maxLength={512}
-                        {...commonInputProps(description, setDescription)}
-                        multiline={true}
-                        scrollEnabled={false}
-                        style={{
-                          borderWidth: 1,
-                          borderRadius: 10,
-                          marginTop: 10,
-                          marginBottom: 40,
-                          padding: 10,
-                          minHeight: 100,
-                        }}
-                      />
-                    </SafeAreaView>
-                  </FieldsTwo>
-                </Container>
-              </TouchableWithoutFeedback>
-            </ScrollView>
-          </KeyboardAvoidingView>
-        </Filter>
+                  <SafeAreaView>
+                    <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>BRIEF DESCRIPTION OF TASKS</Text>
+                    <TextInput
+                      maxLength={512}
+                      {...commonInputProps(description, setDescription)}
+                      multiline={true}
+                      scrollEnabled={false}
+                      style={{
+                        borderWidth: 1,
+                        borderRadius: 10,
+                        marginTop: 10,
+                        marginBottom: 40,
+                        padding: 10,
+                        minHeight: 100,
+                      }}
+                    />
+                  </SafeAreaView>
+                </FieldsTwo>
+              </Container>
+            </TouchableWithoutFeedback>
+          </ScrollView>
+          {show1 && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date_started}
+              mode="date"
+              is24Hour={true}
+              display="default"
+              onChange={onChangeDateObtained}
+            />
+          )}
+          {show2 && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date_ended}
+              mode="date"
+              is24Hour={true}
+              display="default"
+              onChange={onChangeExpirationDate}
+            />
+          )}
+        </KeyboardAvoidingView>
       </ModalBackground>
-
-      {show1 && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={date_started}
-          mode="date"
-          is24Hour={true}
-          display="default"
-          onChange={onChangeDateObtained}
-        />
-      )}
-      {show2 && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={date_ended}
-          mode="date"
-          is24Hour={true}
-          display="default"
-          onChange={onChangeExpirationDate}
-        />
-      )}
     </Modal>
   );
 }
@@ -337,14 +337,8 @@ const WageTimeFieldInput = styled.Picker`
   margin: ${Platform.OS == "ios" ? "-60px 0" : "0px"};
 `;
 
-const Filter = styled.View`
-  background: white;
-  opacity: 0;
-  flex: 1;
-`;
-
 const ModalBackground = styled.View`
-  background: grey;
+  background: white;
   flex: 1;
 `;
 

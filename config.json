@@ -1,8 +1,16 @@
 {
   "Development": {
-    "API_URL": "https://contractor-app-test-api.herokuapp.com"
+    "API_URL": "https://contractor-app-test-api.herokuapp.com/v1",
+    "PUSHER": {
+      "API_KEY": "a86bd61a8fd06fbd858e",
+      "CLUSTER": "us2"
+    }
   },
   "Production": {
-    "API_URL": "https://contractor-app-test-api.herokuapp.com"
+    "API_URL": "https://contractor-app-test-api.herokuapp.com/v1",
+    "PUSHER": {
+      "API_KEY": "a86bd61a8fd06fbd858e",
+      "CLUSTER": "us2"
+    }
   }
 }

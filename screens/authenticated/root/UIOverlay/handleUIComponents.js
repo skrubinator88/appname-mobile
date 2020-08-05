@@ -10,19 +10,19 @@ import AcceptedJob from "./acceptedJob";
 
 import { UIOverlayContext } from "../../../../components/context";
 
-function HandleOverlayUIComponents({ route, navigation }) {
+function HandleOverlayUIComponents({ route, navigation, data }) {
   switch (route) {
     case "dashboard":
       return <Dashboard navigation={navigation} />;
       break;
     case "searching":
-      return <Searching navigation={navigation} />;
+      return <Searching navigation={navigation} data={data} />;
       break;
     case "jobFound":
-      return <JobFound navigation={navigation} />;
+      return <JobFound navigation={navigation} data={data} />;
       break;
     case "acceptedJob":
-      return <AcceptedJob navigation={navigation} />;
+      return <AcceptedJob navigation={navigation} data={data} />;
       break;
     case "example":
       return <Example navigation={navigation} />;
@@ -30,7 +30,7 @@ function HandleOverlayUIComponents({ route, navigation }) {
   }
 }
 
-export default function UIComponents({ navigation }) {
+export default function UIComponents({ navigation, jobPostings, onMoveCamera }) {
   const [route, setRoute] = useState("dashboard");
 
   const uiOverlayContext = React.useMemo(
@@ -38,17 +38,16 @@ export default function UIComponents({ navigation }) {
       changeRoute: (newRoute) => {
         setRoute(newRoute);
       },
+      moveCamera: (location) => {
+        onMoveCamera(location);
+      },
     }),
     []
   );
 
-  useEffect(() => {
-    return;
-  }, [route]);
-
   return (
     <UIOverlayContext.Provider value={uiOverlayContext}>
-      <HandleOverlayUIComponents route={route} navigation={navigation} />
+      <HandleOverlayUIComponents route={route} navigation={navigation} data={jobPostings} />
     </UIOverlayContext.Provider>
   );
 }

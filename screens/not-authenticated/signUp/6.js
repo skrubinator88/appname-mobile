@@ -1,78 +1,168 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { View, TouchableWithoutFeedback, Keyboard, ScrollView } from "react-native";
 import styled from "styled-components/native";
 import { useTheme } from "@react-navigation/native";
 
 import Header from "../../../components/header";
 import Text from "../../../components/text";
+import SchoolModal from "./schoolModal";
 import LicenseModal from "./licenseModal";
 
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, Entypo } from "@expo/vector-icons";
+import { RegistrationContext } from "../../../components/context";
 
-export default function SignUpContractorScreen6({ navigation }) {
+export default function signUp6({ navigation }) {
   const { colors } = useTheme();
   const [licenseModalVisible, setLicenseModalVisible] = useState(false);
+  const [licenseModalState, setLicenseModalState] = useState({});
+  const [licenses_items, setLicenseItems] = useState([]);
+
+  const [workModalVisible, setWorkModalVisible] = useState(false);
+  const [workModalState, setWorkModalState] = useState({});
+  const [work_history_items, setWorkHistoryItems] = useState([]);
+
+  const { registrationState, methods } = useContext(RegistrationContext);
+  const { pushItemFormField } = methods;
+
+  const handleSubmit = () => {
+    // navigation.navigate("SignUpContractor6");
+  };
+
+  useEffect(() => {
+    // if (registrationState.work_history.length != 0) {
+    //   setWorkHistoryItems(registrationState.work_history);
+    // }
+    // if (registrationState.educational_background.length != 0) {
+    //   setEducationalBackgroundItems(registrationState.educational_background);
+    // }
+  }, [registrationState]);
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <>
-        <Header navigation={navigation} backTitle="" nextTitle="Skip" nextColor="grey" nextAction={() => {}} />
-
-        <LicenseModal
-          licenseModalVisible={licenseModalVisible}
-          onCancel={() => setLicenseModalVisible(false)}
-          onSave={() => setLicenseModalVisible(false)}
+        <Header
+          navigation={navigation}
+          backTitle=""
+          // nextTitle="Skip"
+          nextColor="grey"
+          nextAction={() => {
+            // navigation.navigate("SignUpContractor6");
+          }}
         />
 
-        <ScrollView>
-          <Container>
-            <Text align="center" title bold>
-              Skills & Licenses
-            </Text>
-            <Text align="center" medium>
-              We ask for this to enhance your experience with finding work that matches your abilities and permit
-            </Text>
+        <LicenseModal
+          navigation={navigation}
+          licenseModalVisible={licenseModalVisible}
+          onHandleCancel={() => {
+            setLicenseModalState({});
+            setLicenseModalVisible(false);
+          }}
+          onHandleSave={(form) => {
+            setLicenseModalState({});
+            setLicenseModalVisible(false);
+            pushItemFormField(form, "licenses");
+          }}
+          state={licenseModalState}
+        />
 
-            <WorkHistorySection>
-              <Text small>SKILLS</Text>
-              <AddButton
+        <Container>
+          <Text align="center" title bold>
+            Skills & licenses
+          </Text>
+          <Text align="center" medium>
+            We ask fro this to enhance your experience with finding work that matches your abilities and permit.
+          </Text>
+
+          <WorkHistorySection>
+            <Text small>SKILLS</Text>
+            <AddButton
+              onPress={() => {
+                setWorkModalVisible(true);
+              }}
+            >
+              <Text small color="grey">
+                Add a skill
+              </Text>
+              <MaterialIcons color={colors.primary} name="add-circle" size={30} />
+            </AddButton>
+
+            {work_history_items.map((item, index) => (
+              <TouchableWithoutFeedback
+                key={index}
                 onPress={() => {
-                  navigation.navigate("AddSkills");
+                  setWorkModalState({ ...item, edit: true });
+                  setWorkModalVisible(true);
                 }}
               >
-                <Text small color="grey">
-                  Add a skill
-                </Text>
-                <MaterialIcons backgroundColor="white" color={colors.primary} name="add-circle" size={30} />
-              </AddButton>
-            </WorkHistorySection>
+                <WorkHistoryItem>
+                  <Row>
+                    <Text small>{item.employer_name}</Text>
+                    <Entypo color="black" name="pencil" size={16} />
+                  </Row>
+                </WorkHistoryItem>
+              </TouchableWithoutFeedback>
+            ))}
+          </WorkHistorySection>
 
-            <WorkHistorySection>
-              <Text small>LICENSES</Text>
-              <AddButton
+          <WorkHistorySection>
+            <Text small>LICENSES</Text>
+            <AddButton
+              onPress={() => {
+                setLicenseModalVisible(true);
+              }}
+            >
+              <Text small color="grey">
+                Add a license
+              </Text>
+              <MaterialIcons color={colors.primary} name="add-circle" size={30} />
+            </AddButton>
+
+            {licenses_items.map((item, index) => (
+              <TouchableWithoutFeedback
+                key={index}
                 onPress={() => {
-                  setLicenseModalVisible(true);
+                  setEducationalBackgroundModalState({ ...item, edit: true });
+                  setEducationalBackgroundModalVisible(true);
                 }}
               >
-                <Text small color="grey">
-                  Add a license
-                </Text>
-                <MaterialIcons backgroundColor="white" color={colors.primary} name="add-circle" size={30} />
-              </AddButton>
-            </WorkHistorySection>
+                <WorkHistoryItem>
+                  <Row>
+                    <Text small>License: {item.license_number}</Text>
+                    <Entypo color="black" name="pencil" size={16} />
+                  </Row>
+                  <Row>
+                    <Text small>Date Obtained: {item.date_obtained}</Text>
+                  </Row>
+                  <Row>
+                    <Text small>Expires: {item.expiration_date}</Text>
+                  </Row>
+                </WorkHistoryItem>
+              </TouchableWithoutFeedback>
+            ))}
+          </WorkHistorySection>
 
-            <ButtonStyled onPress={(e) => handleSubmit(e)} style={{ backgroundColor: colors.primary }}>
-              <Text style={{ color: "white" }}>Continue</Text>
-            </ButtonStyled>
-          </Container>
-        </ScrollView>
+          <ButtonStyled onPress={(e) => handleSubmit(e)} style={{ backgroundColor: colors.primary }}>
+            <Text style={{ color: "white" }}>Continue</Text>
+          </ButtonStyled>
+        </Container>
       </>
     </TouchableWithoutFeedback>
   );
 }
 
+const Row = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+`;
+
+const WorkHistoryItem = styled.View`
+  flex-direction: column;
+  padding: 10px;
+  background: #ececec;
+  margin: 10px 0;
+`;
+
 const WorkHistorySection = styled.View`
-  height: 250px;
   margin: 20px 0;
 `;
 

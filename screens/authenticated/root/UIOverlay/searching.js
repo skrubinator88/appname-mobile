@@ -14,11 +14,13 @@ export default function Searching() {
   const [loop, setLoop] = useState();
   let isMounted = true;
 
+  useEffect(() => {}, []);
+
   useEffect(() => {
     if (isMounted) {
       let value = 0;
       setProgress(value);
-      demo = setInterval(() => {
+      const demo = setInterval(() => {
         value += Math.random() / 10;
         if (value > 1) {
           value = 1;
@@ -33,6 +35,8 @@ export default function Searching() {
   useEffect(() => {
     if (progress >= 1) {
       clearInterval(loop);
+    }
+    if (progress == 1) {
       return changeRoute("jobFound");
     }
   }, [progress]);
