@@ -44,6 +44,7 @@ const initialLoginState = {
   isLoading: true,
   userName: null,
   userToken: null,
+  role: "contractor",
 };
 
 import loginReducer from "./reducers/loginReducer";
@@ -58,16 +59,20 @@ export default function App({ navigation }) {
         // Fetch from Server API (DEMOSTRATION)
         const userToken = String(foundUser[0].userToken);
         const userName = foundUser[0].username;
+        const userRole = foundUser[0].role;
         try {
           await AsyncStorage.setItem("userToken", userToken);
         } catch (e) {}
-        dispatch({ type: "LOGIN", id: userName, token: userToken });
+        dispatch({ type: "LOGIN", id: userName, token: userToken, role: userRole });
       },
       signOut: async () => {
         try {
           await AsyncStorage.removeItem("userToken");
         } catch (e) {}
         dispatch({ type: "LOGOUT" });
+      },
+      getRole: () => {
+        return loginState.role;
       },
     }),
     []

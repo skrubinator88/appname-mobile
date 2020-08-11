@@ -23,8 +23,9 @@ export default function JobFound({ navigation, data }) {
   const { changeRoute } = useContext(UIOverlayContext);
   const [name, setName] = useState("");
   const [occupation, setOccupation] = useState("");
-  const [starRate, setStarRate] = useState("");
+  const [starRate, setStarRate] = useState(0);
   const [tasks, setTasks] = useState("");
+  const [description, setDescription] = useState([]);
 
   useEffect(() => {
     (async () => {
@@ -32,7 +33,7 @@ export default function JobFound({ navigation, data }) {
       const project_manager = await response.json();
       setName(`${project_manager.first_name} ${project_manager.last_name}`);
       setOccupation(project_manager.occupation);
-      setStarRate(project_manager.star_rate);
+      setStarRate(Number(project_manager.star_rate));
 
       console.log(data);
       setDescription(jobData.tasks);
@@ -76,7 +77,7 @@ export default function JobFound({ navigation, data }) {
           </Column>
         </Row>
         <Row>
-          <Column>
+          <JobDescriptionRow>
             <JobDescription>
               <Text small light marginBottom="5px">
                 Job Description
@@ -86,8 +87,10 @@ export default function JobFound({ navigation, data }) {
               </Text>
             </JobDescription>
 
-            <Text>{description}</Text>
-          </Column>
+            {description.map((item, index) => {
+              return <Text key={index}>{item}</Text>;
+            })}
+          </JobDescriptionRow>
         </Row>
 
         <CardOptionItem row>
@@ -161,6 +164,11 @@ const Row = styled.View`
 `;
 
 const Column = styled.View`
+  flex-direction: column;
+`;
+
+const JobDescriptionRow = styled.View`
+  flex: 1;
   flex-direction: column;
 `;
 

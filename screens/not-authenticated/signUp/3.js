@@ -20,6 +20,8 @@ export default function ({ navigation }) {
   const [thirdInput, setThirdInput] = useState("");
   const [fourthInput, setFourthInput] = useState("");
 
+  const [errorMsg, setErrorMsg] = useState("");
+
   let hiddenTextInput;
   let firstTextInput;
   let secondTextInput;
@@ -69,11 +71,17 @@ export default function ({ navigation }) {
 
   const handleSubmit = async () => {
     const code = textInput.toString();
-    const twilio = await fetch(`${env.API_URL}/v1/users/sms_verification?phone_number=${registrationState.phone_number}&code=${code}`, {
-      method: "POST",
-    });
-    const response = await twilio.json();
-    if (response.data.valid) navigation.navigate("SignUp4");
+    if (!code || code.length != 4) return;
+    try {
+      const twilio = await fetch(`${env.API_URL}/users/sms_verification?phone_number=${registrationState.phone_number}&code=${code}`, {
+        method: "POST",
+      });
+      const response = await twilio.json();
+      if (response.data.valid) navigation.navigate("SignUp4");
+    } catch (e) {
+      setErrorMsg("Incorrect Pin Code");
+      console.log(e.message);
+    }
   };
 
   return (
@@ -84,6 +92,8 @@ export default function ({ navigation }) {
           <ContainerTopMiddle>
             <TextStyled>Enter the 4-digit code sent to you at:</TextStyled>
             <TextStyled style={{ marginTop: 0 }}>{phoneNumberRender()}</TextStyled>
+
+            <Text style={{ textAlign: "center", color: "#ff0000" }}>{errorMsg}</Text>
             <ContainerMiddle>
               <HiddenTextInput
                 keyboardType="numeric"
@@ -109,6 +119,7 @@ export default function ({ navigation }) {
               <TextInputStyled {...handleSettingsProps(3, 1, thirdInput)} />
               <TextInputStyled {...handleSettingsProps(4, 1, fourthInput)} />
             </ContainerMiddle>
+
             <ButtonStyled onPress={() => handleSubmit()} style={{ backgroundColor: colors.primary }}>
               <Text style={{ color: "white" }}>Continue</Text>
             </ButtonStyled>

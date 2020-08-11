@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useContext } from "react";
 
 // Card UI Components
 import Dashboard from "./dashboard";
@@ -7,7 +7,7 @@ import JobFound from "./jobFound";
 import AcceptedJob from "./acceptedJob";
 
 // import Example from "./example";
-
+import { AuthContext } from "../../../../components/context";
 import { UIOverlayContext } from "../../../../components/context";
 
 function HandleOverlayUIComponents({ route, navigation, data }) {
@@ -32,6 +32,7 @@ function HandleOverlayUIComponents({ route, navigation, data }) {
 
 export default function UIComponents({ navigation, jobPostings, onMoveCamera }) {
   const [route, setRoute] = useState("dashboard");
+  const { getRole } = useContext(AuthContext);
 
   const uiOverlayContext = React.useMemo(
     () => ({
@@ -47,7 +48,13 @@ export default function UIComponents({ navigation, jobPostings, onMoveCamera }) 
 
   return (
     <UIOverlayContext.Provider value={uiOverlayContext}>
-      <HandleOverlayUIComponents route={route} navigation={navigation} data={jobPostings} />
+      {getRole() == "project_manager" ? (
+        // Project Manager
+        <HandleOverlayUIComponents route={route} navigation={navigation} data={jobPostings} />
+      ) : (
+        // Contractor
+        <HandleOverlayUIComponents route={route} navigation={navigation} data={jobPostings} />
+      )}
     </UIOverlayContext.Provider>
   );
 }

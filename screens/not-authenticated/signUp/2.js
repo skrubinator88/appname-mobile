@@ -67,7 +67,7 @@ export default function ({ navigation }) {
 
       try {
         navigation.navigate("SignUp3");
-        const twilio = await fetch(`${env.API_URL}/v1/users/sms_registration?phone_number=${phone_number}&channel=sms`, {
+        const twilio = await fetch(`${env.API_URL}/users/sms_registration?phone_number=${phone_number}&channel=sms`, {
           method: "POST",
         });
       } catch (e) {
