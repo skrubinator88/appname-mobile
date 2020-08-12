@@ -1,10 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, TouchableOpacity } from "react-native";
+import { Text, View, TouchableOpacity, Dimensions, Image } from "react-native";
 import { Camera } from "expo-camera";
 
-export default function CameraScreen() {
+import styled from "styled-components/native";
+import Header from "../../../components/header";
+
+const width = Dimensions.get("screen").width;
+
+export default function CameraScreen({ navigation }) {
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.front);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [capturedPhoto, setCapturedPhoto] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  let camera;
 
   useEffect(() => {
     (async () => {
@@ -12,6 +22,19 @@ export default function CameraScreen() {
       setHasPermission(status === "granted");
     })();
   }, []);
+
+  const triggerPhoto = async () => {
+    const photo = await camera.takePictureAsync();
+    setCapturedPhoto(photo.uri);
+    setShowModal(true);
+  };
+
+  const handleSavePhoto = () => {};
+
+  const handleRetakePhoto = () => {
+    setShowModal(false);
+    setCapturedPhoto(null);
+  };
 
   if (hasPermission === null) {
     return <View />;
@@ -21,28 +44,105 @@ export default function CameraScreen() {
   }
   return (
     <View style={{ flex: 1 }}>
-      <Camera style={{ flex: 1 }} type={type}>
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "transparent",
-            flexDirection: "row",
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              flex: 0.1,
-              alignSelf: "flex-end",
-              alignItems: "center",
-            }}
-            onPress={() => {
-              setType(type === Camera.Constants.Type.back ? Camera.Constants.Type.front : Camera.Constants.Type.back);
-            }}
-          >
-            <Text style={{ fontSize: 18, marginBottom: 10, color: "white" }}> Flip </Text>
-          </TouchableOpacity>
-        </View>
+      <Camera style={{ flex: 4 }} type={type} ref={(ref) => (camera = ref)} onCameraReady={(e) => setCameraReady(true)}>
+        <Header navigation={navigation} background="transparent" color="black" />
+        <CameraUI>
+          <Circle></Circle>
+        </CameraUI>
       </Camera>
+      <GUI>
+        <Text style={{ textAlign: "center", flex: 1 }}>
+          Align your face within the middle of the circle. Remove any sunglasses or hats.
+        </Text>
+        <View style={{ flex: 2 }}>
+          <PhotoTriggerOuter onPress={() => cameraReady && triggerPhoto()}>
+            <PhotoTriggerInner></PhotoTriggerInner>
+          </PhotoTriggerOuter>
+        </View>
+      </GUI>
+
+      {capturedPhoto && (
+        <Preview animated={true} visible={showModal} transparent={false} style={{ flex: 1 }}>
+          <Image source={{ uri: capturedPhoto }} style={{ width: "100%", height: "100%", flex: 4 }} />
+
+          <ButtonGUISection>
+            <SaveImageButton onPress={() => handleSavePhoto()}>
+              <Text style={{ textAlign: "center", color: "white" }}>Save Picture</Text>
+            </SaveImageButton>
+
+            <CancelImageButton onPress={() => handleRetakePhoto()}>
+              <Text style={{ textAlign: "center" }}>Retake Picture</Text>
+            </CancelImageButton>
+          </ButtonGUISection>
+        </Preview>
+      )}
     </View>
   );
 }
+const ButtonGUISection = styled.View`
+  background: transparent;
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+`;
+
+const CancelImageButton = styled.TouchableOpacity`
+  border: 2px solid #3869f3;
+  border-radius: 3px;
+  width: 40%;
+  justify-content: center;
+  padding: 20px;
+`;
+
+const SaveImageButton = styled.TouchableOpacity`
+  border: 2px solid #3869f3;
+  background: #3869f3;
+  border-radius: 3px;
+  width: 40%;
+  justify-content: center;
+  padding: 20px;
+`;
+
+const Preview = styled.Modal`
+  justify-content: center;
+  align-items: center;
+`;
+
+const PhotoTriggerOuter = styled.TouchableOpacity`
+  width: 65px;
+  height: 65px;
+  padding: 3px;
+  border-radius: 100px;
+  background: #3869f3;
+`;
+
+const PhotoTriggerInner = styled.View`
+  flex: 1;
+  border: 2px solid white;
+  /* padding: 10px; */
+  border-radius: 100px;
+  background: #3869f3;
+`;
+
+const CameraUI = styled.View`
+  background: transparent;
+  margin: 10% 0 0 0;
+  flex-direction: row;
+  justify-content: center;
+`;
+
+const Circle = styled.View`
+  border: 3px solid #3869f3;
+  width: 80%;
+  height: ${Math.floor(Number(width) * 0.8)}px;
+  border-radius: 500px;
+`;
+
+const GUI = styled.View`
+  flex: 1;
+  background: white;
+  padding: 20px;
+
+  align-items: center;
+`;
