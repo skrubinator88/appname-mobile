@@ -8,13 +8,14 @@ import Card from "../../../../components/card";
 import * as Progress from "react-native-progress";
 import { UIOverlayContext } from "../../../../components/context";
 
+// Controllers
+import JobsControllers from "../../../../controllers/JobsControllers";
+
 export default function Searching() {
-  const { changeRoute } = useContext(UIOverlayContext);
+  const { changeRoute } = useContext(UIOverlayContext); // Overlay
   const [progress, setProgress] = useState(0);
   const [loop, setLoop] = useState();
   let isMounted = true;
-
-  useEffect(() => {}, []);
 
   useEffect(() => {
     if (isMounted) {

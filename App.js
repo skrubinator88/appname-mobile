@@ -15,14 +15,14 @@ Text.defaultProps.allowFontScaling = false;
 TextInput.defaultProps = TextInput.defaultProps || {};
 TextInput.defaultProps.allowFontScaling = false;
 
-// Disable back press
-
+// Disable back press action
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 
 import { YellowBox } from "react-native";
 import _ from "lodash";
 
+// Disable warnings
 YellowBox.ignoreWarnings(["Setting a timer"]);
 const _console = _.clone(console);
 console.warn = (message) => {
@@ -42,9 +42,6 @@ export const Theme = {
 
 const initialLoginState = {
   isLoading: true,
-  userName: null,
-  userToken: null,
-  role: "contractor",
 };
 
 import loginReducer from "./reducers/loginReducer";
@@ -55,24 +52,31 @@ export default function App({ navigation }) {
   const authContext = React.useMemo(
     () => ({
       signIn: async (foundUser) => {
-        // parameter foundUser: Array, Length: 1, Contains: Username and Token properties
-        // Fetch from Server API (DEMOSTRATION)
-        const userToken = String(foundUser[0].userToken);
-        const userName = foundUser[0].username;
-        const userRole = foundUser[0].role;
+        const userToken = foundUser[0].userToken;
+        const userID = foundUser[0].userName;
+        const profile = foundUser[0].profile;
+        const userData = {
+          userToken,
+          userID,
+          profile,
+        };
         try {
-          await AsyncStorage.setItem("userToken", userToken);
-        } catch (e) {}
-        dispatch({ type: "LOGIN", id: userName, token: userToken, role: userRole });
+          await AsyncStorage.setItem("userData", JSON.stringify(userData));
+        } catch (e) {
+          console.log(e);
+        }
+        dispatch({ type: "LOGIN", id: userID, token: userToken, profile: profile });
       },
       signOut: async () => {
         try {
-          await AsyncStorage.removeItem("userToken");
-        } catch (e) {}
+          await AsyncStorage.removeItem("userData");
+        } catch (e) {
+          console.log(e);
+        }
         dispatch({ type: "LOGOUT" });
       },
-      getRole: () => {
-        return loginState.role;
+      setErrorMessage: async (message) => {
+        dispatch({ type: "ERROR", message });
       },
     }),
     []
@@ -80,13 +84,14 @@ export default function App({ navigation }) {
 
   useEffect(() => {
     (async () => {
-      let userToken = null;
+      let userData = null;
       try {
-        userToken = await AsyncStorage.getItem("userToken");
+        const data = await AsyncStorage.getItem("userData");
+        userData = JSON.parse(data);
       } catch (e) {
-        // console.log(e);
+        console.log(e);
       }
-      dispatch({ type: "RETRIEVE_TOKEN", token: userToken });
+      dispatch({ type: "RETRIEVE_TOKEN", token: userData?.userToken, profile: userData?.profile, id: userData?.userID });
     })();
   }, []);
 
@@ -98,8 +103,16 @@ export default function App({ navigation }) {
     );
   }
 
+  if (loginState.errorMessage) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>{loginState.errorMessage}</Text>
+      </View>
+    );
+  }
+
   return (
-    <AuthContext.Provider value={authContext}>
+    <AuthContext.Provider value={{ authContext, globalState: loginState }}>
       <NavigationContainer theme={Theme}>
         {loginState.userToken ? (
           <>

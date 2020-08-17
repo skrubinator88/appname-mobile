@@ -4,27 +4,37 @@ const loginReducer = (prevState, action) => {
       return {
         ...prevState,
         userToken: action.token,
+        userID: action.id,
+        userData: action.profile,
         isLoading: false,
       };
     case "LOGIN":
       return {
         ...prevState,
-        userName: action.id,
         userToken: action.token,
+        userID: action.id,
+        userData: action.profile,
         isLoading: false,
       };
     case "LOGOUT":
       return {
         ...prevState,
-        userName: null,
         userToken: null,
+        userID: null,
+        userData: null,
         isLoading: false,
+      };
+    case "ERROR":
+      return {
+        ...prevState,
+        errorMsg: action.message,
       };
     case "REGISTER":
       return {
         ...prevState,
-        userName: action.id,
         userToken: action.token,
+        userID: action.id,
+        userData: action.profile,
         isLoading: false,
       };
   }

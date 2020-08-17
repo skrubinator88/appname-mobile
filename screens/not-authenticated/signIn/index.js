@@ -12,7 +12,7 @@ import env from "../../../env";
 // Components
 import Header from "../../../components/header";
 
-export default function SingInIndex({ navigation }) {
+export default function SingInIndex({ navigation, route }) {
   const { registrationState, methods } = useContext(RegistrationContext);
   const { updateForm, sendForm } = methods;
 
@@ -64,25 +64,26 @@ export default function SingInIndex({ navigation }) {
       const phone_number = textInput;
 
       try {
-        navigation.navigate("SignIn1", { phone_number });
         const response = await fetch(`${env.API_URL}/users/phone/${phone_number}`, {
           method: "GET",
         });
 
         const { success, valid } = await response.json();
         if (success && valid) {
-          const twilio = await fetch(`${env.API_URL}/users/sms_registration?phone_number=${phone_number}&channel=sms`, {
-            method: "POST",
-          });
+          navigation.navigate("SignIn1", { phone_number });
+          // ENABLE AFTER DEV
+          // await fetch(`${env.API_URL}/users/sms_registration?phone_number=${phone_number}&channel=sms`, {
+          //   method: "POST",
+          // });
         }
       } catch (e) {
         console.log(e.message);
+        if (e.message == 'Network request failed') {
+          
+        }
       }
       return;
     }
-    // DISABLE AFTER DEV
-    // updateForm({ phone_number: "4049901671" });
-    // navigation.navigate("SignUp3");
   };
 
   return (
@@ -92,7 +93,9 @@ export default function SingInIndex({ navigation }) {
           <Header navigation={navigation} />
 
           <ContainerTopMiddle>
-            <TextStyled>For authentication purposes, what is your phone number?</TextStyled>
+            <TextStyled>
+              {route?.params?.errorMsg ? route?.params?.errorMsg : "For authentication purposes, what is your phone number?"}
+            </TextStyled>
 
             <ContainerMiddle>
               <HiddenTextInput

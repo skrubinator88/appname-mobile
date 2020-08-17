@@ -15,7 +15,8 @@ import { AuthContext } from "../../../components/context/";
 
 function DrawerContent({ navigation }) {
   const { colors } = useTheme();
-  const { signOut } = useContext(AuthContext);
+  const { authContext, globalState } = useContext(AuthContext);
+  const { signOut } = authContext;
 
   return (
     <View style={{ flex: 1 }}>
@@ -27,14 +28,14 @@ function DrawerContent({ navigation }) {
         >
           <Row>
             <Column>
-              <ProfilePicture
-                source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }} // fetch from server
-              />
+              <ProfilePicture source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }} />
             </Column>
             <Column>
-              <Text title>John Doe</Text>
+              <Text title>
+                {globalState.userData.first_name} {globalState.userData.last_name}
+              </Text>
               <Text medium bold>
-                <FontAwesome name="star" size={17} color="white" /> 4.01
+                <FontAwesome name="star" size={17} color="white" /> {globalState.userData.star_rate}
               </Text>
             </Column>
           </Row>
@@ -47,12 +48,29 @@ function DrawerContent({ navigation }) {
           onPress={() => navigation.navigate("Payment")}
           icon={() => <Entypo name="wallet" size={24} color="black" />}
         />
-        <DrawerItem
-          labelStyle={{ fontSize: 20 }}
-          label="Work History"
-          onPress={() => navigation.navigate("Work History")}
-          icon={() => <MaterialIcons name="history" size={24} color="black" />}
-        />
+        {globalState.userData.role == "contractor" ? (
+          <DrawerItem
+            labelStyle={{ fontSize: 20 }}
+            label="Work History"
+            onPress={() => navigation.navigate("Work History")}
+            icon={() => <MaterialIcons name="history" size={24} color="black" />}
+          />
+        ) : (
+          <>
+            <DrawerItem
+              labelStyle={{ fontSize: 20 }}
+              label="Job Listing"
+              // onPress={() => navigation.navigate("Work History")}
+              icon={() => <Entypo name="megaphone" size={24} color="black" />}
+            />
+            <DrawerItem
+              labelStyle={{ fontSize: 20 }}
+              label="Job History"
+              // onPress={() => navigation.navigate("Work History")}
+              icon={() => <MaterialIcons name="history" size={24} color="black" />}
+            />
+          </>
+        )}
         <Divider />
         <DrawerItem
           labelStyle={{ fontSize: 20 }}

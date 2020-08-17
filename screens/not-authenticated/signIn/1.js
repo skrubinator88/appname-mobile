@@ -11,7 +11,8 @@ import Header from "../../../components/header";
 import { AuthContext } from "../../../components/context";
 
 export default function ({ route, navigation }) {
-  const authContext = useContext(AuthContext);
+  const { authContext } = useContext(AuthContext);
+  const { signIn } = authContext;
   const { colors } = useTheme();
 
   const [textInput, setTextInput] = useState("");
@@ -70,25 +71,48 @@ export default function ({ route, navigation }) {
 
   const handleSubmit = async () => {
     setLoading(true);
+    let controller = new AbortController();
+    let signal = controller.signal;
+
     try {
       const code = textInput.toString();
-      const twilio = await fetch(`${env.API_URL}/users/sms_verification?phone_number=${route.params.phone_number}&code=${code}`, {
+      const body = {
+        phone_number: route.params.phone_number,
+        code: code,
+      };
+      const twilio = await fetch(`${env.API_URL}/users/login`, {
         method: "POST",
+        credentials: "same-origin",
+        signal: signal,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
       });
-      const response = await twilio.json();
-      if (response.data.valid) {
-        console.log();
-        const response = await fetch(`${env.API_URL}/users/login`, {
-          method: "POST",
+      const user_login_data = await twilio.json();
+
+      const fetchExpirationTime = setTimeout(() => {
+        controller.abort();
+        navigation.navigate("SignIn", { errorMsg: "To many attempts, try again in few more minutes" });
+        setLoading(false);
+      }, 8000);
+
+      if (user_login_data.token) {
+        clearTimeout(fetchExpirationTime);
+        const response = await fetch(`${env.API_URL}/users/${user_login_data.userName}`, {
+          method: "GET",
+          signal: signal,
           headers: {
-            "Content-Type": "application/json",
+            Authorization: `bearer ${user_login_data.token}`,
           },
-          body: JSON.stringify({ phone_number: route.params.phone_number }),
         });
-        const user_data = await response.json();
-        authContext.signIn([{ userToken: user_data.token, userName: user_data.userName }]);
+        const user_profile = await response.json();
+        if (user_profile) {
+          signIn([{ userToken: user_login_data.token, userName: user_login_data.userName, profile: user_profile }]);
+        }
       }
     } catch (e) {
+      controller.abort();
       console.log(e);
       navigation.goBack();
       setLoading(false);

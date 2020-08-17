@@ -1,28 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { View, Keyboard, Dimensions } from "react-native";
+import * as Location from "expo-location";
+import MapView, { Marker } from "react-native-maps";
 import styled from "styled-components/native";
 import config from "../../../env";
 
-import * as Location from "expo-location";
-import MapView, { Marker } from "react-native-maps";
 import HandleUIComponents from "./UIOverlay/handleUIComponents";
-import { mapStyle } from "../../../components/mapStyle";
-import Pusher from "pusher-js/react-native";
 
-const pusher = new Pusher(`${config.PUSHER.API_KEY}`, { cluster: config.PUSHER.CLUSTER });
+// Controllers
+import JobsControllers from "../../../controllers/JobsControllers";
 
 // Interfaces
 import { CameraInterface } from "../../../interfaces/mapview-interfaces";
 
 const { height } = Dimensions.get("screen");
-
-const handleImage = (imageType) => {
-  switch (imageType) {
-    case "user":
-      return require("../../../assets/user-icon.png");
-      break;
-  }
-};
 
 const askPermissions = async () => {
   let position;
@@ -40,32 +31,30 @@ export function RootScreen({ navigation }) {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [jobPostings, setJobPostings] = useState([]);
-  let jobsPostingsArray = [];
+  const [channel, setChannel] = useState(null);
+
   let cameraSettings;
+
+  const thisComponentState = {
+    location,
+    setLocation,
+    setErrorMsg,
+    setJobPostings,
+    channel,
+    setChannel,
+  };
 
   const handleCameraMove = () => {};
 
-  // Get initial location
   useEffect(() => {
     askPermissions().then((position) => setLocation(position));
   }, []);
 
   useEffect(() => {
-    if (location != null) {
-      const channel = pusher.subscribe("jobs");
-      fetch(`${config.API_URL}/jobs/location?lng=${location.coords.longitude}&lat=${location.coords.latitude}`)
-        .then((res) => res.json())
-        .then((jobs) => {
-          jobsPostingsArray = jobs;
-          return setJobPostings(jobs);
-        });
-
-      channel.bind("job-created", function (data) {
-        jobsPostingsArray.push(data);
-        const sanitizedJobs = jobsPostingsArray.filter((item, pos) => jobsPostingsArray.indexOf(item) == pos);
-        setJobPostings(sanitizedJobs);
-      });
-    }
+    JobsControllers.getJobsAndSubscribeJobsChannel(thisComponentState);
+    return function cleanUp() {
+      if (channel) channel.unbind();
+    };
   }, [location]);
 
   if (location != null) {
@@ -103,7 +92,7 @@ export function RootScreen({ navigation }) {
             <Marker
               key={_id}
               coordinate={{ latitude: location.coordinates[1], longitude: location.coordinates[0] }}
-              icon={handleImage("user")}
+              icon={JobsControllers.getJobTagType("user")}
             ></Marker>
           ))}
         </MapView>
