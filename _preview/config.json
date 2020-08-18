@@ -1,0 +1,6 @@
+{
+  "Images": ["preview1.png"],
+  "technologies": ["React.js", "React Native", "MongoDB", "Node.js", "Express.js"],
+  "APIs": ["Google Maps API (Maps, Places & Geolocation)"],
+  "others": ["Styled Components", "Pusher", "Expo", "React Navigation", "Babel", "Axios"]
+}
