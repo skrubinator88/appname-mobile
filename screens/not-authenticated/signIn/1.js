@@ -8,10 +8,10 @@ import env from "../../../env";
 // Components
 import Header from "../../../components/header";
 
-import { AuthContext } from "../../../components/context";
+import { GlobalContext } from "../../../components/context";
 
 export default function ({ route, navigation }) {
-  const { authContext } = useContext(AuthContext);
+  const { authContext } = useContext(GlobalContext);
   const { signIn } = authContext;
   const { colors } = useTheme();
 

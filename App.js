@@ -1,13 +1,7 @@
-// IMPORTS
+// Dependencies
 import React, { useEffect, useReducer } from "react";
 import { View, ActivityIndicator, Text, TextInput, BackHandler } from "react-native";
-import AsyncStorage from "@react-native-community/async-storage";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
-
-import { AuthContext } from "./components/context";
-// import { Screen45 } from "./views/45";
-// import Example from "./screens/not-authenticated/signUp/schoolModal";
-import Example from "./views/work";
 
 // Disable Font Scaling
 Text.defaultProps = Text.defaultProps || {};
@@ -15,14 +9,9 @@ Text.defaultProps.allowFontScaling = false;
 TextInput.defaultProps = TextInput.defaultProps || {};
 TextInput.defaultProps.allowFontScaling = false;
 
-// Disable back press action
-import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
-import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
-
+// Disable warnings
 import { YellowBox } from "react-native";
 import _ from "lodash";
-
-// Disable warnings
 YellowBox.ignoreWarnings(["Setting a timer"]);
 const _console = _.clone(console);
 console.warn = (message) => {
@@ -40,62 +29,40 @@ export const Theme = {
   },
 };
 
-const initialLoginState = {
-  isLoading: true,
-};
+// Imported Store
+import { GlobalContext } from "./components/context";
 
-import loginReducer from "./reducers/loginReducer";
+// Imported Actions
+import AuthActions from "./actions/AuthActions";
+import ErrorActions from "./actions/ErrorActions";
+
+// Reducers
+import AuthReducer from "./reducers/AuthReducer";
+import ErrorReducer from "./reducers/ErrorReducer";
+
+// Components
+import Example from "./views/work";
+import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
+import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 
 export default function App({ navigation }) {
-  const [loginState, dispatch] = useReducer(loginReducer, initialLoginState);
+  // Store
+  const [authState, auth_dispatch] = useReducer(AuthReducer, { isLoading: true });
+  const [errorState, error_dispatch] = useReducer(ErrorReducer, { errorMsg: "ads" });
 
-  const authContext = React.useMemo(
-    () => ({
-      signIn: async (foundUser) => {
-        const userToken = foundUser[0].userToken;
-        const userID = foundUser[0].userName;
-        const profile = foundUser[0].profile;
-        const userData = {
-          userToken,
-          userID,
-          profile,
-        };
-        try {
-          await AsyncStorage.setItem("userData", JSON.stringify(userData));
-        } catch (e) {
-          console.log(e);
-        }
-        dispatch({ type: "LOGIN", id: userID, token: userToken, profile: profile });
-      },
-      signOut: async () => {
-        try {
-          await AsyncStorage.removeItem("userData");
-        } catch (e) {
-          console.log(e);
-        }
-        dispatch({ type: "LOGOUT" });
-      },
-      setErrorMessage: async (message) => {
-        dispatch({ type: "ERROR", message });
-      },
-    }),
-    []
-  );
+  const thisComponentAuthState = { dispatch: auth_dispatch, setError: error_dispatch };
+  const thisComponentErrorState = { dispatch: error_dispatch };
 
+  // Actions
+  const authContext = AuthActions.memo(thisComponentAuthState);
+  const errorContext = ErrorActions.memo(thisComponentErrorState);
+
+  // Retrieve token stored in local memory
   useEffect(() => {
-    (async () => {
-      let userData = null;
-      try {
-        const data = await AsyncStorage.getItem("userData");
-        userData = JSON.parse(data);
-      } catch (e) {
-        console.log(e);
-      }
-      dispatch({ type: "RETRIEVE_TOKEN", token: userData?.userToken, profile: userData?.profile, id: userData?.userID });
-    })();
+    AuthActions.retrieve_user_token_local_storage(thisComponentAuthState);
   }, []);
 
-  if (loginState.isLoading) {
+  if (authState.isLoading) {
     return (
       <View style={{ justifyContent: "center", alignItems: "center", flex: 1 }}>
         <ActivityIndicator size="large" />
@@ -103,18 +70,18 @@ export default function App({ navigation }) {
     );
   }
 
-  if (loginState.errorMessage) {
+  if (errorState.message) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>{loginState.errorMessage}</Text>
+        <Text>{errorState.message}</Text>
       </View>
     );
   }
 
   return (
-    <AuthContext.Provider value={{ authContext, globalState: loginState }}>
+    <GlobalContext.Provider value={{ authContext, authState, errorContext }}>
       <NavigationContainer theme={Theme}>
-        {loginState.userToken ? (
+        {authState.userToken ? (
           <>
             <AuthenticatedStackScreen />
             {/* <Example /> */}
@@ -126,6 +93,6 @@ export default function App({ navigation }) {
           </>
         )}
       </NavigationContainer>
-    </AuthContext.Provider>
+    </GlobalContext.Provider>
   );
 }

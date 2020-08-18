@@ -8,6 +8,7 @@ const loginReducer = (prevState, action) => {
         userData: action.profile,
         isLoading: false,
       };
+
     case "LOGIN":
       return {
         ...prevState,
@@ -16,6 +17,7 @@ const loginReducer = (prevState, action) => {
         userData: action.profile,
         isLoading: false,
       };
+
     case "LOGOUT":
       return {
         ...prevState,
@@ -24,11 +26,7 @@ const loginReducer = (prevState, action) => {
         userData: null,
         isLoading: false,
       };
-    case "ERROR":
-      return {
-        ...prevState,
-        errorMsg: action.message,
-      };
+
     case "REGISTER":
       return {
         ...prevState,

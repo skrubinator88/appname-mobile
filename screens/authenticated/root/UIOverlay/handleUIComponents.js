@@ -8,8 +8,15 @@ import JobFound from "./jobFound";
 import AcceptedJob from "./acceptedJob";
 
 // import Example from "./example";
-import { AuthContext } from "../../../../components/context";
+import { GlobalContext } from "../../../../components/context";
 import { UIOverlayContext } from "../../../../components/context";
+
+// Store
+
+// Reducers
+
+// Actions
+import OverlayActions from "../../../../actions/OverlayActions";
 
 function HandleOverlayUIContractorComponents({ route, navigation, data }) {
   switch (route) {
@@ -53,29 +60,17 @@ function HandleOverlayUIProjectManagerComponents({ route, navigation, data }) {
 
 export default function UIComponents({ navigation, jobPostings, onMoveCamera }) {
   const [route, setRoute] = useState("dashboard");
-  const { authContext, globalState } = useContext(AuthContext);
-  const { getUserInfo } = authContext;
-  const { userToken, userID, userData } = globalState;
+  const { authContext, authState, errorContext } = useContext(GlobalContext);
+  const { userToken, userID, userData } = authState;
 
-  const uiOverlayContext = React.useMemo(
-    () => ({
-      changeRoute: (newRoute) => {
-        setRoute(newRoute);
-      },
-      moveCamera: (location) => {
-        onMoveCamera(location);
-      },
-    }),
-    []
-  );
+  const thisComponentState = { setRoute };
+  const uiOverlayContext = OverlayActions.memo(thisComponentState);
 
   return (
     <UIOverlayContext.Provider value={uiOverlayContext}>
       {userData.role == "contractor" ? (
-        // Project Manager
         <HandleOverlayUIContractorComponents route={route} navigation={navigation} data={jobPostings} />
       ) : (
-        // Contractor
         // <HandleOverlayUIComponents route={route} navigation={navigation} data={jobPostings} />
         <Text>Under Construction</Text>
       )}

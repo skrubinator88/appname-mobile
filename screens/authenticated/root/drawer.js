@@ -11,11 +11,11 @@ import { NavigationContainer } from "@react-navigation/native";
 
 export const AuthenticatedDrawer = createDrawerNavigator();
 
-import { AuthContext } from "../../../components/context/";
+import { GlobalContext } from "../../../components/context/";
 
 function DrawerContent({ navigation }) {
   const { colors } = useTheme();
-  const { authContext, globalState } = useContext(AuthContext);
+  const { authContext, authState, errorContext } = useContext(GlobalContext);
   const { signOut } = authContext;
 
   return (
@@ -32,10 +32,10 @@ function DrawerContent({ navigation }) {
             </Column>
             <Column>
               <Text title>
-                {globalState.userData.first_name} {globalState.userData.last_name}
+                {authState.userData.first_name} {authState.userData.last_name}
               </Text>
               <Text medium bold>
-                <FontAwesome name="star" size={17} color="white" /> {globalState.userData.star_rate}
+                <FontAwesome name="star" size={17} color="white" /> {authState.userData.star_rate}
               </Text>
             </Column>
           </Row>
@@ -48,7 +48,7 @@ function DrawerContent({ navigation }) {
           onPress={() => navigation.navigate("Payment")}
           icon={() => <Entypo name="wallet" size={24} color="black" />}
         />
-        {globalState.userData.role == "contractor" ? (
+        {authState.userData.role == "contractor" ? (
           <DrawerItem
             labelStyle={{ fontSize: 20 }}
             label="Work History"

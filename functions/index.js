@@ -10,7 +10,3 @@ exports.distanceBetweenUserAndJob = (lat1, lon1, lat2, lon2) => {
   var d = R * c;
   return d * 1000; // meters
 };
-
-exports.error_logger = (e) => {
-  console.error(e);
-};

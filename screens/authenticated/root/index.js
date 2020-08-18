@@ -1,67 +1,65 @@
-import React, { useEffect, useState } from "react";
+// Dependencies
+import React, { useEffect, useState, useContext, useReducer } from "react";
 import { View, Keyboard, Dimensions } from "react-native";
-import * as Location from "expo-location";
 import MapView, { Marker } from "react-native-maps";
 import styled from "styled-components/native";
-import config from "../../../env";
-
-import HandleUIComponents from "./UIOverlay/handleUIComponents";
 
 // Controllers
 import JobsControllers from "../../../controllers/JobsControllers";
+import PermissionsControllers from "../../../controllers/PermissionsControllers";
+import MapController from "../../../controllers/MapController";
+
+// Imported Store
+import { JobContext, GlobalContext } from "../../../components/context";
+
+// Imported Reducers
+import JobReducer from "../../../reducers/JobReducer";
+
+// Imported Actions
+import JobActions from "../../../actions/JobActions";
 
 // Interfaces
 import { CameraInterface } from "../../../interfaces/mapview-interfaces";
 
+// Components
+import HandleUIComponents from "./UIOverlay/handleUIComponents";
+
+// Configs
 const { height } = Dimensions.get("screen");
 
-const askPermissions = async () => {
-  let position;
-  try {
-    let { status } = await Location.requestPermissionsAsync();
-    if (status !== "granted") setErrorMsg("Permission to access location was denied");
-    position = await Location.getLastKnownPositionAsync();
-  } catch (e) {
-    position = await Location.getCurrentPositionAsync();
-  }
-  return position;
-};
-
 export function RootScreen({ navigation }) {
+  const { errorContext } = useContext(GlobalContext);
+  const { setError } = errorContext;
+
+  // Constructor
   const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
   const [jobPostings, setJobPostings] = useState([]);
   const [channel, setChannel] = useState(null);
-
   let cameraSettings;
 
-  const thisComponentState = {
-    location,
-    setLocation,
-    setErrorMsg,
-    setJobPostings,
-    channel,
-    setChannel,
-  };
+  // Job Store
+  const [job_ids, dispatch] = useReducer(JobReducer, []);
+  const jobContext = JobActions.memo({ job_ids, dispatch });
 
-  const handleCameraMove = () => {};
+  // State object for use in imported (external) modules. Modules will have control over this (actual module) component state
+  const thisComponentState = { location, setLocation, setJobPostings, channel, setChannel, setError, jobContext };
 
+  // Get location
   useEffect(() => {
-    askPermissions().then((position) => setLocation(position));
+    PermissionsControllers.getLocation().then((position) => setLocation(position));
   }, []);
 
+  // (Web Socket) get jobs and subscribe to jobs pipeline
   useEffect(() => {
-    JobsControllers.getJobsAndSubscribeJobsChannel(thisComponentState);
-    return function cleanUp() {
-      if (channel) channel.unbind();
-    };
+    if (location) JobsControllers.getJobsAndSubscribeJobsChannel(thisComponentState);
+    return () => channel && channel.unbind();
   }, [location]);
 
   if (location != null) {
     const zoom = 12; // Change the zoom between 2 and 20
-    const base = 80; // Change this number to set the position of the GPS Icon (Vertically only) between -200 and 200 Default: -100
+    const verticalAlignment = 80; // Change this number to set the position of the GPS Icon (Vertically only) between -200 and 200 Default: -100
     cameraSettings = new CameraInterface({
-      latitude: location.coords.latitude - base / Math.pow(2, zoom - 1),
+      latitude: location.coords.latitude - verticalAlignment / Math.pow(2, zoom - 1),
       longitude: location.coords.longitude,
       altitude: 0,
       pitch: 0,
@@ -84,8 +82,8 @@ export function RootScreen({ navigation }) {
           camera={cameraSettings}
           showsUserLocation={true}
           style={{ height }}
-          maxZoomLevel={18} // 18
-          minZoomLevel={9} // 9
+          maxZoomLevel={18} // recommended 18 / min: 1, max: 19
+          minZoomLevel={9} // recommended 9 / min: 1, max: 19
           // customMapStyle={mapStyle}
         >
           {jobPostings.map(({ location, _id }) => (
@@ -97,7 +95,9 @@ export function RootScreen({ navigation }) {
           ))}
         </MapView>
 
-        <HandleUIComponents navigation={navigation} jobPostings={jobPostings} onMoveCamera={handleCameraMove} />
+        <JobContext.Provider value={jobContext}>
+          <HandleUIComponents navigation={navigation} jobPostings={jobPostings} onMoveCamera={MapController.handleCameraMoveEvent()} />
+        </JobContext.Provider>
       </Container>
     );
   } else {

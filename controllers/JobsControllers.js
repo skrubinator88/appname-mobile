@@ -7,12 +7,12 @@ import config from "../env";
 const pusher = new Pusher(`${config.PUSHER.API_KEY}`, { cluster: config.PUSHER.CLUSTER });
 
 // Functions
-import { distanceBetweenUserAndJob, error_logger } from "../functions/";
+import { distanceBetweenUserAndJob } from "../functions/";
 
 // Memory
 let jobsPostingsArray = [];
 
-exports.getJobs = async (params, saveJobsInActualComponent) => {
+exports.getJobs = async (params, saveJobsInActualComponent, setError) => {
   if (!params.max_distance) params.max_distance = 10;
   try {
     // Get and register jobs
@@ -25,7 +25,7 @@ exports.getJobs = async (params, saveJobsInActualComponent) => {
     jobsPostingsArray = jobs;
     saveJobsInActualComponent(jobs);
   } catch (e) {
-    error_logger(e);
+    setError(e.message);
   }
 };
 
@@ -33,12 +33,13 @@ exports.getJobsAndSubscribeJobsChannel = async (state) => {
   const { location, setLocation } = state;
   const { setChannel } = state;
   const { setJobPostings } = state;
+  const { setError } = state;
 
   if (location != null) {
     const { latitude, longitude } = location.coords;
 
     try {
-      module.exports.getJobs({ lat: latitude, lng: longitude }, setJobPostings);
+      module.exports.getJobs({ lat: latitude, lng: longitude }, setJobPostings, setError);
 
       // Fetch state from given location coordinates
       const google_geolocation_api_base_url = "https://maps.googleapis.com/maps/api/geocode/json"; // Google Geolocation API
@@ -68,7 +69,7 @@ exports.getJobsAndSubscribeJobsChannel = async (state) => {
         }
       });
     } catch (e) {
-      error_logger(e);
+      setError(e.message);
     }
   }
 };

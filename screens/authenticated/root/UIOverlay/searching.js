@@ -11,6 +11,12 @@ import { UIOverlayContext } from "../../../../components/context";
 // Controllers
 import JobsControllers from "../../../../controllers/JobsControllers";
 
+// Store
+
+// Reducer
+
+// Actions
+
 export default function Searching() {
   const { changeRoute } = useContext(UIOverlayContext); // Overlay
   const [progress, setProgress] = useState(0);
