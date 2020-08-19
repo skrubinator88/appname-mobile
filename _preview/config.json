@@ -1,7 +1,13 @@
 {
   "name": "Contractor App",
   "image_names": ["preview1.png"],
-  "technologies": ["React.js", "React Native", "MongoDB", "Node.js", "Express.js"],
+  "technologies": [
+    { "name": "React.js", "colors": ["#20232a", "#61dafb"] },
+    { "name": "React Native", "colors": ["", ""] },
+    { "name": "MongoDB", "colors": ["", ""] },
+    { "name": "Node.js", "colors": ["", ""] },
+    { "name": "Express.js", "colors": ["", ""] }
+  ],
   "APIs": ["Google Maps API (Maps, Places & Geolocation)"],
   "others": ["Styled Components", "Pusher", "Expo", "React Navigation", "Babel", "Axios"],
   "app_type": "mobile"
