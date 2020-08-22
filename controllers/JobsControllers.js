@@ -1,6 +1,7 @@
 // Dependencies
 import Pusher from "pusher-js/react-native";
 import axios from "axios";
+import * as firebase from "firebase";
 
 // Config
 import config from "../env";
@@ -29,6 +30,23 @@ exports.getJobs = async (params, saveJobsInActualComponent, setError) => {
   }
 };
 
+exports.getJobs2 = async (params, saveJobsInActualComponent, setError) => {
+  if (!params.max_distance) params.max_distance = 10;
+  try {
+    // Get and register jobs
+    const { data } = await axios.get(`${config.API_URL}/jobs/nearby`, {
+      params,
+    });
+    const jobs = data;
+
+    if (jobs?.ok == 0) return; // Failed to fetch
+    jobsPostingsArray = jobs;
+    saveJobsInActualComponent(jobs);
+  } catch (e) {
+    setError(e.message);
+  }
+};
+
 exports.getJobsAndSubscribeJobsChannel = async (state) => {
   const { location, setLocation } = state;
   const { setChannel } = state;
@@ -39,8 +57,10 @@ exports.getJobsAndSubscribeJobsChannel = async (state) => {
     const { latitude, longitude } = location.coords;
 
     try {
-      module.exports.getJobs({ lat: latitude, lng: longitude }, setJobPostings, setError);
+      // *** Step 1. Get jobs ***
+      module.exports.getJobs2({ lat: latitude, lng: longitude }, setJobPostings, setError);
 
+      // *** Step 2. Subscribe to pipeline ***
       // Fetch state from given location coordinates
       const google_geolocation_api_base_url = "https://maps.googleapis.com/maps/api/geocode/json"; // Google Geolocation API
       const params_geolocation = { address: `${latitude},${longitude}`, key: config.GOOGLE.GEOLOCATION_KEY };

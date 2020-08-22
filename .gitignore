@@ -1,6 +1,7 @@
 node_modules/**/*
 package-lock.json
 .expo/*
+config.json
 npm-debug.*
 *.jks
 *.p8
