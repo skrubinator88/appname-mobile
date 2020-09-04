@@ -20,10 +20,10 @@ export default function Dashboard({ navigation, onUIChange }) {
   const [searchBarFocus, setSearchBarFocus] = useState(false);
   let searchBar;
 
-  const handleSubmit = () => {
+  const handleSubmit = (keyword) => {
     searchBar.clear();
     setSearchBarFocus(false);
-    changeRoute("searching");
+    changeRoute({ name: "searching", props: { keyword } });
   };
 
   function Suggestions() {
@@ -49,7 +49,7 @@ export default function Dashboard({ navigation, onUIChange }) {
                     setSearchBarValue(item);
                     setSearchBarFocus(false);
                     searchBar.blur();
-                    handleSubmit();
+                    handleSubmit(item);
                   }}
                 >
                   {item}

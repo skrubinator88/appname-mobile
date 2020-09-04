@@ -15,8 +15,8 @@ import { GlobalContext } from "../../../components/context/";
 
 function DrawerContent({ navigation }) {
   const { colors } = useTheme();
-  const { authContext, authState, errorContext } = useContext(GlobalContext);
-  const { signOut } = authContext;
+  const { authActions, authState, errorActions } = useContext(GlobalContext);
+  const { signOut } = authActions;
 
   return (
     <View style={{ flex: 1 }}>
@@ -59,8 +59,8 @@ function DrawerContent({ navigation }) {
           <>
             <DrawerItem
               labelStyle={{ fontSize: 20 }}
-              label="Job Listing"
-              // onPress={() => navigation.navigate("Work History")}
+              label="Job Listings"
+              onPress={() => navigation.navigate("Job Listings")}
               icon={() => <Entypo name="megaphone" size={24} color="black" />}
             />
             <DrawerItem
@@ -153,6 +153,7 @@ import { RootScreen } from "./index";
 import PaymentScreen from "../payment";
 import SettingsScreen from "../settings";
 import ProfileScreen from "../profile";
+import JobListings from "../listings/stacks";
 
 export function Drawer() {
   return (
@@ -164,6 +165,8 @@ export function Drawer() {
         <AuthenticatedDrawer.Screen name="Work History" component={RootScreen} />
         <AuthenticatedDrawer.Screen name="Help Center" component={RootScreen} />
         <AuthenticatedDrawer.Screen name="Settings" component={SettingsScreen} />
+
+        <AuthenticatedDrawer.Screen name="Job Listings" component={JobListings} />
       </AuthenticatedDrawer.Navigator>
     </NavigationContainer>
   );

@@ -20,7 +20,7 @@ import SignUpScreen8 from "../signUp/8";
 import Camera from "../signUp/camera";
 
 import { RegistrationContext } from "../../../components/context";
-import registrationReducer from "../../../reducers/registrationReducer";
+import registrationReducer from "../../../reducers/RegistrationReducer";
 
 const initialState = {
   role: "",

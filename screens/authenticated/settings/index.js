@@ -13,10 +13,10 @@ import Text from "../../../components/text";
 const isIos = Platform.OS === "ios";
 const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
 
-import { AuthContext } from "../../../components/context";
+import { GlobalContext } from "../../../components/context";
 
 export default function SettingsScreen({ navigation }) {
-  const { signOut } = useContext(AuthContext);
+  const { signOut } = useContext(GlobalContext);
   return (
     <Container
       navigation={navigation}

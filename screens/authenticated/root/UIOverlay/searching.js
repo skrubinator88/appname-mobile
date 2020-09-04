@@ -1,79 +1,70 @@
+// Dependencies
 import React, { useState, useEffect, useContext } from "react";
 import { SafeAreaView, TouchableWithoutFeedback } from "react-native";
 import styled from "styled-components/native";
+import * as Progress from "react-native-progress";
 
+// Components
 import Text from "../../../../components/text";
 import Card from "../../../../components/card";
 
-import * as Progress from "react-native-progress";
-import { UIOverlayContext } from "../../../../components/context";
+// Context Store
+import { UIOverlayContext, GlobalContext } from "../../../../components/context";
 
 // Controllers
-import JobsControllers from "../../../../controllers/JobsControllers";
+import JobsController from "../../../../controllers/JobsControllers";
+import MapController from "../../../../controllers/MapController";
 
-// Store
+// Redux
+import { useSelector, useDispatch } from "react-redux";
 
-// Reducer
-
-// Actions
-
-export default function Searching() {
-  const { changeRoute } = useContext(UIOverlayContext); // Overlay
-  const [progress, setProgress] = useState(0);
-  const [loop, setLoop] = useState();
-  let isMounted = true;
+export default function Searching({ keyword }) {
+  const { changeRoute } = useContext(UIOverlayContext); // Overlay routing
+  const jobs = useSelector((store) => store.jobs);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (isMounted) {
-      let value = 0;
-      setProgress(value);
-      const demo = setInterval(() => {
-        value += Math.random() / 10;
-        if (value > 1) {
-          value = 1;
-        }
-        setProgress(value);
-      }, 200);
-      setLoop(demo);
-      return;
-    }
-  }, []);
+    const job_found = JobsController.findJobWithKeyword(keyword, jobs)[0];
 
-  useEffect(() => {
-    if (progress >= 1) {
-      clearInterval(loop);
-    }
-    if (progress == 1) {
-      return changeRoute("jobFound");
-    }
-  }, [progress]);
+    if (job_found) {
+      /**
+       * Update job status to "In Review" (This will pop the job out from
+       * local store since is going to update in backend)
+       **/
+      JobsController.changeJobStatus(job_found._id, "IN REVIEW");
 
-  if (isMounted) {
-    return (
-      <Card>
-        <SafeAreaView>
-          <Row>
-            <Text medium>Searching for nearby jobs</Text>
-          </Row>
-          <Row>
-            <Progress.Bar progress={progress} width={250} />
-          </Row>
-          <Row>
-            <TouchableWithoutFeedback
-              onPress={() => {
-                clearInterval(loop);
-                changeRoute("dashboard");
-              }}
-            >
-              <Text small cancel>
-                Cancel
-              </Text>
-            </TouchableWithoutFeedback>
-          </Row>
-        </SafeAreaView>
-      </Card>
-    );
-  }
+      // Move Camera
+      MapController.handleCameraCoordinates(job_found.coordinates, dispatch);
+
+      // Evaluate job
+      changeRoute({ name: "job_found", props: { job_data: job_found } });
+    }
+  }, [jobs]);
+
+  return (
+    <Card>
+      <SafeAreaView>
+        <Row>
+          <Text medium>Searching for nearby jobs</Text>
+        </Row>
+        <Row>
+          <Progress.Bar indeterminate indeterminateAnimationDuration={4000} width={250} borderWidth={0} useNativeDriver={true} />
+        </Row>
+        <Row>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              // clearInterval(loop);
+              changeRoute({ name: "dashboard" });
+            }}
+          >
+            <Text small cancel>
+              Cancel
+            </Text>
+          </TouchableWithoutFeedback>
+        </Row>
+      </SafeAreaView>
+    </Card>
+  );
 }
 
 const Row = styled.View`

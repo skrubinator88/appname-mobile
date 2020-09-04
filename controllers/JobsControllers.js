@@ -1,103 +1,120 @@
 // Dependencies
-import Pusher from "pusher-js/react-native";
 import axios from "axios";
 import * as firebase from "firebase";
+import "firebase/firestore";
+import * as geofirestore from "geofirestore";
 
 // Config
 import config from "../env";
-const pusher = new Pusher(`${config.PUSHER.API_KEY}`, { cluster: config.PUSHER.CLUSTER });
+import { firebaseConfig } from "../config/firebase";
+!firebase.apps.length && firebase.initializeApp(firebaseConfig);
+const firestore = firebase.firestore(); // Create a Firestore reference
+const GeoFirestore = geofirestore.initializeApp(firestore); // Create a GeoFirestore reference
 
 // Functions
-import { distanceBetweenUserAndJob } from "../functions/";
+import { distanceBetweenTwoCoordinates } from "../functions/";
 
-// Memory
-let jobsPostingsArray = [];
+// Redux Actions
+import JobsStoreActions from "../rdx-actions/jobs.action";
 
-exports.getJobs = async (params, saveJobsInActualComponent, setError) => {
-  if (!params.max_distance) params.max_distance = 10;
-  try {
-    // Get and register jobs
-    const { data } = await axios.get(`${config.API_URL}/jobs/nearby`, {
-      params,
-    });
-    const jobs = data;
-
-    if (jobs?.ok == 0) return; // Failed to fetch
-    jobsPostingsArray = jobs;
-    saveJobsInActualComponent(jobs);
-  } catch (e) {
-    setError(e.message);
-  }
+exports.addJob = (job) => {
+  // *** Get jobs ***
+  const firestore = firebase.firestore(); // Create a Firestore reference
+  const GeoFirestore = geofirestore.initializeApp(firestore); // Create a GeoFirestore reference
+  const geoCollection = GeoFirestore.collection("jobs"); // Create a GeoCollection reference
+  const { coordinates } = job;
+  const GeoPoint = new firebase.firestore.GeoPoint(...coordinates);
+  // geoCollection.add({ ...job, coordinates: GeoPoint });
+  // geoCollection.add({
+  //   posted_by: "5f32daf2c4a77e001713b6d5",
+  //   job_type: "Software Developer",
+  //   title: "Create a Web App",
+  //   tasks: ["Build the sms Server", "Build payment system", "Bring the ketchup"],
+  //   pay_rate: 30.0,
+  //   payment_frequency: "hr",
+  //   date_completed: "Fri Jul 30 2020 12:06:16 GMT-0400 (Eastern Daylight Time)",
+  //   star_rate: 4.1,
+  //   status: "available",
+  //   "date _created": "Fri Jul 30 2020 12:06:16 GMT-0400 (Eastern Daylight Time)",
+  //   location_address: "6684 Peachtree Industrial Blvd. Atlanta GA 30360",
+  //   status: "active",
+  //   coordinates: new firebase.firestore.GeoPoint(33.8760658, -84.3147504),
+  // });
 };
 
-exports.getJobs2 = async (params, saveJobsInActualComponent, setError) => {
-  if (!params.max_distance) params.max_distance = 10;
-  try {
-    // Get and register jobs
-    const { data } = await axios.get(`${config.API_URL}/jobs/nearby`, {
-      params,
-    });
-    const jobs = data;
-
-    if (jobs?.ok == 0) return; // Failed to fetch
-    jobsPostingsArray = jobs;
-    saveJobsInActualComponent(jobs);
-  } catch (e) {
-    setError(e.message);
-  }
-};
-
-exports.getJobsAndSubscribeJobsChannel = async (state) => {
+exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
+  // State
   const { location, setLocation } = state;
-  const { setChannel } = state;
-  const { setJobPostings } = state;
   const { setError } = state;
+  let { radius } = state;
+  const { latitude, longitude } = location.coords;
+
+  radius = 1000; // replace
 
   if (location != null) {
-    const { latitude, longitude } = location.coords;
+    const geoCollection = GeoFirestore.collection("jobs"); // Create a GeoCollection reference
 
-    try {
-      // *** Step 1. Get jobs ***
-      module.exports.getJobs2({ lat: latitude, lng: longitude }, setJobPostings, setError);
+    // Queries
+    const query = geoCollection
+      .near({ center: new firebase.firestore.GeoPoint(latitude, longitude), radius: radius })
+      .where("status", "==", "available");
 
-      // *** Step 2. Subscribe to pipeline ***
-      // Fetch state from given location coordinates
-      const google_geolocation_api_base_url = "https://maps.googleapis.com/maps/api/geocode/json"; // Google Geolocation API
-      const params_geolocation = { address: `${latitude},${longitude}`, key: config.GOOGLE.GEOLOCATION_KEY };
-      const { data: address_info } = await axios.get(`${google_geolocation_api_base_url}`, { params: params_geolocation });
-      const address_components = address_info.results[0].address_components; // Component Example Street Name & State
-      const filter_data = address_components.filter((el) => el.types.filter((val) => val == "administrative_area_level_1").length != 0); // Search for State only
-      const state = filter_data[0].short_name;
-
-      // Subscribe to websocket
-      const currentChannel = pusher.subscribe(`jobs-${state}`);
-      setChannel(currentChannel);
-
-      currentChannel.bind("job-created", function (data) {
-        // User location
-        const x1 = location.coords.latitude; // Not an important note: 33
-        const y1 = location.coords.longitude; // Not an important note: -84
-        // Job Location
-        const x2 = data.location.coordinates[1]; // latitude // Not an important note: 33
-        const y2 = data.location.coordinates[0]; // longitude // Not an important note: -84
-        const miles = 10;
-        const maxDistanceInMeters = miles * 1609.344;
-        if (distanceBetweenUserAndJob(x1, y1, x2, y2) < maxDistanceInMeters) {
-          jobsPostingsArray.push(data);
-          const sanitizedJobs = jobsPostingsArray.filter((item, pos) => jobsPostingsArray.indexOf(item) == pos);
-          setJobPostings(sanitizedJobs);
+    // ** Subscribe, add jobs into store and listen for changes **
+    // This function returns an unsubscribe function to close this listener
+    console.log("SUBSCRIBED || Firebase ||");
+    const unsubscribe = query.onSnapshot((res) => {
+      res.docChanges().forEach((change) => {
+        const { doc: document } = change;
+        switch (change.type) {
+          case "added":
+            return dispatch(JobsStoreActions.add(document.id, document.data()));
+          case "modified":
+            return dispatch(JobsStoreActions.update(document.id, document.data()));
+          case "removed":
+            // dispatch(QueueStoreActions.remove(document.id))
+            return dispatch(JobsStoreActions.remove(document.id));
+          default:
+            break;
         }
       });
-    } catch (e) {
-      setError(e.message);
-    }
+    });
+
+    return unsubscribe;
   }
 };
 
 exports.getJobTagType = (imageType) => {
   switch (imageType) {
     case "user":
-      return require("../assets/user-icon.png");
+      return require("../assets/user-icon2.png");
       break;
   }
 };
+
+exports.clean = (unsubscribe, dispatch) => {
+  if (unsubscribe) {
+    unsubscribe(); // Unsubscribe from firebase
+    console.log("UNSUBSCRIBED || Firebase ||");
+  }
+
+  dispatch(JobsStoreActions.clear()); // Clear jobs from state
+};
+
+exports.findJobWithKeyword = (searched_Keywords, jobs) => {
+  // console.log(jobs[0]?.job_type);
+  return jobs.filter((job) => job?.job_type === searched_Keywords);
+};
+
+exports.changeJobStatus = async (documentID, status) => {
+  const geoCollection = GeoFirestore.collection("jobs").doc(documentID);
+
+  // Update job status
+  geoCollection.update({ status });
+};
+
+// Project Manager Functions
+exports.currentUserActiveJobs = (user) => {};
+
+exports.currentUserJobsHistory = (user) => {};
+
+exports.postUserJob = (user, job) => {};

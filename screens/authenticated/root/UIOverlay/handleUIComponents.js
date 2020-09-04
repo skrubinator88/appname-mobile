@@ -7,60 +7,67 @@ import Searching from "./searching";
 import JobFound from "./jobFound";
 import AcceptedJob from "./acceptedJob";
 
-// import Example from "./example";
 import { GlobalContext } from "../../../../components/context";
 import { UIOverlayContext } from "../../../../components/context";
-
-// Store
-
-// Reducers
 
 // Actions
 import OverlayActions from "../../../../actions/OverlayActions";
 
-function HandleOverlayUIContractorComponents({ route, navigation, data }) {
-  switch (route) {
+function HandleOverlayUIContractorComponents({ route, navigation }) {
+  switch (route.name) {
     case "dashboard":
-      return <Dashboard navigation={navigation} />;
+      return <Dashboard navigation={navigation} {...route.props} />;
       break;
     case "searching":
-      return <Searching navigation={navigation} data={data} />;
+      return <Searching navigation={navigation} {...route.props} />;
       break;
-    case "jobFound":
-      return <JobFound navigation={navigation} data={data} />;
+    case "job_found":
+      return <JobFound navigation={navigation} {...route.props} />;
       break;
     case "acceptedJob":
-      return <AcceptedJob navigation={navigation} data={data} />;
+      return <AcceptedJob navigation={navigation} {...route.props} />;
       break;
     case "example":
-      return <Example navigation={navigation} />;
+      return <Example navigation={navigation} {...route.props} />;
       break;
   }
 }
 
-function HandleOverlayUIProjectManagerComponents({ route, navigation, data }) {
-  switch (route) {
+function HandleOverlayUIProjectManagerComponents({ route, navigation }) {
+  switch (route.name) {
     case "dashboard":
-      return <Dashboard navigation={navigation} />;
+      return <Dashboard navigation={navigation} {...route.props} />;
       break;
     case "searching":
-      return <Searching navigation={navigation} data={data} />;
+      return <Searching navigation={navigation} {...route.props} />;
       break;
-    case "jobFound":
-      return <JobFound navigation={navigation} data={data} />;
+    case "job_found":
+      return <JobFound navigation={navigation} {...route.props} />;
       break;
     case "acceptedJob":
-      return <AcceptedJob navigation={navigation} data={data} />;
+      return <AcceptedJob navigation={navigation} {...route.props} />;
       break;
     case "example":
-      return <Example navigation={navigation} />;
+      return <Example navigation={navigation} {...route.props} />;
       break;
   }
 }
 
-export default function UIComponents({ navigation, jobPostings, onMoveCamera }) {
-  const [route, setRoute] = useState("dashboard");
-  const { authContext, authState, errorContext } = useContext(GlobalContext);
+export default function UIComponents({ navigation }) {
+  // Initial Route also as Example
+  const [route, setRoute] = useState({
+    name: "dashboard",
+    props: {
+      /**
+       * Put the data and the data key (name) here
+       * that you might pass through props
+       **/
+      // data: "Some Data" || {name: "Some Data"} || ["Some Data"]
+    },
+  });
+
+  // Authentication Context
+  const { authActions, authState, errorActions } = useContext(GlobalContext);
   const { userToken, userID, userData } = authState;
 
   const thisComponentState = { setRoute };
@@ -69,10 +76,9 @@ export default function UIComponents({ navigation, jobPostings, onMoveCamera }) 
   return (
     <UIOverlayContext.Provider value={uiOverlayContext}>
       {userData.role == "contractor" ? (
-        <HandleOverlayUIContractorComponents route={route} navigation={navigation} data={jobPostings} />
+        <HandleOverlayUIContractorComponents route={route} navigation={navigation} />
       ) : (
-        // <HandleOverlayUIComponents route={route} navigation={navigation} data={jobPostings} />
-        <Text>Under Construction</Text>
+        <HandleOverlayUIProjectManagerComponents route={route} navigation={navigation} />
       )}
     </UIOverlayContext.Provider>
   );

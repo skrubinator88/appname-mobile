@@ -1,4 +1,4 @@
-exports.distanceBetweenUserAndJob = (lat1, lon1, lat2, lon2) => {
+exports.distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2) => {
   // generally used geo measurement function
   var R = 6378.137; // Radius of earth in KM
   var dLat = (lat2 * Math.PI) / 180 - (lat1 * Math.PI) / 180;

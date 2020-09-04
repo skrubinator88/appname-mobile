@@ -1,9 +1,7 @@
-const initalState = [];
-
-const loginReducer = (prevState = initalState, action) => {
+export const JobsReducer = (prevState = [], action) => {
   switch (action.type) {
     case "ADD": {
-      console.log("ADDED");
+      console.log("JOB ADDED");
       const data = action.job;
       data._id = action.id;
       const state = [...prevState];
@@ -11,14 +9,14 @@ const loginReducer = (prevState = initalState, action) => {
       return state;
     }
     case "DELETE": {
-      console.log("DELETED");
+      console.log("JOB DELETED");
       const index = [...prevState].findIndex((item) => item._id == action.id);
       const state = [...prevState];
       state.splice(index, 1);
       return state;
     }
     case "UPDATE": {
-      console.log("UPDATED");
+      console.log("JOB UPDATED");
       const state = [...prevState];
       const index = state.findIndex((item) => item._id == action.id);
       state[index] = action.job;
@@ -29,7 +27,7 @@ const loginReducer = (prevState = initalState, action) => {
       console.log("STATE CLEARED \n");
       return [];
     }
+    default:
+      return [...prevState];
   }
 };
-
-export default loginReducer;

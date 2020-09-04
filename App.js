@@ -41,9 +41,13 @@ import AuthReducer from "./reducers/AuthReducer";
 import ErrorReducer from "./reducers/ErrorReducer";
 
 // Components
-import Example from "./views/work";
+import Example from "./views/50";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
+
+// Redux
+import { Provider } from "react-redux";
+import { rootStore } from "./rdx-store/root.store";
 
 export default function App({ navigation }) {
   // Store
@@ -54,8 +58,8 @@ export default function App({ navigation }) {
   const thisComponentErrorState = { dispatch: error_dispatch };
 
   // Actions
-  const authContext = AuthActions.memo(thisComponentAuthState);
-  const errorContext = ErrorActions.memo(thisComponentErrorState);
+  const authActions = AuthActions.memo(thisComponentAuthState);
+  const errorActions = ErrorActions.memo(thisComponentErrorState);
 
   // Retrieve token stored in local memory
   useEffect(() => {
@@ -79,11 +83,13 @@ export default function App({ navigation }) {
   }
 
   return (
-    <GlobalContext.Provider value={{ authContext, authState, errorContext }}>
+    <GlobalContext.Provider value={{ authActions, authState, errorActions }}>
       <NavigationContainer theme={Theme}>
         {authState.userToken ? (
           <>
-            <AuthenticatedStackScreen />
+            <Provider store={rootStore}>
+              <AuthenticatedStackScreen />
+            </Provider>
             {/* <Example /> */}
           </>
         ) : (

@@ -17,6 +17,7 @@
     "@react-navigation/drawer": "^5.8.2",
     "@react-navigation/native": "^5.5.1",
     "@react-navigation/stack": "^5.4.2",
+    "@reduxjs/toolkit": "^1.4.0",
     "axios": "^0.19.2",
     "expo": "~37.0.3",
     "expo-camera": "~8.2.0",
@@ -24,6 +25,7 @@
     "expo-location": "~8.1.0",
     "expo-permissions": "~8.1.0",
     "firebase": "7.9.0",
+    "geofirestore": "^4.3.0",
     "grpc": "^1.24.3",
     "pusher-js": "^7.0.0",
     "react": "~16.9.0",
@@ -43,6 +45,8 @@
     "react-native-star-rating": "^1.1.0",
     "react-native-status-bar-height": "^2.5.0",
     "react-native-web": "~0.11.7",
+    "react-redux": "^7.2.1",
+    "redux": "^4.0.5",
     "styled-components": "^5.1.1"
   },
   "devDependencies": {

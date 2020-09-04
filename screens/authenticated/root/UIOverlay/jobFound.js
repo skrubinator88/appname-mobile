@@ -13,32 +13,37 @@ import Text from "../../../../components/text";
 
 const deviceHeight = Dimensions.get("window").height;
 
-import { UIOverlayContext } from "../../../../components/context";
-
-const fetchProjectManagerInfo = async (id) => {};
+import { UIOverlayContext, GlobalContext } from "../../../../components/context";
 
 // BODY
-export default function JobFound({ navigation, data }) {
-  const [jobData] = data;
+export default function JobFound({ navigation, job_data }) {
+  const { authState } = useContext(GlobalContext);
   const { changeRoute } = useContext(UIOverlayContext);
-  const [name, setName] = useState("");
+
+  // Constructor
   const [occupation, setOccupation] = useState("");
-  const [starRate, setStarRate] = useState(0);
-  const [tasks, setTasks] = useState("");
+  const [name, setName] = useState("");
   const [description, setDescription] = useState([]);
+  const [starRate, setStarRate] = useState(0);
 
   useEffect(() => {
     (async () => {
-      const response = await fetch(`${config.API_URL}/users/${jobData.posted_by}`, { method: "GET" });
+      const response = await fetch(`${config.API_URL}/users/${job_data.posted_by}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authState.userToken}`,
+          "Content-type": "application/json",
+        },
+      });
       const project_manager = await response.json();
       setName(`${project_manager.first_name} ${project_manager.last_name}`);
       setOccupation(project_manager.occupation);
       setStarRate(Number(project_manager.star_rate));
-
-      console.log(data);
-      setDescription(jobData.tasks);
+      setDescription(job_data.tasks);
     })();
   }, []);
+
+  const handleJobDecline = () => {};
 
   return (
     <Card>
@@ -99,14 +104,14 @@ export default function JobFound({ navigation, data }) {
 
         <Row last>
           <Column>
-            <Button decline onPress={() => changeRoute("dashboard")}>
+            <Button decline onPress={() => handleJobDecline()}>
               <Text style={{ color: "red" }} medium>
                 Decline
               </Text>
             </Button>
           </Column>
           <Column>
-            <Button accept onPress={() => changeRoute("acceptedJob")}>
+            <Button accept onPress={() => changeRoute({ name: "acceptedJob" })}>
               <Text style={{ color: "white" }} medium>
                 Accept
               </Text>

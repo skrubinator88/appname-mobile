@@ -1,58 +1,83 @@
 // Dependencies
-import React, { useEffect, useState, useContext, useReducer } from "react";
+import React, { useEffect, useState, useContext, useReducer, useRef } from "react";
 import { View, Keyboard, Dimensions } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Circle } from "react-native-maps";
 import styled from "styled-components/native";
+import { Provider } from "react-redux";
+
+// Interfaces
+import { CameraInterface } from "../../../interfaces/mapview-interfaces";
 
 // Controllers
 import JobsControllers from "../../../controllers/JobsControllers";
 import PermissionsControllers from "../../../controllers/PermissionsControllers";
 import MapController from "../../../controllers/MapController";
 
-// Imported Store
-import { JobContext, GlobalContext } from "../../../components/context";
+// Redux
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
-// Imported Reducers
-import JobReducer from "../../../reducers/JobReducer";
-
-// Imported Actions
-import JobActions from "../../../actions/JobActions";
-
-// Interfaces
-import { CameraInterface } from "../../../interfaces/mapview-interfaces";
+// Context Store
+import { GlobalContext } from "../../../components/context";
 
 // Components
 import HandleUIComponents from "./UIOverlay/handleUIComponents";
 
-// Configs
+// Miscellaneous
 const { height } = Dimensions.get("screen");
 
 export function RootScreen({ navigation }) {
-  const { errorContext } = useContext(GlobalContext);
-  const { setError } = errorContext;
+  const { errorActions } = useContext(GlobalContext);
+  const { setError } = errorActions;
 
   // Constructor
   const [location, setLocation] = useState(null);
-  const [jobPostings, setJobPostings] = useState([]);
-  const [channel, setChannel] = useState(null);
+  const [showCircle, setShowCircle] = useState(false);
+  const [circleCoordinates, setCircleCoordinates] = useState(null);
+
+  const _map = useRef(null);
   let cameraSettings;
 
-  // Job Store
-  const [job_ids, dispatch] = useReducer(JobReducer, []);
-  const jobContext = JobActions.memo({ job_ids, dispatch });
+  // Store
+  const camera = useSelector((state) => state.camera);
+  const jobs = useSelector((state) => state.jobs);
+  const dispatch = useDispatch();
 
   // State object for use in imported (external) modules. Modules will have control over this (actual module) component state
-  const thisComponentState = { location, setLocation, setJobPostings, channel, setChannel, setError, jobContext };
+  const thisComponentState = { location, setLocation, setError };
+
+  // Move Camera
+  useEffect(() => {
+    if (_map.current && camera != null) {
+      setCircleCoordinates({ latitude: camera.coordinates[0], longitude: camera.coordinates[1] });
+      setShowCircle(true);
+      jobs.push({ _id: "IN REVIEW", coordinates: { U: camera.coordinates[0], k: camera.coordinates[1] } });
+      _map.current.animateCamera(camera.settings, { duration: 1500 });
+    }
+  }, [camera]);
 
   // Get location
   useEffect(() => {
     PermissionsControllers.getLocation().then((position) => setLocation(position));
+
+    return () => {
+      if (_map.current && location != null && cameraSettings != null) {
+        setCircleCoordinates(null);
+        setShowCircle(false);
+        _map.current.animateCamera(cameraSettings, { duration: 500 });
+      }
+    };
   }, []);
 
-  // (Web Socket) get jobs and subscribe to jobs pipeline
+  // Get jobs and subscribe to jobs pipeline
   useEffect(() => {
-    if (location) JobsControllers.getJobsAndSubscribeJobsChannel(thisComponentState);
-    return () => channel && channel.unbind();
+    let unsubscribe;
+    // Subscribe and return a function for unsubscribe
+    if (location) unsubscribe = JobsControllers.getJobsAndSubscribeJobsChannel(thisComponentState, dispatch);
+
+    return () => {
+      JobsControllers.clean(unsubscribe, dispatch);
+    };
   }, [location]);
 
   if (location != null) {
@@ -68,11 +93,12 @@ export function RootScreen({ navigation }) {
     });
   }
 
-  if (location != null) {
+  if (location != null && jobs != undefined) {
     return (
       <Container>
         <MapView
           onTouchStart={() => Keyboard.dismiss()}
+          ref={_map}
           provider="google"
           showsMyLocationButton={false}
           showsPointsOfInterest={false}
@@ -86,18 +112,25 @@ export function RootScreen({ navigation }) {
           minZoomLevel={9} // recommended 9 / min: 1, max: 19
           // customMapStyle={mapStyle}
         >
-          {jobPostings.map(({ location, _id }) => (
+          {showCircle && (
+            <Circle
+              center={circleCoordinates}
+              radius={250}
+              strokeColor="rgba(0,163,119,0.3)"
+              strokeWidth={2}
+              fillColor="rgba(102,204,176,0.3)"
+            />
+          )}
+          {jobs.map(({ coordinates, _id }) => (
             <Marker
               key={_id}
-              coordinate={{ latitude: location.coordinates[1], longitude: location.coordinates[0] }}
+              coordinate={{ latitude: coordinates["U"], longitude: coordinates["k"] }}
               icon={JobsControllers.getJobTagType("user")}
             ></Marker>
           ))}
         </MapView>
 
-        <JobContext.Provider value={jobContext}>
-          <HandleUIComponents navigation={navigation} jobPostings={jobPostings} onMoveCamera={MapController.handleCameraMoveEvent()} />
-        </JobContext.Provider>
+        <HandleUIComponents navigation={navigation} />
       </Container>
     );
   } else {
