@@ -11,8 +11,8 @@ import Header from "../../../components/header";
 import { GlobalContext } from "../../../components/context";
 
 export default function ({ route, navigation }) {
-  const { authContext } = useContext(GlobalContext);
-  const { signIn } = authContext;
+  const { authActions } = useContext(GlobalContext);
+  const { signIn } = authActions;
   const { colors } = useTheme();
 
   const [textInput, setTextInput] = useState("");

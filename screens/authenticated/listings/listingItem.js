@@ -10,6 +10,7 @@ import {
   Platform,
   SafeAreaView,
   Picker,
+  Dimensions,
 } from "react-native";
 
 import Modal from "react-native-modal";
@@ -24,6 +25,9 @@ import styled from "styled-components/native";
 // Components
 import Header from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
+
+// Miscellaneous
+const width = Dimensions.get("window").width;
 
 const month_names = [
   "January",
@@ -48,24 +52,23 @@ function formatDate(date) {
   return `${month_names[month]} ${day}, ${year} - ${date.toLocaleDateString()}`;
 }
 
-import { RegistrationContext } from "../../../components/context";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 export default function workModal({ navigation, onHandleCancel, onHandleSave, listingItemVisible, route }) {
   const state = route.params;
-  // const { registrationState, methods } = useContext(RegistrationContext);
 
-  const [employer_name, setEmployerName] = useState("");
+  const [jobType, setJobType] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [task, setTask] = useState("");
+  const [location, setLocation] = useState(""); // Google Places API
+  const [salary, setSalary] = useState("");
+  const [wage, setWage] = useState("hr");
+
   const [employer_phone_number, setEmployerPhoneNumber] = useState("");
   const [employer_address, setEmployerAddress] = useState("");
   const [supervisor_name, setSupervisorName] = useState("");
   const [supervisor_title, setSupervisorTitle] = useState("");
   const [user_position_title, setPositionTitle] = useState("");
-  const [salary, setSalary] = useState("");
-  const [wage, setWage] = useState("hr");
-  const [description, setDescription] = useState("");
-
-  // Switch
-  const [actual_job, setActualJob] = useState(false);
 
   // Date Obtained
   const [date_started, setDateStarted] = useState(new Date());
@@ -99,7 +102,6 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, li
   };
 
   const toggleSwitch = () => {
-    setActualJob((previousState) => !previousState);
     Keyboard.dismiss();
     setShow1(false);
     setShow2(false);
@@ -108,7 +110,6 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, li
   const checkFormPayload = () => {};
   //   const form = {
   //     id: state.edit ? state.id : registrationState.work_history.length,
-  //     employer_name,
   //     employer_phone_number,
   //     employer_address,
   //     supervisor_name,
@@ -119,13 +120,12 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, li
   //     actual_job,
   //     salary,
   //     wage,
-  //     description,
+  //     task,
   //   };
   //   return form;
   // };
 
   // useEffect(() => {
-  //   setEmployerName(state.employer_name);
   //   setEmployerPhoneNumber(state.employer_phone_number);
   //   setEmployerAddress(state.employer_address);
   //   setSupervisorName(state.supervisor_name);
@@ -133,9 +133,8 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, li
   //   setPositionTitle(state.user_position_title);
   //   setSalary(state.salary);
   //   setWage(state.wage);
-  //   setDescription(state.description || description);
+  //   setTask(state.task || task);
 
-  //   setActualJob(state.actual_job);
   //   setDateStarted(state.date_started || date_started);
   //   setDateEnded(state.date_ended || date_ended);
   // }, [state]);
@@ -149,10 +148,9 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, li
     setPositionTitle("");
     setDateStarted(new Date());
     setDateEnded(new Date());
-    setActualJob(false);
     setSalary("");
     setWage("hr");
-    setDescription("");
+    setTask("");
   }
 
   return (
@@ -167,7 +165,6 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, li
         nextAction={() => onHandleSave(checkFormPayload())}
       />
 
-      {/* <KeyboardAvoidingView enabled behavior={Platform.OS == "android" ? "height" : "padding"} style={{ flex: 1 }}> */}
       <ScrollView>
         <TouchableWithoutFeedback
           style={{ flex: 1 }}
@@ -179,14 +176,7 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, li
         >
           <Container>
             <Fields>
-              <TextField label="Employer Name" {...commonInputProps(state.employer_name || employer_name, setEmployerName)} />
-
-              <TextField
-                label="Phone Number"
-                keyboardType="phone-pad"
-                {...commonInputProps(state.employer_phone_number || employer_phone_number, setEmployerPhoneNumber)}
-              />
-
+              <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>JOB TYPE</Text>
               <TextField
                 {...commonInputProps(state.employer_address || state.employer_address, setEmployerAddress)}
                 labelOffset={{ x0: 0, y0: 0, x1: -40, y1: -6 }}
@@ -198,16 +188,42 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, li
                   </View>
                 )}
               />
-            </Fields>
-            <View style={{ backgroundColor: "#F2F2F2", height: 50 }}></View>
 
-            <FieldsTwo>
-              <TextField label="Supervisor Name" {...commonInputProps(state.supervisor_name || supervisor_name, setSupervisorName)} />
-
-              <TextField label="Supervisor Title" {...commonInputProps(state.supervisor_title || supervisor_title, setSupervisorTitle)} />
+              <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>JOB TITLE</Text>
               <TextField
-                label="Your Position Title"
-                {...commonInputProps(state.user_position_title || user_position_title, setPositionTitle)}
+                label="Job Title"
+                {...commonInputProps(state.employer_phone_number || employer_phone_number, setEmployerPhoneNumber)}
+              />
+
+              <SafeAreaView>
+                <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>TASKS</Text>
+                <TextInput
+                  maxLength={512}
+                  {...commonInputProps(task, setTask)}
+                  multiline={true}
+                  scrollEnabled={false}
+                  style={{
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    marginTop: 10,
+                    marginBottom: 40,
+                    padding: 10,
+                    minHeight: 100,
+                  }}
+                />
+              </SafeAreaView>
+
+              <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>LOCATION ADDRESS</Text>
+              <TextField
+                {...commonInputProps(state.employer_address || state.employer_address, setEmployerAddress)}
+                labelOffset={{ x0: 0, y0: 0, x1: -40, y1: -6 }}
+                contentInset={{ top: 16, left: 0, right: 0, label: 4, input: 8 }}
+                label="Address"
+                renderLeftAccessory={() => (
+                  <View style={{ width: 30 }}>
+                    <Ionicons name="ios-search" size={24} />
+                  </View>
+                )}
               />
 
               <WageInput>
@@ -222,91 +238,17 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, li
                 </WageTimeField>
               </WageInput>
 
-              <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE STARTED</Text>
-              <TouchableWithoutFeedback
-                onPress={() => {
-                  setShow1(true);
-                  setShow2(false);
-                  Keyboard.dismiss();
-                }}
-              >
-                <DatePicker>
-                  <Text>{date_started && formatDate(date_started)}</Text>
-                  <AntDesign name="calendar" size={24} />
-                </DatePicker>
-              </TouchableWithoutFeedback>
-
-              <SwitchContainer>
-                <Text small>I am currently working here</Text>
-                <Switch
-                  trackColor={{ false: "#767577", true: "#81b0ff" }}
-                  thumbColor={actual_job ? "#f4f3f4" : "#f4f3f4"}
-                  ios_backgroundColor="#3e3e3e"
-                  onValueChange={toggleSwitch}
-                  value={actual_job}
-                />
-              </SwitchContainer>
-
-              {!actual_job && (
-                <>
-                  <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE ENDED</Text>
-                  <TouchableWithoutFeedback
-                    onPress={() => {
-                      setShow1(false);
-                      setShow2(true);
-                      Keyboard.dismiss();
-                    }}
-                  >
-                    <DatePicker>
-                      <Text>{date_ended && formatDate(date_ended)}</Text>
-                      <AntDesign name="calendar" size={24} />
-                    </DatePicker>
-                  </TouchableWithoutFeedback>
-                </>
-              )}
-
-              <SafeAreaView>
-                <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>BRIEF DESCRIPTION OF TASKS</Text>
-                <TextInput
-                  maxLength={512}
-                  {...commonInputProps(description, setDescription)}
-                  multiline={true}
-                  scrollEnabled={false}
-                  style={{
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    marginTop: 10,
-                    marginBottom: 40,
-                    padding: 10,
-                    minHeight: 100,
-                  }}
-                />
-              </SafeAreaView>
-            </FieldsTwo>
+              <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7 }}>
+                <SaveButton style={{ justifyContent: "center", alignItems: "center" }}>
+                  <Text bold color="white">
+                    Save
+                  </Text>
+                </SaveButton>
+              </TouchableOpacity>
+            </Fields>
           </Container>
         </TouchableWithoutFeedback>
       </ScrollView>
-      {show1 && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={date_started}
-          mode="date"
-          is24Hour={true}
-          display="default"
-          onChange={onChangeDateObtained}
-        />
-      )}
-      {show2 && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={date_ended}
-          mode="date"
-          is24Hour={true}
-          display="default"
-          onChange={onChangeExpirationDate}
-        />
-      )}
-      {/* </KeyboardAvoidingView> */}
     </>
   );
 }
@@ -333,44 +275,16 @@ const WageTimeFieldInput = styled.Picker`
   margin: ${Platform.OS == "ios" ? "-60px 0" : "0px"};
 `;
 
-const ModalBackground = styled.View`
-  background: white;
-  flex: 1;
-`;
-
-const DateTimePickerBackground = styled.View`
-  background: grey;
-  flex: 1;
-  z-index: 1;
-  opacity: 0.5;
-`;
-
-const DatePicker = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 10px;
-  border-width: 1px;
-  padding: 8px 12px;
-`;
-
 const Fields = styled.View`
   margin: 0 20px 20px 20px;
 `;
 
-const FieldsTwo = styled.View`
-  margin: 0 20px;
-`;
-
-const Switch = styled.Switch``;
-
-const SwitchContainer = styled.View`
-  margin: 10px 0 40px 0;
-  align-items: center;
-  justify-content: space-between;
-  flex-direction: row;
-`;
-
 const Container = styled.View`
   flex: 1;
+`;
+
+const SaveButton = styled.View`
+  padding: 10px;
+  background: #255cf0;
+  border-radius: 6px;
 `;

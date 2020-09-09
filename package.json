@@ -1,12 +1,10 @@
 {
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "dev": "expo start",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
-    "eject": "expo eject"
+    "start": "npm run generate-config && expo start",
+    "dev": "npm run generate-config && expo start",
+    "eject": "npm run generate-config && expo eject",
+    "generate-config": "yaml2json config.yaml -s"
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.11.0",
@@ -51,7 +49,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",
-    "babel-preset-expo": "~8.1.0"
+    "babel-preset-expo": "~8.1.0",
+    "yamljs": "^0.3.0"
   },
   "private": true
 }

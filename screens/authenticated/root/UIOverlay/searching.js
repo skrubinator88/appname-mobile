@@ -19,6 +19,8 @@ import MapController from "../../../../controllers/MapController";
 import { useSelector, useDispatch } from "react-redux";
 
 export default function Searching({ keyword }) {
+  const { authActions, authState, errorActions } = useContext(GlobalContext);
+  const { userToken, userID, userData } = authState;
   const { changeRoute } = useContext(UIOverlayContext); // Overlay routing
   const jobs = useSelector((store) => store.jobs);
   const dispatch = useDispatch();
@@ -45,7 +47,7 @@ export default function Searching({ keyword }) {
     <Card>
       <SafeAreaView>
         <Row>
-          <Text medium>Searching for nearby jobs</Text>
+          <Text medium>{userData.role == "contractor" ? "Searching for nearby jobs" : "Searching for workers"}</Text>
         </Row>
         <Row>
           <Progress.Bar indeterminate indeterminateAnimationDuration={4000} width={250} borderWidth={0} useNativeDriver={true} />

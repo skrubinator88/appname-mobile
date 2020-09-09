@@ -80,6 +80,14 @@ export function RootScreen({ navigation }) {
     };
   }, [location]);
 
+  const handleEvent = (event) => {
+    switch (event.type) {
+      case "searching": {
+        console.log(event);
+      }
+    }
+  };
+
   if (location != null) {
     const zoom = 12; // Change the zoom between 2 and 20
     const verticalAlignment = 80; // Change this number to set the position of the GPS Icon (Vertically only) between -200 and 200 Default: -100
@@ -130,7 +138,7 @@ export function RootScreen({ navigation }) {
           ))}
         </MapView>
 
-        <HandleUIComponents navigation={navigation} />
+        <HandleUIComponents navigation={navigation} onEvent={handleEvent} />
       </Container>
     );
   } else {

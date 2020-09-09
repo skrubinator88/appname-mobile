@@ -17,8 +17,8 @@ export default function ({ navigation }) {
 
   const handleChosenOption = (chosenOption) => {
     updateForm({ role: chosenOption });
-    // navigation.navigate("SignUp1"); // ORIGINAL
-    navigation.navigate("SignUp8");
+    navigation.navigate("SignUp5"); // ORIGINAL
+    // navigation.navigate("SignUp8"); // DEV
   };
 
   useEffect(() => {

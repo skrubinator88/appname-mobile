@@ -158,7 +158,9 @@ import JobListings from "../listings/stacks";
 export function Drawer() {
   return (
     <NavigationContainer independent={true}>
-      <AuthenticatedDrawer.Navigator drawerContent={(props) => <DrawerContent {...props} />}>
+      <AuthenticatedDrawer.Navigator drawerType="back" backBehavior="initialRoute" drawerContent={(props) => <DrawerContent {...props} />}>
+        {/* <AuthenticatedDrawer.Screen name="Job Listings" component={JobListings} /> */}
+
         <AuthenticatedDrawer.Screen name="Root" component={RootScreen} />
         <AuthenticatedDrawer.Screen name="Profile" component={ProfileScreen} />
         <AuthenticatedDrawer.Screen name="Payment" component={PaymentScreen} />

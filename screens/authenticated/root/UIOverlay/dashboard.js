@@ -12,9 +12,11 @@ import { ScrollView } from "react-native-gesture-handler";
 import fetchedSuggestedItems from "../../../../models/fetchedSuggestedItems";
 const height = Dimensions.get("screen").height;
 
-import { UIOverlayContext } from "../../../../components/context";
+import { UIOverlayContext, GlobalContext } from "../../../../components/context";
 
 export default function Dashboard({ navigation, onUIChange }) {
+  const { authActions, authState, errorActions } = useContext(GlobalContext);
+  const { userToken, userID, userData } = authState;
   const { changeRoute } = useContext(UIOverlayContext);
   const [searchBarValue, setSearchBarValue] = useState("");
   const [searchBarFocus, setSearchBarFocus] = useState(false);
@@ -92,7 +94,7 @@ export default function Dashboard({ navigation, onUIChange }) {
       )}
 
       <SearchBar
-        placeholder="Search jobs"
+        placeholder={userData.role == "contractor" ? "Search jobs" : "Search Contractors"}
         placeholderTextColor="#777"
         onChangeText={(text) => setSearchBarValue(text)}
         ref={(searchBarRef) => (searchBar = searchBarRef)}

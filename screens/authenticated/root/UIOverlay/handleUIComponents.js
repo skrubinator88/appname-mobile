@@ -41,15 +41,15 @@ function HandleOverlayUIProjectManagerComponents({ route, navigation }) {
     case "searching":
       return <Searching navigation={navigation} {...route.props} />;
       break;
-    case "job_found":
-      return <JobFound navigation={navigation} {...route.props} />;
-      break;
-    case "acceptedJob":
-      return <AcceptedJob navigation={navigation} {...route.props} />;
-      break;
-    case "example":
-      return <Example navigation={navigation} {...route.props} />;
-      break;
+    // case "job_found":
+    //   return <JobFound navigation={navigation} {...route.props} />;
+    //   break;
+    // case "acceptedJob":
+    //   return <AcceptedJob navigation={navigation} {...route.props} />;
+    //   break;
+    // case "example":
+    //   return <Example navigation={navigation} {...route.props} />;
+    //   break;
   }
 }
 

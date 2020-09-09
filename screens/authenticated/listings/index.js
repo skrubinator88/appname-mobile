@@ -30,8 +30,6 @@ export default function PaymentScreen({ navigation }) {
         nextSize={25}
         nextAction={() => {}}
       >
-        {/* Modal */}
-
         {/* Payments Section */}
         <Item>
           <JobItemLink onPress={() => navigation.navigate("Listing Item", jobs)}>
@@ -54,7 +52,7 @@ export default function PaymentScreen({ navigation }) {
             </View>
           </SectionTitle>
 
-          <Item>
+          {/* <Item>
             <JobItemLink>
               <JobItemRow>
                 <Column>
@@ -76,7 +74,7 @@ export default function PaymentScreen({ navigation }) {
                 </Column>
               </JobItemRow>
             </JobItemLink>
-          </Item>
+          </Item> */}
 
           <SectionTitle>
             <View style={{ margin: 10 }}>
@@ -85,7 +83,7 @@ export default function PaymentScreen({ navigation }) {
               </Text>
             </View>
           </SectionTitle>
-          <Item>
+          {/* <Item>
             <JobItemLink>
               <JobItemRow>
                 <Column>
@@ -93,7 +91,7 @@ export default function PaymentScreen({ navigation }) {
                     <Text small weight="700" color="#1b5cce">
                       Job Title
                     </Text>
-                    {/* <Text small>Active</Text> */}
+                    <Text small>Active</Text>
                   </Row>
                   <Row>
                     <Text small>$00/hr</Text>
@@ -107,7 +105,7 @@ export default function PaymentScreen({ navigation }) {
                 </Column>
               </JobItemRow>
             </JobItemLink>
-          </Item>
+          </Item> */}
         </JobSection>
       </Container>
     </>

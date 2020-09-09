@@ -41,7 +41,7 @@ import AuthReducer from "./reducers/AuthReducer";
 import ErrorReducer from "./reducers/ErrorReducer";
 
 // Components
-import Example from "./views/50";
+// import Example from "./views/50";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 
