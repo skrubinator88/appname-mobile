@@ -1,187 +1,223 @@
-import React, { useState, useContext, useEffect } from "react";
-
+// Dependencies React
+import React, { useState, useContext, useEffect, useRef } from "react";
 import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
-  TextInput,
   View,
-  Keyboard,
-  ScrollView,
   Platform,
-  SafeAreaView,
-  Picker,
   Dimensions,
+  TouchableOpacity,
+  ActivityIndicator,
+  FlatList,
 } from "react-native";
 
-import Modal from "react-native-modal";
-
+// Styling Dependencies
 import { TextField } from "react-native-material-textfield";
-import { Ionicons, AntDesign } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
-
-// import CheckBox from "@react-native-community/checkbox";
 import styled from "styled-components/native";
+import { Ionicons } from "@expo/vector-icons";
+
+// Config
 
 // Components
-import Header from "../../../components/headerAndContainer";
+import Header from "../../../components/header";
 import Text from "../../../components/text";
+import TaskModal from "./taskModal";
+
+// Controllers
+import JobsController from "../../../controllers/JobsControllers";
+import GoogleServicesController from "../../../controllers/GoogleServicesController";
+
+// Context
+import { GlobalContext } from "../../../components/context";
 
 // Miscellaneous
 const width = Dimensions.get("window").width;
+const height = Dimensions.get("window").height;
 
-const month_names = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+export default function workModal({ navigation, route }) {
+  // - - Constructor - -
+  const state = route.params; // state passed through props
+  const { authState } = useContext(GlobalContext);
 
-function formatDate(date) {
-  const month = date.getMonth();
-  const day = date.getDate();
-  const year = date.getFullYear();
+  // - - State - -
+  const [job_type, setJobType] = useState(""); // Input Field
+  const [job_title, setJobTitle] = useState(""); // Input Field
+  const [location, setLocation] = useState(""); // Input Field
+  const [salary, setSalary] = useState(""); // Input Field
+  const [wage, setWage] = useState("hr"); // Input Field
+  const [tasks, setTasks] = useState(""); // Input Field (With Modal)
 
-  return `${month_names[month]} ${day}, ${year} - ${date.toLocaleDateString()}`;
-}
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [suggestionsEditing, setSuggestionsEditing] = useState(false);
+  const [googleSuggestions, setGoogleSuggestions] = useState([]);
 
-import { TouchableOpacity } from "react-native-gesture-handler";
+  // - - Refs - -
+  let scroll = useRef(null);
+  let location_address_ref = useRef(null);
 
-export default function workModal({ navigation, onHandleCancel, onHandleSave, listingItemVisible, route }) {
-  const state = route.params;
+  // - - Extra Setup - -
+  const form = { job_type, job_title, tasks, location, salary, wage };
 
-  const [jobType, setJobType] = useState("");
-  const [jobTitle, setJobTitle] = useState("");
-  const [task, setTask] = useState("");
-  const [location, setLocation] = useState(""); // Google Places API
-  const [salary, setSalary] = useState("");
-  const [wage, setWage] = useState("hr");
+  // - - Life Cycles - -
+  // Create session for google suggestions (This will reduce billing expenses)
+  useEffect(() => {
+    GoogleServicesController.createSession();
+    return () => {
+      GoogleServicesController.clean();
+      setShowModal(false);
+    };
+  }, []);
 
-  const [employer_phone_number, setEmployerPhoneNumber] = useState("");
-  const [employer_address, setEmployerAddress] = useState("");
-  const [supervisor_name, setSupervisorName] = useState("");
-  const [supervisor_title, setSupervisorTitle] = useState("");
-  const [user_position_title, setPositionTitle] = useState("");
+  // Fetch suggestions
+  useEffect(() => {
+    (async () => {
+      if (location?.address != undefined) {
+        setGoogleSuggestions(await GoogleServicesController.getPlacesSuggestions(location.address));
+      } else {
+        setGoogleSuggestions([]);
+      }
+    })();
+  }, [location]);
 
-  // Date Obtained
-  const [date_started, setDateStarted] = useState(new Date());
-  const [show1, setShow1] = useState(false);
-  const onChangeDateObtained = (event, selectedDate) => {
-    const currentDate = selectedDate || date_started;
-    setShow1(Platform.OS === "ios");
-    setDateStarted(currentDate);
-  };
-
-  // Expiration Date
-  const [date_ended, setDateEnded] = useState(new Date());
-  const [show2, setShow2] = useState(false);
-  const onChangeExpirationDate = (event, selectedDate) => {
-    const currentDate = selectedDate || date_started;
-    setShow2(Platform.OS === "ios");
-    setDateEnded(currentDate);
-  };
-
-  const commonInputProps = (elementValue, setElementValue) => {
+  // - - Functions (Handler, Events, more) - -
+  function commonInputProps(elementValue, setElementValue) {
     return {
-      onFocus: () => {
-        setShow1(false);
-        setShow2(false);
-      },
       onChangeText: (text) => {
         setElementValue(text);
       },
       value: elementValue,
     };
-  };
-
-  const toggleSwitch = () => {
-    Keyboard.dismiss();
-    setShow1(false);
-    setShow2(false);
-  };
-
-  const checkFormPayload = () => {};
-  //   const form = {
-  //     id: state.edit ? state.id : registrationState.work_history.length,
-  //     employer_phone_number,
-  //     employer_address,
-  //     supervisor_name,
-  //     supervisor_title,
-  //     user_position_title,
-  //     date_started,
-  //     date_ended,
-  //     actual_job,
-  //     salary,
-  //     wage,
-  //     task,
-  //   };
-  //   return form;
-  // };
-
-  // useEffect(() => {
-  //   setEmployerPhoneNumber(state.employer_phone_number);
-  //   setEmployerAddress(state.employer_address);
-  //   setSupervisorName(state.supervisor_name);
-  //   setSupervisorTitle(state.supervisor_title);
-  //   setPositionTitle(state.user_position_title);
-  //   setSalary(state.salary);
-  //   setWage(state.wage);
-  //   setTask(state.task || task);
-
-  //   setDateStarted(state.date_started || date_started);
-  //   setDateEnded(state.date_ended || date_ended);
-  // }, [state]);
-
-  function clear() {
-    setEmployerName("");
-    setEmployerPhoneNumber("");
-    setEmployerAddress("");
-    setSupervisorName("");
-    setSupervisorTitle("");
-    setPositionTitle("");
-    setDateStarted(new Date());
-    setDateEnded(new Date());
-    setSalary("");
-    setWage("hr");
-    setTask("");
   }
+
+  function handleSuggestionEditing(item) {
+    setLocation(item);
+    location_address_ref.current.setValue(item.address);
+    location_address_ref.current.blur();
+    setSuggestionsEditing(false);
+  }
+
+  function handleSaveTasks(tasks) {
+    setShowModal(false);
+    setTasks(tasks);
+  }
+
+  async function formatForm(data) {
+    const form = { ...data };
+    const place_data = await GoogleServicesController.getCoordinatesFromPlaceID(form.location.place_id);
+    form.coordinates = [place_data.geometry.location["lat"], place_data.geometry.location["lng"]];
+    return form;
+  }
+
+  async function handleSubmit(form) {
+    setLoading(true);
+    const formattedForm = await formatForm(form);
+    const { success } = await JobsController.postUserJob(authState.userID, formattedForm);
+
+    if (success) return navigation.goBack();
+  }
+
+  // - - Render - -
+  if (loading)
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
 
   return (
     <>
-      <Header
-        navigation={navigation}
-        backAction={() => onHandleCancel()}
-        backTitle="Cancel"
-        title="Add Work"
-        nextTitle="Save"
-        nextColor="#548ff7"
-        nextAction={() => onHandleSave(checkFormPayload())}
-      />
+      <KeyboardAvoidingView enabled behavior="height" style={{ flex: 1 }}>
+        <Container ref={scroll} keyboardShouldPersistTaps="always">
+          <TaskModal showModal={showModal} onHandleModalClose={(tasks) => handleSaveTasks(tasks)} items={tasks} />
 
-      <ScrollView>
-        <TouchableWithoutFeedback
-          style={{ flex: 1 }}
-          onPress={() => {
-            Keyboard.dismiss();
-            setShow1(false);
-            setShow2(false);
-          }}
-        >
-          <Container>
-            <Fields>
-              <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>JOB TYPE</Text>
+          <Header
+            navigation={navigation}
+            backAction={() => onHandleCancel()}
+            backTitle="Cancel"
+            title="Add Work"
+            nextColor="#548ff7"
+            backAction={() => navigation.goBack()}
+          />
+
+          <Fields>
+            <Item>
               <TextField
-                {...commonInputProps(state.employer_address || state.employer_address, setEmployerAddress)}
+                {...commonInputProps(job_type, setJobType)}
                 labelOffset={{ x0: 0, y0: 0, x1: -40, y1: -6 }}
                 contentInset={{ top: 16, left: 0, right: 0, label: 4, input: 8 }}
-                label="Address"
+                label="JOB TYPE"
+                labelFontSize={14}
+                labelTextStyle={{ color: "black", fontWeight: "700" }}
+                placeholder="Search Job Types"
+                renderLeftAccessory={() => (
+                  <View style={{ width: 30 }}>
+                    <Ionicons name="ios-search" size={24} />
+                  </View>
+                )}
+              />
+            </Item>
+
+            <Item>
+              <TextField
+                label="JOB TITLE"
+                placeholder="Job Title"
+                labelFontSize={14}
+                labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                {...commonInputProps(job_title, setJobTitle)}
+              />
+            </Item>
+
+            <Item>
+              <Text style={{ fontWeight: "bold", color: "grey" }}>TASKS</Text>
+              <TouchableWithoutFeedback onPress={() => setShowModal(true)}>
+                <Tasks>
+                  <FlatList
+                    style={{ marginVertical: 10, paddingVertical: 10 }}
+                    data={tasks}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                      <Task>
+                        <Text style={{ flex: 2, padding: 5 }} color="#636363" small>
+                          {item.text}
+                        </Text>
+                      </Task>
+                    )}
+                  />
+                </Tasks>
+              </TouchableWithoutFeedback>
+            </Item>
+
+            <Item>
+              <TextField
+                {...commonInputProps(location.address, setLocation)}
+                textContentType="addressCityAndState"
+                onChangeText={(text) => {
+                  if (text.length == 0) setTimeout(() => scroll && scroll.current.scrollTo({ y: 350, animated: true, duration: 500 }), 200);
+                  setLocation({ address: text });
+                }}
+                onFocus={() => {
+                  setSuggestionsEditing(true);
+                  setTimeout(() => scroll && scroll.current.scrollTo({ y: 350, animated: true, duration: 500 }), 200);
+                }}
+                onBlur={() => setSuggestionsEditing(false)}
+                labelOffset={{ x0: 0, y0: 0, x1: -40, y1: -6 }}
+                contentInset={{ top: 16, left: 0, right: 0, label: 4, input: 8 }}
+                label="LOCATION ADDRESS"
+                placeholder="Type the first line of the address"
+                value={location.address}
+                ref={location_address_ref}
+                labelFontSize={14}
+                labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                renderRightAccessory={() => (
+                  <TouchableWithoutFeedback onPress={() => location_address_ref.current.clear()}>
+                    <View style={{ width: 40, marginHorizontal: 10 }}>
+                      <Text color="#4a89f2" bold>
+                        Clear
+                      </Text>
+                    </View>
+                  </TouchableWithoutFeedback>
+                )}
                 renderLeftAccessory={() => (
                   <View style={{ width: 30 }}>
                     <Ionicons name="ios-search" size={24} />
@@ -189,69 +225,74 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, li
                 )}
               />
 
-              <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>JOB TITLE</Text>
-              <TextField
-                label="Job Title"
-                {...commonInputProps(state.employer_phone_number || employer_phone_number, setEmployerPhoneNumber)}
-              />
+              {googleSuggestions.length != 0 && location?.address != undefined && suggestionsEditing === true && (
+                <Suggestions>
+                  {/* <SuggestedItem>
+                    <MaterialIcons name="gps-fixed" size={15} />
+                    <Text style={{ marginLeft: 10 }}>Pick Your Location</Text>
+                  </SuggestedItem> */}
+                  <FlatList
+                    keyboardShouldPersistTaps="always"
+                    data={googleSuggestions}
+                    renderItem={({ item }) => (
+                      <TouchableWithoutFeedback onPress={() => handleSuggestionEditing(item)}>
+                        <SuggestedItem>
+                          <Text>{item.address}</Text>
+                        </SuggestedItem>
+                      </TouchableWithoutFeedback>
+                    )}
+                  />
+                  <PoweredByGoogleImage
+                    source={require("../../../assets/powered_by_google_on_white.png")}
+                    style={{
+                      width: 432 * 0.3,
+                      height: 54 * 0.3,
+                    }}
+                  />
+                </Suggestions>
+              )}
+            </Item>
 
-              <SafeAreaView>
-                <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>TASKS</Text>
-                <TextInput
-                  maxLength={512}
-                  {...commonInputProps(task, setTask)}
-                  multiline={true}
-                  scrollEnabled={false}
-                  style={{
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    marginTop: 10,
-                    marginBottom: 40,
-                    padding: 10,
-                    minHeight: 100,
-                  }}
-                />
-              </SafeAreaView>
-
-              <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>LOCATION ADDRESS</Text>
-              <TextField
-                {...commonInputProps(state.employer_address || state.employer_address, setEmployerAddress)}
-                labelOffset={{ x0: 0, y0: 0, x1: -40, y1: -6 }}
-                contentInset={{ top: 16, left: 0, right: 0, label: 4, input: 8 }}
-                label="Address"
-                renderLeftAccessory={() => (
-                  <View style={{ width: 30 }}>
-                    <Ionicons name="ios-search" size={24} />
-                  </View>
-                )}
-              />
-
+            <Item style={{ marginTop: 20, marginBottom: 20 }}>
+              <WageTitles></WageTitles>
               <WageInput>
                 <SalaryField>
-                  <TextField label="Salary" keyboardType="numeric" {...commonInputProps(state.salary || salary, setSalary)} />
+                  <TextField
+                    label="PAY"
+                    labelFontSize={14}
+                    placeholder="$00.00"
+                    labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                    keyboardType="numeric"
+                    {...commonInputProps(state.salary || salary, setSalary)}
+                  />
                 </SalaryField>
                 <WageTimeField>
-                  <WageTimeFieldInput selectedValue={wage} onValueChange={(value) => setWage(value)}>
-                    <WageTimeFieldInput.Item label="/Year" value="yr" />
-                    <WageTimeFieldInput.Item label="/Hour" value="hr" />
+                  <WageTimeFieldInput selectedValue={wage} mode="dropdown" onValueChange={(value) => setWage(value)}>
+                    <WageTimeFieldInput.Item label="Year" value="yr" />
+                    <WageTimeFieldInput.Item label="Hour" value="hr" />
                   </WageTimeFieldInput>
                 </WageTimeField>
               </WageInput>
+            </Item>
 
-              <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7 }}>
-                <SaveButton style={{ justifyContent: "center", alignItems: "center" }}>
-                  <Text bold color="white">
-                    Save
-                  </Text>
-                </SaveButton>
-              </TouchableOpacity>
-            </Fields>
-          </Container>
-        </TouchableWithoutFeedback>
-      </ScrollView>
+            <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7, marginBottom: 100 }} onPress={() => handleSubmit(form)}>
+              <SaveButton style={{ justifyContent: "center", alignItems: "center" }}>
+                <Text bold color="white">
+                  Save
+                </Text>
+              </SaveButton>
+            </TouchableOpacity>
+          </Fields>
+        </Container>
+      </KeyboardAvoidingView>
     </>
   );
 }
+
+const ModalBackground = styled.View`
+  background: white;
+  flex: 1;
+`;
 
 const WageInput = styled.View`
   flex-direction: row;
@@ -265,6 +306,12 @@ const SalaryField = styled.View`
   padding-right: 50px;
 `;
 
+const Task = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 2px 10px;
+`;
+
 const WageTimeField = styled.View`
   flex: 2;
   flex-direction: column;
@@ -276,15 +323,48 @@ const WageTimeFieldInput = styled.Picker`
 `;
 
 const Fields = styled.View`
+  flex: 1;
   margin: 0 20px 20px 20px;
 `;
 
-const Container = styled.View`
-  flex: 1;
+const Item = styled.View`
+  margin: 10px 0;
 `;
 
 const SaveButton = styled.View`
   padding: 10px;
   background: #255cf0;
   border-radius: 6px;
+`;
+
+const Container = styled.ScrollView`
+  flex: 1;
+`;
+
+const Suggestions = styled.View``;
+
+const Tasks = styled.View`
+  min-height: 100px;
+  border: 1px solid grey;
+  border-radius: 6px;
+`;
+
+const SuggestedItem = styled.View`
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  margin: 0 0 3px 0;
+  padding: 10px 15px;
+
+  flex-direction: row;
+  align-items: center;
+`;
+
+const PoweredByGoogleImage = styled.Image`
+  align-self: flex-end;
+`;
+
+const WageTitles = styled.View`
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-between;
 `;

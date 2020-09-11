@@ -1,10 +1,12 @@
 import React from "react";
 
-import { Platform, SafeAreaView, Dimensions, View, ScrollView } from "react-native";
+import { Platform, SafeAreaView, Dimensions, View, ScrollView, StatusBar } from "react-native";
 import styled from "styled-components/native";
 import * as VectorIcons from "@expo/vector-icons";
+import { getStatusBarHeight } from "react-native-status-bar-height";
 
 const isIos = Platform.OS === "ios";
+const statusBarHeight = getStatusBarHeight();
 const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
 
 export default function Header({
@@ -114,10 +116,9 @@ export default function Header({
 
 // Styles
 const Container = styled.View`
-  flex: 1;
-  margin-top: ${() => (Platform.OS == "ios" ? "1%" : "6%")};
-  margin-bottom: 10%;
-  padding: 0 0 20px 0;
+  /* flex: 1; */
+  margin-top: ${Platform.OS == "android" ? `${statusBarHeight}px` : "0px"};
+  padding: 10px;
   flex-direction: row;
 `;
 

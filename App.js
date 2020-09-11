@@ -15,10 +15,15 @@ import _ from "lodash";
 YellowBox.ignoreWarnings(["Setting a timer"]);
 const _console = _.clone(console);
 console.warn = (message) => {
-  if (message.indexOf("Setting a timer") <= -1) {
-    _console.warn(message);
+  if (message.indexOf("Setting a timer") != -1) {
+    return;
   }
+  if (message.indexOf("VirtualizedLists") != -1) {
+    return;
+  }
+  _console.warn(message);
 };
+// console.disableYellowBox = true;
 
 // Theme
 export const Theme = {
@@ -41,7 +46,7 @@ import AuthReducer from "./reducers/AuthReducer";
 import ErrorReducer from "./reducers/ErrorReducer";
 
 // Components
-// import Example from "./views/50";
+import Example from "./views/test";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 

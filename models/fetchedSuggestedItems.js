@@ -3,7 +3,7 @@ module.exports = [
   "Electrician",
   "Carpenter",
   "Masonry (Brick, Concrete)",
-  "Auto Mechanic(Foreign, Domestic, Diesel)",
+  "Auto Mechanic (Foreign, Domestic, Diesel)",
   "HVAC Technician",
   "Lawn care",
   "IT Tech Support",

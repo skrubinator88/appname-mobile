@@ -1,12 +1,13 @@
 import React from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 
-import { Platform, SafeAreaView, Dimensions, View, ScrollView } from "react-native";
+import { Platform, SafeAreaView, Dimensions, View, ScrollView, KeyboardAvoidingView } from "react-native";
 import styled from "styled-components/native";
 import * as VectorIcons from "@expo/vector-icons";
 
 const isIos = Platform.OS === "ios";
-const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
+const height = Dimensions.get("window").height;
+const SPACER_SIZE = height / 2; //arbitrary size
 const statusBarHeight = getStatusBarHeight();
 
 export default function Header({
@@ -26,6 +27,7 @@ export default function Header({
   backTitle = "",
   backSize = 30,
   backColor = "",
+  backAction = "",
 
   // Middle Section
   title = "",
@@ -80,6 +82,14 @@ export default function Header({
     }
   }
 
+  function handleBackAction() {
+    if (backTitle == " ") {
+      return "";
+    } else {
+      return navigation.goBack();
+    }
+  }
+
   // Structure
   return (
     <ScrollView
@@ -101,7 +111,7 @@ export default function Header({
       <SafeAreaView style={{ backgroundColor: headerBackground }}>
         <Container>
           <Column back>
-            <Text style={{ color: backColor || color }} onPress={() => navigation.goBack()}>
+            <Text style={{ color: backColor || color }} onPress={backAction != "" ? backAction : () => handleBackAction()}>
               {handleBackButton()}
             </Text>
           </Column>
@@ -118,7 +128,7 @@ export default function Header({
         </Container>
       </SafeAreaView>
 
-      {/* Childrens */}
+      {/* Children */}
       {children}
 
       {isIos && <View style={{ height: SPACER_SIZE, backgroundColor: endBackground }} />}

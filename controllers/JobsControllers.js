@@ -19,8 +19,6 @@ import JobsStoreActions from "../rdx-actions/jobs.action";
 
 exports.addJob = (job) => {
   // *** Get jobs ***
-  const firestore = firebase.firestore(); // Create a Firestore reference
-  const GeoFirestore = geofirestore.initializeApp(firestore); // Create a GeoFirestore reference
   const geoCollection = GeoFirestore.collection("jobs"); // Create a GeoCollection reference
   const { coordinates } = job;
   const GeoPoint = new firebase.firestore.GeoPoint(...coordinates);
@@ -117,4 +115,38 @@ exports.currentUserActiveJobs = (user) => {};
 
 exports.currentUserJobsHistory = (user) => {};
 
-exports.postUserJob = (user, job) => {};
+exports.postUserJob = async (userID, job) => {
+  if (!userID) throw new Error("User ID is required");
+  if (!job) throw new Error("A job is required");
+
+  const newJob = {
+    posted_by: userID,
+    date_created: new Date(),
+    date_completed: null,
+    star_rate: null,
+    status: "available",
+    ...job,
+  };
+
+  const geoCollection = GeoFirestore.collection("jobs"); // Create a GeoCollection reference
+  const { coordinates } = newJob;
+  const GeoPoint = new firebase.firestore.GeoPoint(...coordinates);
+  return geoCollection
+    .add({ ...newJob, coordinates: GeoPoint })
+    .then((docRef) => {
+      return new Promise((resolution, rejection) => {
+        resolution({ success: true });
+      });
+    })
+    .catch((error) => {
+      return new Promise((resolution, rejection) => {
+        rejection({ success: false, error: error.message });
+      });
+    });
+
+  // Test
+};
+
+exports.updateUserJob = (userID, jobID, job) => {
+  if (!user) throw new Error("User ID is required");
+};

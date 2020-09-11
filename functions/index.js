@@ -10,3 +10,35 @@ exports.distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2) => {
   var d = R * c;
   return d * 1000; // meters
 };
+
+exports.getActualDateFormatted = (date) => {
+  const month_names = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const month = date.getMonth();
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  return `${month_names[month]} ${day}, ${year} - ${date.toLocaleDateString()}`;
+};
+
+// Use UUID Instead
+exports.createToken = () => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};

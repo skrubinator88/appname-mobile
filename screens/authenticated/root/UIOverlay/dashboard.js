@@ -1,17 +1,20 @@
+// Dependencies
 import React, { useState, useContext, useEffect } from "react";
 import { SafeAreaView, Keyboard, KeyboardAvoidingView, Platform, View, Text, Dimensions } from "react-native";
 import styled from "styled-components/native";
 
+// Components
 import Card from "../../../../components/card";
-// import Text from "../../../../components/text";
 
 // Expo
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 
-import fetchedSuggestedItems from "../../../../models/fetchedSuggestedItems";
+// Miscellaneous
 const height = Dimensions.get("screen").height;
+import fetchedSuggestedItems from "../../../../models/fetchedSuggestedItems"; // Simulating an API
 
+// Context
 import { UIOverlayContext, GlobalContext } from "../../../../components/context";
 
 export default function Dashboard({ navigation, onUIChange }) {
@@ -20,7 +23,7 @@ export default function Dashboard({ navigation, onUIChange }) {
   const { changeRoute } = useContext(UIOverlayContext);
   const [searchBarValue, setSearchBarValue] = useState("");
   const [searchBarFocus, setSearchBarFocus] = useState(false);
-  let searchBar;
+  let searchBar; // Search Bar Reference
 
   const handleSubmit = (keyword) => {
     searchBar.clear();
@@ -28,50 +31,86 @@ export default function Dashboard({ navigation, onUIChange }) {
     changeRoute({ name: "searching", props: { keyword } });
   };
 
-  function Suggestions() {
-    // Fetch before search
-    let suggestedItems = fetchedSuggestedItems.filter((item) => {
-      const title = item.toLowerCase();
-      const input = searchBarValue.toLowerCase().trim();
-      return title.indexOf(input) != -1;
-    });
+  let suggestedItems = fetchedSuggestedItems.filter((item) => {
+    const title = item.toLowerCase();
+    const input = searchBarValue.toLowerCase().trim();
+    return title.indexOf(input) != -1;
+  });
 
-    if (searchBarFocus) {
-      return (
-        <SuggestionContainer enabled behavior="height">
-          <TopBar />
-          <SuggestionScrollView
-            keyboardShouldPersistTaps="always"
-            data={suggestedItems}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => {
-              return (
-                <SuggestedItem
-                  onPress={() => {
-                    setSearchBarValue(item);
-                    setSearchBarFocus(false);
-                    searchBar.blur();
-                    handleSubmit(item);
-                  }}
-                >
-                  {item}
-                </SuggestedItem>
-              );
-            }}
-          />
-        </SuggestionContainer>
-      );
-    } else {
-      return;
-    }
-  }
+  // function Suggestions() {
+  //   if (searchBarFocus) {
+  //     let suggestedItems = fetchedSuggestedItems.filter((item) => {
+  //       const title = item.toLowerCase();
+  //       const input = searchBarValue.toLowerCase().trim();
+  //       return title.indexOf(input) != -1;
+  //     });
+  //     return (
+  //       <SuggestionContainer enabled behavior="height">
+  //         <TopBar />
+  //         <SuggestionScrollView
+  //           keyboardShouldPersistTaps="always"
+  //           data={suggestedItems}
+  //           keyExtractor={(item, index) => index.toString()}
+  //           renderItem={({ item }) => {
+  //             return (
+  //               <SuggestedItem
+  //                 onPress={() => {
+  //                   setSearchBarValue(item);
+  //                   setSearchBarFocus(false);
+  //                   searchBar.blur();
+  //                   handleSubmit(item);
+  //                 }}
+  //               >
+  //                 {item}
+  //               </SuggestedItem>
+  //             );
+  //           }}
+  //         />
+  //       </SuggestionContainer>
+  //     );
+  //   } else {
+  //     return <View></View>;
+  //   }
+  // }
 
   return (
     <>
-      {Suggestions()}
+      <SuggestionContainer enabled behavior="height" style={{ opacity: searchBarFocus ? 1 : 0, zIndex: searchBarFocus ? 1 : -1 }}>
+        <TopBar />
+        <SuggestionScrollView
+          keyboardShouldPersistTaps="always"
+          data={suggestedItems}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => {
+            return (
+              <SuggestedItem
+                onPress={() => {
+                  setSearchBarValue(item);
+                  setSearchBarFocus(false);
+                  searchBar.blur();
+                  handleSubmit(item);
+                }}
+              >
+                {item}
+              </SuggestedItem>
+            );
+          }}
+        />
+      </SuggestionContainer>
+
+      <SearchBar
+        placeholder={userData.role == "contractor" ? "Search jobs" : "Search Contractors"}
+        placeholderTextColor="#777"
+        onChangeText={(text) => setSearchBarValue(text)}
+        ref={(searchBarRef) => (searchBar = searchBarRef)}
+        onFocus={() => {
+          setSearchBarFocus(true);
+        }}
+        onSubmitEditing={() => handleSubmit()}
+      />
 
       {searchBarFocus ? (
-        <Menu
+        <MenuButton
           activeOpacity={0.9}
           onPress={() => {
             Keyboard.dismiss();
@@ -80,44 +119,32 @@ export default function Dashboard({ navigation, onUIChange }) {
           }}
         >
           <AntDesign backgroundColor="white" color="black" name="arrowleft" size={30} />
-        </Menu>
+        </MenuButton>
       ) : (
-        <Menu
-          activeOpacity={0.9}
-          onPress={() => {
-            Keyboard.dismiss();
-            navigation.openDrawer();
-          }}
-        >
-          <MaterialIcons backgroundColor="white" color="black" name="menu" size={30} />
-        </Menu>
+        <>
+          <MenuButton
+            activeOpacity={0.9}
+            onPress={() => {
+              Keyboard.dismiss();
+              navigation.openDrawer();
+            }}
+          >
+            <MaterialIcons backgroundColor="white" color="black" name="menu" size={30} />
+          </MenuButton>
+
+          <Card>
+            <Row>
+              <Text small>1.0.0.0</Text>
+            </Row>
+          </Card>
+        </>
       )}
-
-      <SearchBar
-        placeholder={userData.role == "contractor" ? "Search jobs" : "Search Contractors"}
-        placeholderTextColor="#777"
-        onChangeText={(text) => setSearchBarValue(text)}
-        ref={(searchBarRef) => (searchBar = searchBarRef)}
-        onFocus={() => setSearchBarFocus(true)}
-        // onEndEditing={() => setSearchBarFocus(false)}
-        onSubmitEditing={() => handleSubmit()}
-      />
-
-      <KeyboardAvoidingView enabled behavior="height">
-        <Card>
-          <Row>
-            <Text small>1.0.0.0</Text>
-          </Row>
-        </Card>
-      </KeyboardAvoidingView>
-
-      {/* Search Bar on Focus UI */}
     </>
   );
 }
 
-const Menu = styled.TouchableOpacity`
-  z-index: 3;
+const MenuButton = styled.TouchableOpacity`
+  z-index: 2;
   position: absolute;
   left: 6%;
   top: ${() => (Platform.OS == "ios" ? "6%" : "40px")};
@@ -127,7 +154,7 @@ const Menu = styled.TouchableOpacity`
 `;
 
 const SearchBar = styled.TextInput`
-  z-index: 3;
+  z-index: 2;
   position: absolute;
   top: ${() => (Platform.OS == "ios" ? "15%" : "100px")};
   left: 15%;
@@ -145,7 +172,6 @@ const Row = styled.View`
 `;
 
 //  Search Bar on Focus UI *
-
 const TopBar = styled.KeyboardAvoidingView`
   height: ${() => (Platform.OS == "ios" ? `${height * 0.15 + 54}px` : "100px")};
   margin-top: ${() => (Platform.OS == "ios" ? "0" : "54px")};
@@ -161,23 +187,17 @@ const SuggestionContainer = styled.KeyboardAvoidingView`
   height: 100%;
   width: 100%;
   opacity: 1;
-  z-index: 1;
+  z-index: 2;
   position: absolute;
 `;
 
 const SuggestionScrollView = styled.FlatList`
-  flex: 1;
   z-index: 2;
-  /* position: absolute; */
-  /* background: red; */
-  height: 100%;
-  width: 100%;
-  /* align-items: center; */
-  /* justify-content: flex-end; */
+  flex: 1;
 `;
 
 const SuggestedItem = styled.Text`
-  z-index: 1;
+  z-index: 2;
   border: 1px solid #dddddd;
   padding: 10px 30px;
   width: 100%;

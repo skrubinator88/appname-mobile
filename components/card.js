@@ -11,6 +11,7 @@ export default function Card(props) {
 }
 
 const View = styled.View`
+  z-index: 1;
   padding: 5%;
   position: absolute;
   left: 0;
