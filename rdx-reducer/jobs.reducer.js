@@ -24,7 +24,7 @@ export const JobsReducer = (prevState = [], action) => {
       return state;
     }
     case "CLEAR": {
-      console.log("STATE CLEARED \n");
+      console.log("JOB STATE CLEARED \n");
       return [];
     }
     default:

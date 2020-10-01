@@ -12,42 +12,21 @@ const firestore = firebase.firestore(); // Create a Firestore reference
 const GeoFirestore = geofirestore.initializeApp(firestore); // Create a GeoFirestore reference
 
 // Functions
-import { distanceBetweenTwoCoordinates } from "../functions/";
+import { distanceBetweenTwoCoordinates, sortJobsByProximity } from "../functions";
 
 // Redux Actions
 import JobsStoreActions from "../rdx-actions/jobs.action";
-
-exports.addJob = (job) => {
-  // *** Get jobs ***
-  const geoCollection = GeoFirestore.collection("jobs"); // Create a GeoCollection reference
-  const { coordinates } = job;
-  const GeoPoint = new firebase.firestore.GeoPoint(...coordinates);
-  // geoCollection.add({ ...job, coordinates: GeoPoint });
-  // geoCollection.add({
-  //   posted_by: "5f32daf2c4a77e001713b6d5",
-  //   job_type: "Software Developer",
-  //   title: "Create a Web App",
-  //   tasks: ["Build the sms Server", "Build payment system", "Bring the ketchup"],
-  //   pay_rate: 30.0,
-  //   payment_frequency: "hr",
-  //   date_completed: "Fri Jul 30 2020 12:06:16 GMT-0400 (Eastern Daylight Time)",
-  //   star_rate: 4.1,
-  //   status: "available",
-  //   "date _created": "Fri Jul 30 2020 12:06:16 GMT-0400 (Eastern Daylight Time)",
-  //   location_address: "6684 Peachtree Industrial Blvd. Atlanta GA 30360",
-  //   status: "active",
-  //   coordinates: new firebase.firestore.GeoPoint(33.8760658, -84.3147504),
-  // });
-};
+import ListingsActions from "../rdx-actions/listings.action";
+const Actions = { JobsStoreActions, ListingsActions };
 
 exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
   // State
   const { location, setLocation } = state;
   const { setError } = state;
-  let { radius } = state;
-  const { latitude, longitude } = location.coords;
+  let { radius } = state; // in Miles
+  const { latitude, longitude } = location.coords; // User Location
 
-  radius = 1000; // replace
+  radius = 10; // "Miles". Replace this with the value from user settings
 
   if (location != null) {
     const geoCollection = GeoFirestore.collection("jobs"); // Create a GeoCollection reference
@@ -59,18 +38,23 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
 
     // ** Subscribe, add jobs into store and listen for changes **
     // This function returns an unsubscribe function to close this listener
-    console.log("SUBSCRIBED || Firebase ||");
     const unsubscribe = query.onSnapshot((res) => {
       res.docChanges().forEach((change) => {
         const { doc: document } = change;
         switch (change.type) {
-          case "added":
-            return dispatch(JobsStoreActions.add(document.id, document.data()));
-          case "modified":
-            return dispatch(JobsStoreActions.update(document.id, document.data()));
-          case "removed":
-            // dispatch(QueueStoreActions.remove(document.id))
+          case "added": {
+            const data = document.data();
+            data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
+            return dispatch(JobsStoreActions.add(document.id, data));
+          }
+          case "modified": {
+            const data = document.data();
+            data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
+            return dispatch(JobsStoreActions.update(document.id, data));
+          }
+          case "removed": {
             return dispatch(JobsStoreActions.remove(document.id));
+          }
           default:
             break;
         }
@@ -81,6 +65,33 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
   }
 };
 
+exports.currentUserActiveJobs = (userID, dispatch) => {
+  const query = GeoFirestore.collection("jobs")
+    .where("posted_by", "==", userID)
+    .where("status", "in", ["available", "in review", "in progress"]);
+
+  const unsubscribe = query.onSnapshot((res) => {
+    res.docChanges().forEach((change) => {
+      const { doc: document } = change;
+      switch (change.type) {
+        case "added": {
+          return dispatch(ListingsActions.add(document.id, document.data()));
+        }
+        case "modified": {
+          return dispatch(ListingsActions.update(document.id, document.data()));
+        }
+        // case "removed": {
+        //   return setInProgressJobs({ id: document.id, type: "removed" });
+        // }
+        default:
+          break;
+      }
+    });
+  });
+
+  return unsubscribe;
+};
+
 exports.getJobTagType = (imageType) => {
   switch (imageType) {
     case "user":
@@ -89,18 +100,17 @@ exports.getJobTagType = (imageType) => {
   }
 };
 
-exports.clean = (unsubscribe, dispatch) => {
+exports.clean = (ProviderName, unsubscribe, dispatch) => {
   if (unsubscribe) {
     unsubscribe(); // Unsubscribe from firebase
-    console.log("UNSUBSCRIBED || Firebase ||");
   }
 
-  dispatch(JobsStoreActions.clear()); // Clear jobs from state
+  if (dispatch) dispatch(Actions[ProviderName].clear()); // Clear state
 };
 
-exports.findJobWithKeyword = (searched_Keywords, jobs) => {
-  // console.log(jobs[0]?.job_type);
-  return jobs.filter((job) => job?.job_type === searched_Keywords);
+exports.findFirstJobWithKeyword = (searched_Keywords, jobs) => {
+  const jobsFound = jobs.filter((job) => job?.job_type === searched_Keywords);
+  return sortJobsByProximity(jobsFound, (a, b) => a.distance - b.distance)[0];
 };
 
 exports.changeJobStatus = async (documentID, status) => {
@@ -109,9 +119,6 @@ exports.changeJobStatus = async (documentID, status) => {
   // Update job status
   geoCollection.update({ status });
 };
-
-// Project Manager Functions
-exports.currentUserActiveJobs = (user) => {};
 
 exports.currentUserJobsHistory = (user) => {};
 
@@ -147,6 +154,6 @@ exports.postUserJob = async (userID, job) => {
   // Test
 };
 
-exports.updateUserJob = (userID, jobID, job) => {
-  if (!user) throw new Error("User ID is required");
+exports.updateUserJob = (userID, jobID, updatedJob) => {
+  if (!userID) throw new Error("User ID is required");
 };

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useContext } from "react";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 
 // Card UI Components
 import Dashboard from "./dashboard";
@@ -33,7 +33,7 @@ function HandleOverlayUIContractorComponents({ route, navigation }) {
   }
 }
 
-function HandleOverlayUIProjectManagerComponents({ route, navigation }) {
+function HandleOverlayUIProjectManagerComponents({ route, navigation, willUnmountSignal }) {
   switch (route.name) {
     case "dashboard":
       return <Dashboard navigation={navigation} {...route.props} />;
@@ -59,10 +59,11 @@ export default function UIComponents({ navigation }) {
     name: "dashboard",
     props: {
       /**
+       * - - EXAMPLE - -
        * Put the data and the data key (name) here
        * that you might pass through props
        **/
-      // data: "Some Data" || {name: "Some Data"} || ["Some Data"]
+      // data: "Some Data" or {name: "Some Data"} or ["Some Data"]
     },
   });
 

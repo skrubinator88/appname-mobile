@@ -10,7 +10,15 @@ export const CameraReducer = (prevState = null, action) => {
           center: { latitude: latitude - verticalAlignment / Math.pow(2, zoom - 1), longitude: longitude },
           zoom,
         },
+        reset: false,
         coordinates: [latitude, longitude],
+      };
+    }
+    case "RESET_CAMERA_COORDINATES": {
+      return {
+        settings: null,
+        coordinates: null,
+        reset: true,
       };
     }
     default:

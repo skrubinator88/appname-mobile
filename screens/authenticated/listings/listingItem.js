@@ -14,7 +14,7 @@ import {
 // Styling Dependencies
 import { TextField } from "react-native-material-textfield";
 import styled from "styled-components/native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 // Config
 
@@ -36,7 +36,6 @@ const height = Dimensions.get("window").height;
 
 export default function workModal({ navigation, route }) {
   // - - Constructor - -
-  const state = route.params; // state passed through props
   const { authState } = useContext(GlobalContext);
 
   // - - State - -
@@ -227,10 +226,10 @@ export default function workModal({ navigation, route }) {
 
               {googleSuggestions.length != 0 && location?.address != undefined && suggestionsEditing === true && (
                 <Suggestions>
-                  {/* <SuggestedItem>
+                  <SuggestedItem>
                     <MaterialIcons name="gps-fixed" size={15} />
                     <Text style={{ marginLeft: 10 }}>Pick Your Location</Text>
-                  </SuggestedItem> */}
+                  </SuggestedItem>
                   <FlatList
                     keyboardShouldPersistTaps="always"
                     data={googleSuggestions}
@@ -263,7 +262,7 @@ export default function workModal({ navigation, route }) {
                     placeholder="$00.00"
                     labelTextStyle={{ color: "grey", fontWeight: "700" }}
                     keyboardType="numeric"
-                    {...commonInputProps(state.salary || salary, setSalary)}
+                    {...commonInputProps(salary, setSalary)}
                   />
                 </SalaryField>
                 <WageTimeField>

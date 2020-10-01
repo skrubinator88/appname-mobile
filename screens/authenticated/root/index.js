@@ -1,6 +1,6 @@
 // Dependencies
 import React, { useEffect, useState, useContext, useReducer, useRef } from "react";
-import { View, Keyboard, Dimensions } from "react-native";
+import { View, Keyboard, Dimensions, Platform } from "react-native";
 import MapView, { Marker, Circle } from "react-native-maps";
 import styled from "styled-components/native";
 import { Provider } from "react-redux";
@@ -14,28 +14,33 @@ import PermissionsControllers from "../../../controllers/PermissionsControllers"
 import MapController from "../../../controllers/MapController";
 
 // Redux
-import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 // Context Store
 import { GlobalContext } from "../../../components/context";
 
 // Components
 import HandleUIComponents from "./UIOverlay/handleUIComponents";
+import { clear } from "../../../rdx-actions/jobs.action";
+
+// - - Fixes - -
 
 // Miscellaneous
 const { height } = Dimensions.get("screen");
 
-export function RootScreen({ navigation }) {
+export function RootScreen({ navigation, clearTemporalCircle }) {
+  // Constructor
   const { errorActions } = useContext(GlobalContext);
   const { setError } = errorActions;
 
-  // Constructor
+  // State
   const [location, setLocation] = useState(null);
   const [showCircle, setShowCircle] = useState(false);
   const [circleCoordinates, setCircleCoordinates] = useState(null);
 
+  // Refs
   const _map = useRef(null);
+  const _circle = useRef(null);
   let cameraSettings;
 
   // Store
@@ -48,11 +53,21 @@ export function RootScreen({ navigation }) {
 
   // Move Camera
   useEffect(() => {
-    if (_map.current && camera != null) {
+    if (_map.current && camera != null && camera.reset == false) {
       setCircleCoordinates({ latitude: camera.coordinates[0], longitude: camera.coordinates[1] });
       setShowCircle(true);
-      jobs.push({ _id: "IN REVIEW", coordinates: { U: camera.coordinates[0], k: camera.coordinates[1] } });
-      _map.current.animateCamera(camera.settings, { duration: 1500 });
+      _map.current.animateCamera(camera.settings, { duration: 2000 });
+    } else if (camera != null && camera.reset == true) {
+      setShowCircle(false);
+      const verticalAlignment = 80;
+      const zoom = 12;
+      _map.current.animateCamera(
+        {
+          center: { latitude: location.coords.latitude - verticalAlignment / Math.pow(2, zoom - 1), longitude: location.coords.longitude },
+          zoom,
+        },
+        { duration: 1000 }
+      );
     }
   }, [camera]);
 
@@ -61,11 +76,7 @@ export function RootScreen({ navigation }) {
     PermissionsControllers.getLocation().then((position) => setLocation(position));
 
     return () => {
-      if (_map.current && location != null && cameraSettings != null) {
-        setCircleCoordinates(null);
-        setShowCircle(false);
-        _map.current.animateCamera(cameraSettings, { duration: 500 });
-      }
+      setShowCircle(false);
     };
   }, []);
 
@@ -76,17 +87,9 @@ export function RootScreen({ navigation }) {
     if (location) unsubscribe = JobsControllers.getJobsAndSubscribeJobsChannel(thisComponentState, dispatch);
 
     return () => {
-      JobsControllers.clean(unsubscribe, dispatch);
+      if (unsubscribe !== undefined) JobsControllers.clean("JobsStoreActions", unsubscribe, dispatch);
     };
   }, [location]);
-
-  const handleEvent = (event) => {
-    switch (event.type) {
-      case "searching": {
-        console.log(event);
-      }
-    }
-  };
 
   if (location != null) {
     const zoom = 12; // Change the zoom between 2 and 20
@@ -120,25 +123,42 @@ export function RootScreen({ navigation }) {
           minZoomLevel={9} // recommended 9 / min: 1, max: 19
           // customMapStyle={mapStyle}
         >
-          {showCircle && (
-            <Circle
-              center={circleCoordinates}
-              radius={250}
-              strokeColor="rgba(0,163,119,0.3)"
-              strokeWidth={2}
-              fillColor="rgba(102,204,176,0.3)"
-            />
-          )}
           {jobs.map(({ coordinates, _id }) => (
             <Marker
               key={_id}
               coordinate={{ latitude: coordinates["U"], longitude: coordinates["k"] }}
               icon={JobsControllers.getJobTagType("user")}
-            ></Marker>
+            />
           ))}
+          {showCircle && (
+            <>
+              <Circle
+                center={circleCoordinates}
+                radius={250}
+                ref={_circle}
+                strokeWidth={2}
+                strokeColor="rgba(0,163,119,0.3)"
+                fillColor="rgba(102,204,176,0.3)"
+                onLayout={() =>
+                  // Circle fix bug (IOS only) for style props not taking effects
+                  // https://github.com/react-native-community/react-native-maps/issues/3057
+                  _circle.current.setNativeProps({
+                    fillColor: "rgba(102,204,176,0.3)",
+                    strokeColor: "rgba(102,204,176,0.3)",
+                  })
+                }
+              />
+              <Marker
+                onLayout={() => setShowCircle(true)}
+                key={"job_found"}
+                coordinate={circleCoordinates}
+                icon={JobsControllers.getJobTagType("user")}
+              />
+            </>
+          )}
         </MapView>
 
-        <HandleUIComponents navigation={navigation} onEvent={handleEvent} />
+        <HandleUIComponents navigation={navigation} />
       </Container>
     );
   } else {

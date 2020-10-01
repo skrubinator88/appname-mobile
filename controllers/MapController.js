@@ -9,3 +9,7 @@ exports.handleCameraCoordinates = (coordinates, dispatch) => {
   const newCoordinates = { latitude, longitude };
   dispatch(CameraActions.animateTo(newCoordinates));
 };
+
+exports.clearTemporalCirclesAndTags = (dispatch) => {
+  dispatch(CameraActions.animateToActualCoordinates());
+};

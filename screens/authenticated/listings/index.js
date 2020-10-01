@@ -1,20 +1,65 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
-import { Image, Button, Alert, TextInput, View } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 
-import { Platform, Dimensions } from "react-native";
+import { Platform } from "react-native";
 import styled from "styled-components/native";
-import { FontAwesome, Ionicons, Octicons } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 
 // Components
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
-import NewListingModal from "./listingItem";
 
-// Store
+// Context
+import { GlobalContext } from "../../../components/context";
 
-export default function PaymentScreen({ navigation }) {
-  const [jobs, setJobs] = useState({});
+// Controllers
+import JobsControllers from "../../../controllers/JobsControllers";
+
+// Redux
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+
+export default function JobListing({ navigation }) {
+  // Constructor
+  const { authState } = useContext(GlobalContext);
+
+  // Store
+  const listings = useSelector((state) => state.listings);
+  const dispatch = useDispatch();
+
+  // State
+  const [isMounted, setIsMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (isMounted) {
+      console.log("runned");
+      setLoading(false);
+    }
+    setIsMounted(true);
+  }, [listings]);
+
+  // Fetch user jobs
+  useEffect(() => {
+    let unsubscribe;
+    unsubscribe = JobsControllers.currentUserActiveJobs(authState.userID, dispatch);
+
+    return () => {
+      if (unsubscribe !== undefined) JobsControllers.clean("ListingsActions", unsubscribe, dispatch);
+    };
+  }, []);
+
+  // useEffect(() => {
+  //   console.log(listings);
+  // }, [listings]);
+
+  // if (loading)
+  //   return (
+  //     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+  //       <ActivityIndicator color="#4a89f2" animating={true} size="large" />
+  //     </View>
+  //   );
 
   return (
     <>
@@ -32,7 +77,7 @@ export default function PaymentScreen({ navigation }) {
       >
         {/* Payments Section */}
         <Item>
-          <JobItemLink onPress={() => navigation.navigate("Listing Item", jobs)}>
+          <JobItemLink onPress={() => navigation.navigate("Listing Item")}>
             <JobItemRow>
               <Row>
                 <Text small weight="700" color="#1b5cce">
@@ -52,29 +97,35 @@ export default function PaymentScreen({ navigation }) {
             </View>
           </SectionTitle>
 
-          {/* <Item>
-            <JobItemLink>
-              <JobItemRow>
-                <Column>
-                  <Row>
-                    <Text small weight="700" color="#1b5cce">
-                      Job Title
-                    </Text>
-                    <Text small>Active</Text>
-                  </Row>
-                  <Row>
-                    <Text small>$00/hr</Text>
-                  </Row>
-                  <Row>
-                    <Text small>
-                      Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptas omnis possimus praesentium aliquam vel doloremque
-                      quam, consequuntur sit libero perferendis delectus non. Nihil enim expedita odit saepe sapiente rerum nam.
-                    </Text>
-                  </Row>
-                </Column>
-              </JobItemRow>
-            </JobItemLink>
-          </Item> */}
+          {listings.map(
+            (item) =>
+              (item.status == "available" || item.status == "in review") && (
+                <Item key={item.id}>
+                  <JobItemLink>
+                    <JobItemRow>
+                      <Column>
+                        <Row>
+                          <Text small weight="700" color="#1b5cce">
+                            {item.job_type}
+                          </Text>
+                          <Text small>Active</Text>
+                        </Row>
+                        <Row style={{ marginBottom: 10 }}>
+                          <Text small>
+                            ${item.salary}/{item.wage}
+                          </Text>
+                        </Row>
+                        {item.tasks.map((task) => (
+                          <Row key={task.id}>
+                            <Text>- {task.text}</Text>
+                          </Row>
+                        ))}
+                      </Column>
+                    </JobItemRow>
+                  </JobItemLink>
+                </Item>
+              )
+          )}
 
           <SectionTitle>
             <View style={{ margin: 10 }}>
@@ -83,29 +134,36 @@ export default function PaymentScreen({ navigation }) {
               </Text>
             </View>
           </SectionTitle>
-          {/* <Item>
-            <JobItemLink>
-              <JobItemRow>
-                <Column>
-                  <Row>
-                    <Text small weight="700" color="#1b5cce">
-                      Job Title
-                    </Text>
-                    <Text small>Active</Text>
-                  </Row>
-                  <Row>
-                    <Text small>$00/hr</Text>
-                  </Row>
-                  <Row>
-                    <Text small>
-                      Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptas omnis possimus praesentium aliquam vel doloremque
-                      quam, consequuntur sit libero perferendis delectus non. Nihil enim expedita odit saepe sapiente rerum nam.
-                    </Text>
-                  </Row>
-                </Column>
-              </JobItemRow>
-            </JobItemLink>
-          </Item> */}
+
+          {listings.map(
+            (item) =>
+              item.status == "in progress" && (
+                <Item key={item.id}>
+                  <JobItemLink>
+                    <JobItemRow>
+                      <Column>
+                        <Row>
+                          <Text small weight="700" color="#1b5cce">
+                            {item.job_type}
+                          </Text>
+                          <Text small>Active</Text>
+                        </Row>
+                        <Row>
+                          <Text small>
+                            ${item.salary}/{item.wage}
+                          </Text>
+                        </Row>
+                        {item.tasks.map((task) => (
+                          <Row key={task.id}>
+                            <Text>{task.text}</Text>
+                          </Row>
+                        ))}
+                      </Column>
+                    </JobItemRow>
+                  </JobItemLink>
+                </Item>
+              )
+          )}
         </JobSection>
       </Container>
     </>

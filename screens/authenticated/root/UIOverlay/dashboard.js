@@ -4,7 +4,7 @@ import { SafeAreaView, Keyboard, KeyboardAvoidingView, Platform, View, Text, Dim
 import styled from "styled-components/native";
 
 // Components
-import Card from "../../../../components/card";
+import Card from "../../../../components/card_animated";
 
 // Expo
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
@@ -17,7 +17,7 @@ import fetchedSuggestedItems from "../../../../models/fetchedSuggestedItems"; //
 // Context
 import { UIOverlayContext, GlobalContext } from "../../../../components/context";
 
-export default function Dashboard({ navigation, onUIChange }) {
+export default function Dashboard({ navigation, onUIChange, willUnmountSignal, showCard }) {
   const { authActions, authState, errorActions } = useContext(GlobalContext);
   const { userToken, userID, userData } = authState;
   const { changeRoute } = useContext(UIOverlayContext);
@@ -37,66 +37,62 @@ export default function Dashboard({ navigation, onUIChange }) {
     return title.indexOf(input) != -1;
   });
 
-  // function Suggestions() {
-  //   if (searchBarFocus) {
-  //     let suggestedItems = fetchedSuggestedItems.filter((item) => {
-  //       const title = item.toLowerCase();
-  //       const input = searchBarValue.toLowerCase().trim();
-  //       return title.indexOf(input) != -1;
-  //     });
-  //     return (
-  //       <SuggestionContainer enabled behavior="height">
-  //         <TopBar />
-  //         <SuggestionScrollView
-  //           keyboardShouldPersistTaps="always"
-  //           data={suggestedItems}
-  //           keyExtractor={(item, index) => index.toString()}
-  //           renderItem={({ item }) => {
-  //             return (
-  //               <SuggestedItem
-  //                 onPress={() => {
-  //                   setSearchBarValue(item);
-  //                   setSearchBarFocus(false);
-  //                   searchBar.blur();
-  //                   handleSubmit(item);
-  //                 }}
-  //               >
-  //                 {item}
-  //               </SuggestedItem>
-  //             );
-  //           }}
-  //         />
-  //       </SuggestionContainer>
-  //     );
-  //   } else {
-  //     return <View></View>;
-  //   }
-  // }
-
   return (
     <>
-      <SuggestionContainer enabled behavior="height" style={{ opacity: searchBarFocus ? 1 : 0, zIndex: searchBarFocus ? 1 : -1 }}>
-        <TopBar />
-        <SuggestionScrollView
-          keyboardShouldPersistTaps="always"
-          data={suggestedItems}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => {
-            return (
-              <SuggestedItem
-                onPress={() => {
-                  setSearchBarValue(item);
-                  setSearchBarFocus(false);
-                  searchBar.blur();
-                  handleSubmit(item);
-                }}
-              >
-                {item}
-              </SuggestedItem>
-            );
-          }}
-        />
-      </SuggestionContainer>
+      {Platform.OS == "ios" && (
+        <SuggestionContainer enabled behavior="height" style={{ opacity: searchBarFocus ? 1 : 0, zIndex: searchBarFocus ? 1 : -1 }}>
+          <TopBar />
+          <SuggestionScrollView
+            keyboardShouldPersistTaps="always"
+            data={suggestedItems}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => {
+              return (
+                <SuggestedItem
+                  onPress={() => {
+                    setSearchBarValue(item);
+                    setSearchBarFocus(false);
+                    searchBar.blur();
+                    handleSubmit(item);
+                  }}
+                >
+                  {item}
+                </SuggestedItem>
+              );
+            }}
+          />
+        </SuggestionContainer>
+      )}
+      {/* 
+      THESE SIMILAR CODES ARE NECESSARY BECAUSE OF PLATFORM COMPATIBILITY ISSUES
+      - - ISSUES - -
+      Android: suggestion items will still be touchable after hiding them.
+      ios: suggestion ScrollView won't resize when keyboard is up.
+      */}
+      {Platform.OS == "android" && searchBarFocus && (
+        <SuggestionContainer enabled behavior="height" style={{ opacity: searchBarFocus ? 1 : 0, zIndex: searchBarFocus ? 1 : -1 }}>
+          <TopBar />
+          <SuggestionScrollView
+            keyboardShouldPersistTaps="always"
+            data={suggestedItems}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => {
+              return (
+                <SuggestedItem
+                  onPress={() => {
+                    setSearchBarValue(item);
+                    setSearchBarFocus(false);
+                    searchBar.blur();
+                    handleSubmit(item);
+                  }}
+                >
+                  {item}
+                </SuggestedItem>
+              );
+            }}
+          />
+        </SuggestionContainer>
+      )}
 
       <SearchBar
         placeholder={userData.role == "contractor" ? "Search jobs" : "Search Contractors"}
@@ -106,7 +102,12 @@ export default function Dashboard({ navigation, onUIChange }) {
         onFocus={() => {
           setSearchBarFocus(true);
         }}
-        onSubmitEditing={() => handleSubmit()}
+        onSubmitEditing={({ nativeEvent }) => {
+          setSearchBarValue(nativeEvent.text);
+          setSearchBarFocus(false);
+          searchBar.blur();
+          handleSubmit(nativeEvent.text);
+        }}
       />
 
       {searchBarFocus ? (
@@ -133,7 +134,7 @@ export default function Dashboard({ navigation, onUIChange }) {
           </MenuButton>
 
           <Card>
-            <Row>
+            <Row style={{ padding: Platform.OS == "ios" ? 20 : 10, justifyContent: "center" }}>
               <Text small>1.0.0.0</Text>
             </Row>
           </Card>

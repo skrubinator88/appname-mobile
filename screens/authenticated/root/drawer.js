@@ -52,7 +52,7 @@ function DrawerContent({ navigation }) {
           <DrawerItem
             labelStyle={{ fontSize: 20 }}
             label="Work History"
-            onPress={() => navigation.navigate("Work History")}
+            onPress={() => Alert.alert("Work in Progress", "Section still in development")}
             icon={() => <MaterialIcons name="history" size={24} color="black" />}
           />
         ) : (
@@ -66,7 +66,7 @@ function DrawerContent({ navigation }) {
             <DrawerItem
               labelStyle={{ fontSize: 20 }}
               label="Job History"
-              // onPress={() => navigation.navigate("Work History")}
+              onPress={() => Alert.alert("Work in Progress", "Section still in development")}
               icon={() => <MaterialIcons name="history" size={24} color="black" />}
             />
           </>
@@ -162,7 +162,7 @@ export function Drawer() {
   return (
     <NavigationContainer independent={true}>
       <AuthenticatedDrawer.Navigator drawerType="back" backBehavior="initialRoute" drawerContent={(props) => <DrawerContent {...props} />}>
-        <AuthenticatedDrawer.Screen name="test" component={JobListings} />
+        {/* <AuthenticatedDrawer.Screen name="test" component={JobListings} /> */}
 
         <AuthenticatedDrawer.Screen name="Root" component={RootScreen} />
         <AuthenticatedDrawer.Screen name="Profile" component={ProfileScreen} />

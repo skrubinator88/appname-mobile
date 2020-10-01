@@ -14,4 +14,5 @@ module.exports = [
   "Event Planner",
   "Caterers",
   "Private Security Guards",
+  "Software Engineer",
 ].sort();

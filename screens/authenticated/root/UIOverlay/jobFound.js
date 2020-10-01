@@ -1,5 +1,5 @@
 // IMPORT
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { View, Platform, Dimensions, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
 import config from "../../../../env";
@@ -8,15 +8,18 @@ import StarRating from "react-native-star-rating";
 // Expo
 import { FontAwesome } from "@expo/vector-icons";
 
-// import Card from "../../../../components/card";
+import Card from "../../../../components/card_animated";
 import Text from "../../../../components/text";
 
 const deviceHeight = Dimensions.get("window").height;
 
 import { UIOverlayContext, GlobalContext } from "../../../../components/context";
 
+// Controllers
+import AnimationsController from "../../../../controllers/AnimationsControllers";
+
 // BODY
-export default function JobFound({ navigation, job_data }) {
+export default function JobFound({ navigation, job_data, keyword }) {
   const { authState } = useContext(GlobalContext);
   const { changeRoute } = useContext(UIOverlayContext);
 
@@ -25,6 +28,8 @@ export default function JobFound({ navigation, job_data }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState([]);
   const [starRate, setStarRate] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const cardRef = useRef(null);
 
   useEffect(() => {
     (async () => {
@@ -40,101 +45,117 @@ export default function JobFound({ navigation, job_data }) {
       setOccupation(project_manager.occupation);
       setStarRate(Number(project_manager.star_rate));
       setDescription(job_data.tasks);
+      setLoading(false);
     })();
   }, []);
 
-  const handleJobDecline = () => {};
+  const handleJobDecline = () => {
+    changeRoute({ name: "searching", props: { keyword } });
+  };
 
-  return (
-    <Card>
-      <View>
-        <ProfilePicture
-          source={{
-            uri: "https://i.insider.com/5899ffcf6e09a897008b5c04?width=1200",
-          }}
-        ></ProfilePicture>
+  const handleJobApprove = () => {
+    AnimationsController.CardUISlideOut(
+      cardRef,
+      () => {
+        changeRoute({ name: "acceptedJob" });
+      },
+      true
+    );
+  };
 
-        <Row first>
-          <Column>
-            <Text title bold marginBottom="5px">
-              {name}
-            </Text>
-            <Text small light marginBottom="5px">
-              {occupation}
-            </Text>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text bold marginBottom="5px">
-                <FontAwesome name="map-marker" size={24} color="black" />
+  if (!loading) {
+    return (
+      <Card ref={cardRef}>
+        <View>
+          <ProfilePicture
+            source={{
+              uri: "https://i.insider.com/5899ffcf6e09a897008b5c04?width=1200",
+            }}
+          ></ProfilePicture>
+
+          <Row first>
+            <Column>
+              <Text title bold marginBottom="5px">
+                {name}
               </Text>
-              <Text style={{ marginLeft: 10 }} bold>
-                13 min
-              </Text>
-            </View>
-          </Column>
-          <Column>
-            {/* Iterate from array of data pulled from server and render as stars */}
-            <View style={{ flexDirection: "row", marginBottom: 10 }}>
-              <StarRating disabled={true} maxStars={5} rating={starRate} starSize={25} />
-            </View>
-            <Text style={{ textAlign: "center" }} bold>
-              {starRate}
-            </Text>
-          </Column>
-        </Row>
-        <Row>
-          <JobDescriptionRow>
-            <JobDescription>
               <Text small light marginBottom="5px">
-                Job Description
+                {occupation}
               </Text>
-              <Text small marginBottom="5px">
-                $34/hr
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text bold marginBottom="5px">
+                  <FontAwesome name="map-marker" size={24} color="black" />
+                </Text>
+                <Text style={{ marginLeft: 10 }} bold>
+                  13 min
+                </Text>
+              </View>
+            </Column>
+            <Column>
+              {/* Iterate from array of data pulled from server and render as stars */}
+              <View style={{ flexDirection: "row", marginBottom: 10 }}>
+                <StarRating disabled={true} maxStars={5} rating={starRate} starSize={25} />
+              </View>
+              <Text style={{ textAlign: "center" }} bold>
+                {starRate}
               </Text>
-            </JobDescription>
+            </Column>
+          </Row>
+          <Row>
+            <JobDescriptionRow>
+              <JobDescription>
+                <Text small light marginBottom="5px">
+                  Job Description
+                </Text>
+                <Text small marginBottom="5px">
+                  $34/hr
+                </Text>
+              </JobDescription>
 
-            {description.map((item, index) => {
-              return <Text key={index}>{item}</Text>;
-            })}
-          </JobDescriptionRow>
-        </Row>
+              {description.map((item) => {
+                return <Text key={item.id}>{item.text}</Text>;
+              })}
+            </JobDescriptionRow>
+          </Row>
 
-        <CardOptionItem row>
-          <Text small>Reviews</Text>
-        </CardOptionItem>
+          <CardOptionItem row>
+            <Text small>Reviews</Text>
+          </CardOptionItem>
 
-        <Row last>
-          <Column>
-            <Button decline onPress={() => handleJobDecline()}>
-              <Text style={{ color: "red" }} medium>
-                Decline
-              </Text>
-            </Button>
-          </Column>
-          <Column>
-            <Button accept onPress={() => changeRoute({ name: "acceptedJob" })}>
-              <Text style={{ color: "white" }} medium>
-                Accept
-              </Text>
-            </Button>
-          </Column>
-        </Row>
-      </View>
-    </Card>
-  );
+          <Row last>
+            <Column>
+              <Button decline onPress={() => handleJobDecline()}>
+                <Text style={{ color: "red" }} medium>
+                  Decline
+                </Text>
+              </Button>
+            </Column>
+            <Column>
+              <Button accept onPress={() => handleJobApprove()}>
+                <Text style={{ color: "white" }} medium>
+                  Accept
+                </Text>
+              </Button>
+            </Column>
+          </Row>
+        </View>
+      </Card>
+    );
+  } else {
+    return <View></View>;
+  }
 }
 
 // STYLES
-
-const Card = styled.SafeAreaView`
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  border-top-left-radius: 40px;
-  border-top-right-radius: 40px;
-  box-shadow: -10px 0px 20px #999;
-  background: white;
-  width: 100%;
-`;
+// const Card = styled.SafeAreaView`
+//   position: absolute;
+//   left: 0;
+//   bottom: 0;
+//   border-top-left-radius: 40px;
+//   border-top-right-radius: 40px;
+//   box-shadow: -10px 0px 20px #999;
+//   background: white;
+//   width: 100%;
+// `;
 
 const ProfilePicture = styled.Image`
   margin: -35px auto;
