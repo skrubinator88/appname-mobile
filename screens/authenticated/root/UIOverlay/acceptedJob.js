@@ -1,5 +1,5 @@
 // IMPORT
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { View, Platform, Dimensions, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
 
@@ -11,8 +11,13 @@ import Text from "../../../../components/text";
 
 const deviceHeight = Dimensions.get("window").height;
 
+import { UIOverlayContext, GlobalContext } from "../../../../components/context";
+
 // BODY
-export default function Screen45({ navigation }) {
+export default function Screen45({ navigation, projectManagerInfo, job_data }) {
+  const { authState } = useContext(GlobalContext);
+  const { changeRoute } = useContext(UIOverlayContext);
+
   return (
     <Card>
       <View>
@@ -23,20 +28,16 @@ export default function Screen45({ navigation }) {
         ></ProfilePicture>
 
         <Row first>
-          <Column
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
+          <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
             <Text title bold marginBottom="5px">
-              John Doe
+              {projectManagerInfo.first_name} {projectManagerInfo.last_name}
             </Text>
             <Text small light marginBottom="5px">
               Domestic Worker
             </Text>
           </Column>
 
-          <Column
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
+          <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
             <Text style={{ paddingBottom: 10 }} color="#999">
               Cancel Job
             </Text>
@@ -55,7 +56,7 @@ export default function Screen45({ navigation }) {
                 </Column>
 
                 <Column style={{ paddingLeft: 5, justifyContent: "center" }}>
-                  <Text bold>5.0</Text>
+                  <Text bold>{projectManagerInfo.star_rate}</Text>
                 </Column>
               </View>
 
@@ -88,12 +89,11 @@ export default function Screen45({ navigation }) {
                 justifyContent: "space-between",
               }}
             >
-              <Column>
+              <Column location>
                 <Text small light marginBottom="5px">
                   Location
                 </Text>
-                <Text small>32 Wallaway ST</Text>
-                <Text small>Atlanta, GA 30309</Text>
+                <Text small>{job_data.location.address}</Text>
               </Column>
 
               <Column
@@ -101,7 +101,14 @@ export default function Screen45({ navigation }) {
                   justifyContent: "center",
                 }}
               >
-                <Button accept onPress={() => navigation.push("Home2")}>
+                <Button
+                  accept
+                  onPress={() => {
+                    // console.log(projectManagerInfo);
+                    // console.log(job_data.posted_by);
+                    navigation.navigate("Chat", { receiver: job_data.posted_by });
+                  }}
+                >
                   <Text style={{ color: "white" }} medium>
                     Message
                   </Text>
@@ -111,23 +118,28 @@ export default function Screen45({ navigation }) {
           </Column>
         </Row>
 
-        <CardOptionItem row>
+        {/* <CardOptionItem row>
           <Text small>QR Code</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
-        </CardOptionItem>
+        </CardOptionItem> */}
 
         <CardOptionItem row>
           <Text small>View Job Description</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
 
-        <CardOptionItem row>
+        {/* <CardOptionItem row>
           <Text small>View Profile</Text>
+          <Ionicons name="ios-arrow-forward" size={24} />
+        </CardOptionItem> */}
+
+        <CardOptionItem row>
+          <Text small>Report Job</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
 
         <CardOptionItem row>
-          <Text small>Report Job</Text>
+          <Text small>Reschedule Job</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
       </View>
@@ -181,8 +193,16 @@ const Row = styled.View`
 `;
 
 const Column = styled.View`
-  /* border: 1px solid black;  */
   flex-direction: column;
+
+  ${({ location }) => {
+    switch (true) {
+      case location:
+        return `
+        width: 50%;
+        `;
+    }
+  }};
 `;
 
 const CardOptionItem = styled.TouchableOpacity`
@@ -214,9 +234,4 @@ const Button = styled.TouchableOpacity`
         `;
     }
   }};
-`;
-
-const Title = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
 `;

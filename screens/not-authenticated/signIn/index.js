@@ -61,7 +61,9 @@ export default function SingInIndex({ navigation, route }) {
 
   const handleSubmit = async (e) => {
     if (textInput.length == 10) {
-      const phone_number = textInput;
+      const phone_number = `+1${textInput}`;
+
+      if (__DEV__) navigation.navigate("SignIn1", { phone_number });
 
       try {
         const response = await fetch(`${env.API_URL}/users/phone/${phone_number}`, {
@@ -72,14 +74,20 @@ export default function SingInIndex({ navigation, route }) {
         if (success && valid) {
           navigation.navigate("SignIn1", { phone_number });
           // ENABLE AFTER DEV
-          // await fetch(`${env.API_URL}/users/sms_registration?phone_number=${phone_number}&channel=sms`, {
-          //   method: "POST",
-          // });
+          await fetch(`${env.API_URL}/users/sms_registration`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              phone_number,
+              channel: "sms",
+            }),
+          });
         }
       } catch (e) {
         console.log(e.message);
-        if (e.message == 'Network request failed') {
-          
+        if (e.message == "Network request failed") {
         }
       }
       return;
@@ -115,6 +123,7 @@ export default function SingInIndex({ navigation, route }) {
                   }
                 }}
               />
+              <TextInputStyled value="+1" onFocus={() => hiddenTextInput.focus()} />
               <TextInputStyled {...handleSettingsProps(1, 3, firstInput)} />
               <TextInputStyled {...handleSettingsProps(2, 3, secondInput)} />
               <TextInputStyled {...handleSettingsProps(3, 4, thirdInput)} />

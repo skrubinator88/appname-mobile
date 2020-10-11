@@ -24,17 +24,14 @@ export default function ({ route, navigation }) {
   const [loading, setLoading] = useState(false);
 
   let hiddenTextInput;
-  let firstTextInput;
-  let secondTextInput;
-  let thirdTextInput;
-  let fourthTextInput;
 
   const phoneNumberRender = () => {
-    const first = route.params.phone_number.slice(0, 3);
-    const second = route.params.phone_number.slice(3, 6);
-    const third = route.params.phone_number.slice(6, 10);
+    const first = route.params.phone_number.slice(0, 2);
+    const second = route.params.phone_number.slice(2, 5);
+    const third = route.params.phone_number.slice(5, 8);
+    const fourth = route.params.phone_number.slice(6, 12);
 
-    return `(${first}) ${second} - ${third}`;
+    return `${first} (${second}) ${third} - ${fourth}`;
   };
 
   const handleSettingsProps = (inputPosNumber, maxLength, value) => {

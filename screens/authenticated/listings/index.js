@@ -137,7 +137,7 @@ export default function JobListing({ navigation }) {
 
           {listings.map(
             (item) =>
-              item.status == "in progress" && (
+              (item.status == "in progress" || item.status == "accepted") && (
                 <Item key={item.id}>
                   <JobItemLink>
                     <JobItemRow>

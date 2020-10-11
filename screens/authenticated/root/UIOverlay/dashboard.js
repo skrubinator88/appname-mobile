@@ -39,7 +39,7 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
 
   return (
     <>
-      {Platform.OS == "ios" && (
+      {Platform.OS == "ios" && userData.role == "contractor" && (
         <SuggestionContainer enabled behavior="height" style={{ opacity: searchBarFocus ? 1 : 0, zIndex: searchBarFocus ? 1 : -1 }}>
           <TopBar />
           <SuggestionScrollView
@@ -69,7 +69,7 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
       Android: suggestion items will still be touchable after hiding them.
       ios: suggestion ScrollView won't resize when keyboard is up.
       */}
-      {Platform.OS == "android" && searchBarFocus && (
+      {Platform.OS == "android" && searchBarFocus && userData.role == "contractor" && (
         <SuggestionContainer enabled behavior="height" style={{ opacity: searchBarFocus ? 1 : 0, zIndex: searchBarFocus ? 1 : -1 }}>
           <TopBar />
           <SuggestionScrollView
@@ -94,23 +94,25 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
         </SuggestionContainer>
       )}
 
-      <SearchBar
-        placeholder={userData.role == "contractor" ? "Search jobs" : "Search Contractors"}
-        placeholderTextColor="#777"
-        onChangeText={(text) => setSearchBarValue(text)}
-        ref={(searchBarRef) => (searchBar = searchBarRef)}
-        onFocus={() => {
-          setSearchBarFocus(true);
-        }}
-        onSubmitEditing={({ nativeEvent }) => {
-          setSearchBarValue(nativeEvent.text);
-          setSearchBarFocus(false);
-          searchBar.blur();
-          handleSubmit(nativeEvent.text);
-        }}
-      />
+      {userData.role == "contractor" && (
+        <SearchBar
+          placeholder={userData.role == "contractor" ? "Search jobs" : "Search Contractors"}
+          placeholderTextColor="#777"
+          onChangeText={(text) => setSearchBarValue(text)}
+          ref={(searchBarRef) => (searchBar = searchBarRef)}
+          onFocus={() => {
+            setSearchBarFocus(true);
+          }}
+          onSubmitEditing={({ nativeEvent }) => {
+            setSearchBarValue(nativeEvent.text);
+            setSearchBarFocus(false);
+            searchBar.blur();
+            handleSubmit(nativeEvent.text);
+          }}
+        />
+      )}
 
-      {searchBarFocus ? (
+      {searchBarFocus && userData.role == "contractor" ? (
         <MenuButton
           activeOpacity={0.9}
           onPress={() => {

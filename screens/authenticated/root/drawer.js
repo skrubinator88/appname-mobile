@@ -155,13 +155,21 @@ import SettingsScreen from "../settings";
 import ProfileScreen from "../profile";
 import JobListings from "../listings/stacks";
 
+// Components
+import Chat from "../chat/";
+
 // Test Components
 import test from "../listings/listingItem";
 
-export function Drawer() {
+export function Drawer({ navigation }) {
   return (
     <NavigationContainer independent={true}>
-      <AuthenticatedDrawer.Navigator drawerType="back" backBehavior="initialRoute" drawerContent={(props) => <DrawerContent {...props} />}>
+      <AuthenticatedDrawer.Navigator
+        drawerType="back"
+        // backBehavior="initialRoute"
+        edgeWidth={-100}
+        drawerContent={(props) => <DrawerContent {...props} />}
+      >
         {/* <AuthenticatedDrawer.Screen name="test" component={JobListings} /> */}
 
         <AuthenticatedDrawer.Screen name="Root" component={RootScreen} />
@@ -172,6 +180,7 @@ export function Drawer() {
         <AuthenticatedDrawer.Screen name="Settings" component={SettingsScreen} />
 
         <AuthenticatedDrawer.Screen name="Job Listings" component={JobListings} />
+        <AuthenticatedDrawer.Screen name="Chat" component={Chat} />
       </AuthenticatedDrawer.Navigator>
     </NavigationContainer>
   );

@@ -17,13 +17,15 @@ import { UIOverlayContext, GlobalContext } from "../../../../components/context"
 
 // Controllers
 import AnimationsController from "../../../../controllers/AnimationsControllers";
+import JobsController from "../../../../controllers/JobsControllers";
 
 // BODY
-export default function JobFound({ navigation, job_data, keyword }) {
+export default function JobFound({ job_data, keyword }) {
   const { authState } = useContext(GlobalContext);
   const { changeRoute } = useContext(UIOverlayContext);
 
   // Constructor
+  const [projectManager, setProjectManager] = useState({});
   const [occupation, setOccupation] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState([]);
@@ -41,6 +43,7 @@ export default function JobFound({ navigation, job_data, keyword }) {
         },
       });
       const project_manager = await response.json();
+      setProjectManager(project_manager);
       setName(`${project_manager.first_name} ${project_manager.last_name}`);
       setOccupation(project_manager.occupation);
       setStarRate(Number(project_manager.star_rate));
@@ -57,7 +60,11 @@ export default function JobFound({ navigation, job_data, keyword }) {
     AnimationsController.CardUISlideOut(
       cardRef,
       () => {
-        changeRoute({ name: "acceptedJob" });
+        JobsController.changeJobStatus(job_data._id, "in progress");
+        // Save job ID in local storage to retrieve it later on.
+
+        //
+        changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
       },
       true
     );

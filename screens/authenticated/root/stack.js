@@ -9,7 +9,7 @@ import { Drawer } from "./drawer";
 
 // BODY
 
-export function AuthenticatedStackScreen({ navigation }) {
+export function AuthenticatedStackScreen() {
   return (
     <NavigationContainer independent={true}>
       <HomeStack.Navigator headerMode="none">

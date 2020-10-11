@@ -1,15 +1,10 @@
 // Dependencies
 import axios from "axios";
 import * as firebase from "firebase";
-import "firebase/firestore";
-import * as geofirestore from "geofirestore";
 
 // Config
 import config from "../env";
-import { firebaseConfig } from "../config/firebase";
-!firebase.apps.length && firebase.initializeApp(firebaseConfig);
-const firestore = firebase.firestore(); // Create a Firestore reference
-const GeoFirestore = geofirestore.initializeApp(firestore); // Create a GeoFirestore reference
+import { firestore, GeoFirestore } from "../config/firebase";
 
 // Functions
 import { distanceBetweenTwoCoordinates, sortJobsByProximity } from "../functions";
@@ -68,7 +63,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
 exports.currentUserActiveJobs = (userID, dispatch) => {
   const query = GeoFirestore.collection("jobs")
     .where("posted_by", "==", userID)
-    .where("status", "in", ["available", "in review", "in progress"]);
+    .where("status", "in", ["available", "in review", "accepted", "in progress"]);
 
   const unsubscribe = query.onSnapshot((res) => {
     res.docChanges().forEach((change) => {
@@ -80,9 +75,6 @@ exports.currentUserActiveJobs = (userID, dispatch) => {
         case "modified": {
           return dispatch(ListingsActions.update(document.id, document.data()));
         }
-        // case "removed": {
-        //   return setInProgressJobs({ id: document.id, type: "removed" });
-        // }
         default:
           break;
       }
