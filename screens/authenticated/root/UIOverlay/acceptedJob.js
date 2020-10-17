@@ -118,10 +118,10 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
           </Column>
         </Row>
 
-        {/* <CardOptionItem row>
+        <CardOptionItem row>
           <Text small>QR Code</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
-        </CardOptionItem> */}
+        </CardOptionItem>
 
         <CardOptionItem row>
           <Text small>View Job Description</Text>
