@@ -26,6 +26,7 @@ import TaskModal from "./taskModal";
 // Controllers
 import JobsController from "../../../controllers/JobsControllers";
 import GoogleServicesController from "../../../controllers/GoogleServicesController";
+import PermissionsControllers from "../../../controllers/PermissionsControllers";
 
 // Context
 import { GlobalContext } from "../../../components/context";
@@ -60,24 +61,29 @@ export default function workModal({ navigation, route }) {
 
   // - - Life Cycles - -
   // Create session for google suggestions (This will reduce billing expenses)
-  useEffect(() => {
-    GoogleServicesController.createSession();
-    return () => {
-      GoogleServicesController.clean();
-      setShowModal(false);
-    };
-  }, []);
+  // useEffect(() => {
+  //   GoogleServicesController.createSession();
+  //   return () => {
+  //     GoogleServicesController.clean();
+  //     setShowModal(false);
+  //   };
+  // }, []);
 
   // Fetch suggestions
+  // useEffect(() => {
+  //   (async () => {
+  //     if (location?.address != undefined) {
+  //       setGoogleSuggestions(await GoogleServicesController.getPlacesSuggestions(location.address));
+  //     } else {
+  //       setGoogleSuggestions([]);
+  //     }
+  //   })();
+  // }, [location]);
+
+  // Get location
   useEffect(() => {
-    (async () => {
-      if (location?.address != undefined) {
-        setGoogleSuggestions(await GoogleServicesController.getPlacesSuggestions(location.address));
-      } else {
-        setGoogleSuggestions([]);
-      }
-    })();
-  }, [location]);
+    PermissionsControllers.getLocation().then((position) => setLocation(position));
+  }, []);
 
   // - - Functions (Handler, Events, more) - -
   function commonInputProps(elementValue, setElementValue) {
@@ -108,9 +114,16 @@ export default function workModal({ navigation, route }) {
     return form;
   }
 
+  function formatFormV2(data) {
+    const form = { ...data };
+    form.coordinates = [form.location.coords.latitude, form.location.coords.longitude];
+    return form;
+  }
+
   async function handleSubmit(form) {
     setLoading(true);
-    const formattedForm = await formatForm(form);
+    // const formattedForm = await formatForm(form);
+    const formattedForm = formatFormV2(form);
     const { success } = await JobsController.postUserJob(authState.userID, formattedForm);
 
     if (success) return navigation.goBack();
@@ -188,7 +201,7 @@ export default function workModal({ navigation, route }) {
             </Item>
 
             <Item>
-              <TextField
+              {/* <TextField
                 {...commonInputProps(location.address, setLocation)}
                 textContentType="addressCityAndState"
                 onChangeText={(text) => {
@@ -222,9 +235,9 @@ export default function workModal({ navigation, route }) {
                     <Ionicons name="ios-search" size={24} />
                   </View>
                 )}
-              />
+              /> */}
 
-              {googleSuggestions.length != 0 && location?.address != undefined && suggestionsEditing === true && (
+              {/* {googleSuggestions.length != 0 && location?.address != undefined && suggestionsEditing === true && (
                 <Suggestions>
                   <SuggestedItem>
                     <MaterialIcons name="gps-fixed" size={15} />
@@ -249,7 +262,7 @@ export default function workModal({ navigation, route }) {
                     }}
                   />
                 </Suggestions>
-              )}
+              )} */}
             </Item>
 
             <Item style={{ marginTop: 20, marginBottom: 20 }}>
@@ -257,6 +270,7 @@ export default function workModal({ navigation, route }) {
               <WageInput>
                 <SalaryField>
                   <TextField
+                    suffix="/hr"
                     label="PAY"
                     labelFontSize={14}
                     placeholder="$00.00"
@@ -265,12 +279,12 @@ export default function workModal({ navigation, route }) {
                     {...commonInputProps(salary, setSalary)}
                   />
                 </SalaryField>
-                <WageTimeField>
+                {/* <WageTimeField>
                   <WageTimeFieldInput selectedValue={wage} mode="dropdown" onValueChange={(value) => setWage(value)}>
                     <WageTimeFieldInput.Item label="Year" value="yr" />
                     <WageTimeFieldInput.Item label="Hour" value="hr" />
                   </WageTimeFieldInput>
-                </WageTimeField>
+                </WageTimeField> */}
               </WageInput>
             </Item>
 

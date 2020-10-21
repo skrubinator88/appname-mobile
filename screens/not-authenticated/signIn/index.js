@@ -88,6 +88,7 @@ export default function SingInIndex({ navigation, route }) {
       } catch (e) {
         console.log(e.message);
         if (e.message == "Network request failed") {
+          navigation.navigate("SignIn", { errorMsg: e.message });
         }
       }
       return;
@@ -96,14 +97,14 @@ export default function SingInIndex({ navigation, route }) {
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
         <Container>
           <Header navigation={navigation} />
 
           <ContainerTopMiddle>
-            <TextStyled>
-              {route?.params?.errorMsg ? route?.params?.errorMsg : "For authentication purposes, what is your phone number?"}
-            </TextStyled>
+            <TextStyled>For authentication purposes, what is your phone number?</TextStyled>
+
+            <Text style={{ color: "red" }}>{route?.params?.errorMsg ? route?.params?.errorMsg : ""}</Text>
 
             <ContainerMiddle>
               <HiddenTextInput

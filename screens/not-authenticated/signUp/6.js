@@ -25,7 +25,7 @@ export default function signUp6({ navigation }) {
   const { pushItemFormField } = methods;
 
   const handleSubmit = () => {
-    navigation.navigate("SignUp7");
+    navigation.navigate("SignUp8");
   };
 
   useEffect(() => {

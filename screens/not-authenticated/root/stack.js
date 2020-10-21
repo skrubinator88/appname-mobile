@@ -27,6 +27,7 @@ const initialState = {
   first_name: "",
   last_name: "",
   occupation: "",
+  profile_picture: "",
   city: "",
   state: "",
   email: "",

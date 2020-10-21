@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
-import { Image, Button, Alert, TextInput, View, SafeAreaView } from "react-native";
+import { Image, Button, Alert, TextInput, View, SafeAreaView, ActivityIndicator } from "react-native";
 
 import { Platform, ScrollView } from "react-native";
 import styled from "styled-components/native";
@@ -9,14 +9,30 @@ import { useTheme } from "@react-navigation/native";
 import { Camera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 
+import { RegistrationContext } from "../../../components/context";
+
+import env from "../../../env";
+
 // Components
 import Text from "../../../components/text";
 
-export default function ({ navigation }) {
+export default function ({ navigation, route }) {
+  const { registrationState, methods } = useContext(RegistrationContext);
+  const { updateForm, sendForm } = methods;
+
   const [errorMsg, setErrorMsg] = useState("");
   const { colors } = useTheme();
   const [gallerySelectedPhoto, setGallerySelectedPhoto] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (route.capturedPhoto) {
+      console.log(route.capturedPhoto);
+    }
+    console.log(route);
+    console.log("Hell yeah");
+  }, [route.capturedPhoto]);
 
   const handleCamera = async () => {
     const { granted } = await Camera.requestPermissionsAsync();
@@ -30,7 +46,26 @@ export default function ({ navigation }) {
     }
   };
 
-  const handleSavePhoto = () => {};
+  const handleSavePhoto = async () => {
+    setUploading(true);
+
+    // Send picture to server
+    // console.log(capturedPhoto);
+
+    // Get URL of image
+    let uploadData = new FormData();
+    uploadData.append("submit", "ok");
+    uploadData.append("avatar", { type: "image/jpeg", uri: gallerySelectedPhoto, name: "avatar.jpg" });
+
+    const res = await fetch(`${env.API_URL}/images/upload`, { method: "POST", body: uploadData });
+    res.json().then((data) => {
+      setUploading(false);
+
+      updateForm({ profile_picture: data.path });
+
+      setShowModal(false);
+    });
+  };
 
   const handleRetakePhoto = () => {
     setShowModal(false);
@@ -40,13 +75,12 @@ export default function ({ navigation }) {
   const handleGallery = async () => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        // allowsEditing: true,
         aspect: [16, 9],
-        quality: 1,
+        quality: 0,
       });
       if (!result.cancelled) {
-        // Save image in the cloud instead
         setGallerySelectedPhoto(result.uri);
         setShowModal(true);
       }
@@ -80,9 +114,15 @@ export default function ({ navigation }) {
           </View>
 
           <ButtonGUISection>
-            <SaveImageButton onPress={() => handleSavePhoto()}>
-              <Text style={{ textAlign: "center", color: "white" }}>Save Picture</Text>
-            </SaveImageButton>
+            {!uploading ? (
+              <SaveImageButton onPress={() => handleSavePhoto()}>
+                <Text style={{ textAlign: "center", color: "white" }}>Save Picture</Text>
+              </SaveImageButton>
+            ) : (
+              <SaveImageButton>
+                <ActivityIndicator />
+              </SaveImageButton>
+            )}
 
             <CancelImageButton onPress={() => handleRetakePhoto()}>
               <Text style={{ textAlign: "center" }}>Cancel</Text>

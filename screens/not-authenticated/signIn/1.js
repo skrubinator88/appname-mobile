@@ -29,7 +29,7 @@ export default function ({ route, navigation }) {
     const first = route.params.phone_number.slice(0, 2);
     const second = route.params.phone_number.slice(2, 5);
     const third = route.params.phone_number.slice(5, 8);
-    const fourth = route.params.phone_number.slice(6, 12);
+    const fourth = route.params.phone_number.slice(8, 12);
 
     return `${first} (${second}) ${third} - ${fourth}`;
   };
@@ -119,7 +119,7 @@ export default function ({ route, navigation }) {
   if (!loading) {
     return (
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
           <Container>
             <Header navigation={navigation} />
             <ContainerTopMiddle>
@@ -156,7 +156,9 @@ export default function ({ route, navigation }) {
 
               <ContainerBottom>
                 <TextStyledBottom>Didn't get it?</TextStyledBottom>
-                <TextStyledBottomAction style={{ color: colors.primary }}>Resend code</TextStyledBottomAction>
+                <TextStyledBottomAction style={{ color: colors.primary }} onPress={() => navigation.navigate("SignIn")}>
+                  Resend code
+                </TextStyledBottomAction>
               </ContainerBottom>
             </ContainerTopMiddle>
           </Container>
