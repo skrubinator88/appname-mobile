@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useContext } from "react";
 
 import { Image, Button, Alert, TextInput, View } from "react-native";
 
@@ -9,39 +9,45 @@ import { FontAwesome, Ionicons } from "@expo/vector-icons";
 // Components
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
+import env from "../../../env";
 
 const isIos = Platform.OS === "ios";
 const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
 
+import { GlobalContext } from "../../../components/context/";
+
 export default function ProfileScreen({ navigation }) {
+  const { authActions, authState, errorActions } = useContext(GlobalContext);
+  const { userData } = authState;
+
   return (
     <Container
       navigation={navigation}
-      nextTitle="Save"
       color="white"
       headerBackground="#3869f3"
       endBackground="white"
-      nextProvider="Entypo"
-      nextIcon="dots-three-horizontal"
-      nextSize={25}
-      nextAction={() => {}}
+      // nextAction={() => {}}
+      // nextTitle="Save"
+      // nextProvider="Entypo"
+      // nextIcon="dots-three-horizontal"
+      // nextSize={25}
     >
       {/* Profile Section */}
 
       <ProfileSection>
-        <ProfilePicture source={{ uri: "https://i.insider.com/5899ffcf6e09a897008b5c04?width=1200" }} />
+        <ProfilePicture source={{ uri: `${env.API_URL}${userData.profile_picture}` }} />
 
         <Text title color="white" weight="700">
-          John Doe
+          {userData.first_name} {userData.last_name}
         </Text>
         <Text medium color="white" weight="300">
-          Construction Laborer
+          {userData.occupation}
         </Text>
 
         <Row>
           <Column>
             <Text title color="white" weight="700">
-              4.01 <FontAwesome name="star" size={25} />
+              {userData.star_rate} <FontAwesome name="star" size={25} />
             </Text>
             <Text medium weight="300" color="white">
               Rating
@@ -67,7 +73,7 @@ export default function ProfileScreen({ navigation }) {
               PHONE
             </Text>
             <Text small weight="300">
-              000.000.0000
+              {userData.phone_number}
             </Text>
           </DetailItemColumn>
         </DetailItemRow>
@@ -78,7 +84,7 @@ export default function ProfileScreen({ navigation }) {
               EMAIL
             </Text>
             <Text small weight="300">
-              JDoe@companyName.net
+              {userData.email}
             </Text>
           </DetailItemColumn>
         </DetailItemRow>
@@ -92,10 +98,10 @@ export default function ProfileScreen({ navigation }) {
           </DetailItemRowLink>
         </DetailItemRow>
 
-        <DetailItemRow>
+        <DetailItemRow onPress={() => navigation.navigate("Background Check")}>
           <DetailItemRowLink>
             <Text small weight="700" color="#4a4a4a">
-              QR CODE
+              PERFORM A BACKGROUND CHECK
             </Text>
             <Ionicons name="ios-arrow-forward" size={20} />
           </DetailItemRowLink>
@@ -107,16 +113,16 @@ export default function ProfileScreen({ navigation }) {
       <CommentSection>
         <CommentSectionRow>
           <CommentItemColumn>
-            <CommentTitleRowAndLink>
+            {/* <CommentTitleRowAndLink>
               <Text medium weight="700">
                 Compliments
               </Text>
               <Text small weight="700" color="#a0a0a0">
                 View All
               </Text>
-            </CommentTitleRowAndLink>
+            </CommentTitleRowAndLink> */}
             {/* Compliments Item */}
-            <Compliments
+            {/* <Compliments
               horizontal={true}
               alwaysBounceHorizontal={true}
               alwaysBounceVertical={false}
@@ -154,7 +160,7 @@ export default function ProfileScreen({ navigation }) {
                   Great Task Management
                 </Text>
               </ComplimentItem>
-            </Compliments>
+            </Compliments> */}
             {/*  */}
           </CommentItemColumn>
         </CommentSectionRow>
@@ -168,7 +174,7 @@ export default function ProfileScreen({ navigation }) {
               View All
             </Text>
           </CommentTitleRowAndLink>
-          {/*  */}
+
           <Comments>
             <CommentItem>
               <Text small bold>
@@ -198,7 +204,6 @@ export default function ProfileScreen({ navigation }) {
               </Text>
             </CommentItem>
           </Comments>
-          {/*  */}
         </CommentSectionColumn>
       </CommentSection>
     </Container>
@@ -246,7 +251,7 @@ const DetailSection = styled.View`
   margin: 20px 0 0 0;
 `;
 
-const DetailItemRow = styled.View`
+const DetailItemRow = styled.TouchableOpacity`
   padding: 10px;
   flex-direction: row;
   width: 100%;

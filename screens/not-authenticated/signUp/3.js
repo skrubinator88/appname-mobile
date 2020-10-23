@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useTheme } from "@react-navigation/native";
-import { Platform, TouchableWithoutFeedback, Keyboard, SafeAreaView } from "react-native";
+import { Platform, TouchableWithoutFeedback, Keyboard, SafeAreaView, ActivityIndicator, View } from "react-native";
 import styled from "styled-components/native";
 
 import env from "../../../env";
@@ -22,6 +22,8 @@ export default function ({ navigation }) {
 
   const [errorMsg, setErrorMsg] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
   let hiddenTextInput;
   let firstTextInput;
   let secondTextInput;
@@ -29,11 +31,12 @@ export default function ({ navigation }) {
   let fourthTextInput;
 
   const phoneNumberRender = () => {
-    const first = registrationState.phone_number.slice(0, 3);
-    const second = registrationState.phone_number.slice(3, 6);
-    const third = registrationState.phone_number.slice(6, 10);
+    let first = registrationState.phone_number.slice(0, 2);
+    let second = registrationState.phone_number.slice(2, 5);
+    let third = registrationState.phone_number.slice(5, 8);
+    let fourth = registrationState.phone_number.slice(8, 12);
 
-    return `(${first}) ${second} - ${third}`;
+    return `${first} (${second}) ${third} - ${fourth}`;
   };
 
   const handleSettingsProps = (inputPosNumber, maxLength, value) => {
@@ -70,19 +73,67 @@ export default function ({ navigation }) {
   };
 
   const handleSubmit = async () => {
-    const code = textInput.toString();
-    if (!code || code.length != 4) return;
+    setLoading(true);
+    let controller = new AbortController();
+    let signal = controller.signal;
+
     try {
-      const twilio = await fetch(`${env.API_URL}/users/sms_verification?phone_number=${registrationState.phone_number}&code=${code}`, {
+      const code = textInput.toString();
+      const body = {
+        phone_number: registrationState.phone_number,
+        code: code,
+      };
+      const twilio = await fetch(`${env.API_URL}/users/sms_verification`, {
         method: "POST",
+        credentials: "same-origin",
+        signal: signal,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
       });
-      const response = await twilio.json();
-      if (response.data.valid) navigation.navigate("SignUp4");
+
+      const fetchExpirationTime = setTimeout(() => {
+        controller.abort();
+        navigation.navigate("SignUp2", { errorMsg: "Something went wrong" });
+        setLoading(false);
+      }, 8000);
+
+      const { valid } = await twilio.json();
+      if (valid) {
+        clearTimeout(fetchExpirationTime);
+        navigation.navigate("SignUp4");
+      }
     } catch (e) {
-      setErrorMsg("Incorrect Pin Code");
-      console.log(e.message);
+      // controller.abort();
+      console.log(e);
+      // navigation.goBack();
+      setLoading(false);
     }
   };
+
+  // const handleSubmit = async () => {
+  //   // const code = textInput.toString();
+  //   // if (!code || code.length != 4) return;
+  //   // try {
+  //   //   const twilio = await fetch(`${env.API_URL}/users/sms_verification?phone_number=${registrationState.phone_number}&code=${code}`, {
+  //   //     method: "POST",
+  //   //   });
+  //   //   const response = await twilio.json();
+  //   //   if (response.data.valid) navigation.navigate("SignUp4");
+  //   // } catch (e) {
+  //   //   setErrorMsg("Incorrect Pin Code");
+  //   //   console.log(e.message);
+  //   // }
+  // };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>

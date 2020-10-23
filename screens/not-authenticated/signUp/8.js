@@ -16,7 +16,7 @@ import env from "../../../env";
 // Components
 import Text from "../../../components/text";
 
-export default function ({ navigation, route }) {
+export default function SignUp8({ navigation, route }) {
   const { registrationState, methods } = useContext(RegistrationContext);
   const { updateForm, sendForm } = methods;
 
@@ -26,13 +26,8 @@ export default function ({ navigation, route }) {
   const [showModal, setShowModal] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    if (route.capturedPhoto) {
-      console.log(route.capturedPhoto);
-    }
-    console.log(route);
-    console.log("Hell yeah");
-  }, [route.capturedPhoto]);
+  const [capturedPhoto, setCapturedPhoto] = useState();
+  const [message, setMessage] = useState("");
 
   const handleCamera = async () => {
     const { granted } = await Camera.requestPermissionsAsync();
@@ -46,25 +41,14 @@ export default function ({ navigation, route }) {
     }
   };
 
-  const handleSavePhoto = async () => {
-    setUploading(true);
+  useEffect(() => {
+    if (route?.params?.capturedPhoto) setCapturedPhoto(route?.params?.capturedPhoto);
+  }, [route?.params?.capturedPhoto]);
 
-    // Send picture to server
-    // console.log(capturedPhoto);
+  const handleSavePhoto = () => {
+    setCapturedPhoto(gallerySelectedPhoto);
 
-    // Get URL of image
-    let uploadData = new FormData();
-    uploadData.append("submit", "ok");
-    uploadData.append("avatar", { type: "image/jpeg", uri: gallerySelectedPhoto, name: "avatar.jpg" });
-
-    const res = await fetch(`${env.API_URL}/images/upload`, { method: "POST", body: uploadData });
-    res.json().then((data) => {
-      setUploading(false);
-
-      updateForm({ profile_picture: data.path });
-
-      setShowModal(false);
-    });
+    setShowModal(false);
   };
 
   const handleRetakePhoto = () => {
@@ -89,6 +73,56 @@ export default function ({ navigation, route }) {
     }
   };
 
+  const handleSendInfo = async () => {
+    try {
+      setUploading(true);
+
+      // Ask for location permissions
+
+      // Save user in database and generate ID (Working!)
+      setMessage("Creating user");
+      const createUser = await fetch(`${env.API_URL}/users/new`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(registrationState),
+      });
+      const { userID } = await createUser.json();
+
+      // Save photo in the cloud named as the userID and update user photo URI in database
+      let uploadData = new FormData();
+      uploadData.append("submit", "ok");
+      uploadData.append("avatar", { type: "image/jpeg", uri: capturedPhoto, name: `${userID}.jpg` });
+      uploadData.append("userID", userID);
+      setMessage("Uploading Picture");
+      const uploadedImage = await fetch(`${env.API_URL}/images/upload`, {
+        method: "POST",
+        body: uploadData,
+      });
+
+      uploadedImage.json().then(() => {
+        setUploading(false);
+
+        // Go back to root
+        navigation.navigate("SignUp9", { name: registrationState.first_name });
+      });
+    } catch (e) {
+      console.log(e);
+      setErrorMsg(`Something went wrong. Error Message: ${e.message}`);
+      setUploading(false);
+    }
+  };
+
+  if (uploading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator />
+        <Text>{message}</Text>
+      </View>
+    );
+  }
+
   return (
     <Container>
       <Text style={{ fontSize: 30 }}>Set your profile photo</Text>
@@ -97,15 +131,24 @@ export default function ({ navigation, route }) {
 
       <Text style={{ color: "#ff3d3d" }}>{errorMsg}</Text>
 
-      <Image source={require("../../../assets/submitProfilePhoto.png")} style={{ borderRadius: 1000, width: 240, height: 240 }} />
+      <Image
+        source={capturedPhoto ? { uri: capturedPhoto } : require("../../../assets/submitProfilePhoto.png")}
+        style={{ borderRadius: 1000, width: 240, height: 240 }}
+      />
 
       <ButtonStyled onPress={(e) => handleGallery(e)} style={{ backgroundColor: "white", borderColor: colors.primary }}>
-        <Text>Upload Photo</Text>
+        <Text>{route?.params?.capturedPhoto ? "Select another photo from gallery" : "Upload photo from gallery"}</Text>
       </ButtonStyled>
 
-      <ButtonStyled onPress={(e) => handleCamera(e)} style={{ backgroundColor: colors.primary, borderColor: colors.primary }}>
-        <Text style={{ color: "white" }}>Take Photo</Text>
+      <ButtonStyled onPress={(e) => handleCamera(e)} style={{ backgroundColor: "white", borderColor: colors.primary }}>
+        <Text style={{ color: colors.primary, fontWeight: "700" }}>{route?.params?.capturedPhoto ? "Retake Photo" : "Take Photo"}</Text>
       </ButtonStyled>
+
+      {gallerySelectedPhoto && (
+        <ButtonStyled onPress={(e) => handleSendInfo()} style={{ backgroundColor: colors.primary, borderColor: colors.primary }}>
+          <Text style={{ color: "white" }}>Next</Text>
+        </ButtonStyled>
+      )}
 
       {gallerySelectedPhoto && (
         <Preview animated={true} visible={showModal} transparent={false} style={{ flex: 1 }}>

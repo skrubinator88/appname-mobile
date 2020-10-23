@@ -11,6 +11,8 @@ import { NavigationContainer } from "@react-navigation/native";
 
 export const AuthenticatedDrawer = createDrawerNavigator();
 
+import env from "../../../env";
+
 import { GlobalContext } from "../../../components/context/";
 
 function DrawerContent({ navigation }) {
@@ -28,7 +30,7 @@ function DrawerContent({ navigation }) {
         >
           <Row>
             <Column>
-              <ProfilePicture source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }} />
+              <ProfilePicture source={{ uri: `${env.API_URL}${authState.userData.profile_picture}` }} />
             </Column>
             <Column>
               <Text title>
@@ -152,7 +154,7 @@ const ProfilePicture = styled.Image`
 import { RootScreen } from "./index";
 import PaymentScreen from "../payment";
 import SettingsScreen from "../settings";
-import ProfileScreen from "../profile";
+import ProfileScreen from "../profile/stack";
 import JobListings from "../listings/stacks";
 
 // Components

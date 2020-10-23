@@ -5,6 +5,7 @@ const loginReducer = (prevState, action) => {
         ...prevState,
         userToken: action.token,
         userID: action.id,
+
         userData: action.profile,
         isLoading: false,
       };

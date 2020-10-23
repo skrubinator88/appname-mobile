@@ -58,7 +58,7 @@ import { rootStore } from "./rdx-store/root.store";
 export default function App({ navigation }) {
   // Store
   const [authState, auth_dispatch] = useReducer(AuthReducer, { isLoading: true });
-  const [errorState, error_dispatch] = useReducer(ErrorReducer, { errorMsg: "ads" });
+  const [errorState, error_dispatch] = useReducer(ErrorReducer, { errorMsg: "" });
 
   const thisComponentAuthState = { dispatch: auth_dispatch, setError: error_dispatch };
   const thisComponentErrorState = { dispatch: error_dispatch };
@@ -69,7 +69,8 @@ export default function App({ navigation }) {
 
   // Retrieve token stored in local memory
   useEffect(() => {
-    AuthActions.retrieve_user_token_local_storage(thisComponentAuthState);
+    // Retrieve token from local storage and fetch user data from database
+    AuthActions.retrieve_user_info(thisComponentAuthState);
   }, []);
 
   if (authState.isLoading) {

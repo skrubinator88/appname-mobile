@@ -39,25 +39,6 @@ export default function CameraScreen({ navigation }) {
 
   const handleSavePhoto = async () => {
     navigation.navigate("SignUp8", { capturedPhoto });
-
-    // setUploading(true);
-
-    // // Send picture to server
-    // // console.log(capturedPhoto);
-
-    // // Get URL of image
-    // let uploadData = new FormData();
-    // uploadData.append("submit", "ok");
-    // uploadData.append("avatar", { type: "image/jpeg", uri: capturedPhoto, name: "avatar.jpg" });
-
-    // const res = await fetch(`${env.API_URL}/images/upload`, { method: "POST", body: uploadData });
-    // res.json().then((data) => {
-    //   console.log(data);
-    //   setUploading(false);
-
-    //   updateForm({ profile_picture: data.path });
-    //   navigation.goBack();
-    // });
   };
 
   const handleRetakePhoto = () => {
@@ -97,7 +78,7 @@ export default function CameraScreen({ navigation }) {
           <Image source={{ uri: capturedPhoto }} style={{ width: "100%", height: "100%", flex: 4 }} />
 
           <ButtonGUISection>
-            {/* {!uploading ? (
+            {!uploading ? (
               <SaveImageButton onPress={() => handleSavePhoto()}>
                 <Text style={{ textAlign: "center", color: "white" }}>Save Picture</Text>
               </SaveImageButton>
@@ -105,11 +86,7 @@ export default function CameraScreen({ navigation }) {
               <LoadingImageButton>
                 <ActivityIndicator />
               </LoadingImageButton>
-            )} */}
-
-            <SaveImageButton onPress={() => handleSavePhoto()}>
-              <Text style={{ textAlign: "center", color: "white" }}>Save Picture</Text>
-            </SaveImageButton>
+            )}
 
             <CancelImageButton onPress={() => handleRetakePhoto()}>
               <Text style={{ textAlign: "center" }}>Retake Picture</Text>

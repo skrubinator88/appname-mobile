@@ -12,7 +12,7 @@ import env from "../../../env";
 // Components
 import Header from "../../../components/header";
 
-export default function ({ navigation }) {
+export default function ({ navigation, route }) {
   const { registrationState, methods } = useContext(RegistrationContext);
   const { updateForm, sendForm } = methods;
 
@@ -50,7 +50,6 @@ export default function ({ navigation }) {
       ref: (input) => {
         handleRef(input, inputPosNumber);
       },
-
       onFocus: () => {
         hiddenTextInput.focus();
       },
@@ -61,33 +60,75 @@ export default function ({ navigation }) {
   };
 
   const handleSubmit = async (e) => {
+    const phone_number = `+1${textInput}`;
+    try {
+      // Check if phone number exist in database
+      const response = await fetch(`${env.API_URL}/users/phone/${phone_number}`, {
+        method: "GET",
+      });
+
+      const { success, valid } = await response.json();
+
+      console.log(valid);
+
+      if (success && valid) {
+        navigation.navigate("SignIn1", { phone_number });
+        // ENABLE AFTER DEV
+        await fetch(`${env.API_URL}/users/sms_registration`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phone_number,
+            channel: "sms",
+          }),
+        });
+        return;
+      }
+    } catch (e) {
+      console.log(e.message);
+      if (e.message == "Network request failed") {
+        navigation.navigate("SignIn", { errorMsg: e.message });
+      }
+    }
+
     if (textInput.length == 10) {
-      const phone_number = textInput;
       updateForm({ phone_number });
 
       try {
+        console.log("hey");
         navigation.navigate("SignUp3");
-        const twilio = await fetch(`${env.API_URL}/users/sms_registration?phone_number=${phone_number}&channel=sms`, {
+        const twilio = await fetch(`${env.API_URL}/users/sms_registration`, {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phone_number,
+            channel: "sms",
+          }),
         });
       } catch (e) {
         console.log(e.message);
+        if (e.message == "Network request failed") {
+          navigation.navigate("SignUp2", { errorMsg: e.message });
+        }
       }
       return;
     }
-    // DISABLE AFTER DEV
-    // updateForm({ phone_number: "4049901671" });
-    // navigation.navigate("SignUp3");
   };
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
         <Container>
           <Header navigation={navigation} />
 
           <ContainerTopMiddle>
             <TextStyled>For authentication purposes, what is your phone number?</TextStyled>
+
+            <Text style={{ color: "red" }}>{route?.params?.errorMsg ? route?.params?.errorMsg : ""}</Text>
 
             <ContainerMiddle>
               <HiddenTextInput
@@ -107,6 +148,7 @@ export default function ({ navigation }) {
                   }
                 }}
               />
+              <TextInputStyled value="+1" onFocus={() => hiddenTextInput.focus()} />
               <TextInputStyled {...handleSettingsProps(1, 3, firstInput)} />
               <TextInputStyled {...handleSettingsProps(2, 3, secondInput)} />
               <TextInputStyled {...handleSettingsProps(3, 4, thirdInput)} />

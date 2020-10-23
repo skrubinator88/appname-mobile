@@ -17,6 +17,7 @@ import SignUpScreen5 from "../signUp/5";
 import SignUpScreen6 from "../signUp/6";
 import SignUpScreen7 from "../signUp/7";
 import SignUpScreen8 from "../signUp/8";
+import SignUpScreen9 from "../signUp/9";
 import Camera from "../signUp/camera";
 
 import { RegistrationContext } from "../../../components/context";
@@ -76,6 +77,7 @@ export function NotAuthenticatedStackScreen({ navigation }) {
         <RootStack.Screen name="SignUp6" component={SignUpScreen6} />
         <RootStack.Screen name="SignUp7" component={SignUpScreen7} />
         <RootStack.Screen name="SignUp8" component={SignUpScreen8} />
+        <RootStack.Screen name="SignUp9" component={SignUpScreen9} />
         <RootStack.Screen name="Camera" component={Camera} />
 
         {/* <RootStack.Screen name="Sign Up" component={SignUpStackScreen} /> */}

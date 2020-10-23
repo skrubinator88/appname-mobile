@@ -63,9 +63,8 @@ export default function SingInIndex({ navigation, route }) {
     if (textInput.length == 10) {
       const phone_number = `+1${textInput}`;
 
-      if (__DEV__) navigation.navigate("SignIn1", { phone_number });
-
       try {
+        // Check if phone number exist in database
         const response = await fetch(`${env.API_URL}/users/phone/${phone_number}`, {
           method: "GET",
         });
@@ -73,7 +72,6 @@ export default function SingInIndex({ navigation, route }) {
         const { success, valid } = await response.json();
         if (success && valid) {
           navigation.navigate("SignIn1", { phone_number });
-          // ENABLE AFTER DEV
           await fetch(`${env.API_URL}/users/sms_registration`, {
             method: "POST",
             headers: {
