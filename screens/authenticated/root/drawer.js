@@ -152,7 +152,7 @@ const ProfilePicture = styled.Image`
 
 // Screens
 import { RootScreen } from "./index";
-import PaymentScreen from "../payment";
+import PaymentScreen from "../payment/stack";
 import SettingsScreen from "../settings";
 import ProfileScreen from "../profile/stack";
 import JobListings from "../listings/stacks";

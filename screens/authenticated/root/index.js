@@ -92,7 +92,7 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
   }, [location]);
 
   if (location != null) {
-    const zoom = 12; // Change the zoom between 2 and 20
+    const zoom = 15; // Change the zoom between 2 and 20
     const verticalAlignment = 80; // Change this number to set the position of the GPS Icon (Vertically only) between -200 and 200 Default: -100
     cameraSettings = new CameraInterface({
       latitude: location.coords.latitude - verticalAlignment / Math.pow(2, zoom - 1),

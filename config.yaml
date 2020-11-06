@@ -16,7 +16,6 @@ Development:
       # Choose an USER ID from database and place it here
       # ID:
   # IN DEVELOPMENT -----------
-
   # Point IP to Dev server (Locally: 10.0.2.2:3001/v1 or External: 192.169.0.{XXXX}:3001/v1)
   # API_URL: http://10.0.2.2:3001/v1 # Local Server (Leave 10.0.2.2 if you are running Android AVD Emulator)
   # API_URL: http://10.0.0.74:3001/v1 # External Server
@@ -28,6 +27,8 @@ Development:
   PUSHER:
     API_KEY: a86bd61a8fd06fbd858e
     CLUSTER: us2
+  STRIPE:
+    PUBLIC_KEY: pk_test_51He7zlL5334OlXzIlbQEJFcI254w2YQ6kVrZGnZqbFbGHStEoaxMBlxapPh9HsUfYDrgfO7jyukT3kzJC9Wt0SA800k3BQXTmj
 
 Production:
   API_URL: https://contractor-app-test-api.herokuapp.com/v1

@@ -60,7 +60,7 @@ export default function App({ navigation }) {
   const [authState, auth_dispatch] = useReducer(AuthReducer, { isLoading: true });
   const [errorState, error_dispatch] = useReducer(ErrorReducer, { errorMsg: "" });
 
-  const thisComponentAuthState = { dispatch: auth_dispatch, setError: error_dispatch };
+  const thisComponentAuthState = { dispatch: auth_dispatch };
   const thisComponentErrorState = { dispatch: error_dispatch };
 
   // Actions

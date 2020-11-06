@@ -65,7 +65,7 @@ export default function PaymentScreen({ navigation }) {
         </PaymentItemRow>
 
         <PaymentItemRow>
-          <PaymentItemRowLink>
+          <PaymentItemRowLink onPress={() => navigation.navigate("Stripe")}>
             <Text small weight="700" color="#3869f3">
               ADD PAYMENT METHOD
             </Text>
@@ -126,7 +126,7 @@ const PaymentItemRow = styled.View`
   border: 1px solid #f5f5f5;
 `;
 
-const PaymentItemRowLink = styled.View`
+const PaymentItemRowLink = styled.TouchableOpacity`
   width: 100%;
   padding: 0 5%;
   flex-direction: row;

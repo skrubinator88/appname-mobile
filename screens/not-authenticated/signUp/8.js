@@ -76,7 +76,6 @@ export default function SignUp8({ navigation, route }) {
   const handleSendInfo = async () => {
     try {
       setUploading(true);
-
       // Ask for location permissions
 
       // Save user in database and generate ID (Working!)
@@ -144,7 +143,7 @@ export default function SignUp8({ navigation, route }) {
         <Text style={{ color: colors.primary, fontWeight: "700" }}>{route?.params?.capturedPhoto ? "Retake Photo" : "Take Photo"}</Text>
       </ButtonStyled>
 
-      {gallerySelectedPhoto && (
+      {capturedPhoto && (
         <ButtonStyled onPress={(e) => handleSendInfo()} style={{ backgroundColor: colors.primary, borderColor: colors.primary }}>
           <Text style={{ color: "white" }}>Next</Text>
         </ButtonStyled>

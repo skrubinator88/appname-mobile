@@ -7,12 +7,14 @@ import { createStackNavigator } from "@react-navigation/stack";
 export const HelpStack = createStackNavigator();
 
 // import pages
-import PaymentScreen from ".";
+import PaymentScreen from "./";
+import StripeModal from "./stripe";
 
-export function PaymentStackScreen() {
+export default function PaymentStackScreen() {
   return (
-    <HelpStack.Navigator>
-      <HelpStack.Screen name="Help Center" component={PaymentScreen} />
+    <HelpStack.Navigator headerMode="none">
+      <HelpStack.Screen name="Payment" component={PaymentScreen} />
+      <HelpStack.Screen name="Stripe" component={StripeModal} />
     </HelpStack.Navigator>
   );
 }
