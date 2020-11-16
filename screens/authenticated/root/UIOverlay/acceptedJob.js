@@ -5,25 +5,79 @@ import styled from "styled-components/native";
 
 // Expo
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { watchPositionAsync } from "expo-location";
+import env from "../../../../env";
 
+// Components
 // import Card from "../../../../components/card";
 import Text from "../../../../components/text";
 
+// Styling
 const deviceHeight = Dimensions.get("window").height;
-
 import { UIOverlayContext, GlobalContext } from "../../../../components/context";
+import { colors } from "react-native-elements";
+
+// Miscellaneous
+import { distanceBetweenTwoCoordinates } from "../../../../functions/";
+
+// Controllers
+import PermissionsControllers from "../../../../controllers/PermissionsControllers";
 
 // BODY
 export default function Screen45({ navigation, projectManagerInfo, job_data }) {
   const { authState } = useContext(GlobalContext);
   const { changeRoute } = useContext(UIOverlayContext);
 
+  const [onSite, setOnSite] = useState(false);
+  const [location, setLocation] = useState(null);
+
+  // get location real time
+  useEffect(() => {
+    const subscription = watchPositionAsync({ distanceInterval: 2, timeInterval: 1000 }, (position) => {
+      setLocation(position);
+    });
+
+    return () => {
+      if (subscription) {
+        console.log("removed");
+        subscription.then(({ remove }) => remove());
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (location) {
+      const userLocation = location.coords;
+      const jobLocation = job_data.location.coords;
+
+      // console.log("user", userLocation);
+      // console.log("job", jobLocation);
+
+      // get distance between points in miles
+      const distance = distanceBetweenTwoCoordinates(
+        userLocation.latitude,
+        userLocation.longitude,
+        jobLocation.latitude,
+        jobLocation.longitude
+      );
+
+      // console.log("distance", `${distance} in miles`);
+
+      //  0.251866 is the sum of the radius of the 2 points in miles
+      if (distance < 0.2499363724) {
+        setOnSite(true); // Inside
+      } else {
+        setOnSite(false); // Outside
+      }
+    }
+  }, [location]);
+
   return (
     <Card>
       <View>
         <ProfilePicture
           source={{
-            uri: "https://i.insider.com/5899ffcf6e09a897008b5c04?width=1200",
+            uri: `${env.API_URL}${job_data.posted_by_profile_picture}`,
           }}
         ></ProfilePicture>
 
@@ -86,29 +140,18 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
               style={{
                 flexDirection: "row",
                 flex: 1,
-                justifyContent: "space-between",
+                justifyContent: "center",
               }}
             >
-              <Column location>
+              {/* <Column location>
                 <Text small light marginBottom="5px">
                   Location
                 </Text>
                 <Text small>{job_data.location.address}</Text>
-              </Column>
+              </Column> */}
 
-              <Column
-                style={{
-                  justifyContent: "center",
-                }}
-              >
-                <Button
-                  accept
-                  onPress={() => {
-                    // console.log(projectManagerInfo);
-                    // console.log(job_data.posted_by);
-                    navigation.navigate("Chat", { receiver: job_data.posted_by });
-                  }}
-                >
+              <Column style={{ justifyContent: "center" }}>
+                <Button accept onPress={() => navigation.navigate("Chat", { receiver: job_data.posted_by })}>
                   <Text style={{ color: "white" }} medium>
                     Message
                   </Text>
@@ -117,9 +160,11 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
             </View>
           </Column>
         </Row>
-
-        <CardOptionItem row>
-          <Text small>QR Code</Text>
+        {onSite ? console.log("yay") : console.log("no")}
+        <CardOptionItem row onPress={() => navigation.navigate("QR Code", job_data)}>
+          <Text small bold color={onSite ? colors.primary : "grey"}>
+            QR Code {onSite && " - Proceed"}
+          </Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
 

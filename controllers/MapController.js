@@ -5,9 +5,8 @@ import config from "../env";
 import CameraActions from "../rdx-actions/camera.action";
 
 exports.handleCameraCoordinates = (coordinates, dispatch) => {
-  const { U: latitude, k: longitude } = coordinates;
-  const newCoordinates = { latitude, longitude };
-  dispatch(CameraActions.animateTo(newCoordinates));
+  const { latitude, longitude } = coordinates;
+  dispatch(CameraActions.animateTo({ latitude, longitude }));
 };
 
 exports.clearTemporalCirclesAndTags = (dispatch) => {

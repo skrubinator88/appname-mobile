@@ -21,7 +21,7 @@ import SignUpScreen9 from "../signUp/9";
 import Camera from "../signUp/camera";
 
 import { RegistrationContext } from "../../../components/context";
-import registrationReducer from "../../../reducers/registrationReducer";
+import registrationReducer from "../../../reducers/RegistrationReducer";
 
 const initialState = {
   role: "",

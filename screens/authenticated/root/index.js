@@ -35,6 +35,7 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
 
   // State
   const [location, setLocation] = useState(null);
+  const [atJobLocation, setAtJobLocation] = useState(false);
   const [showCircle, setShowCircle] = useState(false);
   const [circleCoordinates, setCircleCoordinates] = useState(null);
 
@@ -44,6 +45,7 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
   let cameraSettings;
 
   // Store
+  // const mapsEvent
   const camera = useSelector((state) => state.camera);
   const jobs = useSelector((state) => state.jobs);
   const dispatch = useDispatch();
@@ -71,7 +73,7 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
     }
   }, [camera]);
 
-  // Get location
+  // Get location once
   useEffect(() => {
     PermissionsControllers.getLocation().then((position) => setLocation(position));
 
@@ -90,6 +92,8 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
       if (unsubscribe !== undefined) JobsControllers.clean("JobsStoreActions", unsubscribe, dispatch);
     };
   }, [location]);
+
+  // Check if user contractor got closer to job
 
   if (location != null) {
     const zoom = 15; // Change the zoom between 2 and 20
@@ -126,7 +130,7 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
           {jobs.map(({ coordinates, _id }) => (
             <Marker
               key={_id}
-              coordinate={{ latitude: coordinates["U"], longitude: coordinates["k"] }}
+              coordinate={{ latitude: coordinates.latitude, longitude: coordinates.longitude }}
               icon={JobsControllers.getJobTagType("user")}
             />
           ))}

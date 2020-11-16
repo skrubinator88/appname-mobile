@@ -46,8 +46,7 @@ import AuthReducer from "./reducers/AuthReducer";
 import ErrorReducer from "./reducers/ErrorReducer";
 
 // Components
-// import Example from "./views/chat";
-import Example from "./screens/authenticated/chat/";
+import Example from "./screens/authenticated/scanner/";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 

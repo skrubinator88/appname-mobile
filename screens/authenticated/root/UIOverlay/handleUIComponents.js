@@ -13,7 +13,7 @@ import { UIOverlayContext } from "../../../../components/context";
 // Actions
 import OverlayActions from "../../../../actions/OverlayActions";
 
-function HandleOverlayUIContractorComponents({ route, navigation }) {
+function HandleOverlayUIContractorComponents({ route, navigation, location }) {
   switch (route.name) {
     case "dashboard":
       return <Dashboard navigation={navigation} {...route.props} />;

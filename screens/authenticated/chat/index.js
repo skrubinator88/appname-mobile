@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, StatusBar, Platform } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
+import env from "../../../env";
 
 // Styling
 import styled from "styled-components/native";
@@ -63,7 +64,7 @@ export default function Chat({ route, navigation }) {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: "white" }}>
       <NavBar style={{ borderBottomWidth: 1, borderColor: "#dedede" }}>
         <TouchableWithoutFeedback onPress={() => navigation.goBack()}>
           <BackButton>
@@ -78,6 +79,7 @@ export default function Chat({ route, navigation }) {
         onSend={(messages) => onSend(messages[0])}
         user={{
           _id: authState.userID,
+          avatar: `${env.API_URL}${authState.userData.profile_picture}`,
         }}
       />
     </View>

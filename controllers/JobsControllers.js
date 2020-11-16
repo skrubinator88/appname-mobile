@@ -105,11 +105,26 @@ exports.findFirstJobWithKeyword = (searched_Keywords, jobs) => {
   return sortJobsByProximity(jobsFound, (a, b) => a.distance - b.distance)[0];
 };
 
-exports.changeJobStatus = async (documentID, status) => {
+exports.changeJobStatus = async (documentID, status, userID = "") => {
   const geoCollection = GeoFirestore.collection("jobs").doc(documentID);
 
   // Update job status
-  geoCollection.update({ status });
+  geoCollection.update({ status, executed_by: userID });
+};
+
+exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
+  db.collection("jobs")
+    .doc(qr_code)
+    .get()
+    .then((doc) => {
+      if (doc.exists) {
+        const data = doc.data();
+
+        if (data.executed_by == contractor_id) {
+          module.changeJobStatus(doc.id, "in progress", contractor_id);
+        }
+      }
+    });
 };
 
 exports.currentUserJobsHistory = (user) => {};
@@ -120,6 +135,7 @@ exports.postUserJob = async (userID, job) => {
 
   const newJob = {
     posted_by: userID,
+    posted_by_profile_picture: `/images/${userID}.jpg`,
     date_created: new Date(),
     date_completed: null,
     star_rate: null,

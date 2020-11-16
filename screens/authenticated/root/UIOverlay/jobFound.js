@@ -4,6 +4,7 @@ import { View, Platform, Dimensions, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
 import config from "../../../../env";
 import StarRating from "react-native-star-rating";
+import env from "../../../../env";
 
 // Expo
 import { FontAwesome } from "@expo/vector-icons";
@@ -60,10 +61,9 @@ export default function JobFound({ job_data, keyword }) {
     AnimationsController.CardUISlideOut(
       cardRef,
       () => {
-        JobsController.changeJobStatus(job_data._id, "in progress");
+        JobsController.changeJobStatus(job_data._id, "in progress", authState.userID);
         // Save job ID in local storage to retrieve it later on.
 
-        //
         changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
       },
       true
@@ -76,7 +76,7 @@ export default function JobFound({ job_data, keyword }) {
         <View>
           <ProfilePicture
             source={{
-              uri: "https://i.insider.com/5899ffcf6e09a897008b5c04?width=1200",
+              uri: `${env.API_URL}${job_data.posted_by_profile_picture}`,
             }}
           ></ProfilePicture>
 

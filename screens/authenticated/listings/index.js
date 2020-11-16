@@ -34,7 +34,7 @@ export default function JobListing({ navigation }) {
 
   useEffect(() => {
     if (isMounted) {
-      console.log("runned");
+      // console.log("runned");
       setLoading(false);
     }
     setIsMounted(true);

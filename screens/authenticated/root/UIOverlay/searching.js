@@ -33,6 +33,7 @@ export default function Searching({ keyword }) {
   const [jobSelected, setJobSelected] = useState(false);
 
   useEffect(() => {
+    console.log(jobs);
     const job_found = JobsController.findFirstJobWithKeyword(keyword, jobs);
 
     if (job_found && jobSelected === false) {
@@ -46,6 +47,7 @@ export default function Searching({ keyword }) {
         JobsController.changeJobStatus(job_found._id, "in review");
 
         // Move Camera
+        // console.log(job_found.location.coords);
         MapController.handleCameraCoordinates(job_found.coordinates, dispatch);
 
         changeRoute({ name: "job_found", props: { job_data: job_found, keyword } });

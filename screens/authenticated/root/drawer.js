@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { useTheme } from "@react-navigation/native";
 import { View, SafeAreaView, Alert, TouchableWithoutFeedback } from "react-native";
 import styled from "styled-components/native";
-import { FontAwesome, MaterialIcons, Entypo } from "@expo/vector-icons";
+import { FontAwesome, MaterialIcons, Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { DrawerContentScrollView, DrawerItem, DrawerItemList } from "@react-navigation/drawer";
@@ -44,12 +44,6 @@ function DrawerContent({ navigation }) {
         </TouchableWithoutFeedback>
       </DrawerHeader>
       <DrawerContentScrollView>
-        <DrawerItem
-          labelStyle={{ fontSize: 20 }}
-          label="Payment"
-          onPress={() => navigation.navigate("Payment")}
-          icon={() => <Entypo name="wallet" size={24} color="black" />}
-        />
         {authState.userData.role == "contractor" ? (
           <DrawerItem
             labelStyle={{ fontSize: 20 }}
@@ -67,12 +61,24 @@ function DrawerContent({ navigation }) {
             />
             <DrawerItem
               labelStyle={{ fontSize: 20 }}
+              label="Scan QR Code"
+              onPress={() => navigation.navigate("Scanner")}
+              icon={() => <MaterialCommunityIcons name="qrcode-scan" size={24} color="black" />}
+            />
+            <DrawerItem
+              labelStyle={{ fontSize: 20 }}
               label="Job History"
               onPress={() => Alert.alert("Work in Progress", "Section still in development")}
               icon={() => <MaterialIcons name="history" size={24} color="black" />}
             />
           </>
         )}
+        <DrawerItem
+          labelStyle={{ fontSize: 20 }}
+          label="Payments"
+          onPress={() => navigation.navigate("Payments")}
+          icon={() => <Entypo name="wallet" size={24} color="black" />}
+        />
         <Divider />
         <DrawerItem
           labelStyle={{ fontSize: 20 }}
@@ -156,9 +162,11 @@ import PaymentScreen from "../payment/stack";
 import SettingsScreen from "../settings";
 import ProfileScreen from "../profile/stack";
 import JobListings from "../listings/stacks";
+import Scanner from "../scanner/";
 
 // Components
 import Chat from "../chat/";
+import QRCode from "./UIOverlay/jobFound/qr_code";
 
 // Test Components
 import test from "../listings/listingItem";
@@ -176,13 +184,16 @@ export function Drawer({ navigation }) {
 
         <AuthenticatedDrawer.Screen name="Root" component={RootScreen} />
         <AuthenticatedDrawer.Screen name="Profile" component={ProfileScreen} />
-        <AuthenticatedDrawer.Screen name="Payment" component={PaymentScreen} />
+
+        <AuthenticatedDrawer.Screen name="Job Listings" component={JobListings} />
+        <AuthenticatedDrawer.Screen name="Scanner" component={Scanner} />
         <AuthenticatedDrawer.Screen name="Work History" component={RootScreen} />
+        <AuthenticatedDrawer.Screen name="Payments" component={PaymentScreen} />
         <AuthenticatedDrawer.Screen name="Help Center" component={RootScreen} />
         <AuthenticatedDrawer.Screen name="Settings" component={SettingsScreen} />
 
-        <AuthenticatedDrawer.Screen name="Job Listings" component={JobListings} />
         <AuthenticatedDrawer.Screen name="Chat" component={Chat} />
+        <AuthenticatedDrawer.Screen name="QR Code" component={QRCode} />
       </AuthenticatedDrawer.Navigator>
     </NavigationContainer>
   );
