@@ -16,7 +16,7 @@ exports.initializeChatBetween = (sender, receiver) => {
   const chat_id = sender > receiver ? sender + receiver : receiver + sender;
   const document = firestore.collection("chats").doc(chat_id);
 
-  document.set({ sender, receiver });
+  document.set({ users: [sender, receiver] });
 
   // return chat session id
   return chat_id;
@@ -34,6 +34,39 @@ exports.sendMessage = (chat_id, message, dispatch) => {
   document.collection("messages").add(cloudMessage);
 
   // Send push notification
+};
+
+exports.getUserChats = (user_id, dispatch) => {
+  const unsubscribe = firestore
+    .collection("chats")
+    .where("users", "array-contains", user_id)
+    // .orderBy("createdAt", "asc")
+    .onSnapshot((res) => {
+      res.docChanges().forEach((change) => {
+        const { doc: document } = change;
+        switch (change.type) {
+          case "added": {
+            console.log(document.data());
+            // const data = document.data();
+            // data.createdAt = data.createdAt.toDate();
+            // return dispatch(ChatActions.add(chat_id, data));
+          }
+          case "modified": {
+            console.log("updated");
+            // const data = document.data();
+            // data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
+            // return dispatch(JobsStoreActions.update(document.id, data));
+          }
+          case "removed": {
+            // return dispatch(JobsStoreActions.remove(document.id));
+          }
+          default:
+            break;
+        }
+      });
+    });
+
+  return unsubscribe;
 };
 
 exports.getMessages = (chat_id, dispatch) => {

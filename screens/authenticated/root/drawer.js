@@ -61,6 +61,12 @@ function DrawerContent({ navigation }) {
             />
             <DrawerItem
               labelStyle={{ fontSize: 20 }}
+              label="Messages"
+              onPress={() => navigation.navigate("Messages")}
+              icon={() => <MaterialIcons name="chat" size={24} color="black" />}
+            />
+            <DrawerItem
+              labelStyle={{ fontSize: 20 }}
               label="Scan QR Code"
               onPress={() => navigation.navigate("Scanner")}
               icon={() => <MaterialCommunityIcons name="qrcode-scan" size={24} color="black" />}
@@ -162,6 +168,7 @@ import PaymentScreen from "../payment/stack";
 import SettingsScreen from "../settings";
 import ProfileScreen from "../profile/stack";
 import JobListings from "../listings/stacks";
+import MessagesScreen from "../messages/";
 import Scanner from "../scanner/";
 
 // Components
@@ -186,6 +193,7 @@ export function Drawer({ navigation }) {
         <AuthenticatedDrawer.Screen name="Profile" component={ProfileScreen} />
 
         <AuthenticatedDrawer.Screen name="Job Listings" component={JobListings} />
+        <AuthenticatedDrawer.Screen name="Messages" component={MessagesScreen} />
         <AuthenticatedDrawer.Screen name="Scanner" component={Scanner} />
         <AuthenticatedDrawer.Screen name="Work History" component={RootScreen} />
         <AuthenticatedDrawer.Screen name="Payments" component={PaymentScreen} />
