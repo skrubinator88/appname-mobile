@@ -39,6 +39,8 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
   const [showCircle, setShowCircle] = useState(false);
   const [circleCoordinates, setCircleCoordinates] = useState(null);
 
+  const [pushNotificationToken, setPushNotificationToken] = useState();
+
   // Refs
   const _map = useRef(null);
   const _circle = useRef(null);
@@ -52,6 +54,34 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
 
   // State object for use in imported (external) modules. Modules will have control over this (actual module) component state
   const thisComponentState = { location, setLocation, setError };
+
+  // Get app necessary permissions
+  useEffect(() => {
+    PermissionsControllers.askPermissions()
+      .then((granted) => {
+        /*console.log("GRANTED", granted)*/
+      })
+      .catch((err) => alert("You can grant permissions on iOS Settings later."));
+  }, []);
+
+  // Get location once
+  useEffect(() => {
+    PermissionsControllers.getLocation().then((position) => setLocation(position));
+    return () => {
+      setShowCircle(false);
+    };
+  }, []);
+
+  // Get jobs and subscribe to jobs pipeline
+  useEffect(() => {
+    let unsubscribe;
+    // Subscribe and return a function for unsubscribe
+    if (location) unsubscribe = JobsControllers.getJobsAndSubscribeJobsChannel(thisComponentState, dispatch);
+
+    return () => {
+      if (unsubscribe !== undefined) JobsControllers.clean("JobsStoreActions", unsubscribe, dispatch);
+    };
+  }, [location]);
 
   // Move Camera
   useEffect(() => {
@@ -72,26 +102,6 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
       );
     }
   }, [camera]);
-
-  // Get location once
-  useEffect(() => {
-    PermissionsControllers.getLocation().then((position) => setLocation(position));
-
-    return () => {
-      setShowCircle(false);
-    };
-  }, []);
-
-  // Get jobs and subscribe to jobs pipeline
-  useEffect(() => {
-    let unsubscribe;
-    // Subscribe and return a function for unsubscribe
-    if (location) unsubscribe = JobsControllers.getJobsAndSubscribeJobsChannel(thisComponentState, dispatch);
-
-    return () => {
-      if (unsubscribe !== undefined) JobsControllers.clean("JobsStoreActions", unsubscribe, dispatch);
-    };
-  }, [location]);
 
   // Check if user contractor got closer to job
 

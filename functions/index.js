@@ -1,3 +1,5 @@
+import firebase from "firebase";
+
 exports.distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2, unit = "miles") => {
   // generally used geo measurement function
   let radius = 6378.137; // Radius of earth in KM
@@ -33,6 +35,10 @@ exports.getActualDateFormatted = (date) => {
   const year = date.getFullYear();
 
   return `${month_names[month]} ${day}, ${year} - ${date.toLocaleDateString()}`;
+};
+
+exports.convertFirestoreTimestamp = (date) => {
+  return date.toDate().toLocaleTimeString().replace(/:\d+ /, " ");
 };
 
 // Use UUID Instead

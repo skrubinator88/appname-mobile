@@ -11,12 +11,12 @@ import { firestore, GeoFirestore } from "../config/firebase";
 // Redux Actions
 import ChatActions from "../rdx-actions/chat.action";
 
-exports.initializeChatBetween = (sender, receiver) => {
+exports.initializeChatBetween = (user1, user2, job_id = "") => {
   // Create document unique ID
-  const chat_id = sender > receiver ? sender + receiver : receiver + sender;
+  const chat_id = user1 > user2 ? user1 + user2 : user2 + user1;
   const document = firestore.collection("chats").doc(chat_id);
 
-  document.set({ users: [sender, receiver] });
+  document.set({ users: [user1, user2], initialized: false });
 
   // return chat session id
   return chat_id;
@@ -31,31 +31,33 @@ exports.sendMessage = (chat_id, message, dispatch) => {
 
   // Send to firebase
   const document = firestore.collection("chats").doc(chat_id);
+  document.set({ last_message: { text: message.text, createdAt: message.createdAt, read: false }, initialized: true }, { merge: true });
   document.collection("messages").add(cloudMessage);
 
   // Send push notification
 };
 
-exports.getUserChats = (user_id, dispatch) => {
+exports.getUserChats = (user_id, setChats) => {
   const unsubscribe = firestore
     .collection("chats")
     .where("users", "array-contains", user_id)
-    // .orderBy("createdAt", "asc")
+    .where("initialized", "==", true)
+    .orderBy("last_message.createdAt")
     .onSnapshot((res) => {
       res.docChanges().forEach((change) => {
         const { doc: document } = change;
         switch (change.type) {
           case "added": {
-            console.log(document.data());
+            setChats((prevState) => [...prevState, { id: document.id, ...document.data() }]);
             // const data = document.data();
             // data.createdAt = data.createdAt.toDate();
             // return dispatch(ChatActions.add(chat_id, data));
           }
           case "modified": {
-            console.log("updated");
-            // const data = document.data();
-            // data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
-            // return dispatch(JobsStoreActions.update(document.id, data));
+            setChats((prevState) => {
+              const newArray = prevState.filter((item) => item.id !== document.id);
+              return [...newArray, { id: document.id, ...document.data() }];
+            });
           }
           case "removed": {
             // return dispatch(JobsStoreActions.remove(document.id));

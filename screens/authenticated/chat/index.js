@@ -41,27 +41,11 @@ export default function Chat({ route, navigation }) {
     return () => ChatController.clean(retrievedChatID, unsubscribe, dispatch);
   }, []);
 
-  // useEffect(() => {
-  //   setMessages([
-  //     {
-  //       _id: 1,
-  //       text: "Hello developer",
-  //       createdAt: new Date(),
-  //       sent: false,
-  //       received: false,
-  //       pending: true,
-  //       user: {
-  //         _id: authState.userID,
-  //         name: "React Native",
-  //         avatar: "https://placeimg.com/140/140/any",
-  //       },
-  //     },
-  //   ]);
-  // }, []);
-
   const onSend = (message) => {
     if (chatID.length != 0) ChatController.sendMessage(chatID, message, dispatch);
   };
+
+  console.log("MY CHAT", Object.values(chats[chatID] || {}));
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
@@ -74,6 +58,7 @@ export default function Chat({ route, navigation }) {
       </NavBar>
       <GiftedChat
         messages={Object.values(chats[chatID] || {}).reverse()}
+        // showAvatarForEveryMessage
         showUserAvatar
         isLoadingEarlier
         onSend={(messages) => onSend(messages[0])}
