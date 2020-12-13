@@ -22,17 +22,16 @@ exports.askPermissions = async () => {
 exports.getLocation = async () => {
   let position = null;
   try {
-    let { status: existingStatus } = await Permissions.getAsync(Permissions.LOCATION);
-    let finalStatus = existingStatus;
-    if (existingStatus !== "granted") {
-      setErrorMsg("Permission to access location was denied");
-      const { status } = await Permissions.askAsync(Permissions.LOCATION);
-      finalStatus = status;
-    }
-    if (finalStatus !== "granted") {
-      alert("Failed to get location!");
-      return;
-    }
+    // let { status } = await Permissions.getAsync(Permissions.LOCATION);
+    let { status } = await Location.requestPermissionsAsync();
+    // let finalStatus = existingStatus;
+    if (status !== "granted") setErrorMsg("Permission to access location was denied");
+    // const { status } = await Permissions.askAsync(Permissions.LOCATION);
+    // finalStatus = status;
+    // if (finalStatus !== "granted") {
+    //   alert("Failed to get location!");
+    //   return;
+    // }
     position = await Location.getLastKnownPositionAsync();
   } catch (e) {
     position = await Location.getCurrentPositionAsync();
