@@ -57,11 +57,11 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
 
   // Get app necessary permissions
   useEffect(() => {
-    PermissionsControllers.askPermissions()
-      .then((granted) => {
-        /*console.log("GRANTED", granted)*/
-      })
-      .catch((err) => alert("You can grant permissions on iOS Settings later."));
+    // PermissionsControllers.askPermissions()
+    //   .then((granted) => {
+    //     /*console.log("GRANTED", granted)*/
+    //   })
+    //   .catch((err) => alert("You can grant permissions on iOS Settings later."));
   }, []);
 
   // Get location once
@@ -132,6 +132,7 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
           initialCamera={cameraSettings}
           camera={cameraSettings}
           showsUserLocation={true}
+          // followsUserLocation={true}
           style={{ height }}
           maxZoomLevel={18} // recommended 18 / min: 1, max: 19
           minZoomLevel={9} // recommended 9 / min: 1, max: 19
@@ -181,6 +182,7 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
 }
 
 // STYLES
+
 const Container = styled.View`
   flex: 1;
 `;

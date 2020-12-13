@@ -49,12 +49,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 40,
     backgroundColor: "white",
     width: Dimensions.get("screen").width,
-    // paddingBottom: Platform.OS == "ios" ? 40 : 20,
-    // transform: Tran,
-    // opacity: 0,
-    // shadowRadius: 10,
-    // shadowColor: "red",
-    // shadowOffset: { x: 10, y: 10 },
   },
 });
 

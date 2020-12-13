@@ -1,6 +1,6 @@
 // Dependencies
 import React, { useState, useContext, useEffect } from "react";
-import { SafeAreaView, Keyboard, KeyboardAvoidingView, Platform, View, Text, Dimensions } from "react-native";
+import { SafeAreaView, Keyboard, KeyboardAvoidingView, Platform, View, Text, Dimensions, TouchableOpacity } from "react-native";
 import styled from "styled-components/native";
 
 // Components
@@ -136,6 +136,12 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
           </MenuButton>
 
           <Card>
+            <ResetCameraBackground onPress={() => {}}>
+              <ResetCamera>
+                <MaterialIcons backgroundColor="white" color="#444" name="gps-fixed" size={30} />
+              </ResetCamera>
+            </ResetCameraBackground>
+
             <Row style={{ padding: Platform.OS == "ios" ? 20 : 10, justifyContent: "center" }}>
               <Text small>1.0.0.0</Text>
             </Row>
@@ -145,6 +151,27 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
     </>
   );
 }
+
+const ResetCameraBackground = styled.View`
+  z-index: 1;
+  top: -150%;
+  right: 5%;
+  position: absolute;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
+`;
+
+const ResetCamera = styled.TouchableOpacity`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  width: 50px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
+  background: white;
+`;
 
 const MenuButton = styled.TouchableOpacity`
   z-index: 2;
