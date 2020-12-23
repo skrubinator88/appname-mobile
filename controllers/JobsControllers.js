@@ -7,7 +7,7 @@ import config from "../env";
 import { firestore, GeoFirestore } from "../config/firebase";
 
 // Functions
-import { distanceBetweenTwoCoordinates, sortJobsByProximity } from "../functions";
+import { distanceBetweenTwoCoordinates, sortJobsByProximity ,isCurrentJob} from "../functions";
 
 // Redux Actions
 import JobsStoreActions from "../rdx-actions/jobs.action";
@@ -39,11 +39,19 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
         switch (change.type) {
           case "added": {
             const data = document.data();
+            if(!isCurrentJob(data)){
+              // if job has a future schedule, skip entry
+              return
+            }
             data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
             return dispatch(JobsStoreActions.add(document.id, data));
           }
           case "modified": {
             const data = document.data();
+            if(!isCurrentJob(data)){
+              // if not current job, skip entry
+              return
+            }
             data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
             return dispatch(JobsStoreActions.update(document.id, data));
           }

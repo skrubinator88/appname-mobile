@@ -1,5 +1,5 @@
 // Dependencies React
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
 import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -10,6 +10,9 @@ import {
   ActivityIndicator,
   FlatList,
 } from "react-native";
+
+import DateTimePicker from '@react-native-community/datetimepicker';
+import moment from 'moment'
 
 // Styling Dependencies
 import { TextField } from "react-native-material-textfield";
@@ -52,12 +55,63 @@ export default function workModal({ navigation, route }) {
   const [suggestionsEditing, setSuggestionsEditing] = useState(false);
   const [googleSuggestions, setGoogleSuggestions] = useState([]);
 
+  // Setup datetime picker
+  const [date, setDate] = useState(new Date())
+  const [mode, setMode] = useState(Platform.OS === 'ios' ? 'datetime' : 'date')
+  const [showDate, setShowDate] = useState(false)
+
+  const updateDate = (e, dateParam) => {
+    if (dateParam) {
+
+      // Set the date picker mode based on platform
+      switch (mode) {
+        case 'datetime':
+          setShowDate(() => {
+            if (Platform.OS === 'ios') {
+              setDate(dateParam)
+            }
+            return false
+          })
+          break
+        case 'date':
+          setShowDate(() => {
+            // After collecting date data, get the time
+            if (Platform.OS !== 'ios') {
+              setMode('time')
+              setDate(dateParam)
+            }
+            return true
+          })
+          break
+        case 'time':
+          // Todo: test on Android
+          setShowDate(() => false)
+          break
+      }
+    } else {
+      setShowDate(false)
+    }
+  }
+
+  const onShowDate = useCallback(() => {
+    setShowDate(() => {
+      // Set the date picker mode based on platform
+      if (Platform.OS === 'ios') {
+        setMode('datetime')
+      } else {
+        setMode('date')
+      }
+      return true
+    })
+  }, [showDate])
+
+
   // - - Refs - -
   let scroll = useRef(null);
   let location_address_ref = useRef(null);
 
   // - - Extra Setup - -
-  const form = { job_type, job_title, tasks, location, salary, wage };
+  const form = { job_type, job_title, tasks, location, salary, wage, date };
 
   // - - Life Cycles - -
   // Create session for google suggestions (This will reduce billing expenses)
@@ -116,6 +170,8 @@ export default function workModal({ navigation, route }) {
 
   function formatFormV2(data) {
     const form = { ...data };
+    form.start_at = form.date?.getTime() || Date.now()
+    form.date = null
     form.coordinates = [form.location.coords.latitude, form.location.coords.longitude];
     return form;
   }
@@ -288,6 +344,20 @@ export default function workModal({ navigation, route }) {
               </WageInput>
             </Item>
 
+            <Item>
+              <Text style={{ color: '#444', textAlign: 'center', marginTop: 8, textTransform: 'uppercase' }}>Job will be available {date.getTime() <= Date.now() + 5000 ? 'immediately' : moment(date).calendar()}</Text>
+            </Item>
+            <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7, marginBottom: 12 }} onPress={onShowDate}>
+              <ScheduleButton style={{ justifyContent: "center", alignItems: "center" }}>
+                <Text bold color="black">
+                  Schedule Job
+                </Text>
+              </ScheduleButton>
+            </TouchableOpacity>
+            {showDate ? (
+              <DateTimePicker style={{ marginBottom: 20 }} minimumDate={new Date()} mode={mode} onChange={updateDate} value={date} />
+            ) : null}
+
             <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7, marginBottom: 100 }} onPress={() => handleSubmit(form)}>
               <SaveButton style={{ justifyContent: "center", alignItems: "center" }}>
                 <Text bold color="white">
@@ -342,6 +412,12 @@ const Fields = styled.View`
 
 const Item = styled.View`
   margin: 10px 0;
+`;
+
+const ScheduleButton = styled.View`
+  padding: 10px;
+  background: #fff;
+  border-radius: 6px;
 `;
 
 const SaveButton = styled.View`

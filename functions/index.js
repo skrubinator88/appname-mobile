@@ -14,6 +14,23 @@ exports.distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2, unit = "miles")
   return distance * units[unit]; // Miles
 };
 
+/**
+ * This checks if the job is scheduled to start earlier than now, else it does not add the job.
+ * 
+ * It assumes the job provided is a valid job and if the required attribute is absent, the job is assumed as present.
+ * 
+ * @author eikcalb
+ */
+exports.isCurrentJob = (job) => {
+  if (!job) {
+    return false
+  }
+  if (job.start_at && job.start_at > Date.now()) {
+    return false
+  }
+  return true
+}
+
 exports.getActualDateFormatted = (date) => {
   const month_names = [
     "January",

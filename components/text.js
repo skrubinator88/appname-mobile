@@ -7,6 +7,7 @@ export default function Text(props) {
 
 const Font = styled.Text`
   color: ${(props) => props.color || "black"};
+  text-transform: ${(props) => props.textTransform || "none"};
   font-weight: ${(props) => props.weight || "normal"};
   text-align: ${(props) => props.align || "auto"};
   margin-bottom: ${(props) => props.marginBottom || "0"};
