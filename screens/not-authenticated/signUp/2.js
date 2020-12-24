@@ -60,7 +60,8 @@ export default function ({ navigation, route }) {
   };
 
   const handleSubmit = async (e) => {
-    const phone_number = `+1${textInput}`;
+    const phone_number = `+234${textInput}`;
+    console.log(phone_number)
     try {
       // Check if phone number exist in database
       const response = await fetch(`${env.API_URL}/users/phone/${phone_number}`, {
@@ -81,7 +82,7 @@ export default function ({ navigation, route }) {
           },
           body: JSON.stringify({
             phone_number,
-            channel: "sms",
+            channel: "call",
           }),
         });
         return;
