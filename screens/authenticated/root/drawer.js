@@ -13,7 +13,7 @@ export const AuthenticatedDrawer = createDrawerNavigator();
 
 import env from "../../../env";
 
-import { GlobalContext } from "../../../components/context/";
+import { GlobalContext } from "../../../components/context";
 
 function DrawerContent({ navigation }) {
   const { colors } = useTheme();
