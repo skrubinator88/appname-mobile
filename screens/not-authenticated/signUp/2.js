@@ -66,10 +66,7 @@ export default function ({ navigation, route }) {
       const response = await fetch(`${env.API_URL}/users/phone/${phone_number}`, {
         method: "GET",
       });
-
       const { success, valid } = await response.json();
-
-      console.log(valid);
 
       if (success && valid) {
         navigation.navigate("SignIn1", { phone_number });
@@ -81,7 +78,7 @@ export default function ({ navigation, route }) {
           },
           body: JSON.stringify({
             phone_number,
-            channel: "call",
+            channel: "sms",
           }),
         });
         return;
@@ -97,7 +94,6 @@ export default function ({ navigation, route }) {
       updateForm({ phone_number });
 
       try {
-        console.log("hey");
         navigation.navigate("SignUp3");
         const twilio = await fetch(`${env.API_URL}/users/sms_registration`, {
           method: "POST",
@@ -109,6 +105,7 @@ export default function ({ navigation, route }) {
             channel: "sms",
           }),
         });
+        console.log(twilio.json())
       } catch (e) {
         console.log(e.message);
         if (e.message == "Network request failed") {
