@@ -12,7 +12,8 @@ import {
   Image
 } from "react-native";
 
-import { launchImageLibraryAsync, requestCameraRollPermissionsAsync } from 'expo-image-picker'
+import Lightbox from "react-native-lightbox";
+import { launchImageLibraryAsync, MediaTypeOptions, requestCameraRollPermissionsAsync } from 'expo-image-picker'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment'
 
@@ -36,6 +37,7 @@ import PermissionsControllers from "../../../controllers/PermissionsControllers"
 // Context
 import { GlobalContext } from "../../../components/context";
 import { Alert } from "react-native";
+import PhotoItem from "./listItemImage";
 
 // Miscellaneous
 const width = Dimensions.get("window").width;
@@ -88,7 +90,10 @@ export default function workModal({ navigation, route }) {
           break
         case 'time':
           // Todo: test on Android
-          setShowDate(() => false)
+          setShowDate(() => {
+            setDate(dateParam)
+            return false
+          })
           break
       }
     } else {
@@ -387,25 +392,25 @@ export default function workModal({ navigation, route }) {
               </WageInput>
             </Item>
 
-            <FlatList data={photos}
-              keyExtractor={v => v.uri}
-              columnWrapperStyle={{ margin: 4 }}
-              ListFooterComponent={() => {
-                <TouchableOpacity style={{ alignSelf: "center", height: 100, width: 100 }} onPress={getPhoto}>
-                  <ScheduleButton style={{ justifyContent: "center", alignItems: "center" }}>
-                    <Ionicons name='add' />
-                  </ScheduleButton>
-                </TouchableOpacity>
-              }}
-              horizontal
-              renderItem={({ item }) => (
-                <View>
-                  <Image style={{ alignSelf: "center", height: 100, width: 100 }} source={{ uri: item.uri }} />
-                  <TouchableOpacity onPress={() => { setPhotos(photos.filter()) }} style={{ alignSelf: "center", backgroundColor: 'transparent', position: 'absolute', top: 0, right: -2 }}>
-                    <Ionicons name='close-circle' style={{ color: 'red' }} />
+            <Item style={{ marginVertical: 4 }}>
+              <Text style={{ color: '#444', textAlign: 'center', marginTop: 8, marginBottom: 4, textTransform: 'uppercase' }}>ADD JOB PHOTOS (OPTIONAL)</Text>
+              <FlatList data={photos}
+                keyExtractor={v => v.uri}
+                centerContent
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingVertical: 40 }}
+                ListHeaderComponent={() => (
+                  <TouchableOpacity style={{ alignSelf: "center", justifyContent: 'center', backgroundColor: '#fff', height: 150, marginHorizontal: 4, width: 150, borderRadius: 4 }} onPress={getPhoto}>
+                    <ScheduleButton style={{ justifyContent: "center", flex: 1, backgroundColor: 'transparent', alignItems: "center" }}>
+                      <Ionicons name='ios-add' style={{ fontSize: 40 }} />
+                    </ScheduleButton>
                   </TouchableOpacity>
-                </View>
-              )} />
+                )}
+                horizontal
+                renderItem={({ item }) => (
+                  <PhotoItem item={item} onRemove={() => { setPhotos(photos.filter(v => v.uri !== item.uri)) }} />
+                )} />
+            </Item>
 
             <Item>
               <Text style={{ color: '#444', textAlign: 'center', marginTop: 8, textTransform: 'uppercase' }}>Job will be available {date.getTime() <= Date.now() + 5000 ? 'immediately' : moment(date).calendar()}</Text>
