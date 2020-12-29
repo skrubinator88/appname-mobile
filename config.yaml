@@ -22,7 +22,9 @@ Development:
   # API_URL: http://10.0.2.2:3001/v1 # AVD Android Emulator Local Server (Leave 10.0.2.2 if you are running Android AVD Emulator)
   # API_URL: http://10.0.0.74:3001/v1 # External Server
   # API_URL: http://192.168.0.11:3001/v1 # External Server
-  API_URL: https://contractor-app-test-api.herokuapp.com/v1
+  # API_URL: http://192.168.43.204:3001/v1 # External Server
+  API_URL: http://192.168.10.103:3001/v1 # External Server
+  # API_URL: https://contractor-app-test-api.herokuapp.com/v1 --- Current prod
   # API_URL: http://192.168.136.132:3001/v1 # External Server
   GOOGLE:
     GEOLOCATION_KEY: AIzaSyB8xVAMRa2hoq8lRXEG1wXG3v2yR1KkHsQ

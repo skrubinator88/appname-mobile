@@ -9,8 +9,10 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   FlatList,
+  Image
 } from "react-native";
 
+import { launchImageLibraryAsync, requestCameraRollPermissionsAsync } from 'expo-image-picker'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment'
 
@@ -33,6 +35,7 @@ import PermissionsControllers from "../../../controllers/PermissionsControllers"
 
 // Context
 import { GlobalContext } from "../../../components/context";
+import { Alert } from "react-native";
 
 // Miscellaneous
 const width = Dimensions.get("window").width;
@@ -105,6 +108,37 @@ export default function workModal({ navigation, route }) {
     })
   }, [showDate])
 
+  // Setup job photo selection
+  const [photos, setPhotos] = useState([])
+  const [loadingMedia, setloadingMedia] = useState(false)
+
+  const getPhoto = useCallback(async () => {
+    try {
+      setloadingMedia(true)
+      if (Platform.OS === 'ios') {
+        let perms = await requestCameraRollPermissionsAsync()
+        if (!perms.granted) {
+          Alert.alert('Access to media library denied', 'You need to grant access to image library to continue')
+          setState({ ...state, loadingMedia: false })
+          return
+        }
+      }
+      let res = await launchImageLibraryAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        mediaTypes: MediaTypeOptions.Images
+      })
+
+      if (!res.cancelled && !photos.find(v => v.uri === res.uri)) {
+        setPhotos([...photos, { uri: res.uri, height: res.height, width: res.width }])
+      }
+    } catch (e) {
+      console.log(e)
+      Alert.alert(e.message)
+    } finally {
+      setloadingMedia(false)
+    }
+  }, [photos])
 
   // - - Refs - -
   let scroll = useRef(null);
@@ -177,12 +211,21 @@ export default function workModal({ navigation, route }) {
   }
 
   async function handleSubmit(form) {
-    setLoading(true);
-    // const formattedForm = await formatForm(form);
-    const formattedForm = formatFormV2(form);
-    const { success } = await JobsController.postUserJob(authState.userID, formattedForm);
+    try {
+      setLoading(true);
+      // const formattedForm = await formatForm(form);
+      const formattedForm = formatFormV2(form);
+      console.log(authState, 'auth state')
+      return setLoading(false);
 
-    if (success) return navigation.goBack();
+      // Sends the job details and associated photos for upload and job creation
+      const { success } = await JobsController.postUserJob(authState.userID, formattedForm, authState.userToken, photos);
+
+      if (success) return navigation.goBack();
+    } catch (e) {
+      console.log(e)
+      Alert.alert('Failed to create job')
+    }
   }
 
   // - - Render - -
@@ -343,6 +386,26 @@ export default function workModal({ navigation, route }) {
                 </WageTimeField> */}
               </WageInput>
             </Item>
+
+            <FlatList data={photos}
+              keyExtractor={v => v.uri}
+              columnWrapperStyle={{ margin: 4 }}
+              ListFooterComponent={() => {
+                <TouchableOpacity style={{ alignSelf: "center", height: 100, width: 100 }} onPress={getPhoto}>
+                  <ScheduleButton style={{ justifyContent: "center", alignItems: "center" }}>
+                    <Ionicons name='add' />
+                  </ScheduleButton>
+                </TouchableOpacity>
+              }}
+              horizontal
+              renderItem={({ item }) => (
+                <View>
+                  <Image style={{ alignSelf: "center", height: 100, width: 100 }} source={{ uri: item.uri }} />
+                  <TouchableOpacity onPress={() => { setPhotos(photos.filter()) }} style={{ alignSelf: "center", backgroundColor: 'transparent', position: 'absolute', top: 0, right: -2 }}>
+                    <Ionicons name='close-circle' style={{ color: 'red' }} />
+                  </TouchableOpacity>
+                </View>
+              )} />
 
             <Item>
               <Text style={{ color: '#444', textAlign: 'center', marginTop: 8, textTransform: 'uppercase' }}>Job will be available {date.getTime() <= Date.now() + 5000 ? 'immediately' : moment(date).calendar()}</Text>

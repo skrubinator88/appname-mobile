@@ -7,7 +7,7 @@ import config from "../env";
 import { firestore, GeoFirestore } from "../config/firebase";
 
 // Functions
-import { distanceBetweenTwoCoordinates, sortJobsByProximity ,isCurrentJob} from "../functions";
+import { distanceBetweenTwoCoordinates, sortJobsByProximity, isCurrentJob } from "../functions";
 
 // Redux Actions
 import JobsStoreActions from "../rdx-actions/jobs.action";
@@ -37,27 +37,30 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
       res.docChanges().forEach((change) => {
         const { doc: document } = change;
         switch (change.type) {
-          case "added": {
-            const data = document.data();
-            if(!isCurrentJob(data)){
-              // if job has a future schedule, skip entry
-              return
+          case "added":
+            {
+              const data = document.data();
+              if (!isCurrentJob(data)) {
+                // if job has a future schedule, skip entry
+                return
+              }
+              data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
+              return dispatch(JobsStoreActions.add(document.id, data));
             }
-            data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
-            return dispatch(JobsStoreActions.add(document.id, data));
-          }
-          case "modified": {
-            const data = document.data();
-            if(!isCurrentJob(data)){
-              // if not current job, skip entry
-              return
+          case "modified":
+            {
+              const data = document.data();
+              if (!isCurrentJob(data)) {
+                // if not current job, skip entry
+                return
+              }
+              data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
+              return dispatch(JobsStoreActions.update(document.id, data));
             }
-            data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
-            return dispatch(JobsStoreActions.update(document.id, data));
-          }
-          case "removed": {
-            return dispatch(JobsStoreActions.remove(document.id));
-          }
+          case "removed":
+            {
+              return dispatch(JobsStoreActions.remove(document.id));
+            }
           default:
             break;
         }
@@ -77,12 +80,14 @@ exports.currentUserActiveJobs = (userID, dispatch) => {
     res.docChanges().forEach((change) => {
       const { doc: document } = change;
       switch (change.type) {
-        case "added": {
-          return dispatch(ListingsActions.add(document.id, document.data()));
-        }
-        case "modified": {
-          return dispatch(ListingsActions.update(document.id, document.data()));
-        }
+        case "added":
+          {
+            return dispatch(ListingsActions.add(document.id, document.data()));
+          }
+        case "modified":
+          {
+            return dispatch(ListingsActions.update(document.id, document.data()));
+          }
         default:
           break;
       }
@@ -135,9 +140,9 @@ exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
     });
 };
 
-exports.currentUserJobsHistory = (user) => {};
+exports.currentUserJobsHistory = (user) => { };
 
-exports.postUserJob = async (userID, job) => {
+exports.postUserJob = async (userID, job, token, photos = []) => {
   if (!userID) throw new Error("User ID is required");
   if (!job) throw new Error("A job is required");
 
@@ -154,19 +159,48 @@ exports.postUserJob = async (userID, job) => {
   const geoCollection = GeoFirestore.collection("jobs"); // Create a GeoCollection reference
   const { coordinates } = newJob;
   const GeoPoint = new firebase.firestore.GeoPoint(...coordinates);
-  return geoCollection
-    .add({ ...newJob, coordinates: GeoPoint })
-    .then((docRef) => {
-      return new Promise((resolution, rejection) => {
-        resolution({ success: true });
-      });
-    })
-    .catch((error) => {
-      return new Promise((resolution, rejection) => {
-        rejection({ success: false, error: error.message });
-      });
-    });
 
+  let newJobDoc
+  let filenames
+  try {
+    newJobDoc = geoCollection.doc()
+    if (photos) {
+      const body = new FormData()
+      photos.map(photo => body.append('photo', photo))
+
+      const apiResponse = await fetch(`${env.API_URL}/tools/job/upload`, {
+        method: "POST",
+        headers: {
+          authorization: `bearer ${token}`,
+          'x-job-id': newJobDoc.id
+        },
+        body
+      })
+      if (!apiResponse.ok) {
+        throw new Error((await apiResponse.json()).message || 'Failed to upload job')
+      }
+
+      filenames = (await apiResponse.json()).data
+    }
+
+    newJobDoc.set({ ...newJob, coordinates: GeoPoint, photo_files })
+      .then(() => {
+        return new Promise((resolution, rejection) => {
+          resolution({ success: true });
+        });
+      })
+      .catch((error) => {
+        return new Promise((resolution, rejection) => {
+          rejection({ success: false, error: error.message });
+        });
+      });
+  } catch (e) {
+    console.log(e)
+    if (newJobDoc) {
+      newJobDoc.delete()
+    }
+    throw e
+  }
   // Test
 };
 

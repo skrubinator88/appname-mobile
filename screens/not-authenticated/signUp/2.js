@@ -94,7 +94,6 @@ export default function ({ navigation, route }) {
       updateForm({ phone_number });
 
       try {
-        navigation.navigate("SignUp3");
         const twilio = await fetch(`${env.API_URL}/users/sms_registration`, {
           method: "POST",
           headers: {
@@ -102,14 +101,22 @@ export default function ({ navigation, route }) {
           },
           body: JSON.stringify({
             phone_number,
-            channel: "sms",
+            channel: "call",
           }),
         });
+
+        if (!twilio.ok) {
+          throw new Error((await twilio.json()).message || 'Please try again')
+        }
+
+        navigation.navigate("SignUp3");
         console.log(twilio.json())
       } catch (e) {
         console.log(e.message);
         if (e.message == "Network request failed") {
           navigation.navigate("SignUp2", { errorMsg: e.message });
+        } else {
+          navigation.navigate("SignUp2", { errorMsg: 'Please try again' });
         }
       }
       return;
