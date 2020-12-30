@@ -166,13 +166,21 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
     newJobDoc = geoCollection.doc()
     if (photos) {
       const body = new FormData()
-      photos.map(photo => body.append('photo', photo))
+      photos.map(photo => {
+        const uriSplit = photo.uri.split("/")
+        body.append('photo', {
+          uri: photo.uri,
+          type: photo.type,
+          name: uriSplit[uriSplit.length - 1]
+        })
+      })
 
-      const apiResponse = await fetch(`${env.API_URL}/tools/job/upload`, {
+      const apiResponse = await fetch(`${config.API_URL}/job/upload`, {
         method: "POST",
         headers: {
-          authorization: `bearer ${token}`,
-          'x-job-id': newJobDoc.id
+          Authorization: `bearer ${token}`,
+          'x-job-id': newJobDoc.id,
+          'Content-Type': 'multipart/form-data'
         },
         body
       })
@@ -183,7 +191,7 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
       filenames = (await apiResponse.json()).data
     }
 
-    newJobDoc.set({ ...newJob, coordinates: GeoPoint, photo_files })
+    return newJobDoc.set({ ...newJob, coordinates: GeoPoint, photo_files: filenames })
       .then(() => {
         return new Promise((resolution, rejection) => {
           resolution({ success: true });

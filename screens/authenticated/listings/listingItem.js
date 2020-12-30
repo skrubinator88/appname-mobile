@@ -135,7 +135,7 @@ export default function workModal({ navigation, route }) {
       })
 
       if (!res.cancelled && !photos.find(v => v.uri === res.uri)) {
-        setPhotos([...photos, { uri: res.uri, height: res.height, width: res.width }])
+        setPhotos([...photos, { uri: res.uri, type: 'image/png', height: res.height, width: res.width }])
       }
     } catch (e) {
       console.log(e)
@@ -220,8 +220,6 @@ export default function workModal({ navigation, route }) {
       setLoading(true);
       // const formattedForm = await formatForm(form);
       const formattedForm = formatFormV2(form);
-      console.log(authState, 'auth state')
-      return setLoading(false);
 
       // Sends the job details and associated photos for upload and job creation
       const { success } = await JobsController.postUserJob(authState.userID, formattedForm, authState.userToken, photos);
@@ -230,6 +228,8 @@ export default function workModal({ navigation, route }) {
     } catch (e) {
       console.log(e)
       Alert.alert('Failed to create job')
+    } finally {
+      setLoading(false);
     }
   }
 
