@@ -14,7 +14,7 @@ import env from "../../../env";
 const isIos = Platform.OS === "ios";
 const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
 
-import { GlobalContext } from "../../../components/context/";
+import { GlobalContext } from "../../../components/context";
 
 export default function ProfileScreen({ navigation }) {
   const { authActions, authState, errorActions } = useContext(GlobalContext);

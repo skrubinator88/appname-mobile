@@ -21,7 +21,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { convertFirestoreTimestamp } from "../../../functions/";
 
 // Context
-import { GlobalContext } from "../../../components/context/";
+import { GlobalContext } from "../../../components/context";
 
 export default function Messages({ navigation }) {
   const { authActions, authState, errorActions } = useContext(GlobalContext);

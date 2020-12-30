@@ -1,6 +1,6 @@
 // IMPORT
 import React, { useState, useEffect, useContext, useRef } from "react";
-import { View, Platform, Dimensions, SafeAreaView } from "react-native";
+import { View, Platform, FlatList, Dimensions, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
 import config from "../../../../env";
 import StarRating from "react-native-star-rating";
@@ -19,6 +19,7 @@ import { UIOverlayContext, GlobalContext } from "../../../../components/context"
 // Controllers
 import AnimationsController from "../../../../controllers/AnimationsControllers";
 import JobsController from "../../../../controllers/JobsControllers";
+import PhotoItem from "../../listings/listItemImage";
 
 // BODY
 export default function JobFound({ job_data, keyword }) {
@@ -114,7 +115,7 @@ export default function JobFound({ job_data, keyword }) {
                   Job Description
                 </Text>
                 <Text small marginBottom="5px">
-                  $34/hr
+                  ${job_data.salary}/hr
                 </Text>
               </JobDescription>
 
@@ -124,9 +125,34 @@ export default function JobFound({ job_data, keyword }) {
             </JobDescriptionRow>
           </Row>
 
+          {job_data.photo_files && job_data.photo_files.length > 0 &&
+            <Row>
+              <PhotosRow>
+                <JobDescription>
+                  <Text small light marginBottom="5px">Photos</Text>
+                </JobDescription>
+
+                <FlatList data={job_data.photo_files}
+                  keyExtractor={v => v}
+                  centerContent
+                  showsHorizontalScrollIndicator={false}
+                  horizontal
+                  renderItem={({ item }) => (
+                    <PhotoItem item={{ uri: `${config.API_URL}/job/${job_data._id}/${item}` }} />
+                  )} />
+              </PhotosRow>
+            </Row>
+          }
+
+
           <CardOptionItem row>
             <Text small>Reviews</Text>
           </CardOptionItem>
+
+
+          <Button negotiate onPress={() => handleJobDecline()}>
+            <Text style={{ color: "red" }} medium>negotiate</Text>
+          </Button>
 
           <Row last>
             <Column>
@@ -203,6 +229,12 @@ const Column = styled.View`
 const JobDescriptionRow = styled.View`
   flex: 1;
   flex-direction: column;
+`;
+
+const PhotosRow = styled.View`
+  flex: 1;
+  flex-direction: column;
+  margin-bottom: 4
 `;
 
 const CardOptionItem = styled.TouchableOpacity`

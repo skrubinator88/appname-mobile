@@ -1,5 +1,5 @@
 // Dependencies React
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
 import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -9,7 +9,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   FlatList,
+  Image
 } from "react-native";
+
+import Lightbox from "react-native-lightbox";
+import { launchImageLibraryAsync, MediaTypeOptions, requestCameraRollPermissionsAsync } from 'expo-image-picker'
+import DateTimePicker from '@react-native-community/datetimepicker';
+import moment from 'moment'
 
 // Styling Dependencies
 import { TextField } from "react-native-material-textfield";
@@ -30,6 +36,8 @@ import PermissionsControllers from "../../../controllers/PermissionsControllers"
 
 // Context
 import { GlobalContext } from "../../../components/context";
+import { Alert } from "react-native";
+import PhotoItem from "./listItemImage";
 
 // Miscellaneous
 const width = Dimensions.get("window").width;
@@ -52,12 +60,97 @@ export default function workModal({ navigation, route }) {
   const [suggestionsEditing, setSuggestionsEditing] = useState(false);
   const [googleSuggestions, setGoogleSuggestions] = useState([]);
 
+  // Setup datetime picker
+  const [date, setDate] = useState(new Date())
+  const [mode, setMode] = useState(Platform.OS === 'ios' ? 'datetime' : 'date')
+  const [showDate, setShowDate] = useState(false)
+
+  const updateDate = (e, dateParam) => {
+    if (dateParam) {
+
+      // Set the date picker mode based on platform
+      switch (mode) {
+        case 'datetime':
+          setShowDate(() => {
+            if (Platform.OS === 'ios') {
+              setDate(dateParam)
+            }
+            return false
+          })
+          break
+        case 'date':
+          setShowDate(() => {
+            // After collecting date data, get the time
+            if (Platform.OS !== 'ios') {
+              setMode('time')
+              setDate(dateParam)
+            }
+            return true
+          })
+          break
+        case 'time':
+          // Todo: test on Android
+          setShowDate(() => {
+            setDate(dateParam)
+            return false
+          })
+          break
+      }
+    } else {
+      setShowDate(false)
+    }
+  }
+
+  const onShowDate = useCallback(() => {
+    setShowDate(() => {
+      // Set the date picker mode based on platform
+      if (Platform.OS === 'ios') {
+        setMode('datetime')
+      } else {
+        setMode('date')
+      }
+      return true
+    })
+  }, [showDate])
+
+  // Setup job photo selection
+  const [photos, setPhotos] = useState([])
+  const [loadingMedia, setloadingMedia] = useState(false)
+
+  const getPhoto = useCallback(async () => {
+    try {
+      setloadingMedia(true)
+      if (Platform.OS === 'ios') {
+        let perms = await requestCameraRollPermissionsAsync()
+        if (!perms.granted) {
+          Alert.alert('Access to media library denied', 'You need to grant access to image library to continue')
+          setState({ ...state, loadingMedia: false })
+          return
+        }
+      }
+      let res = await launchImageLibraryAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        mediaTypes: MediaTypeOptions.Images
+      })
+
+      if (!res.cancelled && !photos.find(v => v.uri === res.uri)) {
+        setPhotos([{ uri: res.uri, type: 'image/png', height: res.height, width: res.width }, ...photos,])
+      }
+    } catch (e) {
+      console.log(e)
+      Alert.alert(e.message)
+    } finally {
+      setloadingMedia(false)
+    }
+  }, [photos])
+
   // - - Refs - -
   let scroll = useRef(null);
   let location_address_ref = useRef(null);
 
   // - - Extra Setup - -
-  const form = { job_type, job_title, tasks, location, salary, wage };
+  const form = { job_type, job_title, tasks, location, salary, wage, date };
 
   // - - Life Cycles - -
   // Create session for google suggestions (This will reduce billing expenses)
@@ -116,17 +209,28 @@ export default function workModal({ navigation, route }) {
 
   function formatFormV2(data) {
     const form = { ...data };
+    form.start_at = form.date?.getTime() || Date.now()
+    form.date = null
     form.coordinates = [form.location.coords.latitude, form.location.coords.longitude];
     return form;
   }
 
   async function handleSubmit(form) {
-    setLoading(true);
-    // const formattedForm = await formatForm(form);
-    const formattedForm = formatFormV2(form);
-    const { success } = await JobsController.postUserJob(authState.userID, formattedForm);
+    try {
+      setLoading(true);
+      // const formattedForm = await formatForm(form);
+      const formattedForm = formatFormV2(form);
 
-    if (success) return navigation.goBack();
+      // Sends the job details and associated photos for upload and job creation
+      const { success } = await JobsController.postUserJob(authState.userID, formattedForm, authState.userToken, photos);
+
+      if (success) return navigation.goBack();
+    } catch (e) {
+      console.log(e)
+      Alert.alert('Failed to create job')
+    } finally {
+      setLoading(false);
+    }
   }
 
   // - - Render - -
@@ -288,6 +392,40 @@ export default function workModal({ navigation, route }) {
               </WageInput>
             </Item>
 
+            <Item style={{ marginVertical: 4 }}>
+              <Text style={{ color: '#444', textAlign: 'center', marginTop: 8, marginBottom: 4, textTransform: 'uppercase' }}>ADD JOB PHOTOS (OPTIONAL)</Text>
+              <FlatList data={photos}
+                keyExtractor={v => v.uri}
+                centerContent
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingVertical: 40 }}
+                ListHeaderComponent={() => (
+                  <TouchableOpacity style={{ alignSelf: "center", justifyContent: 'center', backgroundColor: '#fff', height: 150, marginHorizontal: 4, width: 150, borderRadius: 4 }} onPress={getPhoto}>
+                    <ScheduleButton style={{ justifyContent: "center", flex: 1, backgroundColor: 'transparent', alignItems: "center" }}>
+                      <Ionicons name='ios-add' style={{ fontSize: 40 }} />
+                    </ScheduleButton>
+                  </TouchableOpacity>
+                )}
+                horizontal
+                renderItem={({ item }) => (
+                  <PhotoItem item={item} onRemove={() => { setPhotos(photos.filter(v => v.uri !== item.uri)) }} />
+                )} />
+            </Item>
+
+            <Item>
+              <Text style={{ color: '#444', textAlign: 'center', marginTop: 8, textTransform: 'uppercase' }}>Job will be available {date.getTime() <= Date.now() + 5000 ? 'immediately' : moment(date).calendar()}</Text>
+            </Item>
+            <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7, marginBottom: 12 }} onPress={onShowDate}>
+              <ScheduleButton style={{ justifyContent: "center", alignItems: "center" }}>
+                <Text bold color="black">
+                  Schedule Job
+                </Text>
+              </ScheduleButton>
+            </TouchableOpacity>
+            {showDate ? (
+              <DateTimePicker style={{ marginBottom: 20 }} minimumDate={new Date()} mode={mode} onChange={updateDate} value={date} />
+            ) : null}
+
             <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7, marginBottom: 100 }} onPress={() => handleSubmit(form)}>
               <SaveButton style={{ justifyContent: "center", alignItems: "center" }}>
                 <Text bold color="white">
@@ -342,6 +480,12 @@ const Fields = styled.View`
 
 const Item = styled.View`
   margin: 10px 0;
+`;
+
+const ScheduleButton = styled.View`
+  padding: 10px;
+  background: #fff;
+  border-radius: 6px;
 `;
 
 const SaveButton = styled.View`

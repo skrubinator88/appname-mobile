@@ -6,6 +6,11 @@ import { Platform } from "react-native";
 import styled from "styled-components/native";
 import { FontAwesome } from "@expo/vector-icons";
 
+import { unix } from "moment";
+
+// Functions
+import { isCurrentJob } from '../../../functions'
+
 // Components
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
@@ -73,7 +78,7 @@ export default function JobListing({ navigation }) {
         nextProvider="Entypo"
         nextIcon="dots-three-horizontal"
         nextSize={25}
-        nextAction={() => {}}
+        nextAction={() => { }}
       >
         {/* Payments Section */}
         <Item>
@@ -98,8 +103,10 @@ export default function JobListing({ navigation }) {
           </SectionTitle>
 
           {listings.map(
-            (item) =>
-              (item.status == "available" || item.status == "in review") && (
+            (item) => {
+              const current = isCurrentJob(item)
+
+              return (item.status == "available" || item.status == "in review") && (
                 <Item key={item.id}>
                   <JobItemLink>
                     <JobItemRow>
@@ -108,7 +115,11 @@ export default function JobListing({ navigation }) {
                           <Text small weight="700" color="#1b5cce">
                             {item.job_type}
                           </Text>
-                          <Text small>Active</Text>
+                          {current ?
+                            <Text textTransform='uppercase' small>Active</Text>
+                            :
+                            <Text textTransform='uppercase' color='#a44' small>Scheduled</Text>
+                          }
                         </Row>
                         <Row style={{ marginBottom: 10 }}>
                           <Text small>
@@ -120,11 +131,20 @@ export default function JobListing({ navigation }) {
                             <Text>- {task.text}</Text>
                           </Row>
                         ))}
+                        {!current ?
+                          (
+                            <Row style={{ marginTop: 10, justifyContent: 'flex-start', alignItems: 'center' }}>
+                              <FontAwesome style={{ marginEnd: 4, color: '#444' }} name='clock-o' />
+                              <Text color='#888' small>Available {unix(item.start_at/ 1000).fromNow()}</Text>
+                            </Row>
+                          )
+                          : null}
                       </Column>
                     </JobItemRow>
                   </JobItemLink>
                 </Item>
               )
+            }
           )}
 
           <SectionTitle>
