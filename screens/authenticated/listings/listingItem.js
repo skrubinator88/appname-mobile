@@ -135,7 +135,7 @@ export default function workModal({ navigation, route }) {
       })
 
       if (!res.cancelled && !photos.find(v => v.uri === res.uri)) {
-        setPhotos([...photos, { uri: res.uri, type: 'image/png', height: res.height, width: res.width }])
+        setPhotos([{ uri: res.uri, type: 'image/png', height: res.height, width: res.width }, ...photos,])
       }
     } catch (e) {
       console.log(e)
