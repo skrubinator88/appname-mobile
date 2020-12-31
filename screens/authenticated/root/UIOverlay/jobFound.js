@@ -22,7 +22,7 @@ import JobsController from "../../../../controllers/JobsControllers";
 import PhotoItem from "../../listings/listItemImage";
 
 // BODY
-export default function JobFound({ job_data, keyword }) {
+export default function JobFound({ job_data, keyword, navigation }) {
   const { authState } = useContext(GlobalContext);
   const { changeRoute } = useContext(UIOverlayContext);
 
@@ -33,6 +33,7 @@ export default function JobFound({ job_data, keyword }) {
   const [description, setDescription] = useState([]);
   const [starRate, setStarRate] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [accepted, setAccepted] = useState(false)
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -54,7 +55,19 @@ export default function JobFound({ job_data, keyword }) {
     })();
   }, []);
 
+  useEffect(() => {
+    navigation.addListener('beforeRemove', (e) => {
+      if (accepted) {
+        return;
+      }
+      e.preventDefault()
+      JobsController.changeJobStatus(job_data._id, "available");
+      navigation.dispatch(e.data.action)
+    })
+  }, [navigation, accepted])
+
   const handleJobDecline = () => {
+    JobsController.changeJobStatus(job_data._id, "available");
     changeRoute({ name: "searching", props: { keyword } });
   };
 
@@ -62,7 +75,7 @@ export default function JobFound({ job_data, keyword }) {
     AnimationsController.CardUISlideOut(
       cardRef,
       () => {
-        JobsController.changeJobStatus(job_data._id, "in progress", authState.userID);
+        JobsController.changeJobStatus(job_data._id, "accepted", authState.userID);
         // Save job ID in local storage to retrieve it later on.
 
         changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });

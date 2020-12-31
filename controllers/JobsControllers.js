@@ -40,6 +40,9 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
           case "added":
             {
               const data = document.data();
+
+              console.log('checking 1', data.start_at, !isCurrentJob(data))
+              
               if (!isCurrentJob(data)) {
                 // if job has a future schedule, skip entry
                 return
@@ -49,6 +52,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
             }
           case "modified":
             {
+              console.log('checking 2')
               const data = document.data();
               if (!isCurrentJob(data)) {
                 // if not current job, skip entry
