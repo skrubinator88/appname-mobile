@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 
 import { View, ActivityIndicator } from "react-native";
 
@@ -24,6 +24,7 @@ import JobsControllers from "../../../controllers/JobsControllers";
 // Redux
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function JobListing({ navigation }) {
   // Constructor
@@ -103,48 +104,7 @@ export default function JobListing({ navigation }) {
           </SectionTitle>
 
           {listings.map(
-            (item) => {
-              const current = isCurrentJob(item)
-
-              return (item.status == "available" || item.status == "in review") && (
-                <Item key={item.id}>
-                  <JobItemLink>
-                    <JobItemRow>
-                      <Column>
-                        <Row>
-                          <Text small weight="700" color="#1b5cce">
-                            {item.job_type}
-                          </Text>
-                          {current ?
-                            <Text textTransform='uppercase' small>Active</Text>
-                            :
-                            <Text textTransform='uppercase' color='#a44' small>Scheduled</Text>
-                          }
-                        </Row>
-                        <Row style={{ marginBottom: 10 }}>
-                          <Text small>
-                            ${item.salary}/{item.wage}
-                          </Text>
-                        </Row>
-                        {item.tasks.map((task) => (
-                          <Row key={task.id}>
-                            <Text>- {task.text}</Text>
-                          </Row>
-                        ))}
-                        {!current ?
-                          (
-                            <Row style={{ marginTop: 10, justifyContent: 'flex-start', alignItems: 'center' }}>
-                              <FontAwesome style={{ marginEnd: 4, color: '#444' }} name='clock-o' />
-                              <Text color='#888' small>Available {unix(item.start_at/ 1000).fromNow()}</Text>
-                            </Row>
-                          )
-                          : null}
-                      </Column>
-                    </JobItemRow>
-                  </JobItemLink>
-                </Item>
-              )
-            }
+            (item) => (item.status == "available" || item.status == "in review") && <ListItemDetail isCurrentJob={isCurrentJob(item)} navigation={navigation} item={item} />
           )}
 
           <SectionTitle>
@@ -188,6 +148,54 @@ export default function JobListing({ navigation }) {
       </Container>
     </>
   );
+}
+
+const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
+  const [timeToShow, setTimeToShow] = useState(current ? unix(item.start_at / 1000).fromNow() : '')
+  useFocusEffect(useCallback(() => {
+    if (isCurrentJob) {
+      setTimeToShow(unix(item.start_at / 1000).fromNow())
+    }
+  }, [navigation, item]))
+
+  return (
+    <Item key={item.id}>
+      <JobItemLink>
+        <JobItemRow>
+          <Column>
+            <Row>
+              <Text small weight="700" color="#1b5cce">
+                {item.job_type}
+              </Text>
+              {current ?
+                <Text textTransform='uppercase' small>Active</Text>
+                :
+                <Text textTransform='uppercase' color='#a44' small>Scheduled</Text>
+              }
+            </Row>
+            <Row style={{ marginBottom: 10 }}>
+              <Text small>
+                ${item.salary}/{item.wage}
+              </Text>
+            </Row>
+            {item.tasks.map((task) => (
+              <Row key={task.id}>
+                <Text>- {task.text}</Text>
+              </Row>
+            ))}
+            {!current ?
+              (
+                <Row style={{ marginTop: 10, justifyContent: 'flex-start', alignItems: 'center' }}>
+                  <FontAwesome style={{ marginEnd: 4, color: '#444' }} name='clock-o' />
+                  <Text color='#888' small>Available {timeToShow}</Text>
+                </Row>
+              )
+              : null}
+          </Column>
+        </JobItemRow>
+      </JobItemLink>
+    </Item>
+  )
 }
 
 // Payments Section

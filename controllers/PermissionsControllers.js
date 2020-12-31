@@ -34,10 +34,11 @@ exports.getLocation = async () => {
     // }
     position = await Location.getLastKnownPositionAsync();
   } catch (e) {
-    position = await Location.getCurrentPositionAsync();
+    position = await Location.getCurrentPositionAsync(Platform.OS === 'android' ? { enableHighAccuracy: true } : null);
   }
   return position;
 };
+
 
 exports.registerForPushNotificationsAsync = async (setToken) => {
   if (Constants.isDevice) {
