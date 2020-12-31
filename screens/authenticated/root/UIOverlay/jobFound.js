@@ -1,5 +1,5 @@
 // IMPORT
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef, useCallback } from "react";
 import { View, Platform, FlatList, Dimensions, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
 import config from "../../../../env";
@@ -20,6 +20,7 @@ import { UIOverlayContext, GlobalContext } from "../../../../components/context"
 import AnimationsController from "../../../../controllers/AnimationsControllers";
 import JobsController from "../../../../controllers/JobsControllers";
 import PhotoItem from "../../listings/listItemImage";
+import { StyleSheet } from "react-native";
 
 // BODY
 export default function JobFound({ job_data, keyword, navigation }) {
@@ -78,11 +79,14 @@ export default function JobFound({ job_data, keyword, navigation }) {
         JobsController.changeJobStatus(job_data._id, "accepted", authState.userID);
         // Save job ID in local storage to retrieve it later on.
 
+        setAccepted(true)
         changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
       },
       true
     );
   };
+
+  const handleStartNegotiation = useCallback(async () => { }, [job_data, projectManager])
 
   if (!loading) {
     return (
@@ -163,8 +167,8 @@ export default function JobFound({ job_data, keyword, navigation }) {
           </CardOptionItem>
 
 
-          <Button negotiate onPress={() => handleJobDecline()}>
-            <Text style={{ color: "red" }} medium>negotiate</Text>
+          <Button negotiate onPress={handleStartNegotiation}>
+            <Text style={{ color: "#00bfff", paddingVertical: 16, borderColor: '#00bfff', borderWidth: StyleSheet.hairlineWidth, textAlign: 'center', }} medium>Negotiate</Text>
           </Button>
 
           <Row last>

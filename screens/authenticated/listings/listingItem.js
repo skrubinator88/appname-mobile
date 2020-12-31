@@ -38,6 +38,7 @@ import PermissionsControllers from "../../../controllers/PermissionsControllers"
 import { GlobalContext } from "../../../components/context";
 import { Alert } from "react-native";
 import PhotoItem from "./listItemImage";
+import { debounce } from "lodash";
 
 // Miscellaneous
 const width = Dimensions.get("window").width;
@@ -65,18 +66,26 @@ export default function workModal({ navigation, route }) {
   const [mode, setMode] = useState(Platform.OS === 'ios' ? 'datetime' : 'date')
   const [showDate, setShowDate] = useState(false)
 
-  const updateDate = (e, dateParam) => {
+  let debouncer
+
+  const updateDate = async (e, dateParam) => {
     if (dateParam) {
 
       // Set the date picker mode based on platform
       switch (mode) {
         case 'datetime':
-          setShowDate(() => {
-            if (Platform.OS === 'ios') {
-              setDate(dateParam)
-            }
-            return false
-          })
+          if (debouncer) {
+            debouncer.cancel()
+          }
+          if (Platform.OS === 'ios') {
+            setDate(dateParam)
+          }
+          // This is called for only iOS, so set debouncer to delay removing the time modal.
+          // TODO: Test how to add a button instead of this
+          debouncer = debounce(() => {
+            setShowDate(false)
+            debouncer = undefined
+          }, 3000)
           break
         case 'date':
           setShowDate(() => {

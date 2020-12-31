@@ -104,7 +104,7 @@ export default function JobListing({ navigation }) {
           </SectionTitle>
 
           {listings.map(
-            (item) => (item.status == "available" || item.status == "in review") && <ListItemDetail isCurrentJob={isCurrentJob(item)} navigation={navigation} item={item} />
+            (item) => (item.status == "available" || item.status == "in review") && <ListItemDetail key={item.id} isCurrentJob={isCurrentJob(item)} navigation={navigation} item={item} />
           )}
 
           <SectionTitle>
@@ -159,7 +159,7 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
   }, [navigation, item]))
 
   return (
-    <Item key={item.id}>
+    <Item key={item}>
       <JobItemLink>
         <JobItemRow>
           <Column>
