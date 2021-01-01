@@ -126,6 +126,34 @@ exports.changeJobStatus = async (documentID, status, userID = "") => {
   await geoCollection.update({ status, executed_by: userID });
 };
 
+exports.sendOffer = async (documentID, deployee, offer) => {
+  if (!deployee) {
+    throw new Error('User identity must be provided')
+  }
+  if (!offer || typeof offer == 'number' || offer <= 0) {
+    console.log(typeof offer, offer)
+    throw new Error('You must provide a valid offer')
+  }
+  const doc = GeoFirestore.collection("jobs").doc(documentID);
+  await doc.update({
+    offer_received: {
+      deployee,
+      offer,
+      approved: false
+    }
+  })
+  return {
+    deployee,
+    offer,
+    approved: false
+  }
+};
+
+exports.cancelOffer = async (documentID) => {
+  const doc = GeoFirestore.collection("jobs").doc(documentID);
+  await doc.update({ offer_received: firebase.firestore.FieldValue.delete(), status: 'available' })
+};
+
 exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
   db.collection("jobs")
     .doc(qr_code)

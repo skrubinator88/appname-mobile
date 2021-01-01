@@ -44,7 +44,7 @@ export default function Searching({ keyword }) {
          * Update job status to "In Review" (This will pop the job out from
          * local store since is going to update in the backend)
          **/
-        JobsController.changeJobStatus(job_found._id, "in review");
+        JobsController.changeJobStatus(job_found._id, "in review", authState.userID);
 
         // Move Camera
         // console.log(job_found.location.coords);

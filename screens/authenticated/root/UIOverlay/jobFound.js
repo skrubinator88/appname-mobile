@@ -1,6 +1,6 @@
 // IMPORT
 import React, { useState, useEffect, useContext, useRef, useCallback } from "react";
-import { View, Platform, FlatList, Dimensions, SafeAreaView, ActivityIndicator } from "react-native";
+import { View, Platform, FlatList, Dimensions, SafeAreaView, ActivityIndicator, Alert } from "react-native";
 import styled from "styled-components/native";
 import config from "../../../../env";
 import StarRating from "react-native-star-rating";
@@ -16,6 +16,7 @@ import Text from "../../../../components/text";
 const deviceHeight = Dimensions.get("window").height;
 
 import { UIOverlayContext, GlobalContext } from "../../../../components/context";
+import Confirm from "../../../../components/confirm";
 
 // Controllers
 import AnimationsController from "../../../../controllers/AnimationsControllers";
@@ -24,7 +25,7 @@ import PhotoItem from "../../listings/listItemImage";
 import { StyleSheet } from "react-native";
 
 // BODY
-export default function JobFound({ job_data, keyword, navigation }) {
+export default function JobFound({ job_data: job_data_prop, keyword, navigation }) {
   const { authState } = useContext(GlobalContext);
   const { changeRoute } = useContext(UIOverlayContext);
 
@@ -37,8 +38,8 @@ export default function JobFound({ job_data, keyword, navigation }) {
   const [loading, setLoading] = useState(true);
   const [accepted, setAccepted] = useState(false)
   const [enableNegotiation, setEnableNegotiation] = useState(false)
+  const [job_data, set_job_data] = useState(job_data_prop)
   const cardRef = useRef(null);
-  const negotiationRef = useRef(null)
 
   useEffect(() => {
     (async () => {
@@ -63,22 +64,68 @@ export default function JobFound({ job_data, keyword, navigation }) {
   useEffect(() => {
     let reset = false
     const unsubscribe = navigation.addListener('beforeRemove', async (e) => {
-      if (!accepted) {
+      e.preventDefault()
+      if (job_data.offer_received && job_data.offer_received.deployee === authState.userID) {
+        return await new Promise((res) => {
+          Confirm({
+            title: 'Cancel Job Offer?',
+            message: 'Job will become available in the job pool',
+            cancelButtonIndex: 1,
+            destructiveButtonIndex: 0,
+            options: ['yes', 'cancel'],
+            onPress: async (i) => {
+              if (i === 0) {
+                await JobsController.cancelOffer(job_data._id)
+                reset = true
+                delete job_data.offer_received
+                set_job_data(job_data)
+                res()
+                return navigation.dispatch(e.data.action)
+              }
+            },
+            onCancel: res
+          })
+        })
+      } else if (!accepted) {
         await JobsController.changeJobStatus(job_data._id, "available");
         reset = true
       }
+      return navigation.dispatch(e.data.action)
     })
 
     return () => {
-      unsubscribe()
-      if (!reset) {
-        JobsController.changeJobStatus(job_data._id, "available");
+      if (!reset && (!job_data.offer_received || job_data.offer_received.deployee !== authState.userID)) {
+        JobsController.changeJobStatus(job_data._id, "available")
+      }
+      if (unsubscribe) {
+        unsubscribe()
       }
     }
-  }, [navigation, accepted])
+  }, [navigation])
 
-  const handleJobDecline = () => {
-    JobsController.changeJobStatus(job_data._id, "available");
+  const handleJobDecline = async () => {
+    if (job_data.offer_received && job_data.offer_received.deployee === authState.userID) {
+      return await new Promise((res) => {
+        Confirm({
+          title: 'Cancel Job Offer?',
+          message: 'Job will become available in the job pool',
+          cancelButtonIndex: 1,
+          destructiveButtonIndex: 0,
+          options: ['yes', 'cancel'],
+          onPress: async (i) => {
+            if (i === 0) {
+              await JobsController.cancelOffer(job_data._id)
+              delete job_data.offer_received
+              set_job_data(job_data)
+              res()
+            }
+          },
+          onCancel: res
+        })
+      })
+    } else {
+      await JobsController.changeJobStatus(job_data._id, "available");
+    }
     changeRoute({ name: "searching", props: { keyword } });
   };
 
@@ -98,12 +145,15 @@ export default function JobFound({ job_data, keyword, navigation }) {
 
   const handleStartNegotiation = useCallback(async () => {
     setEnableNegotiation(true)
-  }, [job_data, projectManager])
+  }, [])
 
   if (!loading) {
     return (
       enableNegotiation ?
-        <NegotiationView onCancel={() => setEnableNegotiation(false)} onSuccess={(data) => { setEnableNegotiation(false) }} job_data={job_data} ref={negotiationRef} />
+        <NegotiationView deployee={authState.userID} onCancel={() => setEnableNegotiation(false)} onSubmit={(job) => {
+          setEnableNegotiation(false)
+          set_job_data(job)
+        }} job_data={job_data} />
         :
         (
           <Card ref={cardRef}>
@@ -141,6 +191,7 @@ export default function JobFound({ job_data, keyword, navigation }) {
                   </Text>
                 </Column>
               </Row>
+
               <Row>
                 <JobDescriptionRow>
                   <JobDescription>
@@ -177,15 +228,19 @@ export default function JobFound({ job_data, keyword, navigation }) {
                 </Row>
               }
 
-
               <CardOptionItem row>
                 <Text small>Reviews</Text>
               </CardOptionItem>
 
-
-              <Button negotiate style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: 'center' }} onPress={handleStartNegotiation}>
-                <Text style={{ color: "#00bfff", textAlign: 'center' }} medium>Negotiate Offer</Text>
-              </Button>
+              {job_data.offer_received && job_data.offer_received.deployee === authState.userID ?
+                <Button negotiationSent style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: 'center' }} disabled>
+                  <Text style={{ color: "white", textAlign: 'center' }} medium>Offer Sent</Text>
+                </Button>
+                :
+                <Button negotiate style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: 'center' }} onPress={handleStartNegotiation}>
+                  <Text style={{ color: "#00bfff", textAlign: 'center' }} medium>Negotiate Offer</Text>
+                </Button>
+              }
 
               <Row last>
                 <Column>
@@ -195,13 +250,15 @@ export default function JobFound({ job_data, keyword, navigation }) {
                 </Text>
                   </Button>
                 </Column>
-                <Column>
-                  <Button accept onPress={() => handleJobApprove()}>
-                    <Text style={{ color: "white" }} medium>
-                      Accept
-                </Text>
-                  </Button>
-                </Column>
+
+                {job_data.offer_received && job_data.offer_received.deployee === authState.userID ?
+                  null :
+                  <Column>
+                    <Button accept onPress={() => handleJobApprove()}>
+                      <Text style={{ color: "white" }} medium>Accept</Text>
+                    </Button>
+                  </Column>
+                }
               </Row>
             </View>
           </Card>
@@ -212,19 +269,52 @@ export default function JobFound({ job_data, keyword, navigation }) {
   }
 }
 
-const NegotiationView = ({ job_data, onCancel, onSuccess, ref }) => {
-  const [state, setState] = useState({ loading: false, offer: '' })
+const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
+  const [loading, setLoading] = useState(false)
   const [salary, setSalary] = useState('')
 
+  const onSubmitOffer = useCallback(async () => {
+    if (salary) {
+      setLoading(true)
+
+      const offer = parseFloat(salary).toFixed(2)
+      if (Number.isNaN(offer) || isNaN(offer)) {
+        return
+      }
+      await new Promise(async (res) => {
+        Confirm({
+          title: 'Confirm Offer',
+          message: `Suggest offer of $${offer}/hour to deployer?`,
+          options: ['yes', 'cancel'],
+          cancelButtonIndex: 1,
+          onPress: async (number) => {
+            if (number === 0) {
+              // Save offer
+              try {
+                const offer_received = await JobsController.sendOffer(job_data._id, deployee, offer)
+                job_data.offer_received = offer_received
+                onSubmit(job_data)
+              } catch (e) {
+                console.log(e, 'negotiation send failed')
+                Alert.alert('Failed to confirm offer')
+              }
+            }
+            res()
+          },
+          onCancel: res
+        })
+      })
+
+      setLoading(false)
+    }
+  }, [loading, deployee, job_data, salary])
+
   return (
-    <Card ref={ref}>
+    <Card>
       <View>
         <Row>
 
           <JobDescriptionRow>
-            <Text light marginBottom="5px">
-              What offer would you prefer to accept this job?
-            </Text>
             <JobDescription>
               <Text small light marginBottom="5px">Current Offer</Text>
               <Text small marginBottom="5px">
@@ -232,10 +322,16 @@ const NegotiationView = ({ job_data, onCancel, onSuccess, ref }) => {
             </Text>
             </JobDescription>
 
+            <Text small style={{ textTransform: 'uppercase', marginVertical: 16, textAlign: 'center' }} bold>
+              What offer would you prefer this job?
+            </Text>
+
+
             <View style={{ marginVertical: 10 }}>
               <WageInput>
-                <SalaryField>
+                <SalaryField style={{ justifyContent: 'center' }}>
                   <TextField
+                    disabled={loading}
                     suffix="/hr"
                     label="PAY"
                     prefix="$"
@@ -247,6 +343,7 @@ const NegotiationView = ({ job_data, onCancel, onSuccess, ref }) => {
                       setSalary(text);
                     }}
                     value={salary}
+                    onSubmitEditing={onSubmitOffer}
                   />
                 </SalaryField>
               </WageInput>
@@ -256,20 +353,17 @@ const NegotiationView = ({ job_data, onCancel, onSuccess, ref }) => {
         </Row>
 
         <Row last>
-          <Column>
-            <Button decline onPress={onCancel}>
+          <Column style={{ alignItems: 'center' }}>
+            <Button disabled={loading} decline onPress={onCancel}>
               <Text style={{ color: "red" }} medium>
                 Cancel
             </Text>
             </Button>
           </Column>
           <Column>
-            <Button accept onPress={() => {
-
-            }}>
-              <Text style={{ color: "white" }} medium>
-                Accept
-            </Text>
+            <Button disabled={loading} style={{ flexDirection: 'row' }} accept onPress={onSubmitOffer}>
+              {loading ? <ActivityIndicator animating style={{ marginEnd: 4 }} color='white' /> : null}
+              <Text style={{ color: "white" }} medium>Save</Text>
             </Button>
           </Column>
         </Row>
@@ -305,7 +399,7 @@ const ProfilePicture = styled.Image`
 `;
 
 const SalaryField = styled.View`
-  flex: 3;
+  flex: 1;
   flex-direction: column;
   padding-right: 50px;
 `;
@@ -358,7 +452,7 @@ const CardOptionItem = styled.TouchableOpacity`
 `;
 
 const Button = styled.TouchableOpacity`
-  ${({ decline, accept, negotiate, row }) => {
+  ${({ decline, accept, negotiate, negotiationSent, row }) => {
     switch (true) {
       case accept:
         return `
@@ -379,6 +473,14 @@ const Button = styled.TouchableOpacity`
         return `
         border-color: #00bfff;
         border-width: 1px;
+        text-align: center;
+        padding: 10px 40px; 
+        border-radius: 8px;
+        `;
+
+      case negotiationSent:
+        return `
+        background-color: slategray;
         text-align: center;
         padding: 10px 40px; 
         border-radius: 8px;
