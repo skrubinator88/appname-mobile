@@ -133,7 +133,7 @@ export default function workModal({ navigation, route }) {
         let perms = await requestCameraRollPermissionsAsync()
         if (!perms.granted) {
           Alert.alert('Access to media library denied', 'You need to grant access to image library to continue')
-          setState({ ...state, loadingMedia: false })
+          setloadingMedia(false)
           return
         }
       }
@@ -383,10 +383,11 @@ export default function workModal({ navigation, route }) {
               <WageInput>
                 <SalaryField>
                   <TextField
+                    prefix='$'
                     suffix="/hr"
                     label="PAY"
                     labelFontSize={14}
-                    placeholder="$00.00"
+                    placeholder="0.00"
                     labelTextStyle={{ color: "grey", fontWeight: "700" }}
                     keyboardType="numeric"
                     {...commonInputProps(salary, setSalary)}
@@ -409,7 +410,7 @@ export default function workModal({ navigation, route }) {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingVertical: 40 }}
                 ListHeaderComponent={() => (
-                  <TouchableOpacity style={{ alignSelf: "center", justifyContent: 'center', backgroundColor: '#fff', height: 150, marginHorizontal: 4, width: 150, borderRadius: 4 }} onPress={getPhoto}>
+                  <TouchableOpacity disabled={loadingMedia} style={{ alignSelf: "center", justifyContent: 'center', backgroundColor: '#fff', height: 150, marginHorizontal: 4, width: 150, borderRadius: 4 }} onPress={getPhoto}>
                     <ScheduleButton style={{ justifyContent: "center", flex: 1, backgroundColor: 'transparent', alignItems: "center" }}>
                       <Ionicons name='ios-add' style={{ fontSize: 40 }} />
                     </ScheduleButton>

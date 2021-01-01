@@ -123,7 +123,7 @@ exports.changeJobStatus = async (documentID, status, userID = "") => {
   const geoCollection = GeoFirestore.collection("jobs").doc(documentID);
 
   // Update job status
-  geoCollection.update({ status, executed_by: userID });
+  await geoCollection.update({ status, executed_by: userID });
 };
 
 exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {

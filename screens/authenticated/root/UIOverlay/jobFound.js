@@ -1,10 +1,11 @@
 // IMPORT
 import React, { useState, useEffect, useContext, useRef, useCallback } from "react";
-import { View, Platform, FlatList, Dimensions, SafeAreaView } from "react-native";
+import { View, Platform, FlatList, Dimensions, SafeAreaView, ActivityIndicator } from "react-native";
 import styled from "styled-components/native";
 import config from "../../../../env";
 import StarRating from "react-native-star-rating";
 import env from "../../../../env";
+import { TextField } from "react-native-material-textfield";
 
 // Expo
 import { FontAwesome } from "@expo/vector-icons";
@@ -35,7 +36,9 @@ export default function JobFound({ job_data, keyword, navigation }) {
   const [starRate, setStarRate] = useState(0);
   const [loading, setLoading] = useState(true);
   const [accepted, setAccepted] = useState(false)
+  const [enableNegotiation, setEnableNegotiation] = useState(false)
   const cardRef = useRef(null);
+  const negotiationRef = useRef(null)
 
   useEffect(() => {
     (async () => {
@@ -56,15 +59,22 @@ export default function JobFound({ job_data, keyword, navigation }) {
     })();
   }, []);
 
+  // Monitor page and change the job status back to being avaiilable when user leaves the screen
   useEffect(() => {
-    navigation.addListener('beforeRemove', (e) => {
-      if (accepted) {
-        return;
+    let reset = false
+    const unsubscribe = navigation.addListener('beforeRemove', async (e) => {
+      if (!accepted) {
+        await JobsController.changeJobStatus(job_data._id, "available");
+        reset = true
       }
-      e.preventDefault()
-      JobsController.changeJobStatus(job_data._id, "available");
-      navigation.dispatch(e.data.action)
     })
+
+    return () => {
+      unsubscribe()
+      if (!reset) {
+        JobsController.changeJobStatus(job_data._id, "available");
+      }
+    }
   }, [navigation, accepted])
 
   const handleJobDecline = () => {
@@ -86,113 +96,186 @@ export default function JobFound({ job_data, keyword, navigation }) {
     );
   };
 
-  const handleStartNegotiation = useCallback(async () => { }, [job_data, projectManager])
+  const handleStartNegotiation = useCallback(async () => {
+    setEnableNegotiation(true)
+  }, [job_data, projectManager])
 
   if (!loading) {
     return (
-      <Card ref={cardRef}>
-        <View>
-          <ProfilePicture
-            source={{
-              uri: `${env.API_URL}${job_data.posted_by_profile_picture}`,
-            }}
-          ></ProfilePicture>
+      enableNegotiation ?
+        <NegotiationView onCancel={() => setEnableNegotiation(false)} onSuccess={(data) => { setEnableNegotiation(false) }} job_data={job_data} ref={negotiationRef} />
+        :
+        (
+          <Card ref={cardRef}>
+            <View>
+              <ProfilePicture
+                source={{
+                  uri: `${env.API_URL}${job_data.posted_by_profile_picture}`,
+                }}
+              ></ProfilePicture>
 
-          <Row first>
-            <Column>
-              <Text title bold marginBottom="5px">
-                {name}
-              </Text>
-              <Text small light marginBottom="5px">
-                {occupation}
-              </Text>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text bold marginBottom="5px">
-                  <FontAwesome name="map-marker" size={24} color="black" />
+              <Row first>
+                <Column>
+                  <Text title bold marginBottom="5px">
+                    {name}
+                  </Text>
+                  <Text small light marginBottom="5px">
+                    {occupation}
+                  </Text>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Text bold marginBottom="5px">
+                      <FontAwesome name="map-marker" size={24} color="black" />
+                    </Text>
+                    <Text style={{ marginLeft: 10 }} bold>
+                      13 min
                 </Text>
-                <Text style={{ marginLeft: 10 }} bold>
-                  13 min
+                  </View>
+                </Column>
+                <Column>
+                  {/* Iterate from array of data pulled from server and render as stars */}
+                  <View style={{ flexDirection: "row", marginBottom: 10 }}>
+                    <StarRating disabled={true} maxStars={5} rating={starRate} starSize={25} />
+                  </View>
+                  <Text style={{ textAlign: "center" }} bold>
+                    {starRate}
+                  </Text>
+                </Column>
+              </Row>
+              <Row>
+                <JobDescriptionRow>
+                  <JobDescription>
+                    <Text small light marginBottom="5px">
+                      Job Description
                 </Text>
-              </View>
-            </Column>
-            <Column>
-              {/* Iterate from array of data pulled from server and render as stars */}
-              <View style={{ flexDirection: "row", marginBottom: 10 }}>
-                <StarRating disabled={true} maxStars={5} rating={starRate} starSize={25} />
-              </View>
-              <Text style={{ textAlign: "center" }} bold>
-                {starRate}
-              </Text>
-            </Column>
-          </Row>
-          <Row>
-            <JobDescriptionRow>
-              <JobDescription>
-                <Text small light marginBottom="5px">
-                  Job Description
+                    <Text small marginBottom="5px">
+                      ${job_data.salary}/hr
                 </Text>
-                <Text small marginBottom="5px">
-                  ${job_data.salary}/hr
-                </Text>
-              </JobDescription>
+                  </JobDescription>
 
-              {description.map((item) => {
-                return <Text key={item.id}>{item.text}</Text>;
-              })}
-            </JobDescriptionRow>
-          </Row>
+                  {description.map((item) => {
+                    return <Text key={item.id}>{item.text}</Text>;
+                  })}
+                </JobDescriptionRow>
+              </Row>
 
-          {job_data.photo_files && job_data.photo_files.length > 0 &&
-            <Row>
-              <PhotosRow>
-                <JobDescription>
-                  <Text small light marginBottom="5px">Photos</Text>
-                </JobDescription>
+              {job_data.photo_files && job_data.photo_files.length > 0 &&
+                <Row>
+                  <PhotosRow>
+                    <JobDescription>
+                      <Text small light marginBottom="5px">Photos</Text>
+                    </JobDescription>
 
-                <FlatList data={job_data.photo_files}
-                  keyExtractor={v => v}
-                  centerContent
-                  showsHorizontalScrollIndicator={false}
-                  horizontal
-                  renderItem={({ item }) => (
-                    <PhotoItem item={{ uri: `${config.API_URL}/job/${job_data._id}/${item}` }} />
-                  )} />
-              </PhotosRow>
-            </Row>
-          }
+                    <FlatList data={job_data.photo_files}
+                      keyExtractor={v => v}
+                      centerContent
+                      showsHorizontalScrollIndicator={false}
+                      horizontal
+                      renderItem={({ item }) => (
+                        <PhotoItem item={{ uri: `${config.API_URL}/job/${job_data._id}/${item}` }} />
+                      )} />
+                  </PhotosRow>
+                </Row>
+              }
 
 
-          <CardOptionItem row>
-            <Text small>Reviews</Text>
-          </CardOptionItem>
+              <CardOptionItem row>
+                <Text small>Reviews</Text>
+              </CardOptionItem>
 
 
-          <Button negotiate onPress={handleStartNegotiation}>
-            <Text style={{ color: "#00bfff", paddingVertical: 16, borderColor: '#00bfff', borderWidth: StyleSheet.hairlineWidth, textAlign: 'center', }} medium>Negotiate</Text>
-          </Button>
-
-          <Row last>
-            <Column>
-              <Button decline onPress={() => handleJobDecline()}>
-                <Text style={{ color: "red" }} medium>
-                  Decline
-                </Text>
+              <Button negotiate style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: 'center' }} onPress={handleStartNegotiation}>
+                <Text style={{ color: "#00bfff", textAlign: 'center' }} medium>Negotiate Offer</Text>
               </Button>
-            </Column>
-            <Column>
-              <Button accept onPress={() => handleJobApprove()}>
-                <Text style={{ color: "white" }} medium>
-                  Accept
+
+              <Row last>
+                <Column>
+                  <Button decline onPress={() => handleJobDecline()}>
+                    <Text style={{ color: "red" }} medium>
+                      Decline
                 </Text>
-              </Button>
-            </Column>
-          </Row>
-        </View>
-      </Card>
+                  </Button>
+                </Column>
+                <Column>
+                  <Button accept onPress={() => handleJobApprove()}>
+                    <Text style={{ color: "white" }} medium>
+                      Accept
+                </Text>
+                  </Button>
+                </Column>
+              </Row>
+            </View>
+          </Card>
+        )
     );
   } else {
-    return <View></View>;
+    return <View><ActivityIndicator /></View>;
   }
+}
+
+const NegotiationView = ({ job_data, onCancel, onSuccess, ref }) => {
+  const [state, setState] = useState({ loading: false, offer: '' })
+  const [salary, setSalary] = useState('')
+
+  return (
+    <Card ref={ref}>
+      <View>
+        <Row>
+
+          <JobDescriptionRow>
+            <Text light marginBottom="5px">
+              What offer would you prefer to accept this job?
+            </Text>
+            <JobDescription>
+              <Text small light marginBottom="5px">Current Offer</Text>
+              <Text small marginBottom="5px">
+                ${job_data.salary}/hr
+            </Text>
+            </JobDescription>
+
+            <View style={{ marginVertical: 10 }}>
+              <WageInput>
+                <SalaryField>
+                  <TextField
+                    suffix="/hr"
+                    label="PAY"
+                    prefix="$"
+                    labelFontSize={14}
+                    placeholder="0.00"
+                    labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                    keyboardType="numeric"
+                    onChangeText={(text) => {
+                      setSalary(text);
+                    }}
+                    value={salary}
+                  />
+                </SalaryField>
+              </WageInput>
+            </View>
+
+          </JobDescriptionRow>
+        </Row>
+
+        <Row last>
+          <Column>
+            <Button decline onPress={onCancel}>
+              <Text style={{ color: "red" }} medium>
+                Cancel
+            </Text>
+            </Button>
+          </Column>
+          <Column>
+            <Button accept onPress={() => {
+
+            }}>
+              <Text style={{ color: "white" }} medium>
+                Accept
+            </Text>
+            </Button>
+          </Column>
+        </Row>
+      </View>
+    </Card>
+  )
 }
 
 // STYLES
@@ -207,11 +290,24 @@ export default function JobFound({ job_data, keyword, navigation }) {
 //   width: 100%;
 // `;
 
+
+const WageInput = styled.View`
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+`;
+
 const ProfilePicture = styled.Image`
   margin: -35px auto;
   height: 70px;
   width: 70px;
   border-radius: 50px;
+`;
+
+const SalaryField = styled.View`
+  flex: 3;
+  flex-direction: column;
+  padding-right: 50px;
 `;
 
 const Row = styled.View`
@@ -262,11 +358,11 @@ const CardOptionItem = styled.TouchableOpacity`
 `;
 
 const Button = styled.TouchableOpacity`
-  ${({ decline, accept, row }) => {
+  ${({ decline, accept, negotiate, row }) => {
     switch (true) {
       case accept:
         return `
-        background: #00a0e5; 
+        background: #228b22; 
         padding: 10px 40px; 
         border-radius: 8px;
         `;
@@ -275,6 +371,15 @@ const Button = styled.TouchableOpacity`
         return `
         border: 1px solid red; 
         background: white; 
+        padding: 10px 40px; 
+        border-radius: 8px;
+        `;
+
+      case negotiate:
+        return `
+        border-color: #00bfff;
+        border-width: 1px;
+        text-align: center;
         padding: 10px 40px; 
         border-radius: 8px;
         `;
