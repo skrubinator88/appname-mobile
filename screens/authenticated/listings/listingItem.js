@@ -66,26 +66,17 @@ export default function workModal({ navigation, route }) {
   const [mode, setMode] = useState(Platform.OS === 'ios' ? 'datetime' : 'date')
   const [showDate, setShowDate] = useState(false)
 
-  let debouncer
-
   const updateDate = async (e, dateParam) => {
     if (dateParam) {
 
       // Set the date picker mode based on platform
       switch (mode) {
         case 'datetime':
-          if (debouncer) {
-            debouncer.cancel()
-          }
           if (Platform.OS === 'ios') {
             setDate(dateParam)
           }
           // This is called for only iOS, so set debouncer to delay removing the time modal.
           // TODO: Test how to add a button instead of this
-          debouncer = debounce(() => {
-            setShowDate(false)
-            debouncer = undefined
-          }, 3000)
           break
         case 'date':
           setShowDate(() => {
@@ -425,10 +416,16 @@ export default function workModal({ navigation, route }) {
             <Item>
               <Text style={{ color: '#444', textAlign: 'center', marginTop: 8, textTransform: 'uppercase' }}>Job will be available {date.getTime() <= Date.now() + 5000 ? 'immediately' : moment(date).calendar()}</Text>
             </Item>
-            <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7, marginBottom: 12 }} onPress={onShowDate}>
-              <ScheduleButton style={{ justifyContent: "center", alignItems: "center" }}>
-                <Text bold color="black">
-                  Schedule Job
+            <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7, marginBottom: 12 }} onPress={() => {
+              if (showDate && Platform.OS === 'ios') {
+                setShowDate(false)
+              } else {
+                onShowDate()
+              }
+            }}>
+              <ScheduleButton style={{ justifyContent: "center", alignItems: "center", backgroundColor: showDate ? 'red' : '#fff' }}>
+                <Text bold color={showDate && Platform.OS === 'ios' ? 'white' : "black"}>
+                  {showDate && Platform.OS === 'ios' ? 'Close Date Picker' : 'Schedule Job'}
                 </Text>
               </ScheduleButton>
             </TouchableOpacity>
