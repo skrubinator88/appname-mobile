@@ -212,12 +212,8 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
               <Row>
                 <JobDescriptionRow>
                   <JobDescription>
-                    <Text small light marginBottom="5px">
-                      Job Description
-                </Text>
-                    <Text small marginBottom="5px">
-                      ${job_data.salary}/hr
-                </Text>
+                    <Text small light marginBottom="5px">Job Description</Text>
+                    <Text small marginBottom="5px">${job_data.salary}/hr</Text>
                   </JobDescription>
 
                   {description.map((item) => {
@@ -239,7 +235,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
                       showsHorizontalScrollIndicator={false}
                       horizontal
                       renderItem={({ item }) => (
-                        <PhotoItem item={{ uri: `${config.API_URL}/job/${job_data._id}/${item}` }} />
+                        <PhotoItem key={item} item={{ uri: `${config.API_URL}/job/${job_data._id}/${item}` }} />
                       )} />
                   </PhotosRow>
                 </Row>
@@ -252,10 +248,10 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
               {job_data.offer_received && job_data.offer_received.deployee === authState.userID ?
                 job_data.offer_received.counterOffer ?
                   <>
-                    <JobDescription>
-                      <Text small light marginBottom="5px">Job Description</Text>
-                      <Text small marginBottom="5px">${job_data.salary}/hr</Text>
-                    </JobDescription>
+                    <View style={{ justifyContent: 'space-between', flexDirection: 'row', paddingHorizontal: 20, paddingTop: 12 }}>
+                      <Text small light marginBottom="5px">Counter Offer</Text>
+                      <Text small marginBottom="5px">${job_data.offer_received.counterOffer}/hr</Text>
+                    </View>
                     <Button accept style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: 'center' }} onPress={handleCounterApprove}>
                       <Text style={{ color: "white", textAlign: 'center' }} medium>Accept Counter</Text>
                     </Button>

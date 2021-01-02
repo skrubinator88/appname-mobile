@@ -189,7 +189,7 @@ exports.counterOffer = async (documentID, offer) => {
   })
 };
 
-exports.counterAppprove = async (documentID, offer) => {
+exports.counterApprove = async (documentID, offer) => {
   if (!offer) {
     throw new Error('Offer must be provided')
   }
