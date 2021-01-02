@@ -1,28 +1,26 @@
 // IMPORT
-import React, { useState, useEffect, useContext, useRef, useCallback } from "react";
-import { View, Platform, FlatList, Dimensions, SafeAreaView, ActivityIndicator, Alert } from "react-native";
-import styled from "styled-components/native";
-import config from "../../../../env";
-import StarRating from "react-native-star-rating";
-import env from "../../../../env";
-import { TextField } from "react-native-material-textfield";
-
 // Expo
 import { FontAwesome } from "@expo/vector-icons";
-
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Dimensions, FlatList, View } from "react-native";
+import { TextField } from "react-native-material-textfield";
+import StarRating from "react-native-star-rating";
+import styled from "styled-components/native";
 import Card from "../../../../components/card_animated";
-import Text from "../../../../components/text";
-
-const deviceHeight = Dimensions.get("window").height;
-
-import { UIOverlayContext, GlobalContext } from "../../../../components/context";
 import Confirm from "../../../../components/confirm";
-
+import { GlobalContext, UIOverlayContext } from "../../../../components/context";
+import Text from "../../../../components/text";
 // Controllers
 import AnimationsController from "../../../../controllers/AnimationsControllers";
 import JobsController from "../../../../controllers/JobsControllers";
+import { default as config, default as env } from "../../../../env";
 import PhotoItem from "../../listings/listItemImage";
-import { StyleSheet } from "react-native";
+
+
+
+const deviceHeight = Dimensions.get("window").height;
+
+
 
 // BODY
 export default function JobFound({ job_data: job_data_prop, keyword, navigation }) {
@@ -94,7 +92,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
     })
 
     return () => {
-      if (!reset && (!job_data.offer_received || job_data.offer_received.deployee !== authState.userID)) {
+      if (!reset && !job_data.offer_received) {
         JobsController.changeJobStatus(job_data._id, "available")
       }
       if (unsubscribe) {
@@ -138,6 +136,25 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
 
         setAccepted(true)
         changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
+      },
+      true
+    );
+  };
+
+  const handleCounterApprove = () => {
+    AnimationsController.CardUISlideOut(
+      cardRef,
+      async () => {
+        try {
+          await JobsController.counterApprove(job_data._id, job_data.offer_received.counterOffer);
+          //TODO: Save job ID in local storage to retrieve it later on.
+
+          setAccepted(true)
+          changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
+        } catch (e) {
+          console.log(e, 'counter offer approve')
+          Alert.alert('Please Try Again', 'Failed to accept counter offer')
+        }
       },
       true
     );
@@ -233,9 +250,20 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
               </CardOptionItem>
 
               {job_data.offer_received && job_data.offer_received.deployee === authState.userID ?
-                <Button negotiationSent style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: 'center' }} disabled>
-                  <Text style={{ color: "white", textAlign: 'center' }} medium>Offer Sent</Text>
-                </Button>
+                job_data.offer_received.counterOffer ?
+                  <>
+                    <JobDescription>
+                      <Text small light marginBottom="5px">Job Description</Text>
+                      <Text small marginBottom="5px">${job_data.salary}/hr</Text>
+                    </JobDescription>
+                    <Button accept style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: 'center' }} onPress={handleCounterApprove}>
+                      <Text style={{ color: "white", textAlign: 'center' }} medium>Accept Counter</Text>
+                    </Button>
+                  </>
+                  :
+                  <Button negotiationSent style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: 'center' }} disabled>
+                    <Text style={{ color: "white", textAlign: 'center' }} medium>Offer Sent</Text>
+                  </Button>
                 :
                 <Button negotiate style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: 'center' }} onPress={handleStartNegotiation}>
                   <Text style={{ color: "#00bfff", textAlign: 'center' }} medium>Negotiate Offer</Text>
@@ -245,9 +273,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
               <Row last>
                 <Column>
                   <Button decline onPress={() => handleJobDecline()}>
-                    <Text style={{ color: "red" }} medium>
-                      Decline
-                </Text>
+                    <Text style={{ color: "red" }} medium>Decline</Text>
                   </Button>
                 </Column>
 
@@ -284,7 +310,7 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
       await new Promise(async (res) => {
         Confirm({
           title: 'Confirm Offer',
-          message: `Suggest offer of $${offer}/hour to deployer?`,
+          message: `Suggest offer of $${offer}/hour to deployer to complete this job?`,
           options: ['yes', 'cancel'],
           cancelButtonIndex: 1,
           onPress: async (number) => {
@@ -323,7 +349,7 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
             </JobDescription>
 
             <Text small style={{ textTransform: 'uppercase', marginVertical: 16, textAlign: 'center' }} bold>
-              What offer would you prefer this job?
+              What offer would you complete this job for?
             </Text>
 
 

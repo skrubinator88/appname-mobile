@@ -126,12 +126,17 @@ exports.changeJobStatus = async (documentID, status, userID = "") => {
   await geoCollection.update({ status, executed_by: userID });
 };
 
+/**
+ * Used to send an offer by a deployee
+ * @param {*} documentID 
+ * @param {*} deployee 
+ * @param {*} offer 
+ */
 exports.sendOffer = async (documentID, deployee, offer) => {
   if (!deployee) {
     throw new Error('User identity must be provided')
   }
   if (!offer || typeof offer == 'number' || offer <= 0) {
-    console.log(typeof offer, offer)
     throw new Error('You must provide a valid offer')
   }
   const doc = GeoFirestore.collection("jobs").doc(documentID);
@@ -149,9 +154,52 @@ exports.sendOffer = async (documentID, deployee, offer) => {
   }
 };
 
+/**
+ * Used by deployee or deployer to cancel an offer already sent
+ * 
+ * @param {*} documentID 
+ */
 exports.cancelOffer = async (documentID) => {
   const doc = GeoFirestore.collection("jobs").doc(documentID);
-  await doc.update({ offer_received: firebase.firestore.FieldValue.delete(), status: 'available' })
+  await doc.update({
+    offer_received: firebase.firestore.FieldValue.delete(),
+    executed_by: '',
+    status: 'available'
+  })
+};
+
+exports.approveOffer = async (documentID, deployee) => {
+  if (!deployee) {
+    throw new Error('Deployee identity must be provided')
+  }
+  const doc = GeoFirestore.collection("jobs").doc(documentID);
+  await doc.update({
+    'offer_received.approved': true,
+    status: 'accepted'
+  })
+};
+
+exports.counterOffer = async (documentID, offer) => {
+  if (!offer) {
+    throw new Error('Offer must be provided')
+  }
+  const doc = GeoFirestore.collection("jobs").doc(documentID);
+  await doc.update({
+    'offer_received.counterOffer': offer,
+  })
+};
+
+exports.counterAppprove = async (documentID, offer) => {
+  if (!offer) {
+    throw new Error('Offer must be provided')
+  }
+  const doc = GeoFirestore.collection("jobs").doc(documentID);
+  await doc.update({
+    'offer_received.counterOffer': firebase.firestore.FieldValue.delete(),
+    'offer_received.offer': offer,
+    'offer_received.approved': true,
+    status: 'accepted',
+  })
 };
 
 exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
