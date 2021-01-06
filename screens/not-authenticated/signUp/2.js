@@ -60,7 +60,7 @@ export default function ({ navigation, route }) {
   };
 
   const handleSubmit = async (e) => {
-    const phone_number = `+1${textInput}`;
+    const phone_number = `+234${textInput}`;
     try {
       // Check if phone number exist in database
       const response = await fetch(`${env.API_URL}/users/phone/${phone_number}`, {
@@ -91,6 +91,7 @@ export default function ({ navigation, route }) {
       console.log(e.message);
       if (e.message == "Network request failed") {
         navigation.navigate("SignIn", { errorMsg: e.message });
+        return
       }
     }
 
@@ -111,8 +112,6 @@ export default function ({ navigation, route }) {
         if (!twilio.ok) {
           throw new Error((await twilio.json()).message || 'Please try again')
         }
-
-        console.log(twilio.json())
         navigation.navigate("SignUp3");
       } catch (e) {
         console.log(e.message);

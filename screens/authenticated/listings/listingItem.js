@@ -1,44 +1,42 @@
 // Dependencies React
-import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
-import {
-  KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  View,
-  Platform,
-  Dimensions,
-  TouchableOpacity,
-  ActivityIndicator,
-  FlatList,
-  Image
-} from "react-native";
-
-import Lightbox from "react-native-lightbox";
-import { launchImageLibraryAsync, MediaTypeOptions, requestCameraRollPermissionsAsync } from 'expo-image-picker'
+import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import moment from 'moment'
+import { launchImageLibraryAsync, MediaTypeOptions, requestCameraRollPermissionsAsync } from 'expo-image-picker';
+import moment from 'moment';
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator, Alert, Dimensions,
 
+
+  FlatList, KeyboardAvoidingView,
+
+
+  Platform,
+
+  TouchableOpacity, TouchableWithoutFeedback,
+  View
+} from "react-native";
 // Styling Dependencies
-import { TextField } from "react-native-material-textfield";
+import { TextField } from "@ubaids/react-native-material-textfield";
 import styled from "styled-components/native";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-
-// Config
-
+// Context
+import { GlobalContext } from "../../../components/context";
 // Components
 import Header from "../../../components/header";
 import Text from "../../../components/text";
-import TaskModal from "./taskModal";
-
+import GoogleServicesController from "../../../controllers/GoogleServicesController";
 // Controllers
 import JobsController from "../../../controllers/JobsControllers";
-import GoogleServicesController from "../../../controllers/GoogleServicesController";
 import PermissionsControllers from "../../../controllers/PermissionsControllers";
-
-// Context
-import { GlobalContext } from "../../../components/context";
-import { Alert } from "react-native";
 import PhotoItem from "./listItemImage";
-import { debounce } from "lodash";
+import TaskModal from "./taskModal";
+
+
+
+
+
+
+
 
 // Miscellaneous
 const width = Dimensions.get("window").width;

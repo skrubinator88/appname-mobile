@@ -5,7 +5,7 @@ import { useTheme } from "@react-navigation/native";
 
 import Header from "../../../components/header";
 import Text from "../../../components/text";
-import { TextField } from "react-native-material-textfield";
+import { TextField } from "@ubaids/react-native-material-textfield";
 
 import { RegistrationContext } from "../../../components/context";
 

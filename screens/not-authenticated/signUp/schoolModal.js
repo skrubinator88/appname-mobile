@@ -15,7 +15,7 @@ import {
 
 import Modal from "react-native-modal";
 
-import { TextField } from "react-native-material-textfield";
+import { TextField } from "@ubaids/react-native-material-textfield";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
