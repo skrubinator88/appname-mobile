@@ -60,7 +60,7 @@ export default function ({ navigation, route }) {
   };
 
   const handleSubmit = async (e) => {
-    const phone_number = `+1${textInput}`;
+    const phone_number = `${env.COUNTRY_CODE}${textInput}`;
     try {
       // Check if phone number exist in database
       const response = await fetch(`${env.API_URL}/users/phone/${phone_number}`, {
@@ -68,7 +68,7 @@ export default function ({ navigation, route }) {
       });
 
       if (!response.ok) {
-        return navigation.navigate("SignUp2", { errorMsg: 'Please try again' });
+        return navigation.navigate("SignUp2", { errorMsg: "Please try again" });
       }
 
       const { success, valid } = await response.json();
@@ -91,6 +91,7 @@ export default function ({ navigation, route }) {
       console.log(e.message);
       if (e.message == "Network request failed") {
         navigation.navigate("SignIn", { errorMsg: e.message });
+        return;
       }
     }
 
@@ -109,17 +110,15 @@ export default function ({ navigation, route }) {
         });
 
         if (!twilio.ok) {
-          throw new Error((await twilio.json()).message || 'Please try again')
+          throw new Error((await twilio.json()).message || "Please try again");
         }
-
-        console.log(twilio.json())
         navigation.navigate("SignUp3");
       } catch (e) {
         console.log(e.message);
         if (e.message == "Network request failed") {
           navigation.navigate("SignUp2", { errorMsg: e.message });
         } else {
-          navigation.navigate("SignUp2", { errorMsg: 'Please try again' });
+          navigation.navigate("SignUp2", { errorMsg: "Please try again" });
         }
       }
       return;

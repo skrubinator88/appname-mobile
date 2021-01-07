@@ -23,6 +23,7 @@ Development:
   # API_URL: http://10.0.0.74:3001/v1 # External Server
   # API_URL: http://192.168.0.11:3001/v1 # External Server
   API_URL: http://192.168.43.204:3001/v1 # External Server
+  COUNTRY_CODE: "+1"
   # API_URL: http://192.168.10.103:3001/v1 # External Server
   # API_URL: https://contractor-app-test-api.herokuapp.com/v1 --- Current prod
   # API_URL: http://192.168.136.132:3001/v1 # External Server
