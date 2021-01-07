@@ -20,7 +20,7 @@
         "@react-navigation/stack": "^5.4.2",
         "@reduxjs/toolkit": "^1.4.0",
         "@ubaids/react-native-material-textfield": "^0.16.3",
-        "axios": "^0.19.2",
+        "axios": "^0.21.1",
         "expo": "^40.0.0",
         "expo-barcode-scanner": "~9.1.0",
         "expo-camera": "~9.1.0",
