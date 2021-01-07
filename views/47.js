@@ -17,7 +17,7 @@ import {
   TextField,
   FilledTextField,
   OutlinedTextField,
-} from "react-native-material-textfield";
+} from "@ubaids/react-native-material-textfield";
 
 import { Platform } from "react-native";
 import styled from "styled-components/native";

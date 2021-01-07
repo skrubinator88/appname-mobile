@@ -1,32 +1,34 @@
 {
-  "expo": {
-    "name": "Gig-Chasers",
-    "slug": "Gig-Chasers",
-    "platforms": [
-      "ios",
-      "android"
-    ],
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "bundleIdentifier": "com.example.gig-chasers",
-      "supportsTablet": false,
-      "config": {
-        "googleMapsApiKey": "AIzaSyB8xVAMRa2hoq8lRXEG1wXG3v2yR1KkHsQ"
-      }
-    },
-    "android": {},
-    "sdkVersion": "37.0.0"
-  }
+    "expo": {
+        "name": "Gig-Chasers",
+        "slug": "Gig-Chasers",
+        "platforms": [
+            "ios",
+            "android"
+        ],
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "splash": {
+            "image": "./assets/splash.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#ffffff"
+        },
+        "updates": {
+            "fallbackToCacheTimeout": 0
+        },
+        "assetBundlePatterns": [
+            "**/*"
+        ],
+        "ios": {
+            "bundleIdentifier": "com.example.gig-chasers",
+            "supportsTablet": false,
+            "config": {
+                "googleMapsApiKey": "AIzaSyB8xVAMRa2hoq8lRXEG1wXG3v2yR1KkHsQ"
+            }
+        },
+        "android": {
+            "useNextNotificationsApi": true
+        },
+        "sdkVersion": "38.0.0"
+    }
 }

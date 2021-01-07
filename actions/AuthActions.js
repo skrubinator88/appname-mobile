@@ -1,6 +1,7 @@
 // Dependencies
 import { useMemo } from "react";
 import AsyncStorage from "@react-native-community/async-storage";
+import PermissionsControllers from "../controllers/PermissionsControllers"
 import env from "../env";
 
 function handleError(e) {
@@ -31,6 +32,8 @@ exports.memo = ({ dispatch }) => {
           };
 
           await AsyncStorage.setItem("userData", JSON.stringify(userData));
+          // Trigger push notification subscription by getting token and pushing to server
+          await PermissionsControllers.registerForPushNotificationsAsync(userToken)
 
           dispatch({ type: "LOGIN", id: userID, token: userToken, profile: profile });
         } catch (e) {
@@ -38,13 +41,39 @@ exports.memo = ({ dispatch }) => {
         }
       },
 
-      signOut: async () => {
+      signOut: async (userToken) => {
         try {
-          await AsyncStorage.removeItem("userData");
+          await (AsyncStorage.getItem("app.token").then(async token => {
+            if (token) {
+              try {
+                const response = await fetch(`${env.API_URL}/notification/setup`, {
+                  method: "DELETE",
+                  headers: {
+                    Authorization: `bearer ${userToken}`,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ token })
+                })
+                if (!response.ok) {
+                  return Promise.reject({ message: (await response.json()).message || 'Failed to remove device', code: 'Network Error' })
+                }
+
+                await AsyncStorage.removeItem(`app.token`, token);
+                await AsyncStorage.removeItem("userData");
+              } catch (e) {
+                console.error(e)
+                if (e.code === 'Network Error') {
+                  // Notification not properly disconnected...Prevent signout!
+                  return
+                }
+              }
+            }
+          }))
         } catch (e) {
           handleError(e);
         }
         dispatch({ type: "LOGOUT" });
+        return true
       },
 
       changeRole: async (prevData, newRole) => {
@@ -82,6 +111,8 @@ exports.retrieve_user_info = async ({ dispatch }) => {
 
       userData.profile = await response.json();
 
+      // Trigger push notification subscription by getting token and pushing to server
+      await PermissionsControllers.registerForPushNotificationsAsync(userToken)
       dispatch({ type: "RETRIEVE_TOKEN", token: userData?.userToken, id: userData?.userID, profile: userData?.profile });
     } else {
       dispatch({ type: "LOGOUT" });

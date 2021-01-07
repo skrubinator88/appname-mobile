@@ -3,7 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { unix } from "moment";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Modal, SafeAreaView, ScrollView, View } from "react-native";
-import { TextField } from "react-native-material-textfield";
+import { TextField } from "@ubaids/react-native-material-textfield";
 import StarRating from "react-native-star-rating";
 // Redux
 import { useDispatch, useSelector } from "react-redux";
@@ -18,7 +18,7 @@ import Text from "../../../components/text";
 import JobsControllers from "../../../controllers/JobsControllers";
 import config from "../../../env";
 // Functions
-import { isCurrentJob } from '../../../functions';
+import { isCurrentJob, sendNotification } from '../../../functions';
 
 
 
@@ -326,13 +326,13 @@ const ListOfferItemDetail = ({ item }) => {
           </JobItemRow>
         </JobItemLink>
         {state.showCounterOffer ?
-          <CounterOfferView job_data={item} deployee={state.deployee} onComplete={() => setState({ ...state, showCounterOffer: false })} />
+          <CounterOfferView authState={authState} job_data={item} deployee={state.deployee} onComplete={() => setState({ ...state, showCounterOffer: false })} />
           : null}
       </Item >
   )
 }
 
-const CounterOfferView = ({ job_data, deployee, onComplete }) => {
+const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
   const [loading, setLoading] = useState(false)
   const [salary, setSalary] = useState(job_data.offer_received?.offer)
 
@@ -350,6 +350,7 @@ const CounterOfferView = ({ job_data, deployee, onComplete }) => {
 
               if (index === 0) {
                 await JobsControllers.cancelOffer(job_data.id)
+                sendNotification(authState.userToken, deployee.id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer rejected`, data: { type: 'offerdecline', id: job_data.id, sender: authState.userID } })
               }
               setLoading(false)
               onComplete()
@@ -387,8 +388,10 @@ const CounterOfferView = ({ job_data, deployee, onComplete }) => {
               if (index === 0) {
                 if (isCounterOffer) {
                   await JobsControllers.counterOffer(job_data.id, offer)
+                  sendNotification(authState.userToken, deployee.id, { title: `GigChasers - ${job_data.job_title}`, body: `Counter offer received`, data: { type: 'offerreceive', id: job_data.id, sender: authState.userID } })
                 } else {
                   await JobsControllers.approveOffer(job_data.id, deployee.id)
+                  sendNotification(authState.userToken, deployee.id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer approved`, data: { type: 'offeraccept', id: job_data.id, sender: authState.userID } })
                 }
               }
               setLoading(false)

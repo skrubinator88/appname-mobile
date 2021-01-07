@@ -3,7 +3,7 @@
 import { FontAwesome } from "@expo/vector-icons";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Dimensions, FlatList, View } from "react-native";
-import { TextField } from "react-native-material-textfield";
+import { TextField } from "@ubaids/react-native-material-textfield";
 import StarRating from "react-native-star-rating";
 import styled from "styled-components/native";
 import Card from "../../../../components/card_animated";
@@ -13,7 +13,8 @@ import Text from "../../../../components/text";
 // Controllers
 import AnimationsController from "../../../../controllers/AnimationsControllers";
 import JobsController from "../../../../controllers/JobsControllers";
-import { default as config, default as env } from "../../../../env";
+import { default as config } from "../../../../env";
+import { sendNotification } from "../../../../functions";
 import PhotoItem from "../../listings/listItemImage";
 
 
@@ -74,11 +75,23 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
             onPress: async (i) => {
               if (i === 0) {
                 await JobsController.cancelOffer(job_data._id)
+                await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer declined`, data: { type: 'offerdecline', id: job_data._id, sender: authState.userID } })
+
+              }
+              setLoading(true)
+              try {
+                await JobsController.cancelOffer(job_data._id)
+                delete job_data.offer_received
+                set_job_data(job_data)
+                await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer declined`, data: { type: 'offerdecline', id: job_data._id, sender: authState.userID } })
                 reset = true
                 delete job_data.offer_received
                 set_job_data(job_data)
-                res()
-                return navigation.dispatch(e.data.action)
+                return res(navigation.dispatch(e.data.action))
+              } catch (e) {
+                console.log(e)
+              } finally {
+                setLoading(false)
               }
             },
             onCancel: res
@@ -102,40 +115,61 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
   }, [navigation])
 
   const handleJobDecline = async () => {
-    if (job_data.offer_received && job_data.offer_received.deployee === authState.userID) {
-      return await new Promise((res) => {
-        Confirm({
-          title: 'Cancel Job Offer?',
-          message: 'Job will become available in the job pool',
-          cancelButtonIndex: 1,
-          destructiveButtonIndex: 0,
-          options: ['yes', 'cancel'],
-          onPress: async (i) => {
-            if (i === 0) {
-              await JobsController.cancelOffer(job_data._id)
-              delete job_data.offer_received
-              set_job_data(job_data)
-              res()
-            }
-          },
-          onCancel: res
+    try {
+      if (job_data.offer_received && job_data.offer_received.deployee === authState.userID) {
+        await new Promise((res) => {
+          Confirm({
+            title: 'Cancel Job Offer?',
+            message: 'Job will become available in the job pool',
+            cancelButtonIndex: 1,
+            destructiveButtonIndex: 0,
+            options: ['yes', 'cancel'],
+            onPress: async (i) => {
+              if (i === 0) {
+                setLoading(true)
+                try {
+                  await JobsController.cancelOffer(job_data._id)
+                  delete job_data.offer_received
+                  set_job_data(job_data)
+                  await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer declined`, data: { type: 'offerdecline', id: job_data._id, sender: authState.userID } })
+                  changeRoute({ name: "searching", props: { keyword } });
+                } catch (e) {
+                  console.log(e)
+                } finally {
+                  setLoading(false)
+                }
+                res()
+              }
+            },
+            onCancel: res
+          })
         })
-      })
-    } else {
-      await JobsController.changeJobStatus(job_data._id, "available");
+      } else {
+        await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Job declined`, data: { type: 'jobdecline', id: job_data._id, sender: authState.userID } })
+        await JobsController.changeJobStatus(job_data._id, "available");
+        changeRoute({ name: "searching", props: { keyword } });
+      }
+    } catch (E) {
+      console.log(e)
     }
-    changeRoute({ name: "searching", props: { keyword } });
   };
 
   const handleJobApprove = () => {
     AnimationsController.CardUISlideOut(
       cardRef,
-      () => {
-        JobsController.changeJobStatus(job_data._id, "accepted", authState.userID);
-        // Save job ID in local storage to retrieve it later on.
+      async () => {
+        try {
+          await JobsController.changeJobStatus(job_data._id, "accepted", authState.userID)
+          await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Job accepted`, data: { type: 'jobaccept', id: job_data._id, sender: authState.userID } })
 
-        setAccepted(true)
-        changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
+          // Save job ID in local storage to retrieve it later on.
+
+          setAccepted(true)
+          changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } })
+        } catch (e) {
+          console.log(e, 'job approve')
+          Alert.alert('Please Try Again', 'Failed to accept job')
+        }
       },
       true
     );
@@ -147,6 +181,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
       async () => {
         try {
           await JobsController.counterApprove(job_data._id, job_data.offer_received.counterOffer);
+          await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer accepted`, data: { type: 'offeraccept', id: job_data._id, sender: authState.userID } })
           //TODO: Save job ID in local storage to retrieve it later on.
 
           setAccepted(true)
@@ -169,6 +204,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
       enableNegotiation ?
         <NegotiationView deployee={authState.userID} onCancel={() => setEnableNegotiation(false)} onSubmit={(job) => {
           setEnableNegotiation(false)
+          sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer received`, data: { type: 'offerreceive', id: job_data._id, sender: authState.userID } })
           set_job_data(job)
         }} job_data={job_data} />
         :
@@ -177,7 +213,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
             <View>
               <ProfilePicture
                 source={{
-                  uri: `${env.API_URL}${job_data.posted_by_profile_picture}`,
+                  uri: `${config.API_URL}${job_data.posted_by_profile_picture}`,
                 }}
               ></ProfilePicture>
 

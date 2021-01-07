@@ -1,4 +1,4 @@
-import firebase from "firebase";
+import env from "../env";
 
 exports.distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2, unit = "miles") => {
   // generally used geo measurement function
@@ -30,6 +30,38 @@ exports.isCurrentJob = (job) => {
   }
   return true
 }
+
+
+/**
+ * Send a notification
+ * @param {string} token Auth token of sender
+ * @param {string} recipient Recipient of push
+ * @param {{title,message,data}} param1 Contents of notification
+ * 
+ * @author eikcalb
+ */
+exports.sendNotification = async (userToken, recipient, { title, body, data }) => {
+  try {
+    if (!userToken || !(title && data) || !(title && body)) {
+      throw new Error('Required details are omitted')
+    }
+
+    const response = await fetch(`${env.API_URL}/notification/send`, {
+      method: "POST",
+      headers: {
+        Authorization: `bearer ${userToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ recipient, message: { title, body, data } })
+    })
+    if (!response.ok) {
+      throw new Error((await response.json()).message || 'Failed to send')
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 
 exports.getActualDateFormatted = (date) => {
   const month_names = [
@@ -68,7 +100,4 @@ exports.createToken = () => {
 };
 
 exports.sortJobsByProximity = (arr, compare) =>
-  arr
-    .map((item, index) => ({ item, index }))
-    .sort((a, b) => compare(a.item, b.item) || a.index - b.index)
-    .map(({ item }) => item);
+  arr.map((item, index) => ({ item, index })).sort((a, b) => compare(a.item, b.item) || a.index - b.index).map(({ item }) => item)

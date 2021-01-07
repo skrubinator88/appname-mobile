@@ -16,7 +16,9 @@ const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
 import { GlobalContext } from "../../../components/context";
 
 export default function SettingsScreen({ navigation }) {
-  const { signOut } = useContext(GlobalContext);
+  const { authActions, authState, errorActions } = useContext(GlobalContext);
+  const { signOut } = authActions;
+
   return (
     <Container
       navigation={navigation}
@@ -28,7 +30,7 @@ export default function SettingsScreen({ navigation }) {
       nextProvider="Entypo"
       nextIcon="dots-three-horizontal"
       nextSize={25}
-      nextAction={() => {}}
+      nextAction={() => { }}
     >
       {/* Preffered Section */}
 
@@ -95,7 +97,7 @@ export default function SettingsScreen({ navigation }) {
       </LegalSection>
 
       <SignOutSection>
-        <SignOutItemRow onPress={() => signOut()}>
+        <SignOutItemRow onPress={() => signOut(authState.userToken)}>
           <SignOutItemRowLink>
             <Text small weight="700" color="#ff4a4a">
               SIGN OUT
