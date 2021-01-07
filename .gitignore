@@ -14,3 +14,4 @@ web-report/
 
 # macOS
 .DS_Store
+config.yaml
