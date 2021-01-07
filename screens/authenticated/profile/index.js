@@ -42,6 +42,7 @@ export default function ProfileScreen({ navigation }) {
       toValue: width / 4,
       duration: ANIMATION_DURATION,
       easing: ANIMATION_EASING(),
+      useNativeDriver: false,
     }).start(() => authActions.changeRole(authState, "contractor"));
   };
 
@@ -51,6 +52,7 @@ export default function ProfileScreen({ navigation }) {
       toValue: 0,
       duration: ANIMATION_DURATION,
       easing: ANIMATION_EASING(),
+      useNativeDriver: false,
     }).start(() => authActions.changeRole(authState, "project_manager"));
   };
 
