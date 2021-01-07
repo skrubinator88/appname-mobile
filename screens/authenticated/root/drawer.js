@@ -1,34 +1,39 @@
 // IMPORT
-import React, { useState, useEffect, useContext } from "react";
-import { useTheme } from "@react-navigation/native";
-import { View, SafeAreaView, Alert, TouchableWithoutFeedback } from "react-native";
+import { Entypo, FontAwesome, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
+import { NavigationContainer, useTheme } from "@react-navigation/native";
+import React, { useContext } from "react";
+import { Alert, SafeAreaView, TouchableWithoutFeedback, View } from "react-native";
 import styled from "styled-components/native";
-import { FontAwesome, MaterialIcons, Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
+import { GlobalContext } from "../../../components/context";
+import env from "../../../env";
+// Components
+import Chat from "../chat/";
+import JobListings from "../listings/stacks";
+import MessagesScreen from "../messages/";
+import PaymentScreen from "../payment/stack";
+import ProfileScreen from "../profile/stack";
+import Scanner from "../scanner/";
+import SettingsScreen from "../settings";
+// Screens
+import { RootScreen } from "./index";
+import QRCode from "./UIOverlay/jobFound/qr_code";
 
-import { createDrawerNavigator } from "@react-navigation/drawer";
-import { DrawerContentScrollView, DrawerItem, DrawerItemList } from "@react-navigation/drawer";
-import { NavigationContainer } from "@react-navigation/native";
 
 export const AuthenticatedDrawer = createDrawerNavigator();
 
-import env from "../../../env";
 
-import { GlobalContext } from "../../../components/context";
 
 function DrawerContent({ navigation }) {
   const { colors } = useTheme();
   const { authActions, authState, errorActions } = useContext(GlobalContext);
   const { signOut } = authActions;
-  const [push, setPush] = useState(true)
 
   return (
     <View style={{ flex: 1 }}>
       <DrawerHeader style={{ backgroundColor: colors.primary }}>
         <TouchableWithoutFeedback
           onPress={() => {
-            schedulePushNotification(push)
-            setPush(!push)
-            return
             navigation.navigate("Profile");
           }}
         >
@@ -166,22 +171,8 @@ const ProfilePicture = styled.Image`
   border-radius: 60px;
 `;
 
-// Screens
-import { RootScreen } from "./index";
-import PaymentScreen from "../payment/stack";
-import SettingsScreen from "../settings";
-import ProfileScreen from "../profile/stack";
-import JobListings from "../listings/stacks";
-import MessagesScreen from "../messages/";
-import Scanner from "../scanner/";
 
-// Components
-import Chat from "../chat/";
-import QRCode from "./UIOverlay/jobFound/qr_code";
 
-// Test Components
-import test from "../listings/listingItem";
-import { schedulePushNotification } from "../../../App";
 
 export function Drawer({ navigation }) {
   return (

@@ -1,5 +1,6 @@
 // Dependencies
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import _ from "lodash";
 import React, { useEffect, useReducer } from "react";
 import { ActivityIndicator, Text, TextInput, View, AppState, YellowBox } from "react-native";
@@ -62,18 +63,6 @@ ExpoNotif.setNotificationHandler({
     }
   }
 })
-
-export async function schedulePushNotification(push = true) {
-  await ExpoNotif.scheduleNotificationAsync({
-    content: {
-      title: "You've got mail! 📬",
-      body: 'Here is the notification body',
-      data: { data: 'goes here', push },
-    },
-    trigger: null,
-  });
-}
-
 
 
 export default function App({ navigation }) {
@@ -159,22 +148,24 @@ export default function App({ navigation }) {
   }
 
   return (
-    <GlobalContext.Provider value={{ authActions, authState, errorActions }}>
-      <NavigationContainer theme={Theme}>
-        {authState.userToken ? (
-          <>
-            <Provider store={rootStore}>
-              {/* <Example /> */}
-              <AuthenticatedStackScreen />
-            </Provider>
-          </>
-        ) : (
+    <ActionSheetProvider>
+      <GlobalContext.Provider value={{ authActions, authState, errorActions }}>
+        <NavigationContainer theme={Theme}>
+          {authState.userToken ? (
             <>
-              <NotAuthenticatedStackScreen />
-              {/* <Example /> */}
+              <Provider store={rootStore}>
+                {/* <Example /> */}
+                <AuthenticatedStackScreen />
+              </Provider>
             </>
-          )}
-      </NavigationContainer>
-    </GlobalContext.Provider>
+          ) : (
+              <>
+                <NotAuthenticatedStackScreen />
+                {/* <Example /> */}
+              </>
+            )}
+        </NavigationContainer>
+      </GlobalContext.Provider>
+    </ActionSheetProvider>
   );
 }

@@ -1,21 +1,12 @@
 // Dependencies React
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useActionSheet } from '@expo/react-native-action-sheet'
+import { Camera, requestPermissionsAsync } from 'expo-camera'
 import { launchImageLibraryAsync, MediaTypeOptions, requestCameraRollPermissionsAsync } from 'expo-image-picker';
 import moment from 'moment';
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator, Alert, Dimensions,
-
-
-  FlatList, KeyboardAvoidingView,
-
-
-  Platform,
-
-  TouchableOpacity, TouchableWithoutFeedback,
-  View
-} from "react-native";
+import { ActivityIndicator, Modal, Alert, Dimensions, FlatList, KeyboardAvoidingView, Platform, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 // Styling Dependencies
 import { TextField } from "@ubaids/react-native-material-textfield";
 import styled from "styled-components/native";
@@ -114,8 +105,34 @@ export default function workModal({ navigation, route }) {
   // Setup job photo selection
   const [photos, setPhotos] = useState([])
   const [loadingMedia, setloadingMedia] = useState(false)
+  const { showActionSheetWithOptions } = useActionSheet()
+  const [showCamera, setShowCamera] = useState(false)
 
   const getPhoto = useCallback(async () => {
+    try {
+      showActionSheetWithOptions({
+        options: ['Capture Photo', 'Select From Library', 'Cancel'],
+        title: 'Select Photo',
+        message: 'You can select a photo from your library or capture a new photo',
+        cancelButtonIndex: 2,
+        useModal: true
+      }, async (i) => {
+        switch (i) {
+          case 0:
+            getPhotoFromCamera()
+            break
+          case 1:
+            getPhotoFromLibrary()
+            break
+        }
+      })
+    } catch (e) {
+      console.log(e)
+      Alert.alert('Failed To Select Photo', e.message)
+    }
+  }, [photos])
+
+  const getPhotoFromLibrary = useCallback(async () => {
     try {
       setloadingMedia(true)
       if (Platform.OS === 'ios') {
@@ -138,6 +155,35 @@ export default function workModal({ navigation, route }) {
     } catch (e) {
       console.log(e)
       Alert.alert(e.message)
+    } finally {
+      setloadingMedia(false)
+    }
+  }, [photos])
+
+  const getPhotoFromCamera = useCallback(async () => {
+    try {
+      setloadingMedia(true)
+
+      // if (!(await Camera.isAvailableAsync())) {
+      //   Alert.alert('No Camera Available', 'No camera could be detected on this device')
+      //   return
+      // }
+
+      let hasPermission = false;
+      await (async () => {
+        const { status } = await requestPermissionsAsync();
+        hasPermission = status === 'granted'
+      })();
+
+      if (hasPermission !== true) {
+        Alert.alert('Camera Access Required', 'The application requires permission to use your camera')
+        return
+      }
+
+      setShowCamera(true)
+    } catch (e) {
+      console.log(e)
+      Alert.alert('Failed To Capture Photo', e.message)
     } finally {
       setloadingMedia(false)
     }
@@ -397,11 +443,15 @@ export default function workModal({ navigation, route }) {
                 keyExtractor={v => v.uri}
                 centerContent
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingVertical: 40 }}
+                contentContainerStyle={{ paddingVertical: 40, marginToop: 20 }}
                 ListHeaderComponent={() => (
                   <TouchableOpacity disabled={loadingMedia} style={{ alignSelf: "center", justifyContent: 'center', backgroundColor: '#fff', height: 150, marginHorizontal: 4, width: 150, borderRadius: 4 }} onPress={getPhoto}>
                     <ScheduleButton style={{ justifyContent: "center", flex: 1, backgroundColor: 'transparent', alignItems: "center" }}>
-                      <Ionicons name='ios-add' style={{ fontSize: 40 }} />
+                      {loadingMedia ?
+                        <ActivityIndicator color='black' size='small' />
+                        :
+                        <Ionicons name='ios-add' style={{ fontSize: 40 }} />
+                      }
                     </ScheduleButton>
                   </TouchableOpacity>
                 )}
@@ -409,6 +459,23 @@ export default function workModal({ navigation, route }) {
                 renderItem={({ item }) => (
                   <PhotoItem item={item} onRemove={() => { setPhotos(photos.filter(v => v.uri !== item.uri)) }} />
                 )} />
+              {showCamera ?
+                <JobCamera onSuccess={async (res) => {
+                  if (!res) {
+                    return setShowCamera(false)
+                  }
+                  try {
+                    if (!res.cancelled && !photos.find(v => v.uri === res.uri)) {
+                      setPhotos([{ uri: res.uri, type: 'image/png', height: res.height, width: res.width }, ...photos,])
+                    }
+                  } catch (e) {
+                    console.log(e)
+                    Alert.alert(e.message || 'Failed to add photo')
+                  } finally {
+                    setShowCamera(false)
+                  }
+                }} />
+                : null}
             </Item>
 
             <Item>
@@ -443,6 +510,36 @@ export default function workModal({ navigation, route }) {
       </KeyboardAvoidingView>
     </>
   );
+}
+
+export const JobCamera = ({ onSuccess }) => {
+  const cameraRef = useRef()
+
+  useEffect(() => {
+    return () => {
+      if (cameraRef.current) {
+        cameraRef.current.pausePreview()
+      }
+    }
+  }, [])
+  
+  return (
+    <Modal visible transparent onRequestClose={onSuccess} onDismiss={onSuccess} style={{ height: '100%', width: '100%' }}>
+      <Camera ref={cameraRef} style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#fffa', justifyContent: 'center',
+            alignItems: 'center', borderRadius: 40,
+            height: 80, width: 80,
+            marginBottom: 40
+          }} onPress={async () => {
+            onSuccess(await cameraRef.current.takePictureAsync())
+          }}>
+          <MaterialCommunityIcons name='camera' color='#0008' style={{ fontSize: 40 }} />
+        </TouchableOpacity>
+      </Camera>
+    </Modal>
+  )
 }
 
 const ModalBackground = styled.View`

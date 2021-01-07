@@ -8,6 +8,7 @@
         "generate-config": "yaml2json config.yaml -s"
     },
     "dependencies": {
+        "@expo/react-native-action-sheet": "^3.8.0",
         "@react-native-community/async-storage": "^1.11.0",
         "@react-native-community/checkbox": "^0.4.2",
         "@react-native-community/datetimepicker": "2.2.2",
