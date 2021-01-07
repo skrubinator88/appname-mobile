@@ -1,6 +1,6 @@
-import React, { Component, useContext } from "react";
+import React, { Component, useContext, useState, useEffect, useRef } from "react";
 
-import { Image, Button, Alert, TextInput, View } from "react-native";
+import { Image, Button, Alert, TextInput, View, Animated, Easing } from "react-native";
 
 import { Platform, Dimensions } from "react-native";
 import styled from "styled-components/native";
@@ -13,12 +13,51 @@ import env from "../../../env";
 
 const isIos = Platform.OS === "ios";
 const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
+const width = Dimensions.get("window").width; //arbitrary size
 
 import { GlobalContext } from "../../../components/context";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 export default function ProfileScreen({ navigation }) {
+  const global = useContext(GlobalContext);
   const { authActions, authState, errorActions } = useContext(GlobalContext);
   const { userData } = authState;
+
+  const [role, setRole] = useState(userData.role);
+  const [roleSwitch, setRoleSwitch] = useState(role == "contractor" ? false : true);
+  const ANIMATION_DURATION = 200;
+  const ANIMATION_EASING = () => {
+    return Easing.inOut(Easing.exp);
+  };
+
+  useEffect(() => {
+    setRole(global.authState.userData.role);
+  }, [global]);
+
+  const slide = useRef(new Animated.Value(role == "contractor" ? width / 4 : 0)).current;
+
+  const slideRight = () => {
+    // Will change fadeAnim value to 1 in 5 seconds
+    Animated.timing(slide, {
+      toValue: width / 4,
+      duration: ANIMATION_DURATION,
+      easing: ANIMATION_EASING(),
+    }).start(() => authActions.changeRole(authState, "contractor"));
+  };
+
+  const slideLeft = () => {
+    // Will change fadeAnim value to 1 in 5 seconds
+    Animated.timing(slide, {
+      toValue: 0,
+      duration: ANIMATION_DURATION,
+      easing: ANIMATION_EASING(),
+    }).start(() => authActions.changeRole(authState, "project_manager"));
+  };
+
+  const handleChangeRole = () => {
+    roleSwitch ? slideRight() : slideLeft();
+    setRoleSwitch(!roleSwitch);
+  };
 
   return (
     <Container
@@ -43,6 +82,17 @@ export default function ProfileScreen({ navigation }) {
         <Text medium color="white" weight="300">
           {userData.occupation}
         </Text>
+
+        <TouchableWithoutFeedback onPress={() => handleChangeRole()}>
+          <ChangeRoleSlider>
+            <Animated.View style={{ top: 0, left: slide, position: "absolute" }}>
+              <Selector />
+            </Animated.View>
+
+            <Text color="white">Deployer</Text>
+            <Text color="white">Deployee</Text>
+          </ChangeRoleSlider>
+        </TouchableWithoutFeedback>
 
         <Row>
           <Column>
@@ -214,6 +264,23 @@ export default function ProfileScreen({ navigation }) {
 //   flex: 1;
 //   background: #e4e4e4;
 // `;
+const Selector = styled.View`
+  background-color: #439bf9;
+  width: ${width / 4}px;
+  height: 40px;
+  border-radius: 50px;
+`;
+
+const ChangeRoleSlider = styled.View`
+  background-color: #0b498c;
+  width: ${width / 2}px;
+  height: 40px;
+  margin: 20px;
+  border-radius: 50px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+`;
 
 const ProfileSection = styled.View`
   background: #3869f3;

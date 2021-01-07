@@ -35,6 +35,13 @@ const loginReducer = (prevState, action) => {
         userData: action.profile,
         isLoading: false,
       };
+
+    case "CHANGE_ROLE":
+      return {
+        ...prevState,
+        userData: { ...prevState.userData, role: action.newRole },
+        isLoading: false,
+      };
   }
 };
 

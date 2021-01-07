@@ -46,6 +46,22 @@ exports.memo = ({ dispatch }) => {
         }
         dispatch({ type: "LOGOUT" });
       },
+
+      changeRole: async (prevData, newRole) => {
+        // Update role in back end database
+        const { success } = await fetch(`${env.API_URL}/users/change_role`, {
+          method: "PUT",
+          body: JSON.stringify({ phone_number: prevData.userData.phone_number, role: newRole }),
+        });
+
+        if (success) {
+          // Update role in app global store
+          dispatch({ type: "CHANGE_ROLE", newRole });
+
+          // Update role in local storage
+          await AsyncStorage.setItem("userData", JSON.stringify({ ...prevData, userData: { ...prevData.userData, role: newRole } }));
+        }
+      },
     }),
     []
   );
