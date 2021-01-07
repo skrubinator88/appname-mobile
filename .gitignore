@@ -1,7 +1,9 @@
 node_modules/**/*
 package-lock.json
 .expo/*
+.DS_Store
 config.json
+config.yaml
 npm-debug.*
 *.jks
 *.p8
@@ -13,6 +15,4 @@ web-build/
 web-report/
 
 # macOS
-.DS_Store
-config.yaml
-app.json
+
