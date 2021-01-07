@@ -13,7 +13,7 @@ import Text from "../../../../components/text";
 // Controllers
 import AnimationsController from "../../../../controllers/AnimationsControllers";
 import JobsController from "../../../../controllers/JobsControllers";
-import { default as config, default as env } from "../../../../env";
+import { default as config } from "../../../../env";
 import { sendNotification } from "../../../../functions";
 import PhotoItem from "../../listings/listItemImage";
 
@@ -75,7 +75,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
             onPress: async (i) => {
               if (i === 0) {
                 await JobsController.cancelOffer(job_data._id)
-                await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.title}`, body: `Offer declined by ${authState.profile.first_name}`, data: { type: 'offerdecline', id: job_data._id, sender: authState.userID } })
+                await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer declined`, data: { type: 'offerdecline', id: job_data._id, sender: authState.userID } })
 
               }
               setLoading(true)
@@ -83,7 +83,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
                 await JobsController.cancelOffer(job_data._id)
                 delete job_data.offer_received
                 set_job_data(job_data)
-                await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.title}`, body: `Offer declined by ${authState.profile.first_name}`, data: { type: 'offerdecline', id: job_data._id, sender: authState.userID } })
+                await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer declined`, data: { type: 'offerdecline', id: job_data._id, sender: authState.userID } })
                 reset = true
                 delete job_data.offer_received
                 set_job_data(job_data)
@@ -131,7 +131,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
                   await JobsController.cancelOffer(job_data._id)
                   delete job_data.offer_received
                   set_job_data(job_data)
-                  await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.title}`, body: `Offer declined by ${authState.profile.first_name}`, data: { type: 'offerdecline', id: job_data._id, sender: authState.userID } })
+                  await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer declined`, data: { type: 'offerdecline', id: job_data._id, sender: authState.userID } })
                   changeRoute({ name: "searching", props: { keyword } });
                 } catch (e) {
                   console.log(e)
@@ -145,7 +145,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
           })
         })
       } else {
-        await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.title}`, body: `Job declined by ${authState.profile.first_name}`, data: { type: 'jobdecline', id: job_data._id, sender: authState.userID } })
+        await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Job declined`, data: { type: 'jobdecline', id: job_data._id, sender: authState.userID } })
         await JobsController.changeJobStatus(job_data._id, "available");
         changeRoute({ name: "searching", props: { keyword } });
       }
@@ -160,7 +160,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
       async () => {
         try {
           await JobsController.changeJobStatus(job_data._id, "accepted", authState.userID)
-          await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.title}`, body: `Job accepted by ${authState.profile.first_name}`, data: { type: 'jobaccept', id: job_data._id, sender: authState.userID } })
+          await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Job accepted`, data: { type: 'jobaccept', id: job_data._id, sender: authState.userID } })
 
           // Save job ID in local storage to retrieve it later on.
 
@@ -181,7 +181,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
       async () => {
         try {
           await JobsController.counterApprove(job_data._id, job_data.offer_received.counterOffer);
-          await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.title}`, body: `Offer accepted by ${authState.profile.first_name}`, data: { type: 'offeraccept', id: job_data._id, sender: authState.userID } })
+          await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer accepted`, data: { type: 'offeraccept', id: job_data._id, sender: authState.userID } })
           //TODO: Save job ID in local storage to retrieve it later on.
 
           setAccepted(true)
@@ -204,7 +204,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
       enableNegotiation ?
         <NegotiationView deployee={authState.userID} onCancel={() => setEnableNegotiation(false)} onSubmit={(job) => {
           setEnableNegotiation(false)
-          sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.title}`, body: `Offer received from ${authState.profile.first_name}`, data: { type: 'offerreceive', id: job_data._id, sender: authState.userID } })
+          sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer received`, data: { type: 'offerreceive', id: job_data._id, sender: authState.userID } })
           set_job_data(job)
         }} job_data={job_data} />
         :
@@ -213,7 +213,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
             <View>
               <ProfilePicture
                 source={{
-                  uri: `${env.API_URL}${job_data.posted_by_profile_picture}`,
+                  uri: `${config.API_URL}${job_data.posted_by_profile_picture}`,
                 }}
               ></ProfilePicture>
 

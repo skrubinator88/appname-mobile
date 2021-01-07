@@ -59,18 +59,16 @@ exports.memo = ({ dispatch }) => {
                 }
 
                 await AsyncStorage.removeItem(`app.token`, token);
+                await AsyncStorage.removeItem("userData");
               } catch (e) {
                 console.error(e)
                 if (e.code === 'Network Error') {
                   // Notification not properly disconnected...Prevent signout!
                   return
                 }
-                await AsyncStorage.removeItem("userData");
               }
             }
           }))
-          await AsyncStorage.removeItem("userData");
-
         } catch (e) {
           handleError(e);
         }

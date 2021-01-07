@@ -350,7 +350,7 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
 
               if (index === 0) {
                 await JobsControllers.cancelOffer(job_data.id)
-                sendNotification(authState.userToken, deployee.id, { title: `GigChasers - ${job_data.title}`, body: `Offer rejected by ${authState.profile.first_name}`, data: { type: 'offerdecline', id: job_data.id, sender: authState.userID } })
+                sendNotification(authState.userToken, deployee.id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer rejected`, data: { type: 'offerdecline', id: job_data.id, sender: authState.userID } })
               }
               setLoading(false)
               onComplete()
@@ -388,10 +388,10 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
               if (index === 0) {
                 if (isCounterOffer) {
                   await JobsControllers.counterOffer(job_data.id, offer)
-                  sendNotification(authState.userToken, deployee.id, { title: `GigChasers - ${job_data.title}`, body: `Counter offer received from ${authState.profile.first_name}`, data: { type: 'offerreceive', id: job_data.id, sender: authState.userID } })
+                  sendNotification(authState.userToken, deployee.id, { title: `GigChasers - ${job_data.job_title}`, body: `Counter offer received`, data: { type: 'offerreceive', id: job_data.id, sender: authState.userID } })
                 } else {
                   await JobsControllers.approveOffer(job_data.id, deployee.id)
-                  sendNotification(authState.userToken, deployee.id, { title: `GigChasers - ${job_data.title}`, body: `Offer approved by ${authState.profile.first_name}`, data: { type: 'offeraccept', id: job_data.id, sender: authState.userID } })
+                  sendNotification(authState.userToken, deployee.id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer approved`, data: { type: 'offeraccept', id: job_data.id, sender: authState.userID } })
                 }
               }
               setLoading(false)

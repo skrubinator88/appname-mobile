@@ -48,17 +48,6 @@ exports.registerForPushNotificationsAsync = async (userToken, setToken) => {
     return
   }
   if (Constants.isDevice) {
-    try {
-      const tokenSaved = await AsyncStorage.getItem(`app.token`);
-      if (tokenSaved) {
-        // Token already exists
-        return
-      }
-    } catch (e) {
-      console.log(e)
-      return
-    }
-
     const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
     let finalStatus = existingStatus;
     if (existingStatus !== "granted") {

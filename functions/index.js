@@ -1,4 +1,4 @@
-import firebase from "firebase";
+import env from "../env";
 
 exports.distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2, unit = "miles") => {
   // generally used geo measurement function
