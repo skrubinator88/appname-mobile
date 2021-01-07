@@ -3,7 +3,7 @@ import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import _ from "lodash";
 import React, { useEffect, useReducer } from "react";
-import { ActivityIndicator, Text, TextInput, View, AppState, YellowBox } from "react-native";
+import { ActivityIndicator, Text, TextInput, View, AppState, LogBox } from "react-native";
 import * as ExpoNotif from "expo-notifications";
 // Redux
 import { Provider } from "react-redux";
@@ -18,6 +18,7 @@ import AuthReducer from "./reducers/AuthReducer";
 import ErrorReducer from "./reducers/ErrorReducer";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
+// import { default as Example } from "./views/test";
 
 // Disable Font Scaling
 Text.defaultProps = Text.defaultProps || {};
@@ -25,17 +26,17 @@ Text.defaultProps.allowFontScaling = false;
 TextInput.defaultProps = TextInput.defaultProps || {};
 TextInput.defaultProps.allowFontScaling = false;
 
-YellowBox.ignoreWarnings(["Setting a timer"]);
-const _console = _.clone(console);
-console.warn = (message) => {
-  if (message.indexOf("Setting a timer") != -1) {
-    return;
-  }
-  if (message.indexOf("VirtualizedLists") != -1) {
-    return;
-  }
-  _console.warn(message);
-};
+// LogBox.ignoreWarnings(["Setting a timer"]);
+// const _console = _.clone(console);
+// console.warn = (message) => {
+//   if (message.indexOf("Setting a timer") != -1) {
+//     return;
+//   }
+//   if (message.indexOf("VirtualizedLists") != -1) {
+//     return;
+//   }
+//   _console.warn(message);
+// };
 // console.disableYellowBox = true;
 
 // Theme
@@ -47,23 +48,22 @@ export const Theme = {
   },
 };
 
-let appState = AppState.currentState
+let appState = AppState.currentState;
 ExpoNotif.setNotificationHandler({
   handleNotification: (n) => {
-    if (n.request.trigger.type === 'push' && appState === 'active') {
-      console.log('discarding notification when app is active ======>')
-      const behavior = null
-      return behavior
+    if (n.request.trigger.type === "push" && appState === "active") {
+      console.log("discarding notification when app is active ======>");
+      const behavior = null;
+      return behavior;
     } else {
       return {
         shouldPlaySound: false,
         shouldSetBadge: true,
         shouldShowAlert: true,
-      }
+      };
     }
-  }
-})
-
+  },
+});
 
 export default function App({ navigation }) {
   // Store
@@ -77,52 +77,49 @@ export default function App({ navigation }) {
   const authActions = AuthActions.memo(thisComponentAuthState);
   const errorActions = ErrorActions.memo(thisComponentErrorState);
 
-
   const notificationHandler = React.useRef(async (n) => {
-    console.log(n.request, "notificaiton handler")
-  })
+    console.log(n.request, "notificaiton handler");
+  });
   const notificationResponseHandler = React.useRef((res) => {
     if (res.actionIdentifier === ExpoNotif.DEFAULT_ACTION_IDENTIFIER) {
       // TODO: decide what to do when notification is received
     }
-    console.log('response for notification', res)
-  })
-
+    console.log("response for notification", res);
+  });
 
   // Effect for registering notification handlers
   React.useLayoutEffect(() => {
-    let subscriptions
+    let subscriptions;
 
-    Promise.all(
-      [
-        ExpoNotif.addNotificationReceivedListener(notificationHandler.current),
-        ExpoNotif.addNotificationResponseReceivedListener(notificationResponseHandler.current),
-        async () => {
-          if (Platform.OS === 'android') {
-            await ExpoNotif.setNotificationChannelAsync(`GigChasers-Notification`, {
-              name: `GigChasers-Notification`,
-              sound: 'default',
-              importance: AndroidImportance.MAX,
-              bypassDnd: false,
-              lockscreenVisibility: AndroidNotificationVisibility.PRIVATE,
-              vibrationPattern: [0, 250, 250, 250],
-            })
-          }
-        },
-      ]
-    ).then((subscriptions) => {
-      subscriptions = subscriptions
-    }).catch((e) => {
-      console.log(e, 'Failed to set notification listener')
-    })
+    Promise.all([
+      ExpoNotif.addNotificationReceivedListener(notificationHandler.current),
+      ExpoNotif.addNotificationResponseReceivedListener(notificationResponseHandler.current),
+      async () => {
+        if (Platform.OS === "android") {
+          await ExpoNotif.setNotificationChannelAsync(`GigChasers-Notification`, {
+            name: `GigChasers-Notification`,
+            sound: "default",
+            importance: AndroidImportance.MAX,
+            bypassDnd: false,
+            lockscreenVisibility: AndroidNotificationVisibility.PRIVATE,
+            vibrationPattern: [0, 250, 250, 250],
+          });
+        }
+      },
+    ])
+      .then((subscriptions) => {
+        subscriptions = subscriptions;
+      })
+      .catch((e) => {
+        console.log(e, "Failed to set notification listener");
+      });
 
     return () => {
       if (subscriptions) {
-        subscriptions.map(v => v.remove())
+        subscriptions.map((v) => v.remove());
       }
-    }
-  }, [])
-
+    };
+  }, []);
 
   // Retrieve token stored in local memory
   // TODO: This is a great place to retrieve previously stored active job data for users
@@ -159,11 +156,11 @@ export default function App({ navigation }) {
               </Provider>
             </>
           ) : (
-              <>
-                <NotAuthenticatedStackScreen />
-                {/* <Example /> */}
-              </>
-            )}
+            <>
+              <NotAuthenticatedStackScreen />
+              {/* <Example /> */}
+            </>
+          )}
         </NavigationContainer>
       </GlobalContext.Provider>
     </ActionSheetProvider>
