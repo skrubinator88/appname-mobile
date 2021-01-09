@@ -43,6 +43,7 @@ exports.memo = ({ dispatch }) => {
       },
 
       signOut: async (userToken) => {
+        console.log("something");
         try {
           await AsyncStorage.getItem("app.token").then(async (token) => {
             if (token) {
@@ -68,6 +69,8 @@ exports.memo = ({ dispatch }) => {
                   return;
                 }
               }
+            } else {
+              await AsyncStorage.clear();
             }
           });
         } catch (e) {
