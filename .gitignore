@@ -2,7 +2,6 @@ node_modules/**/*
 package-lock.json
 .expo/*
 .DS_Store
-config.json
 config.yaml
 npm-debug.*
 *.jks
