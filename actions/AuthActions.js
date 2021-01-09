@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import AsyncStorage from "@react-native-community/async-storage";
 import PermissionsControllers from "../controllers/PermissionsControllers";
 import env from "../env";
+import axios from "axios";
 
 function handleError(e) {
   console.log(e);
@@ -78,12 +79,11 @@ exports.memo = ({ dispatch }) => {
 
       changeRole: async (prevData, newRole) => {
         // Update role in back end database
-        const { success } = await fetch(`${env.API_URL}/users/change_role`, {
-          method: "PUT",
-          body: JSON.stringify({ phone_number: prevData.userData.phone_number, role: newRole }),
+        const res = await axios.put(`${env.API_URL}/users/change_role`, {
+          phone_number: prevData.userData.phone_number,
+          role: newRole,
         });
-
-        console.log(success);
+        const { success } = res.data;
 
         if (success) {
           // Update role in app global store
