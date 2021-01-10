@@ -257,7 +257,6 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
         headers: {
           Authorization: `bearer ${token}`,
           'x-job-id': newJobDoc.id,
-          'Content-Type': 'multipart/form-data'
         },
         body
       })
