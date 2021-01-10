@@ -8,6 +8,7 @@ import { AntDesign } from "@expo/vector-icons";
 // Components
 import Header from "../../../components/header";
 export default function ({ navigation }) {
+
   return (
     <Container>
       <Header navigation={navigation} nextTitle="Next" nextColor="#548ff7" nextAction={() => navigation.navigate("SignUp2")} />
@@ -43,7 +44,7 @@ export default function ({ navigation }) {
                 fontWeight: "bold",
                 margin: 10,
               }}
-              onPress={(e) => {}}
+              onPress={(e) => { }}
             >
               Employee Agreement
             </TextStyledInfo>
@@ -54,7 +55,7 @@ export default function ({ navigation }) {
                 fontWeight: "bold",
                 margin: 10,
               }}
-              onPress={(e) => {}}
+              onPress={(e) => { }}
             >
               Privacy Policy Agreement
             </TextStyledInfo>
@@ -65,7 +66,7 @@ export default function ({ navigation }) {
                 fontWeight: "bold",
                 margin: 10,
               }}
-              onPress={(e) => {}}
+              onPress={(e) => { }}
             >
               Terms & Conditions
             </TextStyledInfo>

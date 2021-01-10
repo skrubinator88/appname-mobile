@@ -1,12 +1,14 @@
 // Dependencies React
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, AntDesign, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useActionSheet } from '@expo/react-native-action-sheet'
 import { Camera, requestPermissionsAsync } from 'expo-camera'
 import { launchImageLibraryAsync, MediaTypeOptions, requestCameraRollPermissionsAsync } from 'expo-image-picker';
 import moment from 'moment';
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Modal, Alert, Dimensions, FlatList, KeyboardAvoidingView, Platform, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { ActivityIndicator, Modal, Alert, Dimensions, FlatList, KeyboardAvoidingView, Platform, TouchableOpacity, TouchableWithoutFeedback, View, SafeAreaView, TouchableNativeFeedback } from "react-native";
+import Constants from "expo-constants";
+
 // Styling Dependencies
 import { TextField } from "@ubaids/react-native-material-textfield";
 import styled from "styled-components/native";
@@ -164,11 +166,6 @@ export default function workModal({ navigation, route }) {
     try {
       setloadingMedia(true)
 
-      // if (!(await Camera.isAvailableAsync())) {
-      //   Alert.alert('No Camera Available', 'No camera could be detected on this device')
-      //   return
-      // }
-
       let hasPermission = false;
       await (async () => {
         const { status } = await requestPermissionsAsync();
@@ -288,7 +285,7 @@ export default function workModal({ navigation, route }) {
   return (
     <>
       <KeyboardAvoidingView enabled behavior="height" style={{ flex: 1 }}>
-        <Container ref={scroll} keyboardShouldPersistTaps="always">
+        <Container bounces={false} showsVerticalScrollIndicator={false} ref={scroll} keyboardShouldPersistTaps="always">
           <TaskModal showModal={showModal} onHandleModalClose={(tasks) => handleSaveTasks(tasks)} items={tasks} />
 
           <Header
@@ -443,7 +440,7 @@ export default function workModal({ navigation, route }) {
                 keyExtractor={v => v.uri}
                 centerContent
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingVertical: 40, marginToop: 20 }}
+                contentContainerStyle={{ paddingVertical: 40, paddingTop: 12 }}
                 ListHeaderComponent={() => (
                   <TouchableOpacity disabled={loadingMedia} style={{ alignSelf: "center", justifyContent: 'center', backgroundColor: '#fff', height: 150, marginHorizontal: 4, width: 150, borderRadius: 4 }} onPress={getPhoto}>
                     <ScheduleButton style={{ justifyContent: "center", flex: 1, backgroundColor: 'transparent', alignItems: "center" }}>
@@ -459,23 +456,22 @@ export default function workModal({ navigation, route }) {
                 renderItem={({ item }) => (
                   <PhotoItem item={item} onRemove={() => { setPhotos(photos.filter(v => v.uri !== item.uri)) }} />
                 )} />
-              {showCamera ?
-                <JobCamera onSuccess={async (res) => {
-                  if (!res) {
-                    return setShowCamera(false)
+              <JobCamera showCamera={showCamera} onSuccess={async (res) => {
+                if (!res) {
+                  return setShowCamera(false)
+                }
+                console.log(res)
+                try {
+                  if (!res.cancelled && !photos.find(v => v.uri === res.uri)) {
+                    setPhotos([{ uri: res.uri, type: 'image/png', height: res.height, width: res.width }, ...photos,])
                   }
-                  try {
-                    if (!res.cancelled && !photos.find(v => v.uri === res.uri)) {
-                      setPhotos([{ uri: res.uri, type: 'image/png', height: res.height, width: res.width }, ...photos,])
-                    }
-                  } catch (e) {
-                    console.log(e)
-                    Alert.alert(e.message || 'Failed to add photo')
-                  } finally {
-                    setShowCamera(false)
-                  }
-                }} />
-                : null}
+                } catch (e) {
+                  console.log(e)
+                  Alert.alert(e.message || 'Failed to add photo')
+                } finally {
+                  setShowCamera(false)
+                }
+              }} />
             </Item>
 
             <Item>
@@ -488,7 +484,7 @@ export default function workModal({ navigation, route }) {
                 onShowDate()
               }
             }}>
-              <ScheduleButton style={{ justifyContent: "center", alignItems: "center", backgroundColor: showDate ? 'red' : '#fff' }}>
+              <ScheduleButton style={{ justifyContent: "center", alignItems: "center", backgroundColor: showDate && Platform.OS === 'ios' ? 'red' : '#fff' }}>
                 <Text bold color={showDate && Platform.OS === 'ios' ? 'white' : "black"}>
                   {showDate && Platform.OS === 'ios' ? 'Close Date Picker' : 'Schedule Job'}
                 </Text>
@@ -512,31 +508,77 @@ export default function workModal({ navigation, route }) {
   );
 }
 
-export const JobCamera = ({ onSuccess }) => {
+export const JobCamera = ({ showCamera, onSuccess }) => {
+  const [flash, setFlash] = useState({ icon: 'flash-auto', mode: 'auto' })
+  const [useBack, setUseBack] = useState(true)
   const cameraRef = useRef()
+
+  const toggleFlash = useCallback(() => {
+    const current = flash.mode
+    switch (current) {
+      case 'off':
+        setFlash({ icon: 'flash-auto', mode: 'auto' })
+        break
+      case 'on':
+        setFlash({ icon: 'flash-off', mode: 'off' })
+        break
+      case 'auto':
+        setFlash({ icon: 'flash-on', mode: 'on' })
+        break
+    }
+  })
 
   useEffect(() => {
     return () => {
-      if (cameraRef.current) {
+      if (cameraRef.current && Constants.isDevice) {
         cameraRef.current.pausePreview()
       }
     }
   }, [])
-  
+
   return (
-    <Modal visible transparent onRequestClose={onSuccess} onDismiss={onSuccess} style={{ height: '100%', width: '100%' }}>
-      <Camera ref={cameraRef} style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#fffa', justifyContent: 'center',
-            alignItems: 'center', borderRadius: 40,
-            height: 80, width: 80,
-            marginBottom: 40
-          }} onPress={async () => {
-            onSuccess(await cameraRef.current.takePictureAsync())
+    <Modal visible={showCamera} transparent onRequestClose={onSuccess} onDismiss={onSuccess} style={{ height: '100%', width: '100%' }}>
+      <Camera ref={cameraRef} type={useBack ? 'back' : 'front'} flashMode={flash.mode} style={{ flex: 1, justifyContent: 'space-between', flexDirection: 'column', alignItems: 'stretch' }}>
+        <SafeAreaView style={{ flex: 1, justifyContent: 'space-between', alignItems: 'stretch', margin: 12, backgroundColor: 'transparent' }}>
+          <TouchableOpacity activeOpacity={0.8}
+            style={{
+              backgroundColor: '#fff4', justifyContent: 'center',
+              alignItems: 'center', borderRadius: 28,
+              height: 56, width: 56,
+            }} onPress={() => onSuccess()}>
+            <AntDesign name='arrowleft' size={28} color={'#000a'} />
+          </TouchableOpacity>
+
+          <View style={{
+            flexDirection: 'row', paddingHorizontal: 8, marginBottom: 20,
+            justifyContent: 'space-evenly', alignItems: 'center',
           }}>
-          <MaterialCommunityIcons name='camera' color='#0008' style={{ fontSize: 40 }} />
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#fffc', justifyContent: 'center',
+                alignItems: 'center', borderRadius: 24,
+                height: 48, width: 48,
+              }} onPress={async () => setUseBack(!useBack)}>
+              <AntDesign name='swap' size={28} color={'#000a'} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#fffc', justifyContent: 'center',
+                alignItems: 'center', borderRadius: 32,
+                height: 64, width: 64, marginHorizontal: 8
+              }} onPress={async () => onSuccess(await cameraRef.current.takePictureAsync())}>
+              <MaterialCommunityIcons size={30} name='camera' color='#000a' />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#fffc', justifyContent: 'center',
+                alignItems: 'center', borderRadius: 24,
+                height: 48, width: 48,
+              }} onPress={toggleFlash}>
+              <MaterialIcons size={28} name={flash.icon} color='#000a' />
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
       </Camera>
     </Modal>
   )
