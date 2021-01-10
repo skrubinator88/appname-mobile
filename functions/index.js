@@ -42,7 +42,7 @@ exports.isCurrentJob = (job) => {
  */
 exports.sendNotification = async (userToken, recipient, { title, body, data }) => {
   try {
-    if (!userToken || !(title && data) || !(title && body)) {
+    if (!userToken || !recipient || !(title && data) || !(title && body)) {
       throw new Error('Required details are omitted')
     }
 

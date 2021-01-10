@@ -2,7 +2,7 @@
 // Expo
 import { FontAwesome } from "@expo/vector-icons";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Dimensions, FlatList, View } from "react-native";
+import { ActivityIndicator, Alert, Dimensions, FlatList, View, KeyboardAvoidingView } from "react-native";
 import { TextField } from "@ubaids/react-native-material-textfield";
 import StarRating from "react-native-star-rating";
 import styled from "styled-components/native";
@@ -50,6 +50,8 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
         },
       });
       const project_manager = await response.json();
+      project_manager._id = job_data.posted_by
+
       setProjectManager(project_manager);
       setName(`${project_manager.first_name} ${project_manager.last_name}`);
       setOccupation(project_manager.occupation);
@@ -132,7 +134,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
                   delete job_data.offer_received
                   set_job_data(job_data)
                   await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer declined`, data: { type: 'offerdecline', id: job_data._id, sender: authState.userID } })
-                  changeRoute({ name: "searching", props: { keyword } });
+                  changeRoute({ name: "dashboard", props: { keyword } });
                 } catch (e) {
                   console.log(e)
                 } finally {
@@ -147,7 +149,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
       } else {
         await sendNotification(authState.userToken, projectManager._id, { title: `GigChasers - ${job_data.job_title}`, body: `Job declined`, data: { type: 'jobdecline', id: job_data._id, sender: authState.userID } })
         await JobsController.changeJobStatus(job_data._id, "available");
-        changeRoute({ name: "searching", props: { keyword } });
+        changeRoute({ name: "dashboard", props: { keyword: '' } });
       }
     } catch (E) {
       console.log(e)
@@ -370,61 +372,63 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
   return (
     <Card>
       <View>
-        <Row>
+        <KeyboardAvoidingView>
+          <Row>
 
-          <JobDescriptionRow>
-            <JobDescription>
-              <Text small light marginBottom="5px">Current Offer</Text>
-              <Text small marginBottom="5px">
-                ${job_data.salary}/hr
+            <JobDescriptionRow>
+              <JobDescription>
+                <Text small light marginBottom="5px">Current Offer</Text>
+                <Text small marginBottom="5px">
+                  ${job_data.salary}/hr
             </Text>
-            </JobDescription>
+              </JobDescription>
 
-            <Text small style={{ textTransform: 'uppercase', marginVertical: 16, textAlign: 'center' }} bold>
-              What offer would you complete this job for?
+              <Text small style={{ textTransform: 'uppercase', marginVertical: 16, textAlign: 'center' }} bold>
+                What offer would you complete this job for?
             </Text>
 
 
-            <View style={{ marginVertical: 10 }}>
-              <WageInput>
-                <SalaryField style={{ justifyContent: 'center' }}>
-                  <TextField
-                    disabled={loading}
-                    suffix="/hr"
-                    label="PAY"
-                    prefix="$"
-                    labelFontSize={14}
-                    placeholder="0.00"
-                    labelTextStyle={{ color: "grey", fontWeight: "700" }}
-                    keyboardType="numeric"
-                    onChangeText={(text) => {
-                      setSalary(text);
-                    }}
-                    value={salary}
-                    onSubmitEditing={onSubmitOffer}
-                  />
-                </SalaryField>
-              </WageInput>
-            </View>
+              <View style={{ marginVertical: 10 }}>
+                <WageInput>
+                  <SalaryField style={{ justifyContent: 'center' }}>
+                    <TextField
+                      disabled={loading}
+                      suffix="/hr"
+                      label="PAY"
+                      prefix="$"
+                      labelFontSize={14}
+                      placeholder="0.00"
+                      labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                      keyboardType="numeric"
+                      onChangeText={(text) => {
+                        setSalary(text);
+                      }}
+                      value={salary}
+                      onSubmitEditing={onSubmitOffer}
+                    />
+                  </SalaryField>
+                </WageInput>
+              </View>
 
-          </JobDescriptionRow>
-        </Row>
+            </JobDescriptionRow>
+          </Row>
 
-        <Row last>
-          <Column style={{ alignItems: 'center' }}>
-            <Button disabled={loading} decline onPress={onCancel}>
-              <Text style={{ color: "red" }} medium>
-                Cancel
+          <Row last>
+            <Column style={{ alignItems: 'center' }}>
+              <Button disabled={loading} decline onPress={onCancel}>
+                <Text style={{ color: "red" }} medium>
+                  Cancel
             </Text>
-            </Button>
-          </Column>
-          <Column>
-            <Button disabled={loading} style={{ flexDirection: 'row' }} accept onPress={onSubmitOffer}>
-              {loading ? <ActivityIndicator animating style={{ marginEnd: 4 }} color='white' /> : null}
-              <Text style={{ color: "white" }} medium>Save</Text>
-            </Button>
-          </Column>
-        </Row>
+              </Button>
+            </Column>
+            <Column>
+              <Button disabled={loading} style={{ flexDirection: 'row' }} accept onPress={onSubmitOffer}>
+                {loading ? <ActivityIndicator animating style={{ marginEnd: 4 }} color='white' /> : null}
+                <Text style={{ color: "white" }} medium>Save</Text>
+              </Button>
+            </Column>
+          </Row>
+        </KeyboardAvoidingView>
       </View>
     </Card>
   )

@@ -43,7 +43,6 @@ exports.memo = ({ dispatch }) => {
       },
 
       signOut: async (userToken) => {
-        console.log("something");
         try {
           await AsyncStorage.getItem("app.token").then(async (token) => {
             if (token) {
@@ -60,9 +59,11 @@ exports.memo = ({ dispatch }) => {
                   return Promise.reject({ message: (await response.json()).message || "Failed to remove device", code: "Network Error" });
                 }
 
-                await AsyncStorage.removeItem(`app.token`, token);
+                await AsyncStorage.removeItem(`app.token`);
                 await AsyncStorage.removeItem("userData");
               } catch (e) {
+                // If signout failed, chances are that the notification is still tied to this device.
+                // Prevent the sign out attempt
                 console.error(e);
                 if (e.code === "Network Error") {
                   // Notification not properly disconnected...Prevent signout!

@@ -114,8 +114,11 @@ exports.clean = (ProviderName, unsubscribe, dispatch) => {
   if (dispatch) dispatch(Actions[ProviderName].clear()); // Clear state
 };
 
-exports.findFirstJobWithKeyword = (searched_Keywords, jobs) => {
-  const jobsFound = jobs.filter((job) => job?.job_type === searched_Keywords);
+exports.findFirstJobWithKeyword = (searched_Keywords = "", jobs) => {
+  if (!searched_Keywords) {
+    return
+  }
+  const jobsFound = jobs.filter((job) => job?.job_type?.toLowerCase().startsWith(searched_Keywords.trim().toLowerCase()));
   return sortJobsByProximity(jobsFound, (a, b) => a.distance - b.distance)[0];
 };
 
@@ -257,7 +260,6 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
         headers: {
           Authorization: `bearer ${token}`,
           'x-job-id': newJobDoc.id,
-          'Content-Type': 'multipart/form-data'
         },
         body
       })
