@@ -18,6 +18,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
   // State
   const { location, setLocation } = state;
   const { setError } = state;
+  const { authState } = state; // Client/User information
   let { radius } = state; // in Miles
   const { latitude, longitude } = location.coords; // User Location
 
@@ -37,31 +38,28 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
       res.docChanges().forEach((change) => {
         const { doc: document } = change;
         switch (change.type) {
-          case "added":
-            {
-              const data = document.data();
+          case "added": {
+            const data = document.data();
 
-              if (!isCurrentJob(data)) {
-                // if job has a future schedule, skip entry
-                return
-              }
-              data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
-              return dispatch(JobsStoreActions.add(document.id, data));
+            if (!isCurrentJob(data) /*|| isCurrentJobCreatedByUser(data, authState.userID) */) {
+              // if job has a future schedule, skip entry
+              return;
             }
-          case "modified":
-            {
-              const data = document.data();
-              if (!isCurrentJob(data)) {
-                // if not current job, skip entry
-                return
-              }
-              data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
-              return dispatch(JobsStoreActions.update(document.id, data));
+            data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
+            return dispatch(JobsStoreActions.add(document.id, data));
+          }
+          case "modified": {
+            const data = document.data();
+            if (!isCurrentJob(data) /*|| isCurrentJobCreatedByUser(data, authState.userID) */) {
+              // if not current job, skip entry
+              return;
             }
-          case "removed":
-            {
-              return dispatch(JobsStoreActions.remove(document.id));
-            }
+            data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
+            return dispatch(JobsStoreActions.update(document.id, data));
+          }
+          case "removed": {
+            return dispatch(JobsStoreActions.remove(document.id));
+          }
           default:
             break;
         }
@@ -81,14 +79,12 @@ exports.currentUserActiveJobs = (userID, dispatch) => {
     res.docChanges().forEach((change) => {
       const { doc: document } = change;
       switch (change.type) {
-        case "added":
-          {
-            return dispatch(ListingsActions.add(document.id, document.data()));
-          }
-        case "modified":
-          {
-            return dispatch(ListingsActions.update(document.id, document.data()));
-          }
+        case "added": {
+          return dispatch(ListingsActions.add(document.id, document.data()));
+        }
+        case "modified": {
+          return dispatch(ListingsActions.update(document.id, document.data()));
+        }
         default:
           break;
       }
@@ -114,9 +110,9 @@ exports.clean = (ProviderName, unsubscribe, dispatch) => {
   if (dispatch) dispatch(Actions[ProviderName].clear()); // Clear state
 };
 
-exports.findFirstJobWithKeyword = (searched_Keywords = "", jobs) => {
+exports.findFirstJobWithKeyword = (searched_Keywords = "", jobs, userID = "") => {
   if (!searched_Keywords) {
-    return
+    return;
   }
   const jobsFound = jobs.filter((job) => job?.job_type?.toLowerCase().startsWith(searched_Keywords.trim().toLowerCase()));
   return sortJobsByProximity(jobsFound, (a, b) => a.distance - b.distance)[0];
@@ -131,78 +127,78 @@ exports.changeJobStatus = async (documentID, status, userID = "") => {
 
 /**
  * Used to send an offer by a deployee
- * @param {*} documentID 
- * @param {*} deployee 
- * @param {*} offer 
+ * @param {*} documentID
+ * @param {*} deployee
+ * @param {*} offer
  */
 exports.sendOffer = async (documentID, deployee, offer) => {
   if (!deployee) {
-    throw new Error('User identity must be provided')
+    throw new Error("User identity must be provided");
   }
-  if (!offer || typeof offer == 'number' || offer <= 0) {
-    throw new Error('You must provide a valid offer')
+  if (!offer || typeof offer == "number" || offer <= 0) {
+    throw new Error("You must provide a valid offer");
   }
   const doc = GeoFirestore.collection("jobs").doc(documentID);
   await doc.update({
     offer_received: {
       deployee,
       offer,
-      approved: false
-    }
-  })
+      approved: false,
+    },
+  });
   return {
     deployee,
     offer,
-    approved: false
-  }
+    approved: false,
+  };
 };
 
 /**
  * Used by deployee or deployer to cancel an offer already sent
- * 
- * @param {*} documentID 
+ *
+ * @param {*} documentID
  */
 exports.cancelOffer = async (documentID) => {
   const doc = GeoFirestore.collection("jobs").doc(documentID);
   await doc.update({
     offer_received: firebase.firestore.FieldValue.delete(),
-    executed_by: '',
-    status: 'available'
-  })
+    executed_by: "",
+    status: "available",
+  });
 };
 
 exports.approveOffer = async (documentID, deployee) => {
   if (!deployee) {
-    throw new Error('Deployee identity must be provided')
+    throw new Error("Deployee identity must be provided");
   }
   const doc = GeoFirestore.collection("jobs").doc(documentID);
   await doc.update({
-    'offer_received.approved': true,
-    status: 'accepted'
-  })
+    "offer_received.approved": true,
+    status: "accepted",
+  });
 };
 
 exports.counterOffer = async (documentID, offer) => {
   if (!offer) {
-    throw new Error('Offer must be provided')
+    throw new Error("Offer must be provided");
   }
   const doc = GeoFirestore.collection("jobs").doc(documentID);
   await doc.update({
-    'offer_received.counterOffer': offer,
-  })
+    "offer_received.counterOffer": offer,
+  });
 };
 
 exports.counterApprove = async (documentID, offer) => {
   if (!offer) {
-    throw new Error('Offer must be provided')
+    throw new Error("Offer must be provided");
   }
   const doc = GeoFirestore.collection("jobs").doc(documentID);
   await doc.update({
-    'offer_received.counterOffer': firebase.firestore.FieldValue.delete(),
-    'offer_received.offer': offer,
-    'offer_received.approved': true,
-    status: 'accepted',
-  })
+    "offer_received.counterOffer": firebase.firestore.FieldValue.delete(),
+    "offer_received.offer": offer,
+    "offer_received.approved": true,
+    status: "accepted",
+  });
 };
 
 exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
@@ -220,7 +216,7 @@ exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
     });
 };
 
-exports.currentUserJobsHistory = (user) => { };
+exports.currentUserJobsHistory = (user) => {};
 
 exports.postUserJob = async (userID, job, token, photos = []) => {
   if (!userID) throw new Error("User ID is required");
@@ -240,37 +236,38 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
   const { coordinates } = newJob;
   const GeoPoint = new firebase.firestore.GeoPoint(...coordinates);
 
-  let newJobDoc
-  let filenames
+  let newJobDoc;
+  let filenames;
   try {
-    newJobDoc = geoCollection.doc()
+    newJobDoc = geoCollection.doc();
     if (photos) {
-      const body = new FormData()
-      photos.map(photo => {
-        const uriSplit = photo.uri.split("/")
-        body.append('photo', {
+      const body = new FormData();
+      photos.map((photo) => {
+        const uriSplit = photo.uri.split("/");
+        body.append("photo", {
           uri: photo.uri,
           type: photo.type,
-          name: uriSplit[uriSplit.length - 1]
-        })
-      })
+          name: uriSplit[uriSplit.length - 1],
+        });
+      });
 
       const apiResponse = await fetch(`${config.API_URL}/job/upload`, {
         method: "POST",
         headers: {
           Authorization: `bearer ${token}`,
-          'x-job-id': newJobDoc.id,
+          "x-job-id": newJobDoc.id,
         },
-        body
-      })
+        body,
+      });
       if (!apiResponse.ok) {
-        throw new Error((await apiResponse.json()).message || 'Failed to upload job')
+        throw new Error((await apiResponse.json()).message || "Failed to upload job");
       }
 
-      filenames = (await apiResponse.json()).data
+      filenames = (await apiResponse.json()).data;
     }
 
-    return newJobDoc.set({ ...newJob, coordinates: GeoPoint, photo_files: filenames })
+    return newJobDoc
+      .set({ ...newJob, coordinates: GeoPoint, photo_files: filenames })
       .then(() => {
         return new Promise((resolution, rejection) => {
           resolution({ success: true });
@@ -282,11 +279,11 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
         });
       });
   } catch (e) {
-    console.log(e)
+    console.log(e);
     if (newJobDoc) {
-      newJobDoc.delete()
+      newJobDoc.delete();
     }
-    throw e
+    throw e;
   }
   // Test
 };
