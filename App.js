@@ -9,15 +9,18 @@ import * as ExpoNotif from "expo-notifications";
 import { Provider } from "react-redux";
 // Imported Actions
 import AuthActions from "./actions/AuthActions";
+import AppActions from "./actions/AppActions";
 import ErrorActions from "./actions/ErrorActions";
 // Imported Store
 import { GlobalContext } from "./components/context";
 import { rootStore } from "./rdx-store/root.store";
 // Reducers
 import AuthReducer from "./reducers/AuthReducer";
+import AppReducer from "./reducers/AppReducer";
 import ErrorReducer from "./reducers/ErrorReducer";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
+import Prompts from "./components/Prompts";
 // import { default as Example } from "./views/test";
 
 // Disable Font Scaling
@@ -45,6 +48,8 @@ export const Theme = {
   colors: {
     ...DefaultTheme.colors,
     primary: "#548ff7",
+    contractor: "#548ff7",
+    project_manager: "green",
   },
 };
 
@@ -68,17 +73,20 @@ ExpoNotif.setNotificationHandler({
 export default function App({ navigation }) {
   // Store
   const [authState, auth_dispatch] = useReducer(AuthReducer, { isLoading: true });
+  const [appState, app_dispatch] = useReducer(AppReducer, {});
   const [errorState, error_dispatch] = useReducer(ErrorReducer, { errorMsg: "" });
 
   const thisComponentAuthState = { dispatch: auth_dispatch };
+  const thisComponentAppState = { dispatch: app_dispatch };
   const thisComponentErrorState = { dispatch: error_dispatch };
 
   // Actions
   const authActions = AuthActions.memo(thisComponentAuthState);
+  const appActions = AppActions.memo(thisComponentAppState);
   const errorActions = ErrorActions.memo(thisComponentErrorState);
 
   const notificationHandler = React.useRef(async (n) => {
-    console.log(n.request, "notificaiton handler");
+    console.log(n.request, "notification handler");
   });
   const notificationResponseHandler = React.useRef((res) => {
     if (res.actionIdentifier === ExpoNotif.DEFAULT_ACTION_IDENTIFIER) {
@@ -136,33 +144,36 @@ export default function App({ navigation }) {
     );
   }
 
-  if (errorState.message) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>{errorState.message}</Text>
-      </View>
-    );
-  }
+  // if (errorState.message) {
+  //   return (
+  //     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+  //       <Text>{errorState.message}</Text>
+  //     </View>
+  //   );
+  // }
 
   return (
-    <ActionSheetProvider>
-      <GlobalContext.Provider value={{ authActions, authState, errorActions }}>
-        <NavigationContainer theme={Theme}>
-          {authState.userToken ? (
-            <>
-              <Provider store={rootStore}>
+    <>
+      {/* <Prompts /> */}
+      <ActionSheetProvider>
+        <GlobalContext.Provider value={{ authActions, appActions, authState, errorActions }}>
+          <NavigationContainer theme={Theme}>
+            {authState.userToken ? (
+              <>
+                <Provider store={rootStore}>
+                  {/* <Example /> */}
+                  <AuthenticatedStackScreen />
+                </Provider>
+              </>
+            ) : (
+              <>
+                <NotAuthenticatedStackScreen />
                 {/* <Example /> */}
-                <AuthenticatedStackScreen />
-              </Provider>
-            </>
-          ) : (
-            <>
-              <NotAuthenticatedStackScreen />
-              {/* <Example /> */}
-            </>
-          )}
-        </NavigationContainer>
-      </GlobalContext.Provider>
-    </ActionSheetProvider>
+              </>
+            )}
+          </NavigationContainer>
+        </GlobalContext.Provider>
+      </ActionSheetProvider>
+    </>
   );
 }
