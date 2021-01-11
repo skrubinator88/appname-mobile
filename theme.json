@@ -1,0 +1,12 @@
+{
+  "contractor": {
+    "primary": "#3869f3",
+    "brighter": "#439bf9",
+    "darker": "#0b498c"
+  },
+  "project_manager": {
+    "primary": "#17a525",
+    "brighter": "#22c932",
+    "darker": "#0e5915"
+  }
+}
