@@ -42,6 +42,12 @@ const loginReducer = (prevState, action) => {
         userData: { ...prevState.userData, role: action.newRole },
         isLoading: false,
       };
+
+    case "LOADING":
+      return {
+        ...prevState,
+        isLoading: action.boolean,
+      };
   }
 };
 

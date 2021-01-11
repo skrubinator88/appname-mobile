@@ -97,6 +97,10 @@ exports.memo = ({ dispatch }) => {
           await AsyncStorage.setItem("userData", JSON.stringify({ ...prevData, userData: { ...prevData.userData, role: newRole } }));
         }
       },
+
+      setLoading: (boolean) => {
+        dispatch({ type: "LOADING", boolean });
+      },
     }),
     []
   );
