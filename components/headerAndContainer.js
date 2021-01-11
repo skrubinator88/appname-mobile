@@ -117,7 +117,7 @@ export default function Header({
           </Column>
 
           <Column middle>
-            <Title style={{ color, fontWeight: titleWeight }}>{title}</Title>
+            {typeof title == "string" ? <TitleTextBox style={{ color, fontWeight: titleWeight }}>{title}</TitleTextBox> : title()}
           </Column>
 
           <Column next>
@@ -162,7 +162,7 @@ const Column = styled.View`
   align-items: center;
 `;
 
-const Title = styled.Text`
+const TitleTextBox = styled.Text`
   font-size: 23px;
   font-weight: 700;
 `;

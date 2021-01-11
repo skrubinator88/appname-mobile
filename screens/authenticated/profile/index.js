@@ -5,6 +5,7 @@ import { Image, Button, Alert, TextInput, View, Animated, Easing } from "react-n
 import { Platform, Dimensions } from "react-native";
 import styled from "styled-components/native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import theme from "../../../theme.json";
 
 // Components
 import Container from "../../../components/headerAndContainer";
@@ -17,11 +18,14 @@ const width = Dimensions.get("window").width; //arbitrary size
 
 import { GlobalContext } from "../../../components/context";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { ActivityIndicator } from "react-native";
 
 export default function ProfileScreen({ navigation }) {
   const global = useContext(GlobalContext);
-  const { authActions, authState, errorActions } = useContext(GlobalContext);
+  const { authActions, authState, errorActions, appActions, appState } = useContext(GlobalContext);
   const { userData } = authState;
+
+  const loading = useState(true);
 
   const [role, setRole] = useState(userData.role);
   const [roleSwitch, setRoleSwitch] = useState(role == "contractor" ? false : true);
@@ -37,6 +41,7 @@ export default function ProfileScreen({ navigation }) {
   const slide = useRef(new Animated.Value(role == "contractor" ? width / 4 : 0)).current;
 
   const slideRight = () => {
+    appActions.setLoading(true);
     // Will change fadeAnim value to 1 in 5 seconds
     Animated.timing(slide, {
       toValue: width / 4,
@@ -65,17 +70,23 @@ export default function ProfileScreen({ navigation }) {
     <Container
       navigation={navigation}
       color="white"
-      headerBackground="#3869f3"
+      headerBackground={authState.userData.role == "contractor" ? theme.contractor.primary : theme.project_manager.primary}
       endBackground="white"
       // nextAction={() => {}}
       // nextTitle="Save"
       // nextProvider="Entypo"
       // nextIcon="dots-three-horizontal"
-      // nextSize={25}
+      title={loading[0] ? () => <ActivityIndicator color="white" /> : ""}
     >
       {/* Profile Section */}
 
-      <ProfileSection>
+      <ProfileSection
+        style={
+          authState.userData.role == "contractor"
+            ? { backgroundColor: theme.contractor.primary }
+            : { backgroundColor: theme.project_manager.primary }
+        }
+      >
         <ProfilePicture source={{ uri: `${env.API_URL}${userData.profile_picture}` }} />
 
         <Text title color="white" weight="700">
@@ -86,9 +97,21 @@ export default function ProfileScreen({ navigation }) {
         </Text>
 
         <TouchableWithoutFeedback onPress={() => handleChangeRole()}>
-          <ChangeRoleSlider>
+          <ChangeRoleSlider
+            style={
+              authState.userData.role == "contractor"
+                ? { backgroundColor: theme.contractor.darker }
+                : { backgroundColor: theme.project_manager.darker }
+            }
+          >
             <Animated.View style={{ top: 0, left: slide, position: "absolute" }}>
-              <Selector />
+              <Selector
+                style={
+                  authState.userData.role == "contractor"
+                    ? { backgroundColor: theme.contractor.brighter }
+                    : { backgroundColor: theme.project_manager.brighter }
+                }
+              />
             </Animated.View>
 
             <Text color="white">Deployer</Text>
@@ -267,14 +290,12 @@ export default function ProfileScreen({ navigation }) {
 //   background: #e4e4e4;
 // `;
 const Selector = styled.View`
-  background-color: #439bf9;
   width: ${width / 4}px;
   height: 40px;
   border-radius: 50px;
 `;
 
 const ChangeRoleSlider = styled.View`
-  background-color: #0b498c;
   width: ${width / 2}px;
   height: 40px;
   margin: 20px;
@@ -285,7 +306,6 @@ const ChangeRoleSlider = styled.View`
 `;
 
 const ProfileSection = styled.View`
-  background: #3869f3;
   justify-content: center;
   align-items: center;
 `;

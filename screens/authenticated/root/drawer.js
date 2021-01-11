@@ -1,12 +1,14 @@
 // IMPORT
-import { Entypo, FontAwesome, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
-import { NavigationContainer, useTheme } from "@react-navigation/native";
 import React, { useContext } from "react";
 import { Alert, SafeAreaView, TouchableWithoutFeedback, View } from "react-native";
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
+
+// Styling
+import { NavigationContainer } from "@react-navigation/native";
+import { Entypo, FontAwesome, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import styled from "styled-components/native";
-import { GlobalContext } from "../../../components/context";
-import env from "../../../env";
+import theme from "../../../theme.json";
+
 // Components
 import Chat from "../chat/";
 import JobListings from "../listings/stacks";
@@ -15,23 +17,30 @@ import PaymentScreen from "../payment/stack";
 import ProfileScreen from "../profile/stack";
 import Scanner from "../scanner/";
 import SettingsScreen from "../settings";
-// Screens
-import { RootScreen } from "./index";
 import QRCode from "./UIOverlay/jobFound/qr_code";
 
+// Screens
+import { RootScreen } from "./index";
+
+// Miscellaneous
+import { GlobalContext } from "../../../components/context";
+import env from "../../../env";
 
 export const AuthenticatedDrawer = createDrawerNavigator();
 
-
-
 function DrawerContent({ navigation }) {
-  const { colors } = useTheme();
   const { authActions, authState, errorActions } = useContext(GlobalContext);
   const { signOut } = authActions;
 
   return (
     <View style={{ flex: 1 }}>
-      <DrawerHeader style={{ backgroundColor: colors.primary }}>
+      <DrawerHeader
+        style={
+          authState.userData.role == "contractor"
+            ? { backgroundColor: theme.contractor.primary }
+            : { backgroundColor: theme.project_manager.primary }
+        }
+      >
         <TouchableWithoutFeedback
           onPress={() => {
             navigation.navigate("Profile");
@@ -61,33 +70,33 @@ function DrawerContent({ navigation }) {
             icon={() => <MaterialIcons name="history" size={24} color="black" />}
           />
         ) : (
-            <>
-              <DrawerItem
-                labelStyle={{ fontSize: 20 }}
-                label="Job Listings"
-                onPress={() => navigation.navigate("Job Listings")}
-                icon={() => <Entypo name="megaphone" size={24} color="black" />}
-              />
-              <DrawerItem
-                labelStyle={{ fontSize: 20 }}
-                label="Messages"
-                onPress={() => navigation.navigate("Messages")}
-                icon={() => <MaterialIcons name="chat" size={24} color="black" />}
-              />
-              <DrawerItem
-                labelStyle={{ fontSize: 20 }}
-                label="Scan QR Code"
-                onPress={() => navigation.navigate("Scanner")}
-                icon={() => <MaterialCommunityIcons name="qrcode-scan" size={24} color="black" />}
-              />
-              <DrawerItem
-                labelStyle={{ fontSize: 20 }}
-                label="Job History"
-                onPress={() => Alert.alert("Work in Progress", "Section still in development")}
-                icon={() => <MaterialIcons name="history" size={24} color="black" />}
-              />
-            </>
-          )}
+          <>
+            <DrawerItem
+              labelStyle={{ fontSize: 20 }}
+              label="Job Listings"
+              onPress={() => navigation.navigate("Job Listings")}
+              icon={() => <Entypo name="megaphone" size={24} color="black" />}
+            />
+            <DrawerItem
+              labelStyle={{ fontSize: 20 }}
+              label="Messages"
+              onPress={() => navigation.navigate("Messages")}
+              icon={() => <MaterialIcons name="chat" size={24} color="black" />}
+            />
+            <DrawerItem
+              labelStyle={{ fontSize: 20 }}
+              label="Scan QR Code"
+              onPress={() => navigation.navigate("Scanner")}
+              icon={() => <MaterialCommunityIcons name="qrcode-scan" size={24} color="black" />}
+            />
+            <DrawerItem
+              labelStyle={{ fontSize: 20 }}
+              label="Job History"
+              onPress={() => Alert.alert("Work in Progress", "Section still in development")}
+              icon={() => <MaterialIcons name="history" size={24} color="black" />}
+            />
+          </>
+        )}
         <DrawerItem
           labelStyle={{ fontSize: 20 }}
           label="Payments"
@@ -170,9 +179,6 @@ const ProfilePicture = styled.Image`
   width: 60px;
   border-radius: 60px;
 `;
-
-
-
 
 export function Drawer({ navigation }) {
   return (
