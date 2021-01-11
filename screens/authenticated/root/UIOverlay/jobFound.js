@@ -3,6 +3,7 @@
 import { FontAwesome } from "@expo/vector-icons";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Dimensions, FlatList, View, KeyboardAvoidingView } from "react-native";
+import Modal from 'react-native-modal'
 import { TextField } from "@ubaids/react-native-material-textfield";
 import StarRating from "react-native-star-rating";
 import styled from "styled-components/native";
@@ -73,7 +74,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
             message: 'Job will become available in the job pool',
             cancelButtonIndex: 1,
             destructiveButtonIndex: 0,
-            options: ['yes', 'cancel'],
+            options: ['Yes', 'Cancel'],
             onPress: async (i) => {
               if (i === 0) {
                 await JobsController.cancelOffer(job_data._id)
@@ -125,7 +126,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
             message: 'Job will become available in the job pool',
             cancelButtonIndex: 1,
             destructiveButtonIndex: 0,
-            options: ['yes', 'cancel'],
+            options: ['Yes', 'Cancel'],
             onPress: async (i) => {
               if (i === 0) {
                 setLoading(true)
@@ -345,7 +346,7 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
         Confirm({
           title: 'Confirm Offer',
           message: `Suggest offer of $${offer}/hour to deployer to complete this job?`,
-          options: ['yes', 'cancel'],
+          options: ['Yes', 'Cancel'],
           cancelButtonIndex: 1,
           onPress: async (number) => {
             if (number === 0) {
@@ -370,67 +371,65 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
   }, [loading, deployee, job_data, salary])
 
   return (
-    <Card>
-      <View>
-        <KeyboardAvoidingView>
-          <Row>
+    <Modal isVisible >
+      <View style={{ backgroundColor: '#fff', borderRadius: 40, paddingVertical: 16 }}>
+        <Row>
 
-            <JobDescriptionRow>
-              <JobDescription>
-                <Text small light marginBottom="5px">Current Offer</Text>
-                <Text small marginBottom="5px">
-                  ${job_data.salary}/hr
+          <JobDescriptionRow>
+            <JobDescription>
+              <Text small light marginBottom="5px">Current Offer</Text>
+              <Text small marginBottom="5px">
+                ${job_data.salary}/hr
             </Text>
-              </JobDescription>
+            </JobDescription>
 
-              <Text small style={{ textTransform: 'uppercase', marginVertical: 16, textAlign: 'center' }} bold>
-                What offer would you complete this job for?
+            <Text small style={{ textTransform: 'uppercase', marginVertical: 16, textAlign: 'center' }} bold>
+              What offer would you complete this job for?
             </Text>
 
 
-              <View style={{ marginVertical: 10 }}>
-                <WageInput>
-                  <SalaryField style={{ justifyContent: 'center' }}>
-                    <TextField
-                      disabled={loading}
-                      suffix="/hr"
-                      label="PAY"
-                      prefix="$"
-                      labelFontSize={14}
-                      placeholder="0.00"
-                      labelTextStyle={{ color: "grey", fontWeight: "700" }}
-                      keyboardType="numeric"
-                      onChangeText={(text) => {
-                        setSalary(text);
-                      }}
-                      value={salary}
-                      onSubmitEditing={onSubmitOffer}
-                    />
-                  </SalaryField>
-                </WageInput>
-              </View>
+            <View style={{ marginVertical: 10 }}>
+              <WageInput>
+                <SalaryField style={{ justifyContent: 'center' }}>
+                  <TextField
+                    disabled={loading}
+                    suffix="/hr"
+                    label="PAY"
+                    prefix="$"
+                    labelFontSize={14}
+                    placeholder="0.00"
+                    labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                    keyboardType="numeric"
+                    onChangeText={(text) => {
+                      setSalary(text);
+                    }}
+                    value={salary}
+                    onSubmitEditing={onSubmitOffer}
+                  />
+                </SalaryField>
+              </WageInput>
+            </View>
 
-            </JobDescriptionRow>
-          </Row>
+          </JobDescriptionRow>
+        </Row>
 
-          <Row last>
-            <Column style={{ alignItems: 'center' }}>
-              <Button disabled={loading} decline onPress={onCancel}>
-                <Text style={{ color: "red" }} medium>
-                  Cancel
+        <Row last>
+          <Column style={{ alignItems: 'center' }}>
+            <Button disabled={loading} decline onPress={onCancel}>
+              <Text style={{ color: "red" }} medium>
+                Cancel
             </Text>
-              </Button>
-            </Column>
-            <Column>
-              <Button disabled={loading} style={{ flexDirection: 'row' }} accept onPress={onSubmitOffer}>
-                {loading ? <ActivityIndicator animating style={{ marginEnd: 4 }} color='white' /> : null}
-                <Text style={{ color: "white" }} medium>Save</Text>
-              </Button>
-            </Column>
-          </Row>
-        </KeyboardAvoidingView>
+            </Button>
+          </Column>
+          <Column>
+            <Button disabled={loading} style={{ flexDirection: 'row' }} accept onPress={onSubmitOffer}>
+              {loading ? <ActivityIndicator animating style={{ marginEnd: 4 }} color='white' /> : null}
+              <Text style={{ color: "white" }} medium>Save</Text>
+            </Button>
+          </Column>
+        </Row>
       </View>
-    </Card>
+    </Modal>
   )
 }
 

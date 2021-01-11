@@ -58,8 +58,9 @@ export default function JobListing({ navigation }) {
     };
   }, []);
 
-  const unassignedList = listings.filter((item) => (item.status == "available" || (item.status == "in review" && (!item.offer_received && !item.offer_received.deployee))))
-  const offersList = listings.filter(item => item.status == "in review" && item.offer_received && item.offer_received.deployee)
+  console.log('testing error cause')
+  const unassignedList = listings.filter((item) => (item.status == "available" || (item.status == "in review" && (!item?.offer_received && !item?.offer_received?.deployee))))
+  const offersList = listings.filter(item => item.status == "in review" && item?.offer_received && item?.offer_received?.deployee)
   const inProgressList = listings.filter(item => item.status == "in progress" || item.status == "accepted")
 
   // useEffect(() => {
@@ -340,7 +341,7 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
     if (salary) {
       await new Promise(async (res) => {
         Confirm({
-          options: ['reject', 'cancel'],
+          options: ['Reject', 'Cancel'],
           cancelButtonIndex: 1,
           title: `Reject Offer From ${deployee.first_name}`,
           message: `If you reject, the job will be available in the job pool`,
@@ -377,7 +378,7 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
       await new Promise(async (res) => {
         const isCounterOffer = offer !== parseFloat(job_data.offer_received.offer).toFixed(2)
         Confirm({
-          options: [isCounterOffer ? 'send' : 'approve', 'cancel'],
+          options: [isCounterOffer ? 'Send' : 'Approve', 'Cancel'],
           cancelButtonIndex: 1,
           title: !isCounterOffer ? `Approve Offer From ${deployee.first_name}` : `Send Counter Offer To ${deployee.first_name}`,
           message: !isCounterOffer ? `If you approve, the job will be accepted by this deployee` : `Offer will be sent to ${deployee.first_name} for confirmation`,
@@ -410,11 +411,11 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
   }, [loading, deployee, job_data, salary])
 
   return (
-    <Modal animationType='slide' transparent visible onRequestClose={onComplete} onDismiss={onComplete} >
-      <SafeAreaView>
-        <KeyboardAvoidingView style={{ height: '100%' }} >
-          <ScrollView style={{ flexGrow: 1, backgroundColor: '#0004' }} contentContainerStyle={{ flexGrow: 1, marginVertical: 20, marginHorizontal: 8, justifyContent: 'center' }}>
-            <Item style={{ justifyContent: 'space-between', borderRadius: 8, flex: 1 }}>
+    <Modal animationType='fade' transparent visible onRequestClose={onComplete} onDismiss={onComplete} style={{ height: '100%', backgroundColor: '#0004', justifyContent: 'center' }} >
+      <ScrollView bounces={false} contentContainerStyle={{ justifyContent: 'center', flexGrow: 1, backgroundColor: '#0004' }}>
+        <SafeAreaView>
+          <KeyboardAvoidingView behavior='padding' style={{ justifyContent: 'flex-end', margin: 8 }}>
+            <Item style={{ justifyContent: 'space-between', borderRadius: 8, paddingVertical: 8, flex: 1 }}>
               <Button onPress={onComplete} style={{ position: 'absolute', top: 4, left: 4 }}>
                 <MaterialCommunityIcons size={24} color='red' name='close-circle' />
               </Button>
@@ -483,9 +484,9 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                 }
               </CounterRow>
             </Item >
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </ScrollView>
     </Modal>
   )
 }

@@ -216,7 +216,7 @@ exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
     });
 };
 
-exports.currentUserJobsHistory = (user) => {};
+exports.currentUserJobsHistory = (user) => { };
 
 exports.postUserJob = async (userID, job, token, photos = []) => {
   if (!userID) throw new Error("User ID is required");
