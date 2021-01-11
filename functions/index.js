@@ -16,52 +16,50 @@ exports.distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2, unit = "miles")
 
 /**
  * This checks if the job is scheduled to start earlier than now, else it does not add the job.
- * 
+ *
  * It assumes the job provided is a valid job and if the required attribute is absent, the job is assumed as present.
- * 
+ *
  * @author eikcalb
  */
 exports.isCurrentJob = (job) => {
   if (!job) {
-    return false
+    return false;
   }
   if (job.start_at && job.start_at > Date.now()) {
-    return false
+    return false;
   }
-  return true
-}
-
+  return true;
+};
 
 /**
  * Send a notification
  * @param {string} token Auth token of sender
  * @param {string} recipient Recipient of push
  * @param {{title,message,data}} param1 Contents of notification
- * 
+ *
  * @author eikcalb
  */
 exports.sendNotification = async (userToken, recipient, { title, body, data }) => {
   try {
     if (!userToken || !recipient || !(title && data) || !(title && body)) {
-      throw new Error('Required details are omitted')
+      throw new Error("Required details are omitted");
     }
 
     const response = await fetch(`${env.API_URL}/notification/send`, {
       method: "POST",
       headers: {
         Authorization: `bearer ${userToken}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ recipient, message: { title, body, data } })
-    })
+      body: JSON.stringify({ recipient, message: { title, body, data } }),
+    });
     if (!response.ok) {
-      throw new Error((await response.json()).message || 'Failed to send')
+      throw new Error((await response.json()).message || "Failed to send");
     }
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
-}
-
+};
 
 exports.getActualDateFormatted = (date) => {
   const month_names = [
@@ -90,7 +88,7 @@ exports.convertFirestoreTimestamp = (date) => {
   return date.toDate().toLocaleTimeString().replace(/:\d+ /, " ");
 };
 
-// Use UUID Instead
+// This needs to be replaced to another code / Use UUID Instead
 exports.createToken = () => {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
     var r = (Math.random() * 16) | 0,
@@ -100,4 +98,11 @@ exports.createToken = () => {
 };
 
 exports.sortJobsByProximity = (arr, compare) =>
-  arr.map((item, index) => ({ item, index })).sort((a, b) => compare(a.item, b.item) || a.index - b.index).map(({ item }) => item)
+  arr
+    .map((item, index) => ({ item, index }))
+    .sort((a, b) => compare(a.item, b.item) || a.index - b.index)
+    .map(({ item }) => item);
+
+exports.isCurrentJobCreatedByUser = (job, userID) => {
+  return job.posted_by == userID ? true : false;
+};
