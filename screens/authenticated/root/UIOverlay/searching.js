@@ -33,8 +33,7 @@ export default function Searching({ keyword }) {
   const [jobSelected, setJobSelected] = useState(false);
 
   useEffect(() => {
-    console.log(jobs);
-    const job_found = JobsController.findFirstJobWithKeyword(keyword, jobs);
+    const job_found = JobsController.findFirstJobWithKeyword(keyword, jobs, authState.userID);
 
     if (job_found && jobSelected === false) {
       setJobSelected(true);

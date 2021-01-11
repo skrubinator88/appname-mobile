@@ -30,7 +30,7 @@ const { height } = Dimensions.get("screen");
 
 export function RootScreen({ navigation, clearTemporalCircle }) {
   // Constructor
-  const { errorActions } = useContext(GlobalContext);
+  const { authState, errorActions } = useContext(GlobalContext);
   const { setError } = errorActions;
 
   // State
@@ -53,7 +53,7 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
   const dispatch = useDispatch();
 
   // State object for use in imported (external) modules. Modules will have control over this (actual module) component state
-  const thisComponentState = { location, setLocation, setError };
+  const thisComponentState = { location, setLocation, setError, authState };
 
   // Get app necessary permissions
   useEffect(() => {
