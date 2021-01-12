@@ -16,13 +16,14 @@ export default function PhotoItem({ item, onRemove = null }) {
                 didOpen={() => setLightbox(true)}
                 willClose={() => setLightbox(false)}
                 backgroundColor='#000000f4' underlayColor='transparent'>
-                {loading ?
-                    <Image onLoad={() => setLoading(false)} onLoadStart={() => setLoading(true)} style={[{ alignSelf: "center", height: 150, width: 150, borderRadius }, lightbox ? { borderRadius: 0, height: 'auto', width: '100%', aspectRatio: 1 } : null]} source={{ uri: item.uri, }} />
-                    :
-                    <View style={[{ alignSelf: "center", height: 150, width: 150, borderRadius }, lightbox ? { borderRadius: 0, height: 'auto', width: '100%', aspectRatio: 1 } : null]}>
-                        <ActivityIndicator size='small' color='#444' />
-                    </View>
-                }
+                <>
+                    <Image onLoad={() => setLoading(false)} onLoadStart={() => setLoading(true)} style={[{ alignSelf: "center", height: 150, width: 150, borderRadius }, loading ? { display: 'none' } : null, lightbox ? { borderRadius: 0, height: 'auto', width: '100%', aspectRatio: 1 } : null]} source={{ uri: item.uri, }} />
+                    {!loading ? null :
+                        <View style={[{ alignSelf: "center", justifyContent: 'center', backgroundColor: '#cacaca', height: 150, width: 150, borderRadius }, lightbox ? { borderRadius: 0, height: 'auto', width: '100%', aspectRatio: 1 } : null]}>
+                            <ActivityIndicator size='small' color='#444' />
+                        </View>
+                    }
+                </>
             </Lightbox>
             {onRemove &&
                 <TouchableOpacity onPress={onRemove} activeOpacity={0.2} style={{ alignSelf: "center", backgroundColor: '#fff', opacity: 0.8, padding: 4, borderRadius: 100, position: 'absolute', top: 2, right: 2 }}>
