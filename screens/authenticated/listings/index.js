@@ -58,7 +58,6 @@ export default function JobListing({ navigation }) {
     };
   }, []);
 
-  console.log('testing error cause')
   const unassignedList = listings.filter((item) => (item.status == "available" || (item.status == "in review" && (!item?.offer_received && !item?.offer_received?.deployee))))
   const offersList = listings.filter(item => item.status == "in review" && item?.offer_received && item?.offer_received?.deployee)
   const inProgressList = listings.filter(item => item.status == "in progress" || item.status == "accepted")

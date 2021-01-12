@@ -440,7 +440,7 @@ export default function workModal({ navigation, route }) {
                 keyExtractor={v => v.uri}
                 centerContent
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingVertical: 40, paddingTop: 12 }}
+                contentContainerStyle={{ paddingVertical: 40,justifyContent:'center', paddingTop: 12 }}
                 ListHeaderComponent={() => (
                   <TouchableOpacity disabled={loadingMedia} style={{ alignSelf: "center", justifyContent: 'center', backgroundColor: '#fff', height: 150, marginHorizontal: 4, width: 150, borderRadius: 4 }} onPress={getPhoto}>
                     <ScheduleButton style={{ justifyContent: "center", flex: 1, backgroundColor: 'transparent', alignItems: "center" }}>
@@ -491,7 +491,7 @@ export default function workModal({ navigation, route }) {
               </ScheduleButton>
             </TouchableOpacity>
             {showDate ? (
-              <DateTimePicker style={{ marginBottom: 20 }} minimumDate={new Date()} mode={mode} onChange={updateDate} value={date} />
+              <DateTimePicker display={Platform.OS === 'ios' ? 'spinner' : undefined} style={{ marginBottom: 20 }} minimumDate={new Date()} mode={mode} onChange={updateDate} value={date} />
             ) : null}
 
             <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7, marginBottom: 100 }} onPress={() => handleSubmit(form)}>

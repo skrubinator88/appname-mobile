@@ -240,7 +240,7 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
   let filenames;
   try {
     newJobDoc = geoCollection.doc();
-    if (photos) {
+    if (photos && photos.length > 0) {
       const body = new FormData();
       photos.map((photo) => {
         const uriSplit = photo.uri.split("/");
