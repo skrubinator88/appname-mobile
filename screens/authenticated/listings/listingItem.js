@@ -1,12 +1,25 @@
 // Dependencies React
 import { Ionicons, AntDesign, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { useActionSheet } from '@expo/react-native-action-sheet'
-import { Camera, requestPermissionsAsync } from 'expo-camera'
-import { launchImageLibraryAsync, MediaTypeOptions, requestCameraRollPermissionsAsync } from 'expo-image-picker';
-import moment from 'moment';
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useActionSheet } from "@expo/react-native-action-sheet";
+import { Camera, requestPermissionsAsync } from "expo-camera";
+import { launchImageLibraryAsync, MediaTypeOptions, requestCameraRollPermissionsAsync } from "expo-image-picker";
+import moment from "moment";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Modal, Alert, Dimensions, FlatList, KeyboardAvoidingView, Platform, TouchableOpacity, TouchableWithoutFeedback, View, SafeAreaView, TouchableNativeFeedback } from "react-native";
+import {
+  ActivityIndicator,
+  Modal,
+  Alert,
+  Dimensions,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+  SafeAreaView,
+  TouchableNativeFeedback,
+} from "react-native";
 import Constants from "expo-constants";
 
 // Styling Dependencies
@@ -24,13 +37,6 @@ import PermissionsControllers from "../../../controllers/PermissionsControllers"
 import PhotoItem from "./listItemImage";
 import TaskModal from "./taskModal";
 
-
-
-
-
-
-
-
 // Miscellaneous
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
@@ -45,7 +51,7 @@ export default function workModal({ navigation, route }) {
   const [location, setLocation] = useState(""); // Input Field
   const [salary, setSalary] = useState(""); // Input Field
   const [wage, setWage] = useState("hr"); // Input Field
-  const [tasks, setTasks] = useState(""); // Input Field (With Modal)
+  const [tasks, setTasks] = useState([]); // Input Field (With Modal)
 
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -53,138 +59,140 @@ export default function workModal({ navigation, route }) {
   const [googleSuggestions, setGoogleSuggestions] = useState([]);
 
   // Setup datetime picker
-  const [date, setDate] = useState(new Date())
-  const [mode, setMode] = useState(Platform.OS === 'ios' ? 'datetime' : 'date')
-  const [showDate, setShowDate] = useState(false)
+  const [date, setDate] = useState(new Date());
+  const [mode, setMode] = useState(Platform.OS === "ios" ? "datetime" : "date");
+  const [showDate, setShowDate] = useState(false);
 
   const updateDate = async (e, dateParam) => {
     if (dateParam) {
-
       // Set the date picker mode based on platform
       switch (mode) {
-        case 'datetime':
-          if (Platform.OS === 'ios') {
-            setDate(dateParam)
+        case "datetime":
+          if (Platform.OS === "ios") {
+            setDate(dateParam);
           }
           // This is called for only iOS, so set debouncer to delay removing the time modal.
           // TODO: Test how to add a button instead of this
-          break
-        case 'date':
+          break;
+        case "date":
           setShowDate(() => {
             // After collecting date data, get the time
-            if (Platform.OS !== 'ios') {
-              setMode('time')
-              setDate(dateParam)
+            if (Platform.OS !== "ios") {
+              setMode("time");
+              setDate(dateParam);
             }
-            return true
-          })
-          break
-        case 'time':
+            return true;
+          });
+          break;
+        case "time":
           // Todo: test on Android
           setShowDate(() => {
-            setDate(dateParam)
-            return false
-          })
-          break
+            setDate(dateParam);
+            return false;
+          });
+          break;
       }
     } else {
-      setShowDate(false)
+      setShowDate(false);
     }
-  }
+  };
 
   const onShowDate = useCallback(() => {
     setShowDate(() => {
       // Set the date picker mode based on platform
-      if (Platform.OS === 'ios') {
-        setMode('datetime')
+      if (Platform.OS === "ios") {
+        setMode("datetime");
       } else {
-        setMode('date')
+        setMode("date");
       }
-      return true
-    })
-  }, [showDate])
+      return true;
+    });
+  }, [showDate]);
 
   // Setup job photo selection
-  const [photos, setPhotos] = useState([])
-  const [loadingMedia, setloadingMedia] = useState(false)
-  const { showActionSheetWithOptions } = useActionSheet()
-  const [showCamera, setShowCamera] = useState(false)
+  const [photos, setPhotos] = useState([]);
+  const [loadingMedia, setloadingMedia] = useState(false);
+  const { showActionSheetWithOptions } = useActionSheet();
+  const [showCamera, setShowCamera] = useState(false);
 
   const getPhoto = useCallback(async () => {
     try {
-      showActionSheetWithOptions({
-        options: ['Capture Photo', 'Select From Library', 'Cancel'],
-        title: 'Select Photo',
-        message: 'You can select a photo from your library or capture a new photo',
-        cancelButtonIndex: 2,
-        useModal: true
-      }, async (i) => {
-        switch (i) {
-          case 0:
-            getPhotoFromCamera()
-            break
-          case 1:
-            getPhotoFromLibrary()
-            break
+      showActionSheetWithOptions(
+        {
+          options: ["Capture Photo", "Select From Library", "Cancel"],
+          title: "Select Photo",
+          message: "You can select a photo from your library or capture a new photo",
+          cancelButtonIndex: 2,
+          useModal: true,
+        },
+        async (i) => {
+          switch (i) {
+            case 0:
+              getPhotoFromCamera();
+              break;
+            case 1:
+              getPhotoFromLibrary();
+              break;
+          }
         }
-      })
+      );
     } catch (e) {
-      console.log(e)
-      Alert.alert('Failed To Select Photo', e.message)
+      console.log(e);
+      Alert.alert("Failed To Select Photo", e.message);
     }
-  }, [photos])
+  }, [photos]);
 
   const getPhotoFromLibrary = useCallback(async () => {
     try {
-      setloadingMedia(true)
-      if (Platform.OS === 'ios') {
-        let perms = await requestCameraRollPermissionsAsync()
+      setloadingMedia(true);
+      if (Platform.OS === "ios") {
+        let perms = await requestCameraRollPermissionsAsync();
         if (!perms.granted) {
-          Alert.alert('Access to media library denied', 'You need to grant access to image library to continue')
-          setloadingMedia(false)
-          return
+          Alert.alert("Access to media library denied", "You need to grant access to image library to continue");
+          setloadingMedia(false);
+          return;
         }
       }
       let res = await launchImageLibraryAsync({
         allowsEditing: true,
         aspect: [1, 1],
-        mediaTypes: MediaTypeOptions.Images
-      })
+        mediaTypes: MediaTypeOptions.Images,
+      });
 
-      if (!res.cancelled && !photos.find(v => v.uri === res.uri)) {
-        setPhotos([{ uri: res.uri, type: 'image/png', height: res.height, width: res.width }, ...photos,])
+      if (!res.cancelled && !photos.find((v) => v.uri === res.uri)) {
+        setPhotos([{ uri: res.uri, type: "image/png", height: res.height, width: res.width }, ...photos]);
       }
     } catch (e) {
-      console.log(e)
-      Alert.alert(e.message)
+      console.log(e);
+      Alert.alert(e.message);
     } finally {
-      setloadingMedia(false)
+      setloadingMedia(false);
     }
-  }, [photos])
+  }, [photos]);
 
   const getPhotoFromCamera = useCallback(async () => {
     try {
-      setloadingMedia(true)
+      setloadingMedia(true);
 
       let hasPermission = false;
       await (async () => {
         const { status } = await requestPermissionsAsync();
-        hasPermission = status === 'granted'
+        hasPermission = status === "granted";
       })();
 
       if (hasPermission !== true) {
-        Alert.alert('Camera Access Required', 'The application requires permission to use your camera')
-        return
+        Alert.alert("Camera Access Required", "The application requires permission to use your camera");
+        return;
       }
 
-      setShowCamera(true)
+      setShowCamera(true);
     } catch (e) {
-      console.log(e)
-      Alert.alert('Failed To Capture Photo', e.message)
+      console.log(e);
+      Alert.alert("Failed To Capture Photo", e.message);
     } finally {
-      setloadingMedia(false)
+      setloadingMedia(false);
     }
-  }, [photos])
+  }, [photos]);
 
   // - - Refs - -
   let scroll = useRef(null);
@@ -250,8 +258,8 @@ export default function workModal({ navigation, route }) {
 
   function formatFormV2(data) {
     const form = { ...data };
-    form.start_at = form.date?.getTime() || Date.now()
-    form.date = null
+    form.start_at = form.date?.getTime() || Date.now();
+    form.date = null;
     form.coordinates = [form.location.coords.latitude, form.location.coords.longitude];
     return form;
   }
@@ -267,8 +275,8 @@ export default function workModal({ navigation, route }) {
 
       if (success) return navigation.goBack();
     } catch (e) {
-      console.log(e)
-      Alert.alert('Failed to create job')
+      console.log(e);
+      Alert.alert("Failed to create job");
     } finally {
       setLoading(false);
     }
@@ -415,7 +423,7 @@ export default function workModal({ navigation, route }) {
               <WageInput>
                 <SalaryField>
                   <TextField
-                    prefix='$'
+                    prefix="$"
                     suffix="/hr"
                     label="PAY"
                     labelFontSize={14}
@@ -435,58 +443,93 @@ export default function workModal({ navigation, route }) {
             </Item>
 
             <Item style={{ marginVertical: 4 }}>
-              <Text style={{ color: '#444', textAlign: 'center', marginTop: 8, marginBottom: 4, textTransform: 'uppercase' }}>ADD JOB PHOTOS (OPTIONAL)</Text>
-              <FlatList data={photos}
-                keyExtractor={v => v.uri}
+              <Text style={{ color: "#444", textAlign: "center", marginTop: 8, marginBottom: 4, textTransform: "uppercase" }}>
+                ADD JOB PHOTOS (OPTIONAL)
+              </Text>
+              <FlatList
+                data={photos}
+                keyExtractor={(v) => v.uri}
                 centerContent
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingVertical: 40,justifyContent:'center', paddingTop: 12 }}
                 ListHeaderComponent={() => (
-                  <TouchableOpacity disabled={loadingMedia} style={{ alignSelf: "center", justifyContent: 'center', backgroundColor: '#fff', height: 150, marginHorizontal: 4, width: 150, borderRadius: 4 }} onPress={getPhoto}>
-                    <ScheduleButton style={{ justifyContent: "center", flex: 1, backgroundColor: 'transparent', alignItems: "center" }}>
-                      {loadingMedia ?
-                        <ActivityIndicator color='black' size='small' />
-                        :
-                        <Ionicons name='ios-add' style={{ fontSize: 40 }} />
-                      }
+                  <TouchableOpacity
+                    disabled={loadingMedia}
+                    style={{
+                      alignSelf: "center",
+                      justifyContent: "center",
+                      backgroundColor: "#fff",
+                      height: 150,
+                      marginHorizontal: 4,
+                      width: 150,
+                      borderRadius: 4,
+                    }}
+                    onPress={getPhoto}
+                  >
+                    <ScheduleButton style={{ justifyContent: "center", flex: 1, backgroundColor: "transparent", alignItems: "center" }}>
+                      {loadingMedia ? (
+                        <ActivityIndicator color="black" size="small" />
+                      ) : (
+                        <Ionicons name="ios-add" style={{ fontSize: 40 }} />
+                      )}
                     </ScheduleButton>
                   </TouchableOpacity>
                 )}
                 horizontal
                 renderItem={({ item }) => (
-                  <PhotoItem item={item} onRemove={() => { setPhotos(photos.filter(v => v.uri !== item.uri)) }} />
-                )} />
-              <JobCamera showCamera={showCamera} onSuccess={async (res) => {
-                if (!res) {
-                  return setShowCamera(false)
-                }
-                console.log(res)
-                try {
-                  if (!res.cancelled && !photos.find(v => v.uri === res.uri)) {
-                    setPhotos([{ uri: res.uri, type: 'image/png', height: res.height, width: res.width }, ...photos,])
+                  <PhotoItem
+                    item={item}
+                    onRemove={() => {
+                      setPhotos(photos.filter((v) => v.uri !== item.uri));
+                    }}
+                  />
+                )}
+              />
+              <JobCamera
+                showCamera={showCamera}
+                onSuccess={async (res) => {
+                  if (!res) {
+                    return setShowCamera(false);
                   }
-                } catch (e) {
-                  console.log(e)
-                  Alert.alert(e.message || 'Failed to add photo')
-                } finally {
-                  setShowCamera(false)
-                }
-              }} />
+                  console.log(res);
+                  try {
+                    if (!res.cancelled && !photos.find((v) => v.uri === res.uri)) {
+                      setPhotos([{ uri: res.uri, type: "image/png", height: res.height, width: res.width }, ...photos]);
+                    }
+                  } catch (e) {
+                    console.log(e);
+                    Alert.alert(e.message || "Failed to add photo");
+                  } finally {
+                    setShowCamera(false);
+                  }
+                }}
+              />
             </Item>
 
             <Item>
-              <Text style={{ color: '#444', textAlign: 'center', marginTop: 8, textTransform: 'uppercase' }}>Job will be available {date.getTime() <= Date.now() + 5000 ? 'immediately' : moment(date).calendar()}</Text>
+              <Text style={{ color: "#444", textAlign: "center", marginTop: 8, textTransform: "uppercase" }}>
+                Job will be available {date.getTime() <= Date.now() + 5000 ? "immediately" : moment(date).calendar()}
+              </Text>
             </Item>
-            <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7, marginBottom: 12 }} onPress={() => {
-              if (showDate && Platform.OS === 'ios') {
-                setShowDate(false)
-              } else {
-                onShowDate()
-              }
-            }}>
-              <ScheduleButton style={{ justifyContent: "center", alignItems: "center", backgroundColor: showDate && Platform.OS === 'ios' ? 'red' : '#fff' }}>
-                <Text bold color={showDate && Platform.OS === 'ios' ? 'white' : "black"}>
-                  {showDate && Platform.OS === 'ios' ? 'Close Date Picker' : 'Schedule Job'}
+            <TouchableOpacity
+              style={{ alignSelf: "center", width: width * 0.7, marginBottom: 12 }}
+              onPress={() => {
+                if (showDate && Platform.OS === "ios") {
+                  setShowDate(false);
+                } else {
+                  onShowDate();
+                }
+              }}
+            >
+              <ScheduleButton
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: showDate && Platform.OS === "ios" ? "red" : "#fff",
+                }}
+              >
+                <Text bold color={showDate && Platform.OS === "ios" ? "white" : "black"}>
+                  {showDate && Platform.OS === "ios" ? "Close Date Picker" : "Schedule Job"}
                 </Text>
               </ScheduleButton>
             </TouchableOpacity>
@@ -509,80 +552,114 @@ export default function workModal({ navigation, route }) {
 }
 
 export const JobCamera = ({ showCamera, onSuccess }) => {
-  const [flash, setFlash] = useState({ icon: 'flash-auto', mode: 'auto' })
-  const [useBack, setUseBack] = useState(true)
-  const cameraRef = useRef()
+  const [flash, setFlash] = useState({ icon: "flash-auto", mode: "auto" });
+  const [useBack, setUseBack] = useState(true);
+  const cameraRef = useRef();
 
   const toggleFlash = useCallback(() => {
-    const current = flash.mode
+    const current = flash.mode;
     switch (current) {
-      case 'off':
-        setFlash({ icon: 'flash-auto', mode: 'auto' })
-        break
-      case 'on':
-        setFlash({ icon: 'flash-off', mode: 'off' })
-        break
-      case 'auto':
-        setFlash({ icon: 'flash-on', mode: 'on' })
-        break
+      case "off":
+        setFlash({ icon: "flash-auto", mode: "auto" });
+        break;
+      case "on":
+        setFlash({ icon: "flash-off", mode: "off" });
+        break;
+      case "auto":
+        setFlash({ icon: "flash-on", mode: "on" });
+        break;
     }
-  })
+  });
 
   useEffect(() => {
     return () => {
       if (cameraRef.current && Constants.isDevice) {
-        cameraRef.current.pausePreview()
+        cameraRef.current.pausePreview();
       }
-    }
-  }, [])
+    };
+  }, []);
 
   return (
-    <Modal visible={showCamera} transparent onRequestClose={onSuccess} onDismiss={onSuccess} style={{ height: '100%', width: '100%' }}>
-      <Camera ref={cameraRef} type={useBack ? 'back' : 'front'} flashMode={flash.mode} style={{ flex: 1, justifyContent: 'space-between', flexDirection: 'column', alignItems: 'stretch' }}>
-        <SafeAreaView style={{ flex: 1, justifyContent: 'space-between', alignItems: 'stretch', margin: 12, backgroundColor: 'transparent' }}>
-          <TouchableOpacity activeOpacity={0.8}
+    <Modal visible={showCamera} transparent onRequestClose={onSuccess} onDismiss={onSuccess} style={{ height: "100%", width: "100%" }}>
+      <Camera
+        ref={cameraRef}
+        type={useBack ? "back" : "front"}
+        flashMode={flash.mode}
+        style={{ flex: 1, justifyContent: "space-between", flexDirection: "column", alignItems: "stretch" }}
+      >
+        <SafeAreaView
+          style={{ flex: 1, justifyContent: "space-between", alignItems: "stretch", margin: 12, backgroundColor: "transparent" }}
+        >
+          <TouchableOpacity
+            activeOpacity={0.8}
             style={{
-              backgroundColor: '#fff4', justifyContent: 'center',
-              alignItems: 'center', borderRadius: 28,
-              height: 56, width: 56,
-            }} onPress={() => onSuccess()}>
-            <AntDesign name='arrowleft' size={28} color={'#000a'} />
+              backgroundColor: "#fff4",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 28,
+              height: 56,
+              width: 56,
+            }}
+            onPress={() => onSuccess()}
+          >
+            <AntDesign name="arrowleft" size={28} color={"#000a"} />
           </TouchableOpacity>
 
-          <View style={{
-            flexDirection: 'row', paddingHorizontal: 8, marginBottom: 20,
-            justifyContent: 'space-evenly', alignItems: 'center',
-          }}>
+          <View
+            style={{
+              flexDirection: "row",
+              paddingHorizontal: 8,
+              marginBottom: 20,
+              justifyContent: "space-evenly",
+              alignItems: "center",
+            }}
+          >
             <TouchableOpacity
               style={{
-                backgroundColor: '#fffc', justifyContent: 'center',
-                alignItems: 'center', borderRadius: 24,
-                height: 48, width: 48,
-              }} onPress={async () => setUseBack(!useBack)}>
-              <AntDesign name='swap' size={28} color={'#000a'} />
+                backgroundColor: "#fffc",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 24,
+                height: 48,
+                width: 48,
+              }}
+              onPress={async () => setUseBack(!useBack)}
+            >
+              <AntDesign name="swap" size={28} color={"#000a"} />
             </TouchableOpacity>
             <TouchableOpacity
               style={{
-                backgroundColor: '#fffc', justifyContent: 'center',
-                alignItems: 'center', borderRadius: 32,
-                height: 64, width: 64, marginHorizontal: 8
-              }} onPress={async () => onSuccess(await cameraRef.current.takePictureAsync())}>
-              <MaterialCommunityIcons size={30} name='camera' color='#000a' />
+                backgroundColor: "#fffc",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 32,
+                height: 64,
+                width: 64,
+                marginHorizontal: 8,
+              }}
+              onPress={async () => onSuccess(await cameraRef.current.takePictureAsync())}
+            >
+              <MaterialCommunityIcons size={30} name="camera" color="#000a" />
             </TouchableOpacity>
             <TouchableOpacity
               style={{
-                backgroundColor: '#fffc', justifyContent: 'center',
-                alignItems: 'center', borderRadius: 24,
-                height: 48, width: 48,
-              }} onPress={toggleFlash}>
-              <MaterialIcons size={28} name={flash.icon} color='#000a' />
+                backgroundColor: "#fffc",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 24,
+                height: 48,
+                width: 48,
+              }}
+              onPress={toggleFlash}
+            >
+              <MaterialIcons size={28} name={flash.icon} color="#000a" />
             </TouchableOpacity>
           </View>
         </SafeAreaView>
       </Camera>
     </Modal>
-  )
-}
+  );
+};
 
 const ModalBackground = styled.View`
   background: white;
