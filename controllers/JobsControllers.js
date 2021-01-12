@@ -7,7 +7,7 @@ import config from "../env";
 import { firestore, GeoFirestore } from "../config/firebase";
 
 // Functions
-import { distanceBetweenTwoCoordinates, sortJobsByProximity, isCurrentJob } from "../functions";
+import { distanceBetweenTwoCoordinates, sortJobsByProximity, isCurrentJob, isCurrentJobCreatedByUser } from "../functions";
 
 // Redux Actions
 import JobsStoreActions from "../rdx-actions/jobs.action";
@@ -41,7 +41,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
           case "added": {
             const data = document.data();
 
-            if (!isCurrentJob(data) /*|| isCurrentJobCreatedByUser(data, authState.userID) */) {
+            if (!isCurrentJob(data) || isCurrentJobCreatedByUser(data, authState.userID)) {
               // if job has a future schedule, skip entry
               return;
             }
@@ -50,7 +50,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
           }
           case "modified": {
             const data = document.data();
-            if (!isCurrentJob(data) /*|| isCurrentJobCreatedByUser(data, authState.userID) */) {
+            if (!isCurrentJob(data) || isCurrentJobCreatedByUser(data, authState.userID)) {
               // if not current job, skip entry
               return;
             }
@@ -237,7 +237,7 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
   const GeoPoint = new firebase.firestore.GeoPoint(...coordinates);
 
   let newJobDoc;
-  let filenames;
+  let filenames = null;
   try {
     newJobDoc = geoCollection.doc();
     if (photos && photos.length > 0) {
