@@ -18,15 +18,7 @@ import Text from "../../../components/text";
 import JobsControllers from "../../../controllers/JobsControllers";
 import config from "../../../env";
 // Functions
-import { isCurrentJob, sendNotification } from '../../../functions';
-
-
-
-
-
-
-
-
+import { isCurrentJob, sendNotification } from "../../../functions";
 
 export default function JobListing({ navigation }) {
   // Constructor
@@ -42,7 +34,6 @@ export default function JobListing({ navigation }) {
 
   useEffect(() => {
     if (isMounted) {
-      // console.log("runned");
       setLoading(false);
     }
     setIsMounted(true);
@@ -58,10 +49,11 @@ export default function JobListing({ navigation }) {
     };
   }, []);
 
-  console.log('testing error cause')
-  const unassignedList = listings.filter((item) => (item.status == "available" || (item.status == "in review" && (!item?.offer_received && !item?.offer_received?.deployee))))
-  const offersList = listings.filter(item => item.status == "in review" && item?.offer_received && item?.offer_received?.deployee)
-  const inProgressList = listings.filter(item => item.status == "in progress" || item.status == "accepted")
+  const unassignedList = listings.filter(
+    (item) => item.status == "available" || (item.status == "in review" && !item?.offer_received && !item?.offer_received?.deployee)
+  );
+  const offersList = listings.filter((item) => item.status == "in review" && item?.offer_received && item?.offer_received?.deployee);
+  const inProgressList = listings.filter((item) => item.status == "in progress" || item.status == "accepted");
 
   // useEffect(() => {
   //   console.log(listings);
@@ -86,7 +78,7 @@ export default function JobListing({ navigation }) {
         nextProvider="Entypo"
         nextIcon="dots-three-horizontal"
         nextSize={25}
-        nextAction={() => { }}
+        nextAction={() => {}}
       >
         {/* Payments Section */}
         <Item>
@@ -110,29 +102,43 @@ export default function JobListing({ navigation }) {
             </View>
           </SectionTitle>
 
-          {unassignedList.length > 0 ?
-            unassignedList.map((item) => <ListItemDetail key={item.id} isCurrentJob={isCurrentJob(item)} navigation={navigation} item={item} />)
-            : (
-              <Item style={{ padding: 20, alignSelf: 'stretch', justifyContent: 'center' }}>
-                <MaterialCommunityIcons name='alert-octagon' style={{ textAlign: 'center', fontSize: 32, marginBottom: 8, color: 'darkgrey' }} />
-                <Text small light style={{ textAlign: 'center', textTransform: 'uppercase' }}>No job available</Text>
-              </Item>
-            )}
+          {unassignedList.length > 0 ? (
+            unassignedList.map((item) => (
+              <ListItemDetail key={item.id} isCurrentJob={isCurrentJob(item)} navigation={navigation} item={item} />
+            ))
+          ) : (
+            <Item style={{ padding: 20, alignSelf: "stretch", justifyContent: "center" }}>
+              <MaterialCommunityIcons
+                name="alert-octagon"
+                style={{ textAlign: "center", fontSize: 32, marginBottom: 8, color: "darkgrey" }}
+              />
+              <Text small light style={{ textAlign: "center", textTransform: "uppercase" }}>
+                No job available
+              </Text>
+            </Item>
+          )}
 
           <SectionTitle>
             <View style={{ margin: 10 }}>
-              <Text small bold color="#474747">OFFERS FOR REVIEW</Text>
+              <Text small bold color="#474747">
+                OFFERS FOR REVIEW
+              </Text>
             </View>
           </SectionTitle>
 
-          {offersList.length > 0 ? offersList.map((item) => <ListOfferItemDetail item={item} />
+          {offersList.length > 0 ? (
+            offersList.map((item) => <ListOfferItemDetail item={item} />)
           ) : (
-              <Item style={{ padding: 20, alignSelf: 'stretch', justifyContent: 'center' }}>
-                <MaterialCommunityIcons name='alert-octagon' style={{ textAlign: 'center', fontSize: 32, marginBottom: 8, color: 'darkgrey' }} />
-                <Text small light style={{ textAlign: 'center', textTransform: 'uppercase' }}>No offer available for review</Text>
-              </Item>
-            )
-          }
+            <Item style={{ padding: 20, alignSelf: "stretch", justifyContent: "center" }}>
+              <MaterialCommunityIcons
+                name="alert-octagon"
+                style={{ textAlign: "center", fontSize: 32, marginBottom: 8, color: "darkgrey" }}
+              />
+              <Text small light style={{ textAlign: "center", textTransform: "uppercase" }}>
+                No offer available for review
+              </Text>
+            </Item>
+          )}
 
           <SectionTitle>
             <View style={{ margin: 10 }}>
@@ -142,7 +148,7 @@ export default function JobListing({ navigation }) {
             </View>
           </SectionTitle>
 
-          {inProgressList.length > 0 ?
+          {inProgressList.length > 0 ? (
             inProgressList.map((item) => (
               <Item key={item.id}>
                 <JobItemLink>
@@ -168,14 +174,18 @@ export default function JobListing({ navigation }) {
                   </JobItemRow>
                 </JobItemLink>
               </Item>
-            )
-            ) : (
-              <Item style={{ padding: 20, alignSelf: 'stretch', justifyContent: 'center' }}>
-                <MaterialCommunityIcons name='alert-octagon' style={{ textAlign: 'center', fontSize: 32, marginBottom: 8, color: 'darkgrey' }} />
-                <Text small light style={{ textAlign: 'center', textTransform: 'uppercase' }}>No job is currently in progress</Text>
-              </Item>
-            )
-          }
+            ))
+          ) : (
+            <Item style={{ padding: 20, alignSelf: "stretch", justifyContent: "center" }}>
+              <MaterialCommunityIcons
+                name="alert-octagon"
+                style={{ textAlign: "center", fontSize: 32, marginBottom: 8, color: "darkgrey" }}
+              />
+              <Text small light style={{ textAlign: "center", textTransform: "uppercase" }}>
+                No job is currently in progress
+              </Text>
+            </Item>
+          )}
         </JobSection>
       </Container>
     </>
@@ -183,12 +193,14 @@ export default function JobListing({ navigation }) {
 }
 
 const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
-  const [timeToShow, setTimeToShow] = useState(current ? unix(item.start_at / 1000).fromNow() : '')
-  useFocusEffect(useCallback(() => {
-    if (isCurrentJob) {
-      setTimeToShow(unix(item.start_at / 1000).fromNow())
-    }
-  }, [navigation, item]))
+  const [timeToShow, setTimeToShow] = useState(current ? unix(item.start_at / 1000).fromNow() : "");
+  useFocusEffect(
+    useCallback(() => {
+      if (isCurrentJob) {
+        setTimeToShow(unix(item.start_at / 1000).fromNow());
+      }
+    }, [navigation, item])
+  );
 
   return (
     <Item key={item}>
@@ -199,11 +211,15 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
               <Text small weight="700" color="#1b5cce">
                 {item.job_type}
               </Text>
-              {current ?
-                <Text textTransform='uppercase' small>Active</Text>
-                :
-                <Text textTransform='uppercase' color='#a44' small>Scheduled</Text>
-              }
+              {current ? (
+                <Text textTransform="uppercase" small>
+                  Active
+                </Text>
+              ) : (
+                <Text textTransform="uppercase" color="#a44" small>
+                  Scheduled
+                </Text>
+              )}
             </Row>
             <Row style={{ marginBottom: 10 }}>
               <Text small>
@@ -215,24 +231,24 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
                 <Text>- {task.text}</Text>
               </Row>
             ))}
-            {!current ?
-              (
-                <Row style={{ marginTop: 10, justifyContent: 'flex-start', alignItems: 'center' }}>
-                  <FontAwesome style={{ marginEnd: 4, color: '#444' }} name='clock-o' />
-                  <Text color='#888' small>Available {timeToShow}</Text>
-                </Row>
-              )
-              : null}
+            {!current ? (
+              <Row style={{ marginTop: 10, justifyContent: "flex-start", alignItems: "center" }}>
+                <FontAwesome style={{ marginEnd: 4, color: "#444" }} name="clock-o" />
+                <Text color="#888" small>
+                  Available {timeToShow}
+                </Text>
+              </Row>
+            ) : null}
           </Column>
         </JobItemRow>
       </JobItemLink>
     </Item>
-  )
-}
+  );
+};
 
 const ListOfferItemDetail = ({ item }) => {
   const { authState } = useContext(GlobalContext);
-  const [state, setState] = useState({ loading: true, showCounterOffer: false })
+  const [state, setState] = useState({ loading: true, showCounterOffer: false });
 
   useEffect(() => {
     (async () => {
@@ -246,182 +262,219 @@ const ListOfferItemDetail = ({ item }) => {
         });
 
         const deployee = await response.json();
-        deployee.id = item.offer_received.deployee
+        deployee.id = item.offer_received.deployee;
         setState({
-          ...state, loading: false, deployee, name: `${deployee.first_name} ${deployee.last_name}`,
-          occupation: deployee.occupation, starRate: Number(deployee.star_rate)
-        })
+          ...state,
+          loading: false,
+          deployee,
+          name: `${deployee.first_name} ${deployee.last_name}`,
+          occupation: deployee.occupation,
+          starRate: Number(deployee.star_rate),
+        });
       } catch (e) {
-        console.log(e, 'Load offer fail')
-        setState({ ...state, loading: false })
+        console.log(e, "Load offer fail");
+        setState({ ...state, loading: false });
       }
-    })()
-  }, [item])
+    })();
+  }, [item]);
 
   const onSelect = useCallback(() => {
     if (!state.deployee) {
-      return
+      return;
     }
-    setState({ ...state, showCounterOffer: true })
-  }, [state, item])
+    setState({ ...state, showCounterOffer: true });
+  }, [state, item]);
 
-  return (
-    state.loading ?
-      <Item key={item.id} style={{ padding: 20, paddingVertical: 40, alignSelf: 'stretch', justifyContent: 'center' }}>
-        <ActivityIndicator color='darkgrey' />
-      </Item>
-      :
-      <Item key={item.id} >
-        <JobItemLink onPress={onSelect}>
-          <JobItemRow>
-            <Column>
-              <Row style={{ marginBottom: 8, }}>
-                <Text small weight="700" color="#1b5cce">
-                  {item.job_type}
-                </Text>
+  return state.loading ? (
+    <Item key={item.id} style={{ padding: 20, paddingVertical: 40, alignSelf: "stretch", justifyContent: "center" }}>
+      <ActivityIndicator color="darkgrey" />
+    </Item>
+  ) : (
+    <Item key={item.id}>
+      <JobItemLink onPress={onSelect}>
+        <JobItemRow>
+          <Column>
+            <Row style={{ marginBottom: 8 }}>
+              <Text small weight="700" color="#1b5cce">
+                {item.job_type}
+              </Text>
+            </Row>
+
+            {item.tasks.map((task) => (
+              <Row key={task.id}>
+                <Text>- {task.text}</Text>
               </Row>
+            ))}
 
-              {item.tasks.map((task) => (
-                <Row key={task.id}>
-                  <Text>- {task.text}</Text>
-                </Row>
-              ))}
+            <Row style={{ marginTop: 8, marginBottom: 12 }}>
+              <Text light small>
+                Initial Offer
+              </Text>
+              <Text small>
+                ${item.salary}/{item.wage}
+              </Text>
+            </Row>
 
-              <Row style={{ marginTop: 8, marginBottom: 12 }}>
-                <Text light small>
-                  Initial Offer
-                </Text>
-                <Text small>
-                  ${item.salary}/{item.wage}
-                </Text>
-              </Row>
-
-              {state.deployee && state.deployee.id && state.deployee.id === item.executed_by ?
-                <>
-                  <Row last style={{ marginTop: 4, justifyContent: 'flex-start', paddingRight: 0 }}>
-                    <Image
-                      source={{
-                        uri: `${config.API_URL}/images/${state.deployee.id}.jpg`,
-                      }}
-                      style={{ height: 70, width: 70, borderRadius: 45 }}
-                    />
-                    <Column>
-                      <Text small bold>{state.name}</Text>
+            {state.deployee && state.deployee.id && state.deployee.id === item.executed_by ? (
+              <>
+                <Row last style={{ marginTop: 4, justifyContent: "flex-start", paddingRight: 0 }}>
+                  <Image
+                    source={{
+                      uri: `${config.API_URL}/images/${state.deployee.id}.jpg`,
+                    }}
+                    style={{ height: 70, width: 70, borderRadius: 45 }}
+                  />
+                  <Column>
+                    <Text small bold>
+                      {state.name}
+                    </Text>
+                    <Row style={{ marginVertical: 4, paddingLeft: 0 }}>
+                      <Text light small>
+                        Suggested Offer
+                      </Text>
+                      <Text small>
+                        ${item.offer_received.offer}/{item.wage}
+                      </Text>
+                    </Row>
+                    {item.offer_received.counterOffer ? (
                       <Row style={{ marginVertical: 4, paddingLeft: 0 }}>
-                        <Text light small>Suggested Offer</Text>
-                        <Text small>
-                          ${item.offer_received.offer}/{item.wage}
+                        <Text color="teal" small>
+                          Counter Offer
+                        </Text>
+                        <Text color="teal" small>
+                          ${item.offer_received.counterOffer}/{item.wage}
                         </Text>
                       </Row>
-                      {item.offer_received.counterOffer ?
-                        <Row style={{ marginVertical: 4, paddingLeft: 0 }}>
-                          <Text color='teal' small>Counter Offer</Text>
-                          <Text color='teal' small>${item.offer_received.counterOffer}/{item.wage}</Text>
-                        </Row>
-                        : null}
-                    </Column>
-                  </Row>
-                </>
-                : null}
-            </Column>
-          </JobItemRow>
-        </JobItemLink>
-        {state.showCounterOffer ?
-          <CounterOfferView authState={authState} job_data={item} deployee={state.deployee} onComplete={() => setState({ ...state, showCounterOffer: false })} />
-          : null}
-      </Item >
-  )
-}
+                    ) : null}
+                  </Column>
+                </Row>
+              </>
+            ) : null}
+          </Column>
+        </JobItemRow>
+      </JobItemLink>
+      {state.showCounterOffer ? (
+        <CounterOfferView
+          authState={authState}
+          job_data={item}
+          deployee={state.deployee}
+          onComplete={() => setState({ ...state, showCounterOffer: false })}
+        />
+      ) : null}
+    </Item>
+  );
+};
 
 const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
-  const [loading, setLoading] = useState(false)
-  const [salary, setSalary] = useState(job_data.offer_received?.offer)
+  const [loading, setLoading] = useState(false);
+  const [salary, setSalary] = useState(job_data.offer_received?.offer);
 
   const onRejectOffer = useCallback(async () => {
     if (salary) {
       await new Promise(async (res) => {
         Confirm({
-          options: ['Reject', 'Cancel'],
+          options: ["Reject", "Cancel"],
           cancelButtonIndex: 1,
           title: `Reject Offer From ${deployee.first_name}`,
           message: `If you reject, the job will be available in the job pool`,
           onPress: async (index) => {
             try {
-              setLoading(true)
+              setLoading(true);
 
               if (index === 0) {
-                await JobsControllers.cancelOffer(job_data.id)
-                sendNotification(authState.userToken, deployee.id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer rejected`, data: { type: 'offerdecline', id: job_data.id, sender: authState.userID } })
+                await JobsControllers.cancelOffer(job_data.id);
+                sendNotification(authState.userToken, deployee.id, {
+                  title: `GigChasers - ${job_data.job_title}`,
+                  body: `Offer rejected`,
+                  data: { type: "offerdecline", id: job_data.id, sender: authState.userID },
+                });
               }
-              setLoading(false)
-              onComplete()
+              setLoading(false);
+              onComplete();
             } catch (e) {
-              console.log(e, 'offer rejection')
-              setLoading(false)
+              console.log(e, "offer rejection");
+              setLoading(false);
             } finally {
-              res()
+              res();
             }
           },
-          onCancel: res
-        })
-      })
+          onCancel: res,
+        });
+      });
     }
-  }, [loading, deployee, job_data, salary])
+  }, [loading, deployee, job_data, salary]);
 
   const onSubmitOffer = useCallback(async () => {
     if (salary) {
-      const offer = parseFloat(salary).toFixed(2)
+      const offer = parseFloat(salary).toFixed(2);
       if (Number.isNaN(offer) || isNaN(offer)) {
-        console.log(offer, ': is not a number?')
-        return
+        console.log(offer, ": is not a number?");
+        return;
       }
       await new Promise(async (res) => {
-        const isCounterOffer = offer !== parseFloat(job_data.offer_received.offer).toFixed(2)
+        const isCounterOffer = offer !== parseFloat(job_data.offer_received.offer).toFixed(2);
         Confirm({
-          options: [isCounterOffer ? 'Send' : 'Approve', 'Cancel'],
+          options: [isCounterOffer ? "Send" : "Approve", "Cancel"],
           cancelButtonIndex: 1,
           title: !isCounterOffer ? `Approve Offer From ${deployee.first_name}` : `Send Counter Offer To ${deployee.first_name}`,
-          message: !isCounterOffer ? `If you approve, the job will be accepted by this deployee` : `Offer will be sent to ${deployee.first_name} for confirmation`,
+          message: !isCounterOffer
+            ? `If you approve, the job will be accepted by this deployee`
+            : `Offer will be sent to ${deployee.first_name} for confirmation`,
           onPress: async (index) => {
             try {
-              setLoading(true)
+              setLoading(true);
 
               if (index === 0) {
                 if (isCounterOffer) {
-                  await JobsControllers.counterOffer(job_data.id, offer)
-                  sendNotification(authState.userToken, deployee.id, { title: `GigChasers - ${job_data.job_title}`, body: `Counter offer received`, data: { type: 'offerreceive', id: job_data.id, sender: authState.userID } })
+                  await JobsControllers.counterOffer(job_data.id, offer);
+                  sendNotification(authState.userToken, deployee.id, {
+                    title: `GigChasers - ${job_data.job_title}`,
+                    body: `Counter offer received`,
+                    data: { type: "offerreceive", id: job_data.id, sender: authState.userID },
+                  });
                 } else {
-                  await JobsControllers.approveOffer(job_data.id, deployee.id)
-                  sendNotification(authState.userToken, deployee.id, { title: `GigChasers - ${job_data.job_title}`, body: `Offer approved`, data: { type: 'offeraccept', id: job_data.id, sender: authState.userID } })
+                  await JobsControllers.approveOffer(job_data.id, deployee.id);
+                  sendNotification(authState.userToken, deployee.id, {
+                    title: `GigChasers - ${job_data.job_title}`,
+                    body: `Offer approved`,
+                    data: { type: "offeraccept", id: job_data.id, sender: authState.userID },
+                  });
                 }
               }
-              setLoading(false)
-              onComplete()
+              setLoading(false);
+              onComplete();
             } catch (e) {
-              setLoading(false)
-              console.log(e, 'offer acceptance')
+              setLoading(false);
+              console.log(e, "offer acceptance");
             } finally {
-              res()
+              res();
             }
           },
-          onCancel: res
-        })
-      })
+          onCancel: res,
+        });
+      });
     }
-  }, [loading, deployee, job_data, salary])
+  }, [loading, deployee, job_data, salary]);
 
   return (
-    <Modal animationType='fade' transparent visible onRequestClose={onComplete} onDismiss={onComplete} style={{ height: '100%', backgroundColor: '#0004', justifyContent: 'center' }} >
-      <ScrollView bounces={false} contentContainerStyle={{ justifyContent: 'center', flexGrow: 1, backgroundColor: '#0004' }}>
+    <Modal
+      animationType="fade"
+      transparent
+      visible
+      onRequestClose={onComplete}
+      onDismiss={onComplete}
+      style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
+    >
+      <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0004" }}>
         <SafeAreaView>
-          <KeyboardAvoidingView behavior='padding' style={{ justifyContent: 'flex-end', margin: 8 }}>
-            <Item style={{ justifyContent: 'space-between', borderRadius: 8, paddingVertical: 8, flex: 1 }}>
-              <Button onPress={onComplete} style={{ position: 'absolute', top: 4, left: 4 }}>
-                <MaterialCommunityIcons size={24} color='red' name='close-circle' />
+          <KeyboardAvoidingView behavior="padding" style={{ justifyContent: "flex-end", margin: 8 }}>
+            <Item style={{ justifyContent: "space-between", borderRadius: 8, paddingVertical: 8, flex: 1 }}>
+              <Button onPress={onComplete} style={{ position: "absolute", top: 4, left: 4 }}>
+                <MaterialCommunityIcons size={24} color="red" name="close-circle" />
               </Button>
-              <CounterRow style={{ justifyContent: 'center', flex: 1 }} first>
+              <CounterRow style={{ justifyContent: "center", flex: 1 }} first>
                 <Column>
-                  <View last style={{ marginBottom: 20, justifyContent: 'flex-start', flexDirection: 'row', paddingRight: 0 }}>
+                  <View last style={{ marginBottom: 20, justifyContent: "flex-start", flexDirection: "row", paddingRight: 0 }}>
                     <Image
                       source={{
                         uri: `${config.API_URL}/images/${deployee.id}.jpg`,
@@ -429,22 +482,39 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                       style={{ height: 70, width: 70, borderRadius: 45 }}
                     />
                     <Column>
-                      <Text medium>{deployee.first_name} {deployee.last_name}</Text>
-                      <StarRating disabled={true} containerStyle={{ justifyContent: 'flex-start', marginVertical: 4 }} starStyle={{ marginHorizontal: 2 }} maxStars={5} rating={deployee.star_rate} starSize={16} />
-                      <Text small light>{deployee.occupation}</Text>
+                      <Text medium>
+                        {deployee.first_name} {deployee.last_name}
+                      </Text>
+                      <StarRating
+                        disabled={true}
+                        containerStyle={{ justifyContent: "flex-start", marginVertical: 4 }}
+                        starStyle={{ marginHorizontal: 2 }}
+                        maxStars={5}
+                        rating={deployee.star_rate}
+                        starSize={16}
+                      />
+                      <Text small light>
+                        {deployee.occupation}
+                      </Text>
                     </Column>
                   </View>
 
-                  <Text small style={{ textTransform: 'uppercase', marginVertical: 30, textAlign: 'center' }} bold>Approve suggested offer or Send a counter offer to deployee</Text>
+                  <Text small style={{ textTransform: "uppercase", marginVertical: 30, textAlign: "center" }} bold>
+                    Approve suggested offer or Send a counter offer to deployee
+                  </Text>
 
-                  <View style={{ flexDirection: 'row', marginTop: 24, justifyContent: 'space-between' }}>
-                    <Text small light marginBottom="5px">Current Offer</Text>
-                    <Text small marginBottom="5px">${job_data.salary}/hr</Text>
+                  <View style={{ flexDirection: "row", marginTop: 24, justifyContent: "space-between" }}>
+                    <Text small light marginBottom="5px">
+                      Current Offer
+                    </Text>
+                    <Text small marginBottom="5px">
+                      ${job_data.salary}/hr
+                    </Text>
                   </View>
 
                   <View style={{ marginVertical: 16 }}>
                     <WageInput>
-                      <SalaryField style={{ justifyContent: 'center' }}>
+                      <SalaryField style={{ justifyContent: "center" }}>
                         <TextField
                           disabled={loading}
                           suffix="/hr"
@@ -463,33 +533,38 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                       </SalaryField>
                     </WageInput>
                   </View>
-
                 </Column>
               </CounterRow>
 
               <CounterRow last>
-                {loading ? <ActivityIndicator animating style={{ marginEnd: 4, marginVertical: 8 }} color='darkgrey' /> :
+                {loading ? (
+                  <ActivityIndicator animating style={{ marginEnd: 4, marginVertical: 8 }} color="darkgrey" />
+                ) : (
                   <>
-                    <Column style={{ alignItems: 'center' }}>
+                    <Column style={{ alignItems: "center" }}>
                       <Button disabled={loading} decline onPress={onRejectOffer}>
-                        <Text style={{ color: "red" }} medium>Reject</Text>
+                        <Text style={{ color: "red" }} medium>
+                          Reject
+                        </Text>
                       </Button>
                     </Column>
                     <Column>
-                      <Button disabled={loading} style={{ flexDirection: 'row' }} accept onPress={onSubmitOffer}>
-                        <Text style={{ color: "white" }} medium>Approve</Text>
+                      <Button disabled={loading} style={{ flexDirection: "row" }} accept onPress={onSubmitOffer}>
+                        <Text style={{ color: "white" }} medium>
+                          Approve
+                        </Text>
                       </Button>
                     </Column>
                   </>
-                }
+                )}
               </CounterRow>
-            </Item >
+            </Item>
           </KeyboardAvoidingView>
         </SafeAreaView>
       </ScrollView>
     </Modal>
-  )
-}
+  );
+};
 
 // Payments Section
 const Item = styled.View`
@@ -590,7 +665,6 @@ const Button = styled.TouchableOpacity`
     }
   }};
 `;
-
 
 const CounterRow = styled.View`
   flex-direction: row;
