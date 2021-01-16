@@ -29,6 +29,10 @@ Text.defaultProps.allowFontScaling = false;
 TextInput.defaultProps = TextInput.defaultProps || {};
 TextInput.defaultProps.allowFontScaling = false;
 
+// Ignore Some Warnings
+LogBox.ignoreLogs(["Setting a timer", "VirtualizedLists should never be nested inside plain ScrollViews with the same orientation"]);
+
+// DEPRECATED
 // LogBox.ignoreWarnings(["Setting a timer"]);
 // const _console = _.clone(console);
 // console.warn = (message) => {
