@@ -1,6 +1,6 @@
 // Dependencies React
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Image, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import Lightbox from "react-native-lightbox";
 // Miscellaneous
@@ -8,6 +8,8 @@ import Lightbox from "react-native-lightbox";
 export default function PhotoItem({ item, onRemove = null }) {
     const [lightbox, setLightbox] = useState(false);
     const [loading, setLoading] = useState(false)
+
+    const mutable = useMemo(() => ({ loaded: false }),[])
     const borderRadius = onRemove ? 6 : 0
 
     return (
@@ -17,8 +19,17 @@ export default function PhotoItem({ item, onRemove = null }) {
                 willClose={() => setLightbox(false)}
                 backgroundColor='#000000f4' underlayColor='transparent'>
                 <>
-                    <Image onLoad={() => setLoading(false)} onLoadStart={() => setLoading(true)} style={[{ alignSelf: "center", height: 150, width: 150, borderRadius }, loading ? { display: 'none' } : null, lightbox ? { borderRadius: 0, height: 'auto', width: '100%', aspectRatio: 1 } : null]} source={{ uri: item.uri, }} />
-                    {!loading ? null :
+                    <Image onLoadEnd={() => {
+                        if (!mutable.loaded) {
+                            mutable.loaded = true;
+                            setLoading(false)
+                        }
+                    }} onLoadStart={() => {
+                        if (!mutable.loaded) {
+                            setLoading(true)
+                        }
+                    }} style={[{ backgroundColor: '#cacaca', alignSelf: "center", height: 150, width: 150, borderRadius }, loading && !mutable.loaded ? { display: 'none' } : null, lightbox ? { borderRadius: 0, height: 'auto', width: '100%', aspectRatio: 1 } : null]} source={{ uri: item.uri, }} />
+                    {!loading || mutable.loaded ? null :
                         <View style={[{ alignSelf: "center", justifyContent: 'center', backgroundColor: '#cacaca', height: 150, width: 150, borderRadius }, lightbox ? { borderRadius: 0, height: 'auto', width: '100%', aspectRatio: 1 } : null]}>
                             <ActivityIndicator size='small' color='#444' />
                         </View>

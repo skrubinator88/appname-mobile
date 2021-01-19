@@ -40,6 +40,7 @@ export default function Header({
   nextColor = "",
   nextAction,
   children,
+  refreshControl
 }) {
   // @Required
   if (!navigation) throw Error("navigation: Navigation is Required");
@@ -93,6 +94,7 @@ export default function Header({
   // Structure
   return (
     <ScrollView
+      refreshControl={refreshControl}
       contentInset={{
         top: -SPACER_SIZE + statusBarHeight,
         bottom: -SPACER_SIZE + statusBarHeight,

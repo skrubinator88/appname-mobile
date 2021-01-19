@@ -1,17 +1,16 @@
 // Dependencies
-import axios from "axios";
 import * as firebase from "firebase";
-
+import { GeoFirestore } from "../config/firebase";
 // Config
 import config from "../env";
-import { firestore, GeoFirestore } from "../config/firebase";
-
 // Functions
-import { distanceBetweenTwoCoordinates, sortJobsByProximity, isCurrentJob, isCurrentJobCreatedByUser } from "../functions";
-
+import { distanceBetweenTwoCoordinates, isCurrentJob, isCurrentJobCreatedByUser, sortJobsByProximity } from "../functions";
 // Redux Actions
 import JobsStoreActions from "../rdx-actions/jobs.action";
 import ListingsActions from "../rdx-actions/listings.action";
+
+
+
 const Actions = { JobsStoreActions, ListingsActions };
 
 exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
