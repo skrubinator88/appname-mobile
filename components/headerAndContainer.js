@@ -4,6 +4,7 @@ import { getStatusBarHeight } from "react-native-status-bar-height";
 import { Platform, SafeAreaView, Dimensions, View, ScrollView, KeyboardAvoidingView } from "react-native";
 import styled from "styled-components/native";
 import * as VectorIcons from "@expo/vector-icons";
+import { RefreshControl } from "react-native";
 
 const isIos = Platform.OS === "ios";
 const height = Dimensions.get("window").height;
@@ -40,7 +41,7 @@ export default function Header({
   nextColor = "",
   nextAction,
   children,
-  refreshControl
+  flexible = true
 }) {
   // @Required
   if (!navigation) throw Error("navigation: Navigation is Required");
@@ -94,7 +95,8 @@ export default function Header({
   // Structure
   return (
     <ScrollView
-      refreshControl={refreshControl}
+      bounces={flexible}
+      scrollEnabled={flexible}
       contentInset={{
         top: -SPACER_SIZE + statusBarHeight,
         bottom: -SPACER_SIZE + statusBarHeight,

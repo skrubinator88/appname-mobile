@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { KeyboardAvoidingView, Modal, RefreshControl, SafeAreaView, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -21,16 +21,19 @@ export default function PaymentScreen({ navigation }) {
   const dispatch = useDispatch()
   const payments = useSelector((state) => state.payment)
 
+  const refresh = useCallback(async () => {
+    setRefreshing(true)
+
+    setTimeout(() => setRefreshing(false), 5000)
+  }, [refreshing, payments])
+
   useEffect(() => {
     setRefreshing(false)
   }, [])
 
   return (
     <Container
-      refreshControl={<RefreshControl refreshing={refreshing} tintColor='#fff' onRefresh={async () => {
-        setRefreshing(true)
-
-      }} />}
+      flexible={false}
       navigation={navigation}
       nextTitle="Save"
       color="white"
@@ -42,58 +45,68 @@ export default function PaymentScreen({ navigation }) {
       nextSize={25}
       nextAction={() => { }}
     >
-      {/* Payments Section */}
-      {authState.userData.role === 'contractor' && (<AccountView refreshing={refreshing} hasActiveAccount={payments.hasActiveAccount} balance={payments.balance} />)}
-
-      <PaymentSection>
-        <SectionTitle>
-          <View style={{ margin: 10 }}>
-            <Text small bold color="#474747">
-              PAYMENT METHODS
-            </Text>
-          </View>
-        </SectionTitle>
-
-
-        {payments.methods && payments.methods.length > 0 ? payments.methods.map((method) => <MethodView method={method} />) :
-          <View style={{ paddingVertical: 24 }}>
-            <Text light small>NO PAYMENT METHOD ADDED YET</Text>
-          </View>
-        }
-
-        <PaymentItemRow>
-          <PaymentItemRowLink onPress={() => setAddPaymentMethod(true)}>
-            <Text small weight="700" color="#3869f3">
-              ADD PAYMENT METHOD
-            </Text>
-          </PaymentItemRowLink>
-        </PaymentItemRow>
-      </PaymentSection>
-      {addPaymentMethod && (
-        <Modal
-          animationType="fade"
-          transparent
-          visible
-          onRequestClose={() => setAddPaymentMethod(false)}
-          onDismiss={() => setAddPaymentMethod(false)}
-          style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
+      <View style={{ height:'100%' }}>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          navigation={navigation}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} tintColor='#888' onRefresh={refresh} />}
         >
-          <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0004" }}>
-            <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 120, flexGrow: 1 }}>
-              <KeyboardAvoidingView behavior="padding" style={{ justifyContent: "center", margin: 8, flex: 1 }}>
-                <StripeCheckoutScreen close={() => setAddPaymentMethod(false)}>
-                  <TouchableOpacity onPress={() => setAddPaymentMethod(false)} style={{ position: "absolute", top: 4, left: 4 }}>
-                    <MaterialCommunityIcons size={24} color="red" name="close-circle" />
-                  </TouchableOpacity>
-                </StripeCheckoutScreen>
-              </KeyboardAvoidingView>
-            </SafeAreaView>
-          </ScrollView>
-        </Modal>
-      )}
+          <>
+            {/* Payments Section */}
+            {authState.userData.role === 'contractor' && (<AccountView refreshing={refreshing} hasActiveAccount={payments.hasActiveAccount} balance={payments.balance} />)}
 
-      {/* Preffered Section */}
-      {payments.defaultMethod && <PreferredMethodView method={payments.defaultMethod} />}
+            <PaymentSection>
+              <SectionTitle>
+                <View style={{ margin: 10 }}>
+                  <Text small bold color="#474747">PAYMENT METHODS</Text>
+                </View>
+              </SectionTitle>
+
+
+              {payments.methods && payments.methods.length > 0 ? payments.methods.map((method) => <MethodView method={method} />) :
+                <View style={{ paddingVertical: 24 }}>
+                  <Text light small>NO PAYMENT METHOD ADDED YET</Text>
+                </View>
+              }
+
+              <PaymentItemRow>
+                <PaymentItemRowLink onPress={() => setAddPaymentMethod(true)}>
+                  <Text small weight="700" color="#3869f3">
+                    ADD PAYMENT METHOD
+            </Text>
+                </PaymentItemRowLink>
+              </PaymentItemRow>
+            </PaymentSection>
+            {addPaymentMethod && (
+              <Modal
+                animationType="fade"
+                transparent
+                visible
+                onRequestClose={() => setAddPaymentMethod(false)}
+                onDismiss={() => setAddPaymentMethod(false)}
+                style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
+              >
+                <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0004" }}>
+                  <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 120, flexGrow: 1 }}>
+                    <KeyboardAvoidingView behavior="padding" style={{ justifyContent: "center", margin: 8, flex: 1 }}>
+                      <StripeCheckoutScreen close={() => setAddPaymentMethod(false)}>
+                        <TouchableOpacity onPress={() => setAddPaymentMethod(false)} style={{ position: "absolute", top: 4, left: 4 }}>
+                          <MaterialCommunityIcons size={24} color="red" name="close-circle" />
+                        </TouchableOpacity>
+                      </StripeCheckoutScreen>
+                    </KeyboardAvoidingView>
+                  </SafeAreaView>
+                </ScrollView>
+              </Modal>
+            )}
+
+            {/* Preffered Section */}
+            {payments.defaultMethod && <PreferredMethodView method={payments.defaultMethod} />}
+          </>
+        </ScrollView>
+      </View>
     </Container>
   );
 }

@@ -63,21 +63,22 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount }) {
 
     return (
         <AccountSection>
+
+            <View style={{ margin: 10, padding: 10, justifyContent: 'center', alignItems: 'center' }}>
+                <Ionicons name="ios-wallet" size={60} />
+                <Text small light>ACCOUNT</Text>
+                {!refreshing && <Text title bold color="#474747">{CurrencyFormatter.format(balance / 100)}</Text>}
+            </View>
+
             {refreshing ?
-                <View style={{ padding: 12 }} >
+                <View style={{ padding: 20 }} >
                     <ActivityIndicator color='#3869f3' size='small' />
                 </View>
                 :
-                <View style={{ margin: 10, padding: 10, justifyContent: 'center', alignItems: 'center' }}>
-                    <Ionicons name="ios-wallet" size={60} />
-                    <Text small light>ACCOUNT</Text>
-                    <Text title bold color="#474747">{CurrencyFormatter.format(balance / 100)}</Text>
-                </View>
+                <TouchableOpacity style={{ backgroundColor: '#3869f3', marginBottom: 12, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text small bold color='#fff' >{hasActiveAccount ? "PAYOUT" : "SETUP PAYOUT"}</Text>
+                </TouchableOpacity>
             }
-
-            <TouchableOpacity style={{ backgroundColor: '#3869f3', marginBottom: 12, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, alignItems: 'center', justifyContent: 'center' }}>
-                <Text small bold color='#fff' >{hasActiveAccount ? "PAYOUT" : "SETUP PAYOUT"}</Text>
-            </TouchableOpacity>
         </AccountSection>
     )
 }
