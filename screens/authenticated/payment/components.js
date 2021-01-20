@@ -23,21 +23,21 @@ export const CurrencyFormatter = Intl.NumberFormat('en-US', { style: 'currency',
 export const NumberFormatter = Intl.NumberFormat()
 
 export function MethodView({ method }) {
-    <PaymentItemRow key={method._id}>
-        <PaymentItemRowLink>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                {CARD_ICON[method.brand]}
-                <Text small weight="700" textTransform='uppercase' color="#4a4a4a">{method.brand} ****{method.mask}</Text>
-            </View>
+    return (
+        <PaymentItemRow key={method.id}>
+            <PaymentItemRowLink>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                    {CARD_ICON[method.brand]({ size: 20 })}
+                    <Text small weight="700" style={{ marginStart: 4 }} textTransform='uppercase' color="#4a4a4a">{method.brand} ****{method.mask}</Text>
+                </View>
 
-            <Text small weight="700" color="#4a4a4a">EXP: {`${method.month}/${method.year}`}</Text>
-        </PaymentItemRowLink>
-    </PaymentItemRow>
-
+                <Text small weight="700" color="#4a4a4a">EXP: {`${method.month.padStart(2, '0')}/${method.year}`}</Text>
+            </PaymentItemRowLink>
+        </PaymentItemRow>
+    )
 }
 
 export function PreferredMethodView({ method }) {
-
     return (
         <PaymentSection>
             <SectionTitle>
@@ -108,7 +108,7 @@ const PaymentSection = styled.View`
 const AccountSection = styled.View`
   justify-content: center;
   align-items: center;
-  border-width: ${StyleSheet.hairlineWidth}px;
+  border-width: ${StyleSheet.hairlineWidth / 2}px;
   border-color: #3869f3;
   margin: 20px;
   border-radius: 8px;
@@ -118,7 +118,7 @@ const AccountSection = styled.View`
 
 const PaymentItemRow = styled.View`
   background: white;
-  padding: 10px;
+  padding: 20px 10px;
   flex-direction: row;
   width: 100%;
   justify-content: space-around;
