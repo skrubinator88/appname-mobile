@@ -1,12 +1,16 @@
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import "intl";
 import 'intl/locale-data/jsonp/en';
-import React from "react";
-import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useContext, useState } from "react";
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
+import { GlobalContext } from "../../../components/context";
 import Text from "../../../components/text";
-
-
+import { initiateAccount } from "../../../controllers/PaymentController";
+import { CALLBACK_URL, MyWebView } from "./stripe";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 
 export const CARD_ICON = {
@@ -22,10 +26,10 @@ export const CARD_ICON = {
 export const CurrencyFormatter = Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 export const NumberFormatter = Intl.NumberFormat()
 
-export function MethodView({ method }) {
+export function MethodView({ method, onPress }) {
     return (
         <PaymentItemRow key={method.id}>
-            <PaymentItemRowLink>
+            <PaymentItemRowLink onPress={onPress}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
                     {CARD_ICON[method.brand]({ size: 20 })}
                     <Text small weight="700" style={{ marginStart: 4 }} textTransform='uppercase' color="#4a4a4a">{method.brand} ****{method.mask}</Text>
@@ -60,6 +64,27 @@ export function PreferredMethodView({ method }) {
 }
 
 export function AccountView({ refreshing, balance = 0, hasActiveAccount }) {
+    const { authState } = useContext(GlobalContext);
+    const [setupAccount, setSetupAccount] = useState(false)
+    const [showSetup, setShowSetup] = useState(false)
+    const [uri, setURI] = useState('')
+
+    const dispatch = useDispatch()
+    const payments = useSelector((state) => state.payment)
+    const actionSheet = useActionSheet()
+
+    const setup = useCallback(async () => {
+        setShowSetup(true)
+        try {
+            const uri = await initiateAccount(authState)
+            setURI(uri)
+        } catch (e) {
+            console.log(e)
+            Alert.alert('Account Setup Failed', 'Failed to setup your account')
+            setShowSetup(false)
+        } finally {
+        }
+    }, [authState, uri])
 
     return (
         <AccountSection>
@@ -75,10 +100,57 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount }) {
                     <ActivityIndicator color='#3869f3' size='small' />
                 </View>
                 :
-                <TouchableOpacity style={{ backgroundColor: '#3869f3', marginBottom: 12, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' }}>
+                <TouchableOpacity style={{ backgroundColor: '#3869f3', marginBottom: 12, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' }}
+                    onPress={() => {
+                        if (hasActiveAccount) {
+
+                        } else {
+                            setup()
+                        }
+                    }}>
                     <Text small bold color='#fff' >{hasActiveAccount ? "PAYOUT" : "SETUP PAYOUT"}</Text>
                 </TouchableOpacity>
             }
+            {showSetup ?
+                <Modal
+                    animationType="fade"
+                    transparent
+                    visible
+                    onRequestClose={() => setShowSetup(false)}
+                    onDismiss={() => setShowSetup(false)}
+                    style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
+                >
+                    <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0004" }}>
+                        <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 120, flexGrow: 1 }}>
+                            <KeyboardAvoidingView behavior="padding" style={{ justifyContent: "center", margin: 8, flex: 1 }}>
+                                <View style={{ flexGrow: 1, padding: 8, backgroundColor: '#fff', borderRadius: 8, alignItems: "stretch", }}>
+                                    {!setupAccount || !uri ?
+                                        <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+                                            <ActivityIndicator />
+                                        </View>
+                                        : null}
+                                    {uri ? <MyWebView forAccount
+                                        style={{ flex: 1, paddingVertical: 8, display: setupAccount && uri ? 'flex' : 'none' }}
+                                        options={{
+                                            uri,
+                                            successUrl: CALLBACK_URL.SUCCESS,
+                                            cancelUrl: CALLBACK_URL.CANCELLED,
+                                        }}
+                                        onLoadingComplete={() => setSetupAccount(true)}
+                                        onLoadingFail={() => setShowSetup(false)}
+                                        onSuccess={() => setShowSetup(false)}
+                                        onCancel={() => setShowSetup(false)}
+                                    />
+                                        : null}
+                                    <TouchableOpacity onPress={() => setShowSetup(false)} style={{ position: "absolute", top: 4, left: 4 }}>
+                                        <MaterialCommunityIcons size={24} color="red" name="close-circle" />
+                                    </TouchableOpacity>
+                                </View>
+                            </KeyboardAvoidingView>
+                        </SafeAreaView>
+                    </ScrollView>
+                </Modal>
+                : null}
         </AccountSection>
     )
 }

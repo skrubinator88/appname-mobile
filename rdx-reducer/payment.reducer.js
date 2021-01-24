@@ -8,6 +8,10 @@ const initialState = {
 
 export const PaymentReducer = (prevState = initialState, action) => {
     switch (action.type) {
+        case "REMOVE_PAYMENT_METHOD":
+            const { methods: existing } = prevState
+            return { ...prevState, methods: [...existing.filter(v => v.id !== action.data.id)] }
+
         case "ADD_PAYMENT_METHOD":
             const { methods } = prevState
             return { ...prevState, methods: [...methods.filter(v => v.id !== action.data.id), action.data] }

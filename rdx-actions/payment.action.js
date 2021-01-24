@@ -3,6 +3,10 @@ exports.addMethod = (data) => {
   return { type: "ADD_PAYMENT_METHOD", data };
 };
 
+exports.removeMethod = (data) => {
+  return { type: "REMOVE_PAYMENT_METHOD", data };
+};
+
 exports.updateBalance = (data) => {
   return { type: "SET_BALANCE", data };
 };

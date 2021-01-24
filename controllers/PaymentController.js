@@ -18,8 +18,56 @@ export const getPaymentInfo = async (authState, dispatch) => {
 
     data.methods.map((method) => dispatch(PaymentActions.addMethod(method)))
     data.transactions.map((txn) => dispatch(PaymentActions.updateTransaction(txn)))
-    await dispatch(PaymentActions.updateBalance(data.balance))
+    await dispatch(PaymentActions.updateBalance({ balance: data.balance, hasActiveAccount: data.hasActiveAccount }))
     await dispatch(PaymentActions.updateDefault(data.methods.filter(v => v.isDefault)[0]))
   })
+};
 
+export const setDefaultMethod = async (method, authState, dispatch) => {
+  return fetch(`${env.API_URL}/payments/register_default`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
+    body: JSON.stringify({ method: method.id })
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+    await dispatch(PaymentActions.updateDefault(method))
+  })
+};
+
+export const removeMethod = async (method, authState, dispatch) => {
+  return fetch(`${env.API_URL}/payments/remove_payment`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
+    body: JSON.stringify({ method: method.id })
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+    await dispatch(PaymentActions.updateDefault(null))
+    await dispatch(PaymentActions.removeMethod(method))
+  })
+};
+
+export const initiateAccount = async (authState) => {
+  return fetch(`${env.API_URL}/payments/setup_account`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
+    body: JSON.stringify({ first_name: authState.userData.first_name, last_name: authState.userData.last_name, phone: authState.userData.phone_number, email: authState.userData.email }),
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+    return (await res.json()).url
+  })
 };
