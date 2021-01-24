@@ -15,7 +15,7 @@ import Text from "../../../components/text";
 import env from "../../../env";
 import { GlobalContext } from "../../../components/context";
 
-const CALLBACK_URL = {
+export const CALLBACK_URL = {
   // SUCCESS: process.env.BASE_HOST_URI + '/api/payments/session/success',
   SUCCESS: 'https://stripe.com/success?sc_checkout=success',
   CANCELLED: 'https://stripe.com/cancel?sc_checkout=cancel',
@@ -92,7 +92,7 @@ export default function StripeCheckoutScreen({ children, close = () => { } }) {
   );
 }
 
-export function MyWebView({ options, stripePublicKey, onSuccess, onCancel, onLoadingComplete, onLoadingFail, style }) {
+export function MyWebView({ options, forAccount, stripePublicKey, onSuccess, onCancel, onLoadingComplete, onLoadingFail, style }) {
   const webViewRef = useRef()
   const STRIPE_CHECKOUT_HTML = `
   <html>
@@ -152,11 +152,13 @@ export function MyWebView({ options, stripePublicKey, onSuccess, onCancel, onLoa
       onShouldStartLoadWithRequest={onNavHandler}
       style={[{ alignItems: 'stretch', alignSelf: 'stretch', position: 'relative', paddingVertical: 4 }, style]}
       containerStyle={{ alignItems: 'stretch', flexGrow: 1, position: 'relative' }}
-      source={{
-        html: STRIPE_CHECKOUT_HTML
-        // uri: 'https://google.com'
-      }}
-      onMessage={(e) => {
+      source={forAccount ? {
+        uri: options.uri
+      } : {
+          html: STRIPE_CHECKOUT_HTML
+          // uri: 'https://google.com'
+        }}
+      onMessage={forAccount ? null : (e) => {
         switch (e.nativeEvent.data) {
           case 'pong':
             // Load and redirest to Stripe was successful
@@ -170,7 +172,9 @@ export function MyWebView({ options, stripePublicKey, onSuccess, onCancel, onLoa
       }}
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
+      bounces={false}
       originWhitelist={'*'}
+      onLoad={forAccount ? onLoadingComplete : null}
       onError={onLoadingFail}
       onHttpError={onLoadingFail}
       ref={webViewRef}

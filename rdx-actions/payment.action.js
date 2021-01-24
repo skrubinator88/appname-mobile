@@ -1,17 +1,21 @@
 // Store
-exports.add = (data) => {
+exports.addMethod = (data) => {
   return { type: "ADD_PAYMENT_METHOD", data };
 };
 
-exports.update = (data) => {
+exports.removeMethod = (data) => {
+  return { type: "REMOVE_PAYMENT_METHOD", data };
+};
+
+exports.updateBalance = (data) => {
   return { type: "SET_BALANCE", data };
 };
 
-exports.update = (data) => {
+exports.updateDefault = (data) => {
   return { type: "SET_DEFAULT_METHOD", data };
 };
 
-exports.remove = (data) => {
+exports.updateTransaction = (data) => {
   return { type: "SET_TRANSACTION", data };
 };
 
