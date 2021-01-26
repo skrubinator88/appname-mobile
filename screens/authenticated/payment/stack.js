@@ -14,7 +14,7 @@ export default function PaymentStackScreen() {
   return (
     <HelpStack.Navigator headerMode="none">
       <HelpStack.Screen name="Payment" component={PaymentScreen} />
-      <HelpStack.Screen name="Stripe" component={StripeModal} />
+      <HelpStack.Screen name="StripeMethodSetup" component={StripeModal} />
     </HelpStack.Navigator>
   );
 }
