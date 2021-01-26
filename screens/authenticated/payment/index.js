@@ -114,7 +114,7 @@ export default function PaymentScreen({ navigation }) {
         refreshControl={<RefreshControl refreshing={false} tintColor='#888' onRefresh={refresh} />}
       >
         {/* Payments Section */}
-        {authState.userData.role === 'contractor' && (<AccountView refreshing={refreshing} hasActiveAccount={payments.hasActiveAccount} balance={payments.balance} />)}
+        {authState.userData.role === 'contractor' && (<AccountView refreshing={refreshing} hasAccount={payments.hasAccount} hasActiveAccount={payments.hasActiveAccount} balance={payments.balance} />)}
 
         <PaymentSection>
           <SectionTitle>
