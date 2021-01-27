@@ -31,6 +31,7 @@ import { GlobalContext } from "../../../components/context";
 import Header from "../../../components/header";
 import Text from "../../../components/text";
 import GoogleServicesController from "../../../controllers/GoogleServicesController";
+import JobSuggestions from "../../../models/fetchedSuggestedItems";
 // Controllers
 import JobsController from "../../../controllers/JobsControllers";
 import PermissionsControllers from "../../../controllers/PermissionsControllers";
@@ -41,12 +42,13 @@ import TaskModal from "./taskModal";
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
 
-export default function workModal({ navigation, route }) {
+export default function ListingItem({ navigation, route }) {
   // - - Constructor - -
   const { authState } = useContext(GlobalContext);
 
   // - - State - -
   const [job_type, setJobType] = useState(""); // Input Field
+  const [selected_job_type, setSelectedJobType] = useState(""); // Input Field
   const [job_title, setJobTitle] = useState(""); // Input Field
   const [location, setLocation] = useState(""); // Input Field
   const [salary, setSalary] = useState(""); // Input Field
@@ -62,6 +64,17 @@ export default function workModal({ navigation, route }) {
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState(Platform.OS === "ios" ? "datetime" : "date");
   const [showDate, setShowDate] = useState(false);
+
+  // - - Refs - -
+  const job_type_ref = useRef(null);
+  const scroll = useRef(null);
+  const location_address_ref = useRef(null);
+
+  let suggestedItems = JobSuggestions.filter((item) => {
+    const title = item.toLowerCase();
+    const input = job_type.toLowerCase().trim();
+    return title.indexOf(input) != -1;
+  });
 
   const updateDate = async (e, dateParam) => {
     if (dateParam) {
@@ -194,38 +207,34 @@ export default function workModal({ navigation, route }) {
     }
   }, [photos]);
 
-  // - - Refs - -
-  let scroll = useRef(null);
-  let location_address_ref = useRef(null);
-
   // - - Extra Setup - -
-  const form = { job_type, job_title, tasks, location, salary, wage, date };
+  const form = { job_type: selected_job_type, job_title, tasks, location, salary, wage, date };
 
   // - - Life Cycles - -
   // Create session for google suggestions (This will reduce billing expenses)
-  // useEffect(() => {
-  //   GoogleServicesController.createSession();
-  //   return () => {
-  //     GoogleServicesController.clean();
-  //     setShowModal(false);
-  //   };
-  // }, []);
+  useEffect(() => {
+    GoogleServicesController.createSession();
+    return () => {
+      GoogleServicesController.clean();
+      setShowModal(false);
+    };
+  }, []);
 
   // Fetch suggestions
-  // useEffect(() => {
-  //   (async () => {
-  //     if (location?.address != undefined) {
-  //       setGoogleSuggestions(await GoogleServicesController.getPlacesSuggestions(location.address));
-  //     } else {
-  //       setGoogleSuggestions([]);
-  //     }
-  //   })();
-  // }, [location]);
+  useEffect(() => {
+    (async () => {
+      if (location?.address != undefined) {
+        setGoogleSuggestions(await GoogleServicesController.getPlacesSuggestions(location.address));
+      } else {
+        setGoogleSuggestions([]);
+      }
+    })();
+  }, [location]);
 
   // Get location
-  useEffect(() => {
-    PermissionsControllers.getLocation().then((position) => setLocation(position));
-  }, []);
+  // useEffect(() => {
+  //   PermissionsControllers.getLocation().then((position) => setLocation(position));
+  // }, []);
 
   // - - Functions (Handler, Events, more) - -
   function commonInputProps(elementValue, setElementValue) {
@@ -238,10 +247,16 @@ export default function workModal({ navigation, route }) {
   }
 
   function handleSuggestionEditing(item) {
-    setLocation(item);
-    location_address_ref.current.setValue(item.address);
+    if (item == "Current Location") {
+      PermissionsControllers.getLocation().then((position) => setLocation(position));
+      location_address_ref.current.setValue(item);
+    } else {
+      setLocation(item);
+      location_address_ref.current.setValue(item.address);
+    }
     location_address_ref.current.blur();
     setSuggestionsEditing(false);
+    // console.log(location);
   }
 
   function handleSaveTasks(tasks) {
@@ -252,12 +267,15 @@ export default function workModal({ navigation, route }) {
   async function formatForm(data) {
     const form = { ...data };
     const place_data = await GoogleServicesController.getCoordinatesFromPlaceID(form.location.place_id);
+    form.start_at = form.date?.getTime() || Date.now();
+    form.date = null;
     form.coordinates = [place_data.geometry.location["lat"], place_data.geometry.location["lng"]];
     return form;
   }
 
+  // When google suggestion is disabled
   function formatFormV2(data) {
-    const form = { ...data };
+    const form = { ...data }; // Copy data
     form.start_at = form.date?.getTime() || Date.now();
     form.date = null;
     form.coordinates = [form.location.coords.latitude, form.location.coords.longitude];
@@ -268,9 +286,18 @@ export default function workModal({ navigation, route }) {
     try {
       setLoading(true);
       // const formattedForm = await formatForm(form);
-      const formattedForm = formatFormV2(form);
+      let formattedForm;
+      if (form.location.coords == undefined) {
+        // Formats form when job location was pulled from Google Location API
+        formattedForm = await formatForm(form);
+      } else {
+        // Formats form when job location was pulled from client GPS
+        formattedForm = formatFormV2(form);
+      }
 
-      // Sends the job details and associated photos for upload and job creation
+      console.log("FORMATTED FORM", formattedForm);
+
+      // // Sends the job details and associated photos for upload and job creation
       const { success } = await JobsController.postUserJob(authState.userID, formattedForm, authState.userToken, photos);
 
       if (success) return navigation.goBack();
@@ -301,7 +328,6 @@ export default function workModal({ navigation, route }) {
             backAction={() => onHandleCancel()}
             backTitle="Cancel"
             title="Add Work"
-            nextColor="#548ff7"
             backAction={() => navigation.goBack()}
           />
 
@@ -315,12 +341,41 @@ export default function workModal({ navigation, route }) {
                 labelFontSize={14}
                 labelTextStyle={{ color: "black", fontWeight: "700" }}
                 placeholder="Search Job Types"
+                ref={job_type_ref}
                 renderLeftAccessory={() => (
                   <View style={{ width: 30 }}>
                     <Ionicons name="ios-search" size={24} />
                   </View>
                 )}
+                renderRightAccessory={() => (
+                  <TouchableWithoutFeedback onPress={() => job_type_ref.current.clear()}>
+                    <View style={{ width: 40, marginHorizontal: 10 }}>
+                      <Text color="#4a89f2" bold>
+                        Clear
+                      </Text>
+                    </View>
+                  </TouchableWithoutFeedback>
+                )}
               />
+              <Text style={{ marginBottom: 5 }}>
+                Selected:{" "}
+                <Text bold color="#548ff7">
+                  {selected_job_type}
+                </Text>
+              </Text>
+
+              <SearchTitleSuggestionsField>
+                <SearchTitleSuggestionsFieldInput
+                  selectedValue={selected_job_type}
+                  onValueChange={(value) => setSelectedJobType(value)}
+                  itemStyle={{ fontSize: 19 }}
+                >
+                  <SearchTitleSuggestionsFieldInput.Item label={"Select a type"} value={""} key={0} />
+                  {suggestedItems.map((JobSuggestion, index) => (
+                    <SearchTitleSuggestionsFieldInput.Item label={JobSuggestion} value={JobSuggestion} key={index + 1} />
+                  ))}
+                </SearchTitleSuggestionsFieldInput>
+              </SearchTitleSuggestionsField>
             </Item>
 
             <Item>
@@ -354,7 +409,7 @@ export default function workModal({ navigation, route }) {
             </Item>
 
             <Item>
-              {/* <TextField
+              <TextField
                 {...commonInputProps(location.address, setLocation)}
                 textContentType="addressCityAndState"
                 onChangeText={(text) => {
@@ -388,14 +443,17 @@ export default function workModal({ navigation, route }) {
                     <Ionicons name="ios-search" size={24} />
                   </View>
                 )}
-              /> */}
+              />
 
-              {/* {googleSuggestions.length != 0 && location?.address != undefined && suggestionsEditing === true && (
+              {/* {googleSuggestions.length != 0 && location?.address != undefined && suggestionsEditing === true && ( */}
+              {suggestionsEditing === true && (
                 <Suggestions>
-                  <SuggestedItem>
-                    <MaterialIcons name="gps-fixed" size={15} />
-                    <Text style={{ marginLeft: 10 }}>Pick Your Location</Text>
-                  </SuggestedItem>
+                  <TouchableWithoutFeedback onPress={() => handleSuggestionEditing("Current Location")}>
+                    <SuggestedItem>
+                      <MaterialIcons name="gps-fixed" size={15} />
+                      <Text style={{ marginLeft: 10 }}>Pick Your Location</Text>
+                    </SuggestedItem>
+                  </TouchableWithoutFeedback>
                   <FlatList
                     keyboardShouldPersistTaps="always"
                     data={googleSuggestions}
@@ -415,7 +473,7 @@ export default function workModal({ navigation, route }) {
                     }}
                   />
                 </Suggestions>
-              )} */}
+              )}
             </Item>
 
             <Item style={{ marginTop: 20, marginBottom: 20 }}>
@@ -451,7 +509,7 @@ export default function workModal({ navigation, route }) {
                 keyExtractor={(v) => v.uri}
                 centerContent
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingVertical: 40,justifyContent:'center', paddingTop: 12 }}
+                contentContainerStyle={{ paddingVertical: 40, justifyContent: "center", paddingTop: 12 }}
                 ListHeaderComponent={() => (
                   <TouchableOpacity
                     disabled={loadingMedia}
@@ -491,7 +549,7 @@ export default function workModal({ navigation, route }) {
                   if (!res) {
                     return setShowCamera(false);
                   }
-                  console.log(res);
+                  // console.log(res);
                   try {
                     if (!res.cancelled && !photos.find((v) => v.uri === res.uri)) {
                       setPhotos([{ uri: res.uri, type: "image/png", height: res.height, width: res.width }, ...photos]);
@@ -534,7 +592,14 @@ export default function workModal({ navigation, route }) {
               </ScheduleButton>
             </TouchableOpacity>
             {showDate ? (
-              <DateTimePicker display={Platform.OS === 'ios' ? 'spinner' : undefined} style={{ marginBottom: 20 }} minimumDate={new Date()} mode={mode} onChange={updateDate} value={date} />
+              <DateTimePicker
+                display={Platform.OS === "ios" ? "spinner" : undefined}
+                style={{ marginBottom: 20 }}
+                minimumDate={new Date()}
+                mode={mode}
+                onChange={updateDate}
+                value={date}
+              />
             ) : null}
 
             <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7, marginBottom: 100 }} onPress={() => handleSubmit(form)}>
@@ -692,6 +757,16 @@ const WageTimeField = styled.View`
 
 const WageTimeFieldInput = styled.Picker`
   margin: ${Platform.OS == "ios" ? "-60px 0" : "0px"};
+`;
+
+const SearchTitleSuggestionsField = styled.View`
+  flex: 2;
+  flex-direction: column;
+  overflow: hidden;
+`;
+
+const SearchTitleSuggestionsFieldInput = styled.Picker`
+  margin: ${Platform.OS == "ios" ? "-60px 0px" : "0px"};
 `;
 
 const Fields = styled.View`
