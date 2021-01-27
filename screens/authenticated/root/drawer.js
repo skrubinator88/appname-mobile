@@ -9,16 +9,6 @@ import { Entypo, FontAwesome, MaterialCommunityIcons, MaterialIcons } from "@exp
 import styled from "styled-components/native";
 import theme from "../../../theme.json";
 
-// Components
-import Chat from "../chat/";
-import JobListings from "../listings/stacks";
-import MessagesScreen from "../messages/";
-import PaymentScreen from "../payment/stack";
-import ProfileScreen from "../profile/stack";
-import Scanner from "../scanner/";
-import SettingsScreen from "../settings";
-import QRCode from "./UIOverlay/jobFound/qr_code";
-
 // Screens
 import { RootScreen } from "./index";
 
@@ -66,7 +56,7 @@ function DrawerContent({ navigation }) {
           <DrawerItem
             labelStyle={{ fontSize: 20 }}
             label="Work History"
-            onPress={() => Alert.alert("Work in Progress", "Section still in development")}
+            onPress={() => navigation.navigate("Work History")}
             icon={() => <MaterialIcons name="history" size={24} color="black" />}
           />
         ) : (
@@ -91,8 +81,8 @@ function DrawerContent({ navigation }) {
             />
             <DrawerItem
               labelStyle={{ fontSize: 20 }}
-              label="Job History"
-              onPress={() => Alert.alert("Work in Progress", "Section still in development")}
+              label="Work History"
+              onPress={() => navigation.navigate("Work History")}
               icon={() => <MaterialIcons name="history" size={24} color="black" />}
             />
           </>
@@ -180,6 +170,17 @@ const ProfilePicture = styled.Image`
   border-radius: 60px;
 `;
 
+// Components
+import Chat from "../chat/";
+import JobListings from "../listings/stacks";
+import MessagesScreen from "../messages/";
+import PaymentScreen from "../payment/stack";
+import ProfileScreen from "../profile/stack";
+import Scanner from "../scanner/";
+import WorkHistory from "../work-history/";
+import SettingsScreen from "../settings";
+import QRCode from "./UIOverlay/jobFound/qr_code";
+
 export function Drawer({ navigation }) {
   return (
     <NavigationContainer independent={true}>
@@ -197,7 +198,7 @@ export function Drawer({ navigation }) {
         <AuthenticatedDrawer.Screen name="Job Listings" component={JobListings} />
         <AuthenticatedDrawer.Screen name="Messages" component={MessagesScreen} />
         <AuthenticatedDrawer.Screen name="Scanner" component={Scanner} />
-        <AuthenticatedDrawer.Screen name="Work History" component={RootScreen} />
+        <AuthenticatedDrawer.Screen name="Work History" component={WorkHistory} />
         <AuthenticatedDrawer.Screen name="Payments" component={PaymentScreen} />
         <AuthenticatedDrawer.Screen name="Help Center" component={RootScreen} />
         <AuthenticatedDrawer.Screen name="Settings" component={SettingsScreen} />
