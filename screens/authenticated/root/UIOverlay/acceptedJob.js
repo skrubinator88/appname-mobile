@@ -1,6 +1,6 @@
 // IMPORT
-import React, { useState, useEffect, useContext } from "react";
-import { View, Platform, Dimensions, SafeAreaView } from "react-native";
+import React, { useState, useEffect, useContext, useCallback } from "react";
+import { View, Platform, Dimensions, Alert } from "react-native";
 import styled from "styled-components/native";
 
 // Expo
@@ -22,11 +22,17 @@ import { distanceBetweenTwoCoordinates } from "../../../../functions/";
 
 // Controllers
 import PermissionsControllers from "../../../../controllers/PermissionsControllers";
+import { PaymentMethodSelector } from "../../payment/components";
+import { TouchableOpacity } from "react-native";
+import JobsController from "../../../../controllers/JobsControllers";
+import { sendNotification } from "../../../../functions";
+import Confirm from "../../../../components/confirm";
 
 // BODY
 export default function Screen45({ navigation, projectManagerInfo, job_data }) {
   const { authState } = useContext(GlobalContext);
   const { changeRoute } = useContext(UIOverlayContext);
+  const [pay, setPay] = useState(false)
 
   const [onSite, setOnSite] = useState(false);
   const [location, setLocation] = useState(null);
@@ -72,6 +78,25 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
     }
   }, [location]);
 
+
+  const cancelJob = useCallback(() => {
+    Confirm({
+      title: 'Cancel Job',
+      message: `Are you sure about canceling this accepted job?`,
+      options: ['Yes', 'No'],
+      cancelButtonIndex: 1,
+      destructiveButtonIndex: 0,
+      onPress: async (i) => {
+        if (i === 0) {
+          await JobsController.changeJobStatus(job_data._id, "available")
+          await sendNotification(authState.userToken, job_data.posted_by, { title: `GigChasers - ${job_data.job_title}`, body: `Job canceled`, data: { type: 'jobcancel', id: job_data._id, sender: authState.userID } })
+          // TODO: Charge user for cancellation
+          changeRoute({ name: "dashboard" })
+        }
+      }
+    })
+  }, [authState])
+
   return (
     <Card>
       <View>
@@ -92,9 +117,9 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
           </Column>
 
           <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            <Text style={{ paddingBottom: 10 }} color="#999">
-              Cancel Job
-            </Text>
+            <TouchableOpacity activeOpacity={0.8} onPress={cancelJob}>
+              <Text style={{ paddingBottom: 10 }} color="#999">Cancel Job</Text>
+            </TouchableOpacity>
 
             <Column>
               <View style={{ flexDirection: "row" }}>
@@ -187,7 +212,15 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
           <Text small>Reschedule Job</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
+
+        <CardOptionItem onPress={() => { setPay(true) }} row>
+          <Text small>Test Pay</Text>
+          <Ionicons name="ios-arrow-forward" size={24} />
+        </CardOptionItem>
       </View>
+      {pay && <PaymentMethodSelector description={`Payment for Job - ${job_data.job_title}`} jobID={job_data._id} recipient={authState.userId} onClose={() => setPay(false)} onError={() => setPay(false)} onSuccess={() => {
+        setPay(false)
+      }} />}
     </Card>
   );
 }

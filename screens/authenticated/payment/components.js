@@ -1,16 +1,17 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { TextField } from "@ubaids/react-native-material-textfield";
 import "intl";
 import 'intl/locale-data/jsonp/en';
 import React, { useCallback, useContext, useState } from "react";
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
+import Confirm from "../../../components/confirm";
 import { GlobalContext } from "../../../components/context";
 import Text from "../../../components/text";
-import { initiateAccount } from "../../../controllers/PaymentController";
+import { initiateAccount, makePayment } from "../../../controllers/PaymentController";
 import { CALLBACK_URL, MyWebView } from "./stripe";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 
 export const CARD_ICON = {
@@ -63,15 +64,11 @@ export function PreferredMethodView({ method }) {
     )
 }
 
-export function AccountView({ refreshing, balance = 0, hasActiveAccount }) {
+export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAccount }) {
     const { authState } = useContext(GlobalContext);
     const [setupAccount, setSetupAccount] = useState(false)
     const [showSetup, setShowSetup] = useState(false)
     const [uri, setURI] = useState('')
-
-    const dispatch = useDispatch()
-    const payments = useSelector((state) => state.payment)
-    const actionSheet = useActionSheet()
 
     const setup = useCallback(async () => {
         setShowSetup(true)
@@ -82,12 +79,17 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount }) {
             console.log(e)
             Alert.alert('Account Setup Failed', 'Failed to setup your account')
             setShowSetup(false)
-        } finally {
         }
     }, [authState, uri])
 
     return (
         <AccountSection>
+
+            {hasAccount &&
+                <TouchableOpacity onPress={setup} style={{ position: "absolute", top: 4, right: 4 }}>
+                    <FontAwesome size={24} color="#3869f8" name="external-link-square" />
+                </TouchableOpacity>
+            }
 
             <View style={{ margin: 10, padding: 10, justifyContent: 'center', alignItems: 'center' }}>
                 <Ionicons name="ios-wallet" size={60} />
@@ -138,7 +140,10 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount }) {
                                         }}
                                         onLoadingComplete={() => setSetupAccount(true)}
                                         onLoadingFail={() => setShowSetup(false)}
-                                        onSuccess={() => setShowSetup(false)}
+                                        onSuccess={() => {
+                                            setShowSetup(false)
+                                            Alert.alert('Acount Setup Complete', 'You account will be available after verification is complete')
+                                        }}
                                         onCancel={() => setShowSetup(false)}
                                     />
                                         : null}
@@ -152,6 +157,110 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount }) {
                 </Modal>
                 : null}
         </AccountSection>
+    )
+}
+
+export function PaymentMethodSelector({ jobID, recipient, description, onClose, onSuccess, onError }) {
+    const { authState } = useContext(GlobalContext);
+    const [selectMethod, setSelectMethod] = useState(false)
+    const [amount, setAmount] = useState('')
+    const [loading, setLoading] = useState(false)
+
+    const dispatch = useDispatch()
+    const payments = useSelector((state) => state.payment)
+    const actionSheet = useActionSheet()
+
+    const onSubmit = useCallback(async () => {
+        Confirm({
+            title: 'Confirm payment',
+            message: 'Do you want to continue with payment?',
+            options: ['Yes', 'No'],
+            destructiveButtonIndex: 1,
+            onPress: async (i) => {
+                switch (i) {
+                    case 0:
+                        try {
+                            setLoading(true)
+                            const value = parseInt(amount, 10)
+                            if (Number.isNaN(value) || !value || value <= 0) {
+                                throw new Error('Invalid payment amount specified')
+                            }
+
+                            await makePayment({
+                                amount: value * 100,
+                                description,
+                                jobID,
+                                method: selectMethod,
+                                recipient
+                            }, authState, dispatch)
+
+                            setLoading(false)
+                            onSuccess(value)
+                            Alert.alert('Payment Successful', 'Your money is on its way!')
+                        } catch (e) {
+                            console.log(e)
+                            setLoading(false)
+                            Alert.alert('Payment Failed', e.message)
+                            // onError(e)
+                        }
+                        break
+                }
+            }
+        })
+    }, [authState, amount, selectMethod])
+
+    return (
+        <Modal
+            animationType="fade"
+            transparent
+            visible
+            onRequestClose={onClose}
+            onDismiss={onClose}
+            style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
+        >
+            <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0004" }}>
+                <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 120 }}>
+                    <KeyboardAvoidingView behavior="padding" style={{ justifyContent: "center", margin: 8, flex: 1 }}>
+                        <View style={{ flexGrow: 1, padding: 8, paddingVertical: 16, backgroundColor: '#fff', borderRadius: 8, alignItems: "stretch", }}>
+                            {loading ?
+                                <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+                                    <ActivityIndicator />
+                                </View>
+                                :
+                                !selectMethod ?
+                                    <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+                                        {payments.methods.map(m => <MethodView key={m.id} method={m} onPress={() => setSelectMethod(m)} />)}
+                                    </View>
+                                    :
+                                    <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+                                        <Text>Enter mount You Intend To Pay</Text>
+                                        <TextField
+                                            disabled={loading}
+                                            label="PAY"
+                                            prefix="$"
+                                            labelFontSize={14}
+                                            placeholder="0.00"
+                                            labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                                            keyboardType="numeric"
+                                            onChangeText={(text) => {
+                                                setAmount(text);
+                                            }}
+                                            value={amount}
+                                        />
+                                        <TouchableOpacity style={{ backgroundColor: '#3869f3', marginTop: 8, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' }}
+                                            onPress={onSubmit}>
+                                            <Text small bold color='#fff' >PAY</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                            }
+                            <TouchableOpacity onPress={onClose} style={{ position: "absolute", top: 4, left: 4 }}>
+                                <MaterialCommunityIcons size={24} color="red" name="close-circle" />
+                            </TouchableOpacity>
+                        </View>
+                    </KeyboardAvoidingView>
+                </SafeAreaView>
+            </ScrollView>
+        </Modal>
     )
 }
 
