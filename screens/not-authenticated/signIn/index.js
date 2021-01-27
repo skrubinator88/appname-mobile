@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useTheme } from "@react-navigation/native";
 
-import { Platform, TouchableWithoutFeedback, Keyboard, SafeAreaView, TextInput } from "react-native";
+import { Platform, TouchableWithoutFeedback, Keyboard, SafeAreaView, TextInput, ActivityIndicator } from "react-native";
 import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
 
@@ -15,6 +15,8 @@ import Header from "../../../components/header";
 export default function SingInIndex({ navigation, route }) {
   const { registrationState, methods } = useContext(RegistrationContext);
   const { updateForm, sendForm } = methods;
+
+  const [loading, setLoading] = useState(false);
 
   const { colors } = useTheme();
   const [firstInput, setFirstInput] = useState("");
@@ -60,6 +62,7 @@ export default function SingInIndex({ navigation, route }) {
   };
 
   const handleSubmit = async (e) => {
+    setLoading(true);
     if (textInput.length == 10) {
       const phone_number = `+1${textInput}`;
 
@@ -88,9 +91,11 @@ export default function SingInIndex({ navigation, route }) {
         if (e.message == "Network request failed") {
           navigation.navigate("SignIn", { errorMsg: e.message });
         }
+      } finally {
+        return setLoading(false);
       }
-      return;
     }
+    return setLoading(false);
   };
 
   return (
@@ -129,7 +134,7 @@ export default function SingInIndex({ navigation, route }) {
             </ContainerMiddle>
 
             <ButtonStyled onPress={(e) => handleSubmit(e)} style={{ backgroundColor: colors.primary }}>
-              <Text style={{ color: "white" }}>Continue</Text>
+              {loading ? <ActivityIndicator color="white" /> : <Text style={{ color: "white" }}>Continue</Text>}
             </ButtonStyled>
           </ContainerTopMiddle>
         </Container>
