@@ -21,7 +21,7 @@ import ErrorReducer from "./reducers/ErrorReducer";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
 import Prompts from "./components/Prompts";
-// import { default as Example } from "./views/test";
+import { default as Example } from "./components/Suggestions";
 
 // Disable Font Scaling
 Text.defaultProps = Text.defaultProps || {};
@@ -75,6 +75,8 @@ ExpoNotif.setNotificationHandler({
 });
 
 export default function App({ navigation }) {
+  // return <Example />;
+
   // Store
   const [authState, auth_dispatch] = useReducer(AuthReducer, { isLoading: true });
   const [appState, app_dispatch] = useReducer(AppReducer, {});
@@ -158,21 +160,19 @@ export default function App({ navigation }) {
 
   return (
     <>
-      {/* <Prompts /> */}
+      <Prompts />
       <ActionSheetProvider>
         <GlobalContext.Provider value={{ authActions, appActions, authState, errorActions }}>
           <NavigationContainer theme={Theme}>
             {authState.userToken ? (
               <>
                 <Provider store={rootStore}>
-                  {/* <Example /> */}
                   <AuthenticatedStackScreen />
                 </Provider>
               </>
             ) : (
               <>
                 <NotAuthenticatedStackScreen />
-                {/* <Example /> */}
               </>
             )}
           </NavigationContainer>
