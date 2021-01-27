@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View, Dimensions } from "react-native";
 import styled from "styled-components/native";
 
 // Components
@@ -9,7 +9,7 @@ import { useTheme } from "@react-navigation/native";
 import env from "../../../env";
 
 // Styling
-import { Entypo, Octicons } from "@expo/vector-icons";
+import { Entypo, Octicons, Feather } from "@expo/vector-icons";
 
 // Controllers
 import ChatsController from "../../../controllers/ChatsController";
@@ -17,11 +17,17 @@ import ChatsController from "../../../controllers/ChatsController";
 // Redux
 import { useDispatch, useSelector } from "react-redux";
 
-// Function
+// Functions
 import { convertFirestoreTimestamp } from "../../../functions/";
 
 // Context
 import { GlobalContext } from "../../../components/context";
+
+// Miscellaneous
+import { getStatusBarHeight } from "react-native-status-bar-height";
+const statusBarHeight = getStatusBarHeight();
+const width = Dimensions.get("screen").width;
+const height = Dimensions.get("screen").height;
 
 export default function Messages({ navigation }) {
   const { authActions, authState, errorActions } = useContext(GlobalContext);
@@ -40,10 +46,18 @@ export default function Messages({ navigation }) {
   }, []);
 
   return (
-    <Container navigation={navigation} headerBackground={colors.primary} backColor="white">
+    <Container navigation={navigation} headerBackground={colors.primary} backColor="white" style={{ backgroundColor: "red" }}>
       {chats.map((prop) => (
         <Message key={prop.id} {...prop} navigation={navigation} />
       ))}
+      {chats.length <= 0 && (
+        <NoMessageBanner>
+          <Feather name="message-circle" size={width * 0.4} color="#ccc" style={{ margin: 20 }} />
+          <Text bold color="#ccc">
+            There is not messages yet
+          </Text>
+        </NoMessageBanner>
+      )}
     </Container>
   );
 }
@@ -121,4 +135,10 @@ const LastMessage = styled.View`
 
 const Divider = styled.View`
   border: 0.5px solid #dadada;
+`;
+
+const NoMessageBanner = styled.View`
+  height: ${height - statusBarHeight * 4}px;
+  justify-content: center;
+  align-items: center;
 `;
