@@ -49,9 +49,11 @@ export default function JobListing({ navigation }) {
     };
   }, []);
 
-  const unassignedList = listings.filter((item) => (item.status == "available" || (item.status == "in review" && (!item?.offer_received && !item?.offer_received?.deployee))))
-  const offersList = listings.filter(item => item.status == "in review" && item?.offer_received && item?.offer_received?.deployee)
-  const inProgressList = listings.filter(item => item.status == "in progress" || item.status == "accepted")
+  const unassignedList = listings.filter(
+    (item) => item.status == "available" || (item.status == "in review" && !item?.offer_received && !item?.offer_received?.deployee)
+  );
+  const offersList = listings.filter((item) => item.status == "in review" && item?.offer_received && item?.offer_received?.deployee);
+  const inProgressList = listings.filter((item) => item.status == "in progress" || item.status == "accepted");
 
   // useEffect(() => {
   //   console.log(listings);
@@ -206,8 +208,8 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
         <JobItemRow>
           <Column>
             <Row>
-              <Text small weight="700" color="#1b5cce">
-                {item.job_type}
+              <Text small weight="700">
+                {item.job_title}
               </Text>
               {current ? (
                 <Text textTransform="uppercase" small>
@@ -218,6 +220,11 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
                   Scheduled
                 </Text>
               )}
+            </Row>
+            <Row>
+              <Text small weight="700" color="#1b5cce">
+                {item.job_type}
+              </Text>
             </Row>
             <Row style={{ marginBottom: 10 }}>
               <Text small>
