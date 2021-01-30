@@ -2,6 +2,7 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { FontAwesome, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { TextField } from "@ubaids/react-native-material-textfield";
 import "intl";
+import moment from 'moment';
 import 'intl/locale-data/jsonp/en';
 import React, { useCallback, useContext, useState } from "react";
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -24,6 +25,37 @@ export const CARD_ICON = {
     visa: (props) => <FontAwesome name='cc-visa' {...props} />,
     unknown: (props) => <FontAwesome name='credit-card' {...props} />
 }
+export const getTransactionStatus = (status) => {
+    switch (status) {
+        case 0:
+            return 'pending'
+        case 1:
+            return 'successful'
+        case 2:
+            return 'failed'
+        case 3:
+            return 'declined'
+        case 4:
+            return 'uncaptured'
+        default:
+            return 'unknown'
+    }
+}
+export const getTransactionStatusColor = (status) => {
+    switch (status) {
+        case 0:
+            return 'white'
+        case 1:
+            return '#8fbc8f44'
+        case 2:
+            return '#f0808044'
+        case 3:
+        case 4:
+            return '#ffe4b5'
+        default:
+            return 'white'
+    }
+}
 export const CurrencyFormatter = Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 export const NumberFormatter = Intl.NumberFormat()
 
@@ -33,10 +65,37 @@ export function MethodView({ method, onPress }) {
             <PaymentItemRowLink onPress={onPress}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
                     {CARD_ICON[method.brand]({ size: 20 })}
-                    <Text small weight="700" style={{ marginStart: 4 }} textTransform='uppercase' color="#4a4a4a">{method.brand} ****{method.mask}</Text>
+                    <Text small weight="700" style={{ marginStart: 4 }} textTransform='uppercase' color="#4a4a4a"> ****{method.mask}</Text>
                 </View>
 
                 <Text small weight="700" color="#4a4a4a">EXP: {`${method.month.padStart(2, '0')}/${method.year}`}</Text>
+            </PaymentItemRowLink>
+        </PaymentItemRow>
+    )
+}
+
+export function TransactionRecord({ transaction: txn, onPress }) {
+    return (
+        <PaymentItemRow key={txn.id} style={{ backgroundColor: getTransactionStatusColor(txn.status) }} >
+            <PaymentItemRowLink onPress={onPress}>
+                <View style={{ flex: 1, justifyContent: 'space-between', alignItems: 'stretch' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            {CARD_ICON[txn.brand]({ size: 20 })}
+                            <Text small weight="600" style={{ marginStart: 4 }} textTransform='uppercase' color="#4a4a4a">****{txn.mask}</Text>
+                        </View>
+
+                        <Text small weight="600" color="#4a4a4a">EXP: {`${txn.month.padStart(2, '0')}/${txn.year}`}</Text>
+                    </View>
+                    <View style={{ margin: 12, alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text align='center' title weight="700" color="#4a4a4a">{CurrencyFormatter.format(txn.amount / 100)}</Text>
+                        <Text align='center' small weight="500" color="#4a4a4a">{txn.description}</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text small weight="500" textTransform='uppercase' color="#888">{getTransactionStatus(txn.status)}</Text>
+                        <Text small weight="500" color="#8888">{moment(txn.dateCreated).calendar()}</Text>
+                    </View>
+                </View>
             </PaymentItemRowLink>
         </PaymentItemRow>
     )

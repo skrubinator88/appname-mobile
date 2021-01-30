@@ -8,7 +8,7 @@ import { GlobalContext } from "../../../components/context";
 // Components
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
-import { AccountView, MethodView, PreferredMethodView } from "./components";
+import { AccountView, MethodView, PreferredMethodView, TransactionRecord } from "./components";
 import StripeCheckoutScreen from "./stripe";
 import { TouchableOpacity } from "react-native";
 import { getPaymentInfo, removeMethod, setDefaultMethod } from "../../../controllers/PaymentController";
@@ -162,6 +162,22 @@ export default function PaymentScreen({ navigation }) {
         )}
         {/* Preffered Section */}
         {payments.defaultMethod && <PreferredMethodView method={payments.defaultMethod} />}
+
+        {/* Transaction History */}
+
+        <PaymentSection>
+          <SectionTitle>
+            <View style={{ margin: 10 }}>
+              <Text small bold color="#474747">TRANSACTION HISTORY</Text>
+            </View>
+          </SectionTitle>
+
+          {payments.transactions && payments.transactions.length > 0 ? payments.transactions.map((txn) => <TransactionRecord key={txn.id} onPress={() => onMethodClick(txn)} transaction={txn} />) :
+            <View style={{ paddingVertical: 28 }}>
+              <Text light small>NO TRANSACTION YET</Text>
+            </View>
+          }
+        </PaymentSection>
       </ScrollView>
     </Container>
   );
