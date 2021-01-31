@@ -44,14 +44,14 @@ export const getTransactionStatus = (status) => {
 export const getTransactionStatusColor = (status) => {
     switch (status) {
         case 0:
-            return 'white'
+            return '#ffa500'
         case 1:
-            return '#8fbc8f44'
+            return '#4f8c4f'
         case 2:
-            return '#f0808044'
+            return '#f08080'
         case 3:
         case 4:
-            return '#ffe4b5'
+            return '#4682b4'
         default:
             return 'white'
     }
@@ -76,7 +76,7 @@ export function MethodView({ method, onPress }) {
 
 export function TransactionRecord({ transaction: txn, onPress }) {
     return (
-        <PaymentItemRow key={txn.id} style={{ backgroundColor: getTransactionStatusColor(txn.status) }} >
+        <PaymentItemRow key={txn.id} style={{ borderLeftWidth: 8, borderLeftColor: getTransactionStatusColor(txn.status) }} >
             <PaymentItemRowLink onPress={onPress}>
                 <View style={{ flex: 1, justifyContent: 'space-between', alignItems: 'stretch' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -88,8 +88,8 @@ export function TransactionRecord({ transaction: txn, onPress }) {
                         <Text small weight="600" color="#4a4a4a">EXP: {`${txn.month.padStart(2, '0')}/${txn.year}`}</Text>
                     </View>
                     <View style={{ margin: 12, alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text align='center' title weight="700" color="#4a4a4a">{CurrencyFormatter.format(txn.amount / 100)}</Text>
-                        <Text align='center' small weight="500" color="#4a4a4a">{txn.description}</Text>
+                        <Text align='center' title weight="700" color="#444">{CurrencyFormatter.format(txn.amount / 100)}</Text>
+                        <Text align='center' small weight="500" color="#6a6a6a">{txn.description}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Text small weight="500" textTransform='uppercase' color="#888">{getTransactionStatus(txn.status)}</Text>
