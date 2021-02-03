@@ -9,8 +9,6 @@ import { distanceBetweenTwoCoordinates, isCurrentJob, isCurrentJobCreatedByUser,
 import JobsStoreActions from "../rdx-actions/jobs.action";
 import ListingsActions from "../rdx-actions/listings.action";
 
-
-
 const Actions = { JobsStoreActions, ListingsActions };
 
 exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
@@ -215,7 +213,7 @@ exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
     });
 };
 
-exports.currentUserJobsHistory = (user) => { };
+exports.currentUserJobsHistory = (user) => {};
 
 exports.postUserJob = async (userID, job, token, photos = []) => {
   if (!userID) throw new Error("User ID is required");

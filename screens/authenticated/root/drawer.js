@@ -190,8 +190,6 @@ export function Drawer({ navigation }) {
         edgeWidth={-100}
         drawerContent={(props) => <DrawerContent {...props} />}
       >
-        {/* <AuthenticatedDrawer.Screen name="test" component={JobListings} /> */}
-
         <AuthenticatedDrawer.Screen name="Root" component={RootScreen} />
         <AuthenticatedDrawer.Screen name="Profile" component={ProfileScreen} />
 
