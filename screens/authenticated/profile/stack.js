@@ -9,12 +9,14 @@ export const ProfileStack = createStackNavigator();
 // import pages
 import ProfileScreen from "./";
 import BackgroundCheckScreen from "./backgroundCheck";
+import BackgroundCheckPricingScreen from "./backgroundCheckPricing";
 
 export default function ProfileStackScreen() {
   return (
     <ProfileStack.Navigator headerMode="none">
       <ProfileStack.Screen name="Profile" component={ProfileScreen} />
       <ProfileStack.Screen name="Background Check" component={BackgroundCheckScreen} />
+      <ProfileStack.Screen name="Background Check Pricing" component={BackgroundCheckPricingScreen} />
     </ProfileStack.Navigator>
   );
 }

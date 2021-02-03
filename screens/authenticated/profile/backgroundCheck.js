@@ -31,7 +31,10 @@ export default function BackgroundCheck({ navigation, route }) {
         <Image source={require("../../../assets/backgroundCheck.png")} style={{ width: width * 0.5, height: width * 0.5 }} />
         {/* <SimpleLineIcons name="check" size={width * 0.5} color={colors.primary} /> */}
 
-        <ButtonStyled onPress={(e) => navigation.popToTop()} style={{ backgroundColor: colors.primary, borderColor: colors.primary }}>
+        <ButtonStyled
+          onPress={(e) => navigation.navigate("Background Check Pricing")}
+          style={{ backgroundColor: colors.primary, borderColor: colors.primary }}
+        >
           <Text style={{ color: "white" }}>Continue</Text>
         </ButtonStyled>
       </Container>
