@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Image, Dimensions, SafeAreaView, View, ActivityIndicator } from "react-native";
+import { Image, Dimensions, SafeAreaView, View, ActivityIndicator, Alert } from "react-native";
 import env from "../../../env";
 import theme from "../../../theme.json";
 
@@ -46,9 +46,26 @@ export default function BackgroundCheckPricing({ navigation, route }) {
     }
   };
 
-  const openLink = async (url) => {
-    let result = await WebBrowser.openAuthSessionAsync(url);
-    console.log(result);
+  const openLink = async (url, tier_name) => {
+    Alert.alert(
+      `You choose: \n"${tier_name}"`,
+      `\nThis will open the browser. \nYou will fill your application under the "${tier_name}" package`,
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
+        },
+        {
+          text: "Accept",
+          onPress: async () => {
+            let result = await WebBrowser.openBrowserAsync(url, { controlsColor: theme.contractor.primary });
+            console.log(result);
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   return (
@@ -65,7 +82,7 @@ export default function BackgroundCheckPricing({ navigation, route }) {
         let cents = String(Math.ceil(checkr_package.price * 1.15)).slice(-2);
 
         return (
-          <TouchableWithoutFeedback onPress={() => openLink(checkr_package.apply_url)} key={checkr_package.name}>
+          <TouchableWithoutFeedback onPress={() => openLink(checkr_package.apply_url, checkr_package.name)} key={checkr_package.name}>
             <Card>
               <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                 <Text title bold>
