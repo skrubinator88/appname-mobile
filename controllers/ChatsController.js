@@ -22,6 +22,18 @@ exports.initializeChatBetween = (user1, user2, job_id = "") => {
   return chat_id;
 };
 
+exports.getReceiverData = async (receiver, token) => {
+  const res = await fetch(`${config.API_URL}/users/${receiver}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  const data = await res.json();
+  return data;
+};
+
 exports.sendMessage = (chat_id, message, dispatch) => {
   const reduxMessage = { ...message, pending: true };
   const cloudMessage = { ...message, sent: true };
@@ -46,6 +58,7 @@ exports.getUserChats = (user_id, setChats) => {
     .onSnapshot((res) => {
       res.docChanges().forEach((change) => {
         const { doc: document } = change;
+        console.log(change.type);
         switch (change.type) {
           case "added": {
             setChats((prevState) => [...prevState, { id: document.id, ...document.data() }]);
