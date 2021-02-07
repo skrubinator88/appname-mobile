@@ -18,6 +18,9 @@ import { GlobalContext } from "../../../components/context";
 // Expo
 import { AntDesign } from "@expo/vector-icons";
 
+// Components
+import Text from "../../../components/text";
+
 // Redux
 import { useDispatch, useSelector } from "react-redux";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
@@ -27,6 +30,7 @@ export default function Chat({ route, navigation }) {
   const { receiver } = route.params;
 
   const [chatID, setChatID] = useState("");
+  const [receiverName, setReceiverName] = useState("");
 
   const chats = useSelector((state) => state.chats);
   const dispatch = useDispatch();
@@ -41,6 +45,16 @@ export default function Chat({ route, navigation }) {
     return () => ChatController.clean(retrievedChatID, unsubscribe, dispatch);
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      const retrieveReceiverInfo = await ChatController.getReceiverData(receiver, authState.userToken);
+
+      console.log(retrieveReceiverInfo);
+
+      setReceiverName(`${retrieveReceiverInfo.first_name} ${retrieveReceiverInfo.last_name}`);
+    })();
+  });
+
   const onSend = (message) => {
     if (chatID.length != 0) ChatController.sendMessage(chatID, message, dispatch);
   };
@@ -50,11 +64,19 @@ export default function Chat({ route, navigation }) {
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <NavBar style={{ borderBottomWidth: 1, borderColor: "#dedede" }}>
-        <TouchableWithoutFeedback onPress={() => navigation.goBack()}>
-          <BackButton>
-            <AntDesign backgroundColor="white" color="#444" name="arrowleft" size={30} style={{ marginLeft: 20 }} />
-          </BackButton>
-        </TouchableWithoutFeedback>
+        <Start>
+          <TouchableWithoutFeedback onPress={() => navigation.goBack()}>
+            <BackButton>
+              <AntDesign backgroundColor="white" color="#444" name="arrowleft" size={30} style={{ marginLeft: 20 }} />
+            </BackButton>
+          </TouchableWithoutFeedback>
+        </Start>
+
+        <Middle>
+          <Text title>{receiverName}</Text>
+        </Middle>
+
+        <End></End>
       </NavBar>
       <GiftedChat
         messages={Object.values(chats[chatID] || {}).reverse()}
@@ -75,9 +97,23 @@ const NavBar = styled.SafeAreaView`
   height: 90px;
   margin-top: ${Platform.OS == "android" ? `${statusBarHeight}px` : "0px"};
   flex-direction: row;
-  justify-content: flex-start;
+  /* justify-content: space-around; */
   align-items: center;
   background-color: white;
 `;
 
 const BackButton = styled.View``;
+
+const Start = styled.View`
+  flex: 1;
+`;
+
+const Middle = styled.View`
+  justify-content: center;
+  align-items: center;
+  flex: 2;
+`;
+
+const End = styled.View`
+  flex: 1;
+`;
