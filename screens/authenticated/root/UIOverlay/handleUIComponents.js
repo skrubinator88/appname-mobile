@@ -38,18 +38,6 @@ function HandleOverlayUIProjectManagerComponents({ route, navigation, willUnmoun
     case "dashboard":
       return <Dashboard navigation={navigation} {...route.props} />;
       break;
-    case "searching":
-      return <Searching navigation={navigation} {...route.props} />;
-      break;
-    // case "job_found":
-    //   return <JobFound navigation={navigation} {...route.props} />;
-    //   break;
-    // case "acceptedJob":
-    //   return <AcceptedJob navigation={navigation} {...route.props} />;
-    //   break;
-    // case "example":
-    //   return <Example navigation={navigation} {...route.props} />;
-    //   break;
   }
 }
 
