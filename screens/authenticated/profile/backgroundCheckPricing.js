@@ -68,6 +68,22 @@ export default function BackgroundCheckPricing({ navigation, route }) {
     );
   };
 
+  const conditionalRendering = () => {
+    switch (status) {
+      case "pending": {
+      }
+
+      case "consider": {
+      }
+
+      case "clear": {
+      }
+
+      default: {
+      }
+    }
+  };
+
   return (
     <Container
       navigation={navigation}
