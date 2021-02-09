@@ -1,7 +1,7 @@
 import React from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 
-import { Platform, SafeAreaView, Dimensions, View, ScrollView, KeyboardAvoidingView } from "react-native";
+import { Platform, SafeAreaView, Dimensions, View, ScrollView, KeyboardAvoidingView, ActivityIndicator } from "react-native";
 import styled from "styled-components/native";
 import * as VectorIcons from "@expo/vector-icons";
 import { RefreshControl } from "react-native";
@@ -21,6 +21,7 @@ export default function Header({
   headerBackground = "transparent",
   endBackground = "transparent",
   color = "black",
+  loading = false,
 
   // Back Button Properties
   backProvider = "",
@@ -41,7 +42,7 @@ export default function Header({
   nextColor = "",
   nextAction,
   children,
-  flexible = true
+  flexible = true,
 }) {
   // @Required
   if (!navigation) throw Error("navigation: Navigation is Required");
@@ -94,51 +95,66 @@ export default function Header({
 
   // Structure
   return (
-    <ScrollView
-      bounces={flexible}
-      scrollEnabled={flexible}
-      contentInset={{
-        top: -SPACER_SIZE + statusBarHeight,
-        bottom: -SPACER_SIZE + statusBarHeight,
-      }}
-      contentOffset={{ y: SPACER_SIZE - statusBarHeight }}
-      style={{ backgroundColor: background }}
-    >
-      {isIos && (
-        <View
-          style={{
-            height: SPACER_SIZE,
-            backgroundColor: headerBackground,
-          }}
-        />
+    <>
+      <ScrollView
+        bounces={flexible}
+        scrollEnabled={flexible}
+        contentInset={{
+          top: -SPACER_SIZE + statusBarHeight,
+          bottom: -SPACER_SIZE + statusBarHeight,
+        }}
+        contentOffset={{ y: SPACER_SIZE - statusBarHeight }}
+        style={{ backgroundColor: background }}
+      >
+        {isIos && (
+          <View
+            style={{
+              height: SPACER_SIZE,
+              backgroundColor: headerBackground,
+            }}
+          />
+        )}
+        <SafeAreaView style={{ backgroundColor: headerBackground }}>
+          <Container>
+            <Column back>
+              <Text style={{ color: backColor || color }} onPress={backAction != "" ? backAction : () => handleBackAction()}>
+                {handleBackButton()}
+              </Text>
+            </Column>
+
+            <Column middle>
+              {typeof title == "string" ? <TitleTextBox style={{ color, fontWeight: titleWeight }}>{title}</TitleTextBox> : title()}
+            </Column>
+
+            <Column next>
+              <Text style={{ color: nextColor || color, fontWeight: "700" }} onPress={nextAction}>
+                {handleNextButton()}
+              </Text>
+            </Column>
+          </Container>
+        </SafeAreaView>
+
+        {/* Children */}
+        {children}
+
+        {isIos && <View style={{ height: SPACER_SIZE, backgroundColor: endBackground }} />}
+      </ScrollView>
+      {loading && (
+        <Loader>
+          <ActivityIndicator color={headerBackground} />
+        </Loader>
       )}
-      <SafeAreaView style={{ backgroundColor: headerBackground }}>
-        <Container>
-          <Column back>
-            <Text style={{ color: backColor || color }} onPress={backAction != "" ? backAction : () => handleBackAction()}>
-              {handleBackButton()}
-            </Text>
-          </Column>
-
-          <Column middle>
-            {typeof title == "string" ? <TitleTextBox style={{ color, fontWeight: titleWeight }}>{title}</TitleTextBox> : title()}
-          </Column>
-
-          <Column next>
-            <Text style={{ color: nextColor || color, fontWeight: "700" }} onPress={nextAction}>
-              {handleNextButton()}
-            </Text>
-          </Column>
-        </Container>
-      </SafeAreaView>
-
-      {/* Children */}
-      {children}
-
-      {isIos && <View style={{ height: SPACER_SIZE, backgroundColor: endBackground }} />}
-    </ScrollView>
+    </>
   );
 }
+
+const Loader = styled.View`
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+`;
 
 // Styles
 const Container = styled.View`

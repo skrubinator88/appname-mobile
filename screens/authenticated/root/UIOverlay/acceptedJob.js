@@ -32,7 +32,7 @@ import Confirm from "../../../../components/confirm";
 export default function Screen45({ navigation, projectManagerInfo, job_data }) {
   const { authState } = useContext(GlobalContext);
   const { changeRoute } = useContext(UIOverlayContext);
-  const [pay, setPay] = useState(false)
+  const [pay, setPay] = useState(false);
 
   const [onSite, setOnSite] = useState(false);
   const [location, setLocation] = useState(null);
@@ -54,18 +54,13 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
   useEffect(() => {
     if (location) {
       const userLocation = location.coords;
-      const jobLocation = job_data.location.coords;
+      const jobLocation = job_data.coordinates;
 
       // console.log("user", userLocation);
       // console.log("job", jobLocation);
 
       // get distance between points in miles
-      const distance = distanceBetweenTwoCoordinates(
-        userLocation.latitude,
-        userLocation.longitude,
-        jobLocation.latitude,
-        jobLocation.longitude
-      );
+      const distance = distanceBetweenTwoCoordinates(userLocation.latitude, userLocation.longitude, jobLocation["U"], jobLocation["k"]);
 
       // console.log("distance", `${distance} in miles`);
 
@@ -78,12 +73,11 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
     }
   }, [location]);
 
-
   const cancelJob = useCallback(() => {
     Confirm({
-      title: 'Cancel Job',
+      title: "Cancel Job",
       message: `Are you sure about canceling this accepted job?`,
-      options: ['Yes', 'No'],
+      options: ["Yes", "No"],
       cancelButtonIndex: 1,
       destructiveButtonIndex: 0,
       onPress: async (i) => {
@@ -98,9 +92,9 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
             Alert.alert('Failed To Cancel Job', e.message)
           }
         }
-      }
-    })
-  }, [authState])
+      },
+    });
+  }, [authState]);
 
   return (
     <Card>
@@ -123,7 +117,9 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
 
           <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
             <TouchableOpacity activeOpacity={0.8} onPress={cancelJob}>
-              <Text style={{ paddingBottom: 10 }} color="#999">Cancel Job</Text>
+              <Text style={{ paddingBottom: 10 }} color="#999">
+                Cancel Job
+              </Text>
             </TouchableOpacity>
 
             <Column>
@@ -190,7 +186,6 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
             </View>
           </Column>
         </Row>
-        {onSite ? console.log("yay") : console.log("no")}
         <CardOptionItem row onPress={() => navigation.navigate("QR Code", job_data)}>
           <Text small bold color={onSite ? colors.primary : "grey"}>
             QR Code {onSite && " - Proceed"}
@@ -218,14 +213,28 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
 
-        <CardOptionItem onPress={() => { setPay(true) }} row>
+        <CardOptionItem
+          onPress={() => {
+            setPay(true);
+          }}
+          row
+        >
           <Text small>Test Pay</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
       </View>
-      {pay && <PaymentMethodSelector description={`Payment for Job - ${job_data.job_title}`} jobID={job_data._id} recipient={authState.userId} onClose={() => setPay(false)} onError={() => setPay(false)} onSuccess={() => {
-        setPay(false)
-      }} />}
+      {pay && (
+        <PaymentMethodSelector
+          description={`Payment for Job - ${job_data.job_title}`}
+          jobID={job_data._id}
+          recipient={authState.userId}
+          onClose={() => setPay(false)}
+          onError={() => setPay(false)}
+          onSuccess={() => {
+            setPay(false);
+          }}
+        />
+      )}
     </Card>
   );
 }

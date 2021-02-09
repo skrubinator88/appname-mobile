@@ -21,7 +21,7 @@ import ErrorReducer from "./reducers/ErrorReducer";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
 import Prompts from "./components/Prompts";
-import { default as Example } from "./components/Suggestions";
+import { default as Example } from "./components/Example";
 
 // Disable Font Scaling
 Text.defaultProps = Text.defaultProps || {};
