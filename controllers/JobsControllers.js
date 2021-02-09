@@ -124,6 +124,22 @@ exports.changeJobStatus = async (documentID, status, userID = "") => {
   await geoCollection.update({ status, executed_by: userID });
 };
 
+// TODO: upon cancellation, either suspend or bill the deployee or deployer
+exports.cancelAcceptedJob = async (documentID, authState) => {
+  const { userData: { role } } = authState
+  const geoCollection = GeoFirestore.collection("jobs").doc(documentID);
+
+  if (role === 'contractor') {
+    // Handle logic when a deployee cancels a job. 
+    // The deployee should receive a penalty.
+  } else {
+    // Penalty for cancellation as a deployer
+  }
+
+  // Update job status
+  await geoCollection.update({ status: 'available' });
+};
+
 /**
  * Used to send an offer by a deployee
  * @param {*} documentID

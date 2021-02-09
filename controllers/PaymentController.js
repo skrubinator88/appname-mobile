@@ -56,6 +56,7 @@ export const removeMethod = async (method, authState, dispatch) => {
   })
 };
 
+// TODO: will have to decide on mechanism to handle job schedules
 export const makePayment = async ({ method, recipient, amount, description, jobID }, authState, dispatch) => {
   return fetch(`${env.API_URL}/payments/pay`, {
     method: "POST",
@@ -70,6 +71,61 @@ export const makePayment = async ({ method, recipient, amount, description, jobI
       description,
       jobID
     })
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+  })
+};
+
+export const placeHold = async ({ method, recipient, amount, description, jobID }, authState, dispatch) => {
+  return fetch(`${env.API_URL}/payments/pay/hold`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
+    body: JSON.stringify({
+      paymentMethodID: method.id,
+      recipient,
+      amount,
+      description,
+      jobID
+    })
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+  })
+};
+
+export const completeHold = async ({ transactionID, amount, jobID }, authState, dispatch) => {
+  return fetch(`${env.API_URL}/payments/pay/hold`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
+    body: JSON.stringify({
+      transactionID,
+      amount,
+      jobID
+    })
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+  })
+};
+
+export const cancelHold = async ({ transactionID }, authState, dispatch) => {
+  return fetch(`${env.API_URL}/payments/pay/hold`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
+    body: JSON.stringify({ transactionID })
   }).then(async (res) => {
     if (!res.ok) {
       throw new Error((await res.json()).message)
