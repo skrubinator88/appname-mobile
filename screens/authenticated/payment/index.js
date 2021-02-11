@@ -37,7 +37,7 @@ export default function PaymentScreen({ navigation }) {
     } finally {
       setRefreshing(false)
     }
-  }, [refreshing, authState, payments])
+  }, [authState])
 
   const onMethodClick = useCallback(async (item) => {
     actionSheet.showActionSheetWithOptions({
@@ -95,15 +95,12 @@ export default function PaymentScreen({ navigation }) {
     <Container
       flexible={false}
       navigation={navigation}
-      nextTitle="Save"
       color="white"
       title="Payment"
       titleWeight="300"
       headerBackground="#3869f3"
       nextProvider="Entypo"
-      nextIcon="dots-three-horizontal"
-      nextSize={25}
-      nextAction={() => { }}
+    // nextIcon="dots-three-horizontal"
     >
       <ScrollView
         scrollEnabled

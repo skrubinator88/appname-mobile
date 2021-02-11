@@ -15,6 +15,7 @@ export const getPaymentInfo = async (authState, dispatch) => {
       throw new Error((await res.json()).message)
     }
     const data = await res.json()
+    console.log(data, 'beta')
 
     data.methods.map((method) => dispatch(PaymentActions.addMethod(method)))
     data.transactions.map((txn) => dispatch(PaymentActions.updateTransaction(txn)))
@@ -141,6 +142,21 @@ export const initiateAccount = async (authState) => {
       'Authorization': `Bearer ${authState.userToken}`
     },
     body: JSON.stringify({ first_name: authState.userData.first_name, last_name: authState.userData.last_name, phone: authState.userData.phone_number, email: authState.userData.email }),
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+    return (await res.json()).url
+  })
+};
+
+export const fetchDashboardLink = async (authState) => {
+  return fetch(`${env.API_URL}/payments/dashboard_link`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
   }).then(async (res) => {
     if (!res.ok) {
       throw new Error((await res.json()).message)
