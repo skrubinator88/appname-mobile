@@ -148,3 +148,18 @@ export const initiateAccount = async (authState) => {
     return (await res.json()).url
   })
 };
+
+export const fetchDashboardLink = async (authState) => {
+  return fetch(`${env.API_URL}/payments/dashboard_link`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+    return (await res.json()).url
+  })
+};

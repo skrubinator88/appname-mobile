@@ -18,7 +18,11 @@ export const PaymentReducer = (prevState = initialState, action) => {
             return { ...prevState, methods: [...methods.filter(v => v.id !== action.data.id), action.data] }
 
         case "SET_BALANCE":
-            return { ...prevState, balance: action.data.balance || 0, hasActiveAccount: action.data.activeAccount, hasAccount: action.data.hasAccount }
+            return {
+                ...prevState, balance: action.data.balance || 0,
+                hasActiveAccount: action.data.hasActiveAccount,
+                hasAccount: action.data.hasAccount
+            }
 
         case "SET_DEFAULT_METHOD":
             return { ...prevState, defaultMethod: action.data }
