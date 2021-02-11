@@ -15,7 +15,6 @@ export const getPaymentInfo = async (authState, dispatch) => {
       throw new Error((await res.json()).message)
     }
     const data = await res.json()
-    console.log(data, 'beta')
 
     data.methods.map((method) => dispatch(PaymentActions.addMethod(method)))
     data.transactions.map((txn) => dispatch(PaymentActions.updateTransaction(txn)))
