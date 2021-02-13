@@ -1,10 +1,11 @@
 // IMPORT
 // Expo
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { FontAwesome } from "@expo/vector-icons";
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Dimensions, FlatList, View, KeyboardAvoidingView } from "react-native";
-import Modal from "react-native-modal";
 import { TextField } from "@ubaids/react-native-material-textfield";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Dimensions, FlatList, Platform, View } from "react-native";
+import Modal from "react-native-modal";
 import StarRating from "react-native-star-rating";
 import styled from "styled-components/native";
 import Card from "../../../../components/card_animated";
@@ -240,146 +241,146 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
         job_data={job_data}
       />
     ) : (
-      <Card ref={cardRef}>
-        <View>
-          <ProfilePicture
-            source={{
-              uri: `${config.API_URL}${job_data.posted_by_profile_picture}`,
-            }}
-          ></ProfilePicture>
+        <Card ref={cardRef}>
+          <View>
+            <ProfilePicture
+              source={{
+                uri: `${config.API_URL}${job_data.posted_by_profile_picture}`,
+              }}
+            ></ProfilePicture>
 
-          <Row first>
-            <Column>
-              <Text title bold marginBottom="5px">
-                {name}
-              </Text>
-              <Text small light marginBottom="5px">
-                {occupation}
-              </Text>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text bold marginBottom="5px">
-                  <FontAwesome name="map-marker" size={24} color="black" />
+            <Row first>
+              <Column>
+                <Text title bold marginBottom="5px">
+                  {name}
                 </Text>
-                <Text style={{ marginLeft: 10 }} bold>
-                  13 min
-                </Text>
-              </View>
-            </Column>
-            <Column>
-              {/* Iterate from array of data pulled from server and render as stars */}
-              <View style={{ flexDirection: "row", marginBottom: 10 }}>
-                <StarRating disabled={true} maxStars={5} rating={starRate} starSize={25} />
-              </View>
-              <Text style={{ textAlign: "center" }} bold>
-                {starRate}
-              </Text>
-            </Column>
-          </Row>
-
-          <Row>
-            <JobDescriptionRow>
-              <JobDescription>
                 <Text small light marginBottom="5px">
-                  Job Description
+                  {occupation}
                 </Text>
-                <Text small marginBottom="5px">
-                  ${job_data.salary}/hr
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Text bold marginBottom="5px">
+                    <FontAwesome name="map-marker" size={24} color="black" />
+                  </Text>
+                  <Text style={{ marginLeft: 10 }} bold>
+                    13 min
                 </Text>
-              </JobDescription>
+                </View>
+              </Column>
+              <Column>
+                {/* Iterate from array of data pulled from server and render as stars */}
+                <View style={{ flexDirection: "row", marginBottom: 10 }}>
+                  <StarRating disabled={true} maxStars={5} rating={starRate} starSize={25} />
+                </View>
+                <Text style={{ textAlign: "center" }} bold>
+                  {starRate}
+                </Text>
+              </Column>
+            </Row>
 
-              {description.map((item) => {
-                return <Text key={item.id}>{item.text}</Text>;
-              })}
-            </JobDescriptionRow>
-          </Row>
-
-          {job_data.photo_files && job_data.photo_files.length > 0 && (
             <Row>
-              <PhotosRow>
+              <JobDescriptionRow>
                 <JobDescription>
                   <Text small light marginBottom="5px">
-                    Photos
-                  </Text>
+                    Job Description
+                </Text>
+                  <Text small marginBottom="5px">
+                    ${job_data.salary}/hr
+                </Text>
                 </JobDescription>
 
-                <FlatList
-                  data={job_data.photo_files}
-                  keyExtractor={(v) => v}
-                  centerContent
-                  showsHorizontalScrollIndicator={false}
-                  horizontal
-                  renderItem={({ item }) => <PhotoItem key={item} item={{ uri: `${config.API_URL}/job/${job_data._id}/${item}` }} />}
-                />
-              </PhotosRow>
+                {description.map((item) => {
+                  return <Text key={item.id}>{item.text}</Text>;
+                })}
+              </JobDescriptionRow>
             </Row>
-          )}
 
-          <CardOptionItem row>
-            <Text small>Reviews</Text>
-          </CardOptionItem>
+            {job_data.photo_files && job_data.photo_files.length > 0 && (
+              <Row>
+                <PhotosRow>
+                  <JobDescription>
+                    <Text small light marginBottom="5px">
+                      Photos
+                  </Text>
+                  </JobDescription>
 
-          {job_data.offer_received && job_data.offer_received.deployee === authState.userID ? (
-            job_data.offer_received.counterOffer ? (
-              <>
-                <View style={{ justifyContent: "space-between", flexDirection: "row", paddingHorizontal: 20, paddingTop: 12 }}>
-                  <Text small light marginBottom="5px">
-                    Counter Offer
+                  <FlatList
+                    data={job_data.photo_files}
+                    keyExtractor={(v) => v}
+                    centerContent
+                    showsHorizontalScrollIndicator={false}
+                    horizontal
+                    renderItem={({ item }) => <PhotoItem key={item} item={{ uri: `${config.API_URL}/job/${job_data._id}/${item}` }} />}
+                  />
+                </PhotosRow>
+              </Row>
+            )}
+
+            <CardOptionItem row>
+              <Text small>Reviews</Text>
+            </CardOptionItem>
+
+            {job_data.offer_received && job_data.offer_received.deployee === authState.userID ? (
+              job_data.offer_received.counterOffer ? (
+                <>
+                  <View style={{ justifyContent: "space-between", flexDirection: "row", paddingHorizontal: 20, paddingTop: 12 }}>
+                    <Text small light marginBottom="5px">
+                      Counter Offer
                   </Text>
-                  <Text small marginBottom="5px">
-                    ${job_data.offer_received.counterOffer}/hr
+                    <Text small marginBottom="5px">
+                      ${job_data.offer_received.counterOffer}/hr
                   </Text>
-                </View>
-                <Button
-                  accept
-                  style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: "center" }}
-                  onPress={handleCounterApprove}
-                >
-                  <Text style={{ color: "white", textAlign: "center" }} medium>
-                    Accept Counter
+                  </View>
+                  <Button
+                    accept
+                    style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: "center" }}
+                    onPress={handleCounterApprove}
+                  >
+                    <Text style={{ color: "white", textAlign: "center" }} medium>
+                      Accept Counter
                   </Text>
-                </Button>
-              </>
+                  </Button>
+                </>
+              ) : (
+                  <Button negotiationSent style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: "center" }} disabled>
+                    <Text style={{ color: "white", textAlign: "center" }} medium>
+                      Offer Sent
+                </Text>
+                  </Button>
+                )
             ) : (
-              <Button negotiationSent style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: "center" }} disabled>
-                <Text style={{ color: "white", textAlign: "center" }} medium>
-                  Offer Sent
-                </Text>
-              </Button>
-            )
-          ) : (
-            <Button
-              negotiate
-              style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: "center" }}
-              onPress={handleStartNegotiation}
-            >
-              <Text style={{ color: "#00bfff", textAlign: "center" }} medium>
-                Negotiate Offer
+                <Button
+                  negotiate
+                  style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: "center" }}
+                  onPress={handleStartNegotiation}
+                >
+                  <Text style={{ color: "#00bfff", textAlign: "center" }} medium>
+                    Negotiate Offer
               </Text>
-            </Button>
-          )}
+                </Button>
+              )}
 
-          <Row last>
-            <Column>
-              <Button decline onPress={() => handleJobDecline()}>
-                <Text style={{ color: "red" }} medium>
-                  Decline
-                </Text>
-              </Button>
-            </Column>
-
-            {job_data.offer_received && job_data.offer_received.deployee === authState.userID ? null : (
+            <Row last>
               <Column>
-                <Button accept onPress={() => handleJobApprove()}>
-                  <Text style={{ color: "white" }} medium>
-                    Accept
-                  </Text>
+                <Button decline onPress={() => handleJobDecline()}>
+                  <Text style={{ color: "red" }} medium>
+                    Decline
+                </Text>
                 </Button>
               </Column>
-            )}
-          </Row>
-        </View>
-      </Card>
-    );
+
+              {job_data.offer_received && job_data.offer_received.deployee === authState.userID ? null : (
+                <Column>
+                  <Button accept onPress={() => handleJobApprove()}>
+                    <Text style={{ color: "white" }} medium>
+                      Accept
+                  </Text>
+                  </Button>
+                </Column>
+              )}
+            </Row>
+          </View>
+        </Card>
+      );
   } else {
     return (
       <View>
@@ -392,6 +393,9 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
 const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [salary, setSalary] = useState("");
+  const [unit, setUnit] = useState(job_data.wage || 'hr')
+
+  const { showActionSheetWithOptions } = useActionSheet()
 
   const onSubmitOffer = useCallback(async () => {
     if (salary) {
@@ -447,12 +451,11 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
               What offer would you complete this job for?
             </Text>
 
-            <View style={{ marginVertical: 10 }}>
-              <WageInput>
-                <SalaryField style={{ justifyContent: "center" }}>
+            <View style={{ marginVertical: 10, alignItems: 'stretch', justifyContent: 'center', }}>
+              <WageInput style={{ alignItems: 'stretch' }}>
+                <SalaryField style={{ alignItems: 'stretch' }}>
                   <TextField
                     disabled={loading}
-                    suffix="/hr"
                     label="PAY"
                     prefix="$"
                     labelFontSize={14}
@@ -464,8 +467,50 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
                     }}
                     value={salary}
                     onSubmitEditing={onSubmitOffer}
+                    renderRightAccessory={() => (
+                      <RateTouchable onPress={() => {
+                        showActionSheetWithOptions({
+                          options: ['Per Day', 'Per Deployment', 'Per Hour', 'Cancel'],
+                          cancelButtonIndex: 3,
+                          title: 'Select Payment Rate',
+                          showSeparators: true,
+                        }, async (num) => {
+                          switch (num) {
+                            case 0:
+                              setUnit('day')
+                              break
+                            case 1:
+                              setUnit('deployment')
+                              break
+                            case 2:
+                              setUnit('hr')
+                              break
+                          }
+                        })
+                      }}><Text light small>/{unit}</Text></RateTouchable>
+                    )}
                   />
                 </SalaryField>
+                <RateTouchable onPress={() => {
+                        showActionSheetWithOptions({
+                          options: ['Per Day', 'Per Deployment', 'Per Hour', 'Cancel'],
+                          cancelButtonIndex: 3,
+                          title: 'Select Rate',
+                          showSeparators: true,
+                        }, async (num) => {
+                          switch (num) {
+                            case 0:
+                              setUnit('day')
+                              break
+                            case 1:
+                              setUnit('deployment')
+                              break
+                            case 2:
+                              setUnit('hr')
+                              break
+                          }
+                        })
+                      }}><Text light small>/{unit}</Text></RateTouchable>
               </WageInput>
             </View>
           </JobDescriptionRow>
@@ -521,7 +566,6 @@ const ProfilePicture = styled.Image`
 const SalaryField = styled.View`
   flex: 1;
   flex-direction: column;
-  padding-right: 50px;
 `;
 
 const Row = styled.View`
@@ -613,3 +657,8 @@ const JobDescription = styled.View`
   flex-direction: row;
   justify-content: space-between;
 `;
+
+const RateTouchable = styled.TouchableOpacity`
+  background-color:red;
+`;
+
