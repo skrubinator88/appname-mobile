@@ -1,10 +1,12 @@
 // IMPORT
 // Expo
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { FontAwesome } from "@expo/vector-icons";
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Dimensions, FlatList, View, KeyboardAvoidingView } from "react-native";
-import Modal from "react-native-modal";
 import { TextField } from "@ubaids/react-native-material-textfield";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Dimensions, FlatList, KeyboardAvoidingView, Platform, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import Modal from "react-native-modal";
 import StarRating from "react-native-star-rating";
 import styled from "styled-components/native";
 import Card from "../../../../components/card_animated";
@@ -240,146 +242,146 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
         job_data={job_data}
       />
     ) : (
-      <Card ref={cardRef}>
-        <View>
-          <ProfilePicture
-            source={{
-              uri: `${config.API_URL}${job_data.posted_by_profile_picture}`,
-            }}
-          ></ProfilePicture>
+        <Card ref={cardRef}>
+          <View>
+            <ProfilePicture
+              source={{
+                uri: `${config.API_URL}${job_data.posted_by_profile_picture}`,
+              }}
+            ></ProfilePicture>
 
-          <Row first>
-            <Column>
-              <Text title bold marginBottom="5px">
-                {name}
-              </Text>
-              <Text small light marginBottom="5px">
-                {occupation}
-              </Text>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text bold marginBottom="5px">
-                  <FontAwesome name="map-marker" size={24} color="black" />
+            <Row first>
+              <Column>
+                <Text title bold marginBottom="5px">
+                  {name}
                 </Text>
-                <Text style={{ marginLeft: 10 }} bold>
-                  13 min
-                </Text>
-              </View>
-            </Column>
-            <Column>
-              {/* Iterate from array of data pulled from server and render as stars */}
-              <View style={{ flexDirection: "row", marginBottom: 10 }}>
-                <StarRating disabled={true} maxStars={5} rating={starRate} starSize={25} />
-              </View>
-              <Text style={{ textAlign: "center" }} bold>
-                {starRate}
-              </Text>
-            </Column>
-          </Row>
-
-          <Row>
-            <JobDescriptionRow>
-              <JobDescription>
                 <Text small light marginBottom="5px">
-                  Job Description
+                  {occupation}
                 </Text>
-                <Text small marginBottom="5px">
-                  ${job_data.salary}/hr
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Text bold marginBottom="5px">
+                    <FontAwesome name="map-marker" size={24} color="black" />
+                  </Text>
+                  <Text style={{ marginLeft: 10 }} bold>
+                    13 min
                 </Text>
-              </JobDescription>
+                </View>
+              </Column>
+              <Column>
+                {/* Iterate from array of data pulled from server and render as stars */}
+                <View style={{ flexDirection: "row", marginBottom: 10 }}>
+                  <StarRating disabled={true} maxStars={5} rating={starRate} starSize={25} />
+                </View>
+                <Text style={{ textAlign: "center" }} bold>
+                  {starRate}
+                </Text>
+              </Column>
+            </Row>
 
-              {description.map((item) => {
-                return <Text key={item.id}>{item.text}</Text>;
-              })}
-            </JobDescriptionRow>
-          </Row>
-
-          {job_data.photo_files && job_data.photo_files.length > 0 && (
             <Row>
-              <PhotosRow>
+              <JobDescriptionRow>
                 <JobDescription>
                   <Text small light marginBottom="5px">
-                    Photos
-                  </Text>
+                    Job Description
+                </Text>
+                  <Text small marginBottom="5px">
+                    ${job_data.salary}/hr
+                </Text>
                 </JobDescription>
 
-                <FlatList
-                  data={job_data.photo_files}
-                  keyExtractor={(v) => v}
-                  centerContent
-                  showsHorizontalScrollIndicator={false}
-                  horizontal
-                  renderItem={({ item }) => <PhotoItem key={item} item={{ uri: `${config.API_URL}/job/${job_data._id}/${item}` }} />}
-                />
-              </PhotosRow>
+                {description.map((item) => {
+                  return <Text key={item.id}>{item.text}</Text>;
+                })}
+              </JobDescriptionRow>
             </Row>
-          )}
 
-          <CardOptionItem row>
-            <Text small>Reviews</Text>
-          </CardOptionItem>
+            {job_data.photo_files && job_data.photo_files.length > 0 && (
+              <Row>
+                <PhotosRow>
+                  <JobDescription>
+                    <Text small light marginBottom="5px">
+                      Photos
+                  </Text>
+                  </JobDescription>
 
-          {job_data.offer_received && job_data.offer_received.deployee === authState.userID ? (
-            job_data.offer_received.counterOffer ? (
-              <>
-                <View style={{ justifyContent: "space-between", flexDirection: "row", paddingHorizontal: 20, paddingTop: 12 }}>
-                  <Text small light marginBottom="5px">
-                    Counter Offer
+                  <FlatList
+                    data={job_data.photo_files}
+                    keyExtractor={(v) => v}
+                    centerContent
+                    showsHorizontalScrollIndicator={false}
+                    horizontal
+                    renderItem={({ item }) => <PhotoItem key={item} item={{ uri: `${config.API_URL}/job/${job_data._id}/${item}` }} />}
+                  />
+                </PhotosRow>
+              </Row>
+            )}
+
+            <CardOptionItem row>
+              <Text small>Reviews</Text>
+            </CardOptionItem>
+
+            {job_data.offer_received && job_data.offer_received.deployee === authState.userID ? (
+              job_data.offer_received.counterOffer ? (
+                <>
+                  <View style={{ justifyContent: "space-between", flexDirection: "row", paddingHorizontal: 20, paddingTop: 12 }}>
+                    <Text small light marginBottom="5px">
+                      Counter Offer
                   </Text>
-                  <Text small marginBottom="5px">
-                    ${job_data.offer_received.counterOffer}/hr
+                    <Text small marginBottom="5px">
+                      ${job_data.offer_received.counterOffer}/hr
                   </Text>
-                </View>
-                <Button
-                  accept
-                  style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: "center" }}
-                  onPress={handleCounterApprove}
-                >
-                  <Text style={{ color: "white", textAlign: "center" }} medium>
-                    Accept Counter
+                  </View>
+                  <Button
+                    accept
+                    style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: "center" }}
+                    onPress={handleCounterApprove}
+                  >
+                    <Text style={{ color: "white", textAlign: "center" }} medium>
+                      Accept Counter
                   </Text>
-                </Button>
-              </>
+                  </Button>
+                </>
+              ) : (
+                  <Button negotiationSent style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: "center" }} disabled>
+                    <Text style={{ color: "white", textAlign: "center" }} medium>
+                      Offer Sent
+                </Text>
+                  </Button>
+                )
             ) : (
-              <Button negotiationSent style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: "center" }} disabled>
-                <Text style={{ color: "white", textAlign: "center" }} medium>
-                  Offer Sent
-                </Text>
-              </Button>
-            )
-          ) : (
-            <Button
-              negotiate
-              style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: "center" }}
-              onPress={handleStartNegotiation}
-            >
-              <Text style={{ color: "#00bfff", textAlign: "center" }} medium>
-                Negotiate Offer
+                <Button
+                  negotiate
+                  style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: "center" }}
+                  onPress={handleStartNegotiation}
+                >
+                  <Text style={{ color: "#00bfff", textAlign: "center" }} medium>
+                    Negotiate Offer
               </Text>
-            </Button>
-          )}
+                </Button>
+              )}
 
-          <Row last>
-            <Column>
-              <Button decline onPress={() => handleJobDecline()}>
-                <Text style={{ color: "red" }} medium>
-                  Decline
-                </Text>
-              </Button>
-            </Column>
-
-            {job_data.offer_received && job_data.offer_received.deployee === authState.userID ? null : (
+            <Row last>
               <Column>
-                <Button accept onPress={() => handleJobApprove()}>
-                  <Text style={{ color: "white" }} medium>
-                    Accept
-                  </Text>
+                <Button decline onPress={() => handleJobDecline()}>
+                  <Text style={{ color: "red" }} medium>
+                    Decline
+                </Text>
                 </Button>
               </Column>
-            )}
-          </Row>
-        </View>
-      </Card>
-    );
+
+              {job_data.offer_received && job_data.offer_received.deployee === authState.userID ? null : (
+                <Column>
+                  <Button accept onPress={() => handleJobApprove()}>
+                    <Text style={{ color: "white" }} medium>
+                      Accept
+                  </Text>
+                  </Button>
+                </Column>
+              )}
+            </Row>
+          </View>
+        </Card>
+      );
   } else {
     return (
       <View>
@@ -392,6 +394,9 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
 const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [salary, setSalary] = useState("");
+  const [unit, setUnit] = useState(job_data.wage || 'hr')
+
+  const { showActionSheetWithOptions } = useActionSheet()
 
   const onSubmitOffer = useCallback(async () => {
     if (salary) {
@@ -430,65 +435,71 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
   }, [loading, deployee, job_data, salary]);
 
   return (
-    <Modal isVisible>
-      <View style={{ backgroundColor: "#fff", borderRadius: 40, paddingVertical: 16 }}>
-        <Row>
-          <JobDescriptionRow>
-            <JobDescription>
-              <Text small light marginBottom="5px">
-                Current Offer
+    <Modal coverScreen avoidKeyboard swipeDirection='down' onSwipeComplete={onCancel} isVisible>
+        <View style={{ backgroundColor: "#fff", borderRadius: 40, paddingVertical: 16 }}>
+          <Row>
+            <JobDescriptionRow>
+              <JobDescription>
+                <Text small light marginBottom="5px">
+                  Current Offer
               </Text>
-              <Text small marginBottom="5px">
-                ${job_data.salary}/hr
+                <Text small marginBottom="5px">
+                  ${job_data.salary}/hr
               </Text>
-            </JobDescription>
+              </JobDescription>
 
-            <Text small style={{ textTransform: "uppercase", marginVertical: 16, textAlign: "center" }} bold>
-              What offer would you complete this job for?
+              <Text small style={{ textTransform: "uppercase", marginVertical: 16, textAlign: "center" }} bold>
+                What offer would you complete this job for?
             </Text>
 
-            <View style={{ marginVertical: 10 }}>
-              <WageInput>
-                <SalaryField style={{ justifyContent: "center" }}>
-                  <TextField
-                    disabled={loading}
-                    suffix="/hr"
-                    label="PAY"
-                    prefix="$"
-                    labelFontSize={14}
-                    placeholder="0.00"
-                    labelTextStyle={{ color: "grey", fontWeight: "700" }}
-                    keyboardType="numeric"
-                    onChangeText={(text) => {
-                      setSalary(text);
-                    }}
-                    value={salary}
-                    onSubmitEditing={onSubmitOffer}
-                  />
-                </SalaryField>
-              </WageInput>
-            </View>
-          </JobDescriptionRow>
-        </Row>
+              <View style={{ marginVertical: 10, alignItems: 'stretch', justifyContent: 'center', }}>
+                <WageInput style={{ alignItems: 'stretch' }}>
+                  <SalaryField style={{ alignItems: 'stretch' }}>
+                    <TextField
+                      disabled={loading}
+                      label="PAY"
+                      prefix="$"
+                      labelFontSize={14}
+                      placeholder="0.00"
+                      labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                      keyboardType="numeric"
+                      onChangeText={(text) => {
+                        setSalary(text);
+                      }}
+                      value={salary}
+                      onSubmitEditing={onSubmitOffer}
+                      renderRightAccessory={() => (
+                        <ReactTouchable style={{ width: 80, height: 80 }}>
+                          <ReactTouchable.Item value='a' label='anti-b' key='0' />
+                          <ReactTouchable.Item value='ab' label='anti-a' key='2' />
+                          <ReactTouchable.Item value='c' label='anti-1' key='3' />
+                        </ReactTouchable>
+                      )}
+                    />
+                  </SalaryField>
+                </WageInput>
+              </View>
+            </JobDescriptionRow>
+          </Row>
 
-        <Row last>
-          <Column style={{ alignItems: "center" }}>
-            <Button disabled={loading} decline onPress={onCancel}>
-              <Text style={{ color: "red" }} medium>
-                Cancel
+          <Row last>
+            <Column style={{ alignItems: "center" }}>
+              <Button disabled={loading} decline onPress={onCancel}>
+                <Text style={{ color: "red" }} medium>
+                  Cancel
               </Text>
-            </Button>
-          </Column>
-          <Column>
-            <Button disabled={loading} style={{ flexDirection: "row" }} accept onPress={onSubmitOffer}>
-              {loading ? <ActivityIndicator animating style={{ marginEnd: 4 }} color="white" /> : null}
-              <Text style={{ color: "white" }} medium>
-                Save
+              </Button>
+            </Column>
+            <Column>
+              <Button disabled={loading} style={{ flexDirection: "row" }} accept onPress={onSubmitOffer}>
+                {loading ? <ActivityIndicator animating style={{ marginEnd: 4 }} color="white" /> : null}
+                <Text style={{ color: "white" }} medium>
+                  Save
               </Text>
-            </Button>
-          </Column>
-        </Row>
-      </View>
+              </Button>
+            </Column>
+          </Row>
+        </View>
     </Modal>
   );
 };
@@ -521,7 +532,6 @@ const ProfilePicture = styled.Image`
 const SalaryField = styled.View`
   flex: 1;
   flex-direction: column;
-  padding-right: 50px;
 `;
 
 const Row = styled.View`
@@ -612,4 +622,8 @@ const Button = styled.TouchableOpacity`
 const JobDescription = styled.View`
   flex-direction: row;
   justify-content: space-between;
+`;
+
+const ReactTouchable = styled.Picker`
+  background-color:red;
 `;
