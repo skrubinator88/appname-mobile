@@ -332,6 +332,7 @@ export function PaymentMethodSelector({ jobID, recipient, description, onClose, 
                                         <Text>Enter mount You Intend To Pay</Text>
                                         <TextField
                                             disabled={loading}
+                                            editable={!loading}
                                             label="PAY"
                                             prefix="$"
                                             labelFontSize={14}

@@ -476,19 +476,44 @@ export default function ListingItem({ navigation, route }) {
               )}
             </Item>
 
-            <Item style={{ marginTop: 20, marginBottom: 20 }}>
-              <WageTitles></WageTitles>
+            <Item style={{ marginVertical: 20 }}>
               <WageInput>
-                <SalaryField>
+                <SalaryField style={{ alignItems: 'stretch' }}>
                   <TextField
+                    {...commonInputProps(salary, setSalary)}
                     prefix="$"
-                    suffix="/hr"
                     label="PAY"
                     labelFontSize={14}
                     placeholder="0.00"
                     labelTextStyle={{ color: "grey", fontWeight: "700" }}
                     keyboardType="numeric"
-                    {...commonInputProps(salary, setSalary)}
+                    renderRightAccessory={() => (
+                      <TouchableOpacity
+                        onPress={() => {
+                          showActionSheetWithOptions({
+                            options: ['Per Day', 'Per Deployment', 'Per Hour', 'Cancel'],
+                            cancelButtonIndex: 3,
+                            title: 'Select  Rate',
+                            showSeparators: true,
+                          }, async (num) => {
+                            switch (num) {
+                              case 0:
+                                setWage('day')
+                                break
+                              case 1:
+                                setWage('deployment')
+                                break
+                              case 2:
+                                setWage('hr')
+                                break
+                            }
+                          })
+                        }}>
+                        <View style={{ marginHorizontal: 10 }}>
+                          <Text color="#4a89f2" bold>/{wage}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    )}
                   />
                 </SalaryField>
                 {/* <WageTimeField>
@@ -528,8 +553,8 @@ export default function ListingItem({ navigation, route }) {
                       {loadingMedia ? (
                         <ActivityIndicator color="black" size="small" />
                       ) : (
-                        <Ionicons name="ios-add" style={{ fontSize: 40 }} />
-                      )}
+                          <Ionicons name="ios-add" style={{ fontSize: 40 }} />
+                        )}
                     </ScheduleButton>
                   </TouchableOpacity>
                 )}
@@ -738,9 +763,8 @@ const WageInput = styled.View`
 `;
 
 const SalaryField = styled.View`
-  flex: 3;
+  flex: 1;
   flex-direction: column;
-  padding-right: 50px;
 `;
 
 const Task = styled.View`

@@ -3,7 +3,7 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { FontAwesome } from "@expo/vector-icons";
 import { TextField } from "@ubaids/react-native-material-textfield";
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Dimensions, FlatList, Platform, View } from "react-native";
 import Modal from "react-native-modal";
 import StarRating from "react-native-star-rating";
@@ -33,10 +33,12 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
   const [description, setDescription] = useState([]);
   const [starRate, setStarRate] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [accepted, setAccepted] = useState(false);
   const [enableNegotiation, setEnableNegotiation] = useState(false);
   const [job_data, set_job_data] = useState(job_data_prop);
   const cardRef = useRef(null);
+
+  // Tracks when the job is accepted
+  let data = useMemo(() => ({ accepted: false }), [navigation])
 
   useEffect(() => {
     (async () => {
@@ -59,52 +61,46 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
     })();
   }, []);
 
-  // Monitor page and change the job status back to being avaiilable when user leaves the screen
+  // Monitor page and change the job status back to being available when user leaves the screen
   useEffect(() => {
     let reset = false;
     const unsubscribe = navigation.addListener("beforeRemove", async (e) => {
       e.preventDefault();
-      if (job_data.offer_received && job_data.offer_received.deployee === authState.userID) {
+      if (!data.accepted && job_data.offer_received && job_data.offer_received.deployee === authState.userID) {
         return await new Promise((res) => {
           Confirm({
             title: "Cancel Job Offer?",
             message: "Job will become available in the job pool",
             cancelButtonIndex: 1,
             destructiveButtonIndex: 0,
-            options: ["Yes", "Cancel"],
+            options: ["Yes", "No"],
             onPress: async (i) => {
               if (i === 0) {
-                await JobsController.cancelOffer(job_data._id);
-                await sendNotification(authState.userToken, projectManager._id, {
-                  title: `GigChasers - ${job_data.job_title}`,
-                  body: `Offer declined`,
-                  data: { type: "offerdecline", id: job_data._id, sender: authState.userID },
-                });
-              }
-              setLoading(true);
-              try {
-                await JobsController.cancelOffer(job_data._id);
-                delete job_data.offer_received;
-                set_job_data(job_data);
-                await sendNotification(authState.userToken, projectManager._id, {
-                  title: `GigChasers - ${job_data.job_title}`,
-                  body: `Offer declined`,
-                  data: { type: "offerdecline", id: job_data._id, sender: authState.userID },
-                });
-                reset = true;
-                delete job_data.offer_received;
-                set_job_data(job_data);
-                return res(navigation.dispatch(e.data.action));
-              } catch (e) {
-                console.log(e);
-              } finally {
-                setLoading(false);
+                setLoading(true);
+                try {
+                  await JobsController.cancelOffer(job_data._id);
+                  delete job_data.offer_received;
+                  set_job_data(job_data);
+                  await sendNotification(authState.userToken, projectManager._id, {
+                    title: `GigChasers - ${job_data.job_title}`,
+                    body: `Offer declined`,
+                    data: { type: "offerdecline", id: job_data._id, sender: authState.userID },
+                  });
+                  reset = true;
+                  delete job_data.offer_received;
+                  set_job_data(job_data);
+                  return res(navigation.dispatch(e.data.action));
+                } catch (e) {
+                  console.log(e);
+                } finally {
+                  setLoading(false);
+                }
               }
             },
             onCancel: res,
           });
         });
-      } else if (!accepted) {
+      } else if (!data.accepted) {
         await JobsController.changeJobStatus(job_data._id, "available");
         reset = true;
       }
@@ -112,7 +108,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
     });
 
     return () => {
-      if (!reset && !job_data.offer_received) {
+      if (!reset && !job_data.offer_received && !data.accepted) {
         JobsController.changeJobStatus(job_data._id, "available");
       }
       if (unsubscribe) {
@@ -130,7 +126,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
             message: "Job will become available in the job pool",
             cancelButtonIndex: 1,
             destructiveButtonIndex: 0,
-            options: ["Yes", "Cancel"],
+            options: ["Yes", "No"],
             onPress: async (i) => {
               if (i === 0) {
                 setLoading(true);
@@ -175,6 +171,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
       cardRef,
       async () => {
         try {
+          data.accepted = true
           await JobsController.changeJobStatus(job_data._id, "accepted", authState.userID);
           await sendNotification(authState.userToken, projectManager._id, {
             title: `GigChasers - ${job_data.job_title}`,
@@ -182,10 +179,9 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
             data: { type: "jobaccept", id: job_data._id, sender: authState.userID },
           });
 
-          // Save job ID in local storage to retrieve it later on.
+          console.log(data)
 
-          setAccepted(true);
-          console.log(job_data);
+          //TODO: Save job ID in local storage to retrieve it later on.
           changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
         } catch (e) {
           console.log(e, "job approve");
@@ -202,6 +198,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
       async () => {
         try {
           await JobsController.counterApprove(job_data._id, job_data.offer_received.counterOffer);
+          data.accepted = true
           await sendNotification(authState.userToken, projectManager._id, {
             title: `GigChasers - ${job_data.job_title}`,
             body: `Offer accepted`,
@@ -209,7 +206,6 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
           });
           //TODO: Save job ID in local storage to retrieve it later on.
 
-          setAccepted(true);
           changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
         } catch (e) {
           console.log(e, "counter offer approve");
@@ -284,8 +280,8 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
                     Job Description
                 </Text>
                   <Text small marginBottom="5px">
-                    ${job_data.salary}/hr
-                </Text>
+                    ${job_data.salary}/{job_data.wage}
+                  </Text>
                 </JobDescription>
 
                 {description.map((item) => {
@@ -322,22 +318,18 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
             {job_data.offer_received && job_data.offer_received.deployee === authState.userID ? (
               job_data.offer_received.counterOffer ? (
                 <>
-                  <View style={{ justifyContent: "space-between", flexDirection: "row", paddingHorizontal: 20, paddingTop: 12 }}>
-                    <Text small light marginBottom="5px">
-                      Counter Offer
-                  </Text>
+                  <Row style={{ paddingHorizontal: 20, paddingTop: 12, borderBottomWidth: 0, justifyContent: 'space-between' }}>
+                    <Text small light marginBottom="5px">Counter Offer</Text>
                     <Text small marginBottom="5px">
-                      ${job_data.offer_received.counterOffer}/hr
-                  </Text>
-                  </View>
+                      ${job_data.offer_received.counterOffer}/{job_data.offer_received.counterWage}
+                    </Text>
+                  </Row>
                   <Button
                     accept
                     style={{ marginHorizontal: 24, marginVertical: 12, justifyContent: "center" }}
                     onPress={handleCounterApprove}
                   >
-                    <Text style={{ color: "white", textAlign: "center" }} medium>
-                      Accept Counter
-                  </Text>
+                    <Text style={{ color: "white", textAlign: "center" }} medium>Accept Counter</Text>
                   </Button>
                 </>
               ) : (
@@ -408,14 +400,14 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
       await new Promise(async (res) => {
         Confirm({
           title: "Confirm Offer",
-          message: `Suggest offer of $${offer}/hour to deployer to complete this job?`,
-          options: ["Yes", "Cancel"],
+          message: `Suggest offer of $${offer}/${unit} to deployer to complete this job?`,
+          options: ["Yes", "No"],
           cancelButtonIndex: 1,
           onPress: async (number) => {
             if (number === 0) {
               // Save offer
               try {
-                const offer_received = await JobsController.sendOffer(job_data._id, deployee, offer);
+                const offer_received = await JobsController.sendOffer(job_data._id, deployee, offer, unit);
                 job_data.offer_received = offer_received;
                 onSubmit(job_data);
               } catch (e) {
@@ -431,24 +423,24 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
 
       setLoading(false);
     }
-  }, [loading, deployee, job_data, salary]);
+  }, [loading, deployee, job_data, salary, unit]);
 
   return (
     <Modal coverScreen avoidKeyboard swipeDirection='down' onSwipeComplete={onCancel} isVisible>
-        <View style={{ backgroundColor: "#fff", borderRadius: 40, paddingVertical: 16 }}>
-          <Row>
-            <JobDescriptionRow>
-              <JobDescription>
-                <Text small light marginBottom="5px">
-                  Current Offer
+      <View style={{ backgroundColor: "#fff", borderRadius: 40, paddingVertical: 16 }}>
+        <Row>
+          <JobDescriptionRow>
+            <JobDescription>
+              <Text small light marginBottom="5px">
+                Current Offer
               </Text>
-                <Text small marginBottom="5px">
-                  ${job_data.salary}/hr
+              <Text small marginBottom="5px">
+                ${job_data.salary}/hr
               </Text>
-              </JobDescription>
+            </JobDescription>
 
-              <Text small style={{ textTransform: "uppercase", marginVertical: 16, textAlign: "center" }} bold>
-                What offer would you complete this job for?
+            <Text small style={{ textTransform: "uppercase", marginVertical: 16, textAlign: "center" }} bold>
+              What offer would you complete this job for?
             </Text>
 
             <View style={{ marginVertical: 10, alignItems: 'stretch', justifyContent: 'center', }}>
@@ -472,7 +464,7 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
                         showActionSheetWithOptions({
                           options: ['Per Day', 'Per Deployment', 'Per Hour', 'Cancel'],
                           cancelButtonIndex: 3,
-                          title: 'Select Payment Rate',
+                          title: 'Select  Rate',
                           showSeparators: true,
                         }, async (num) => {
                           switch (num) {
@@ -487,30 +479,12 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
                               break
                           }
                         })
-                      }}><Text light small>/{unit}</Text></RateTouchable>
+                      }}>
+                        <Text color='#4a89f2'>/{unit}</Text>
+                      </RateTouchable>
                     )}
                   />
                 </SalaryField>
-                <RateTouchable onPress={() => {
-                        showActionSheetWithOptions({
-                          options: ['Per Day', 'Per Deployment', 'Per Hour', 'Cancel'],
-                          cancelButtonIndex: 3,
-                          title: 'Select Rate',
-                          showSeparators: true,
-                        }, async (num) => {
-                          switch (num) {
-                            case 0:
-                              setUnit('day')
-                              break
-                            case 1:
-                              setUnit('deployment')
-                              break
-                            case 2:
-                              setUnit('hr')
-                              break
-                          }
-                        })
-                      }}><Text light small>/{unit}</Text></RateTouchable>
               </WageInput>
             </View>
           </JobDescriptionRow>
@@ -522,18 +496,18 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
               <Text style={{ color: "red" }} medium>
                 Cancel
               </Text>
-              </Button>
-            </Column>
-            <Column>
-              <Button disabled={loading} style={{ flexDirection: "row" }} accept onPress={onSubmitOffer}>
-                {loading ? <ActivityIndicator animating style={{ marginEnd: 4 }} color="white" /> : null}
-                <Text style={{ color: "white" }} medium>
-                  Save
+            </Button>
+          </Column>
+          <Column>
+            <Button disabled={loading} style={{ flexDirection: "row" }} accept onPress={onSubmitOffer}>
+              {loading ? <ActivityIndicator animating style={{ marginEnd: 4 }} color="white" /> : null}
+              <Text style={{ color: "white" }} medium>
+                Save
               </Text>
-              </Button>
-            </Column>
-          </Row>
-        </View>
+            </Button>
+          </Column>
+        </Row>
+      </View>
     </Modal>
   );
 };
@@ -659,6 +633,8 @@ const JobDescription = styled.View`
 `;
 
 const RateTouchable = styled.TouchableOpacity`
-  background-color:red;
+  padding: 4px 12px;
+  background-color: #fafafa;
+  margin: 0 2px
 `;
 

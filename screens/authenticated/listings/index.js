@@ -19,6 +19,7 @@ import JobsControllers from "../../../controllers/JobsControllers";
 import config from "../../../env";
 // Functions
 import { isCurrentJob, sendNotification } from "../../../functions";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 
 export default function JobListing({ navigation }) {
   // Constructor
@@ -78,7 +79,7 @@ export default function JobListing({ navigation }) {
         nextProvider="Entypo"
         nextIcon="dots-three-horizontal"
         nextSize={25}
-        nextAction={() => {}}
+        nextAction={() => { }}
       >
         {/* Payments Section */}
         <Item>
@@ -107,16 +108,16 @@ export default function JobListing({ navigation }) {
               <ListItemDetail key={item.id} isCurrentJob={isCurrentJob(item)} navigation={navigation} item={item} />
             ))
           ) : (
-            <Item style={{ padding: 20, alignSelf: "stretch", justifyContent: "center" }}>
-              <MaterialCommunityIcons
-                name="alert-octagon"
-                style={{ textAlign: "center", fontSize: 32, marginBottom: 8, color: "darkgrey" }}
-              />
-              <Text small light style={{ textAlign: "center", textTransform: "uppercase" }}>
-                No job available
+              <Item style={{ padding: 20, alignSelf: "stretch", justifyContent: "center" }}>
+                <MaterialCommunityIcons
+                  name="alert-octagon"
+                  style={{ textAlign: "center", fontSize: 32, marginBottom: 8, color: "darkgrey" }}
+                />
+                <Text small light style={{ textAlign: "center", textTransform: "uppercase" }}>
+                  No job available
               </Text>
-            </Item>
-          )}
+              </Item>
+            )}
 
           <SectionTitle>
             <View style={{ margin: 10 }}>
@@ -127,18 +128,18 @@ export default function JobListing({ navigation }) {
           </SectionTitle>
 
           {offersList.length > 0 ? (
-            offersList.map((item) => <ListOfferItemDetail item={item} />)
+            offersList.map((item) => <ListOfferItemDetail item={item} key={item.id || item._id} />)
           ) : (
-            <Item style={{ padding: 20, alignSelf: "stretch", justifyContent: "center" }}>
-              <MaterialCommunityIcons
-                name="alert-octagon"
-                style={{ textAlign: "center", fontSize: 32, marginBottom: 8, color: "darkgrey" }}
-              />
-              <Text small light style={{ textAlign: "center", textTransform: "uppercase" }}>
-                No offer available for review
+              <Item style={{ padding: 20, alignSelf: "stretch", justifyContent: "center" }}>
+                <MaterialCommunityIcons
+                  name="alert-octagon"
+                  style={{ textAlign: "center", fontSize: 32, marginBottom: 8, color: "darkgrey" }}
+                />
+                <Text small light style={{ textAlign: "center", textTransform: "uppercase" }}>
+                  No offer available for review
               </Text>
-            </Item>
-          )}
+              </Item>
+            )}
 
           <SectionTitle>
             <View style={{ margin: 10 }}>
@@ -176,16 +177,16 @@ export default function JobListing({ navigation }) {
               </Item>
             ))
           ) : (
-            <Item style={{ padding: 20, alignSelf: "stretch", justifyContent: "center" }}>
-              <MaterialCommunityIcons
-                name="alert-octagon"
-                style={{ textAlign: "center", fontSize: 32, marginBottom: 8, color: "darkgrey" }}
-              />
-              <Text small light style={{ textAlign: "center", textTransform: "uppercase" }}>
-                No job is currently in progress
+              <Item style={{ padding: 20, alignSelf: "stretch", justifyContent: "center" }}>
+                <MaterialCommunityIcons
+                  name="alert-octagon"
+                  style={{ textAlign: "center", fontSize: 32, marginBottom: 8, color: "darkgrey" }}
+                />
+                <Text small light style={{ textAlign: "center", textTransform: "uppercase" }}>
+                  No job is currently in progress
               </Text>
-            </Item>
-          )}
+              </Item>
+            )}
         </JobSection>
       </Container>
     </>
@@ -216,10 +217,10 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
                   Active
                 </Text>
               ) : (
-                <Text textTransform="uppercase" color="#a44" small>
-                  Scheduled
-                </Text>
-              )}
+                  <Text textTransform="uppercase" color="#a44" small>
+                    Scheduled
+                  </Text>
+                )}
             </Row>
             <Row>
               <Text small weight="700" color="#1b5cce">
@@ -295,84 +296,87 @@ const ListOfferItemDetail = ({ item }) => {
       <ActivityIndicator color="darkgrey" />
     </Item>
   ) : (
-    <Item key={item.id}>
-      <JobItemLink onPress={onSelect}>
-        <JobItemRow>
-          <Column>
-            <Row style={{ marginBottom: 8 }}>
-              <Text small weight="700" color="#1b5cce">
-                {item.job_type}
-              </Text>
-            </Row>
-
-            {item.tasks.map((task) => (
-              <Row key={task.id}>
-                <Text>- {task.text}</Text>
+      <Item key={item.id}>
+        <JobItemLink onPress={onSelect}>
+          <JobItemRow>
+            <Column>
+              <Row style={{ marginBottom: 8 }}>
+                <Text small weight="700" color="#1b5cce">
+                  {item.job_type}
+                </Text>
               </Row>
-            ))}
 
-            <Row style={{ marginTop: 8, marginBottom: 12 }}>
-              <Text light small>
-                Initial Offer
-              </Text>
-              <Text small>
-                ${item.salary}/{item.wage}
-              </Text>
-            </Row>
+              {item.tasks.map((task) => (
+                <Row key={task.id}>
+                  <Text>- {task.text}</Text>
+                </Row>
+              ))}
 
-            {state.deployee && state.deployee.id && state.deployee.id === item.executed_by ? (
-              <>
-                <Row last style={{ marginTop: 4, justifyContent: "flex-start", paddingRight: 0 }}>
-                  <Image
-                    source={{
-                      uri: `${config.API_URL}/images/${state.deployee.id}.jpg`,
-                    }}
-                    style={{ height: 70, width: 70, borderRadius: 45 }}
-                  />
-                  <Column>
-                    <Text small bold>
-                      {state.name}
-                    </Text>
-                    <Row style={{ marginVertical: 4, paddingLeft: 0 }}>
-                      <Text light small>
-                        Suggested Offer
+              <Row style={{ marginTop: 8, marginBottom: 12 }}>
+                <Text light small>
+                  Initial Offer
+              </Text>
+                <Text small>
+                  ${item.salary}/{item.wage}
+                </Text>
+              </Row>
+
+              {state.deployee && state.deployee.id && state.deployee.id === item.executed_by ? (
+                <>
+                  <Row last style={{ marginTop: 4, justifyContent: "flex-start", paddingRight: 0 }}>
+                    <Image
+                      source={{
+                        uri: `${config.API_URL}/images/${state.deployee.id}.jpg`,
+                      }}
+                      style={{ height: 70, width: 70, borderRadius: 45 }}
+                    />
+                    <Column>
+                      <Text small bold>
+                        {state.name}
                       </Text>
-                      <Text small>
-                        ${item.offer_received.offer}/{item.wage}
-                      </Text>
-                    </Row>
-                    {item.offer_received.counterOffer ? (
                       <Row style={{ marginVertical: 4, paddingLeft: 0 }}>
-                        <Text color="teal" small>
-                          Counter Offer
-                        </Text>
-                        <Text color="teal" small>
-                          ${item.offer_received.counterOffer}/{item.wage}
+                        <Text light small>
+                          Suggested Offer
+                      </Text>
+                        <Text small>
+                          ${item.offer_received.offer}/{item.offer_received.wage}
                         </Text>
                       </Row>
-                    ) : null}
-                  </Column>
-                </Row>
-              </>
-            ) : null}
-          </Column>
-        </JobItemRow>
-      </JobItemLink>
-      {state.showCounterOffer ? (
-        <CounterOfferView
-          authState={authState}
-          job_data={item}
-          deployee={state.deployee}
-          onComplete={() => setState({ ...state, showCounterOffer: false })}
-        />
-      ) : null}
-    </Item>
-  );
+                      {item.offer_received.counterOffer ? (
+                        <Row style={{ marginVertical: 4, paddingLeft: 0 }}>
+                          <Text color="teal" small>
+                            Counter Offer
+                        </Text>
+                          <Text color="teal" small>
+                            ${item.offer_received.counterOffer}/{item.offer_received.counterWage}
+                          </Text>
+                        </Row>
+                      ) : null}
+                    </Column>
+                  </Row>
+                </>
+              ) : null}
+            </Column>
+          </JobItemRow>
+        </JobItemLink>
+        {state.showCounterOffer ? (
+          <CounterOfferView
+            authState={authState}
+            job_data={item}
+            deployee={state.deployee}
+            onComplete={() => setState({ ...state, showCounterOffer: false })}
+          />
+        ) : null}
+      </Item>
+    );
 };
 
 const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
   const [loading, setLoading] = useState(false);
   const [salary, setSalary] = useState(job_data.offer_received?.offer);
+  const [wage, setUnit] = useState(job_data.offer_received.wage || 'hr')
+
+  const { showActionSheetWithOptions } = useActionSheet()
 
   const onRejectOffer = useCallback(async () => {
     if (salary) {
@@ -417,7 +421,7 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
         return;
       }
       await new Promise(async (res) => {
-        const isCounterOffer = offer !== parseFloat(job_data.offer_received.offer).toFixed(2);
+        const isCounterOffer = offer !== parseFloat(job_data.offer_received.offer).toFixed(2) || job_data.offer_received.wage !== wage
         Confirm({
           options: [isCounterOffer ? "Send" : "Approve", "Cancel"],
           cancelButtonIndex: 1,
@@ -431,7 +435,7 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
 
               if (index === 0) {
                 if (isCounterOffer) {
-                  await JobsControllers.counterOffer(job_data.id, offer);
+                  await JobsControllers.counterOffer(job_data.id, offer, wage);
                   sendNotification(authState.userToken, deployee.id, {
                     title: `GigChasers - ${job_data.job_title}`,
                     body: `Counter offer received`,
@@ -459,7 +463,7 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
         });
       });
     }
-  }, [loading, deployee, job_data, salary]);
+  }, [loading, deployee, job_data, salary, wage]);
 
   return (
     <Modal
@@ -513,7 +517,7 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                       Current Offer
                     </Text>
                     <Text small marginBottom="5px">
-                      ${job_data.salary}/hr
+                      ${job_data.salary}/{job_data.wage}
                     </Text>
                   </View>
 
@@ -522,7 +526,6 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                       <SalaryField style={{ justifyContent: "center" }}>
                         <TextField
                           disabled={loading}
-                          suffix="/hr"
                           label="SUGGESTED OFFER"
                           prefix="$"
                           labelFontSize={14}
@@ -534,6 +537,30 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                           }}
                           value={salary}
                           onSubmitEditing={onSubmitOffer}
+                          renderRightAccessory={() => (
+                            <RateTouchable onPress={() => {
+                              showActionSheetWithOptions({
+                                options: ['Per Day', 'Per Deployment', 'Per Hour', 'Cancel'],
+                                cancelButtonIndex: 3,
+                                title: 'Select  Rate',
+                                showSeparators: true,
+                              }, async (num) => {
+                                switch (num) {
+                                  case 0:
+                                    setUnit('day')
+                                    break
+                                  case 1:
+                                    setUnit('deployment')
+                                    break
+                                  case 2:
+                                    setUnit('hr')
+                                    break
+                                }
+                              })
+                            }}>
+                              <Text color='#4a89f2'>/{wage}</Text>
+                            </RateTouchable>
+                          )}
                         />
                       </SalaryField>
                     </WageInput>
@@ -545,23 +572,23 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                 {loading ? (
                   <ActivityIndicator animating style={{ marginEnd: 4, marginVertical: 8 }} color="darkgrey" />
                 ) : (
-                  <>
-                    <Column style={{ alignItems: "center" }}>
-                      <Button disabled={loading} decline onPress={onRejectOffer}>
-                        <Text style={{ color: "red" }} medium>
-                          Reject
+                    <>
+                      <Column style={{ alignItems: "center" }}>
+                        <Button disabled={loading} decline onPress={onRejectOffer}>
+                          <Text style={{ color: "red" }} medium>
+                            Reject
                         </Text>
-                      </Button>
-                    </Column>
-                    <Column>
-                      <Button disabled={loading} style={{ flexDirection: "row" }} accept onPress={onSubmitOffer}>
-                        <Text style={{ color: "white" }} medium>
-                          Approve
+                        </Button>
+                      </Column>
+                      <Column>
+                        <Button disabled={loading} style={{ flexDirection: "row" }} accept onPress={onSubmitOffer}>
+                          <Text style={{ color: "white" }} medium>
+                            Approve
                         </Text>
-                      </Button>
-                    </Column>
-                  </>
-                )}
+                        </Button>
+                      </Column>
+                    </>
+                  )}
               </CounterRow>
             </Item>
           </KeyboardAvoidingView>
@@ -572,6 +599,13 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
 };
 
 // Payments Section
+
+const RateTouchable = styled.TouchableOpacity`
+  padding: 4px 12px;
+  background-color: #fafafa;
+  margin: 0 2px
+`;
+
 const Item = styled.View`
   flex: 1;
   background: white;
@@ -581,7 +615,6 @@ const Item = styled.View`
 const SalaryField = styled.View`
   flex: 1;
   flex-direction: column;
-  padding-right: 50px;
 `;
 
 const SectionTitle = styled.View`
