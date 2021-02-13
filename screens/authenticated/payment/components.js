@@ -172,6 +172,13 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAcco
 
     }, [uri, authState, hasActiveAccount])
 
+    const onSuccessfulSession = useCallback(() => {
+        setShowSetup(false)
+        if (!hasActiveAccount) {
+            Alert.alert('Acount Setup Complete', 'You account will be available after verification is complete')
+        }
+    }, [hasActiveAccount])
+
     return (
         <AccountSection>
 
@@ -195,7 +202,8 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAcco
                 <TouchableOpacity style={{ backgroundColor: '#3869f3', marginBottom: 12, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' }}
                     onPress={() => {
                         if (hasActiveAccount) {
-
+                            // TODO: fix payout
+                            Alert.alert('Working on this', 'Will be out soon')
                         } else {
                             setup()
                         }
@@ -208,7 +216,7 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAcco
                     animationType="fade"
                     transparent
                     visible
-                    onRequestClose={() => {}}
+                    onRequestClose={() => { }}
                     onDismiss={() => setShowSetup(false)}
                     style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
                 >
@@ -231,12 +239,7 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAcco
                                             }}
                                             onLoadingComplete={() => setSetupAccount(true)}
                                             onLoadingFail={() => setShowSetup(false)}
-                                            onSuccess={() => {
-                                                setShowSetup(false)
-                                                if (!hasActiveAccount) {
-                                                    Alert.alert('Acount Setup Complete', 'You account will be available after verification is complete')
-                                                }
-                                            }}
+                                            onSuccess={onSuccessfulSession}
                                             onCancel={() => setShowSetup(false)}
                                         />
                                         : null}
