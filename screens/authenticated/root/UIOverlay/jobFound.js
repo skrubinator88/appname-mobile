@@ -4,8 +4,7 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { FontAwesome } from "@expo/vector-icons";
 import { TextField } from "@ubaids/react-native-material-textfield";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Dimensions, FlatList, KeyboardAvoidingView, Platform, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import { ActivityIndicator, Alert, Dimensions, FlatList, Platform, View } from "react-native";
 import Modal from "react-native-modal";
 import StarRating from "react-native-star-rating";
 import styled from "styled-components/native";
@@ -452,41 +451,76 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
                 What offer would you complete this job for?
             </Text>
 
-              <View style={{ marginVertical: 10, alignItems: 'stretch', justifyContent: 'center', }}>
-                <WageInput style={{ alignItems: 'stretch' }}>
-                  <SalaryField style={{ alignItems: 'stretch' }}>
-                    <TextField
-                      disabled={loading}
-                      label="PAY"
-                      prefix="$"
-                      labelFontSize={14}
-                      placeholder="0.00"
-                      labelTextStyle={{ color: "grey", fontWeight: "700" }}
-                      keyboardType="numeric"
-                      onChangeText={(text) => {
-                        setSalary(text);
-                      }}
-                      value={salary}
-                      onSubmitEditing={onSubmitOffer}
-                      renderRightAccessory={() => (
-                        <ReactTouchable style={{ width: 80, height: 80 }}>
-                          <ReactTouchable.Item value='a' label='anti-b' key='0' />
-                          <ReactTouchable.Item value='ab' label='anti-a' key='2' />
-                          <ReactTouchable.Item value='c' label='anti-1' key='3' />
-                        </ReactTouchable>
-                      )}
-                    />
-                  </SalaryField>
-                </WageInput>
-              </View>
-            </JobDescriptionRow>
-          </Row>
+            <View style={{ marginVertical: 10, alignItems: 'stretch', justifyContent: 'center', }}>
+              <WageInput style={{ alignItems: 'stretch' }}>
+                <SalaryField style={{ alignItems: 'stretch' }}>
+                  <TextField
+                    disabled={loading}
+                    label="PAY"
+                    prefix="$"
+                    labelFontSize={14}
+                    placeholder="0.00"
+                    labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                    keyboardType="numeric"
+                    onChangeText={(text) => {
+                      setSalary(text);
+                    }}
+                    value={salary}
+                    onSubmitEditing={onSubmitOffer}
+                    renderRightAccessory={() => (
+                      <RateTouchable onPress={() => {
+                        showActionSheetWithOptions({
+                          options: ['Per Day', 'Per Deployment', 'Per Hour', 'Cancel'],
+                          cancelButtonIndex: 3,
+                          title: 'Select Payment Rate',
+                          showSeparators: true,
+                        }, async (num) => {
+                          switch (num) {
+                            case 0:
+                              setUnit('day')
+                              break
+                            case 1:
+                              setUnit('deployment')
+                              break
+                            case 2:
+                              setUnit('hr')
+                              break
+                          }
+                        })
+                      }}><Text light small>/{unit}</Text></RateTouchable>
+                    )}
+                  />
+                </SalaryField>
+                <RateTouchable onPress={() => {
+                        showActionSheetWithOptions({
+                          options: ['Per Day', 'Per Deployment', 'Per Hour', 'Cancel'],
+                          cancelButtonIndex: 3,
+                          title: 'Select Rate',
+                          showSeparators: true,
+                        }, async (num) => {
+                          switch (num) {
+                            case 0:
+                              setUnit('day')
+                              break
+                            case 1:
+                              setUnit('deployment')
+                              break
+                            case 2:
+                              setUnit('hr')
+                              break
+                          }
+                        })
+                      }}><Text light small>/{unit}</Text></RateTouchable>
+              </WageInput>
+            </View>
+          </JobDescriptionRow>
+        </Row>
 
-          <Row last>
-            <Column style={{ alignItems: "center" }}>
-              <Button disabled={loading} decline onPress={onCancel}>
-                <Text style={{ color: "red" }} medium>
-                  Cancel
+        <Row last>
+          <Column style={{ alignItems: "center" }}>
+            <Button disabled={loading} decline onPress={onCancel}>
+              <Text style={{ color: "red" }} medium>
+                Cancel
               </Text>
               </Button>
             </Column>
@@ -624,6 +658,7 @@ const JobDescription = styled.View`
   justify-content: space-between;
 `;
 
-const ReactTouchable = styled.Picker`
+const RateTouchable = styled.TouchableOpacity`
   background-color:red;
 `;
+

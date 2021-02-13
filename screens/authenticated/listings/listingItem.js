@@ -3,7 +3,7 @@ import { Ionicons, AntDesign, MaterialCommunityIcons, MaterialIcons } from "@exp
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Camera, requestPermissionsAsync } from "expo-camera";
-import { launchImageLibraryAsync, MediaTypeOptions, requestCameraRollPermissionsAsync } from "expo-image-picker";
+import { launchImageLibraryAsync, MediaTypeOptions, requestMediaLibraryPermissionsAsync } from "expo-image-picker";
 import moment from "moment";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
@@ -159,7 +159,7 @@ export default function ListingItem({ navigation, route }) {
     try {
       setloadingMedia(true);
       if (Platform.OS === "ios") {
-        let perms = await requestCameraRollPermissionsAsync();
+        let perms = await requestMediaLibraryPermissionsAsync();
         if (!perms.granted) {
           Alert.alert("Access to media library denied", "You need to grant access to image library to continue");
           setloadingMedia(false);
