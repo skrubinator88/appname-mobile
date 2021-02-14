@@ -20,121 +20,150 @@ const height = Dimensions.get("window").height;
 
 export default function PaymentScreen({ navigation }) {
   const { authState } = useContext(GlobalContext);
-  const [refreshing, setRefreshing] = useState(false)
-  const [addPaymentMethod, setAddPaymentMethod] = useState(false)
+  const [refreshing, setRefreshing] = useState(false);
+  const [addPaymentMethod, setAddPaymentMethod] = useState(false);
 
-  const dispatch = useDispatch()
-  const payments = useSelector((state) => state.payment)
-  const actionSheet = useActionSheet()
+  const dispatch = useDispatch();
+  const payments = useSelector((state) => state.payment);
+  const actionSheet = useActionSheet();
 
   const refresh = useCallback(async () => {
-    setRefreshing(true)
+    setRefreshing(true);
     try {
-      await getPaymentInfo(authState, dispatch)
+      await getPaymentInfo(authState, dispatch);
     } catch (e) {
-      console.log(e)
-      Alert.alert('Load Failed', 'Failed to fetch payment details')
+      console.log(e);
+      Alert.alert("Load Failed", "Failed to fetch payment details");
     } finally {
-      setRefreshing(false)
+      setRefreshing(false);
     }
-  }, [refreshing, authState, payments])
+  }, [refreshing, authState, payments]);
 
-  const onMethodClick = useCallback(async (item) => {
-    actionSheet.showActionSheetWithOptions({
-      title: 'Manage Payment Method',
-      message: `${item.brand} ****${item.mask}`,
-      options: ['Make Default', 'Remove', 'Cancel'],
-      cancelButtonIndex: 2,
-      destructiveButtonIndex: 1
-    }, async (i) => {
-      try {
-        switch (i) {
-          case 0:
-            const confirmDefault = await (new Promise((res) => Alert.alert('Set Default Payment Method?',
-              'Your default method will be used for fulfilling bills charged on your account',
-              [{
-                style: 'default',
-                text: 'Yes',
-                onPress: () => res(true)
-              }, {
-                text: 'No',
-                style: 'cancel',
-                onPress: () => res(false)
-              }])))
-            if (confirmDefault) {
-              await setDefaultMethod(item, authState, dispatch)
+  const onMethodClick = useCallback(
+    async (item) => {
+      actionSheet.showActionSheetWithOptions(
+        {
+          title: "Manage Payment Method",
+          message: `${item.brand} ****${item.mask}`,
+          options: ["Make Default", "Remove", "Cancel"],
+          cancelButtonIndex: 2,
+          destructiveButtonIndex: 1,
+        },
+        async (i) => {
+          try {
+            switch (i) {
+              case 0:
+                const confirmDefault = await new Promise((res) =>
+                  Alert.alert(
+                    "Set Default Payment Method?",
+                    "Your default method will be used for fulfilling bills charged on your account",
+                    [
+                      {
+                        style: "default",
+                        text: "Yes",
+                        onPress: () => res(true),
+                      },
+                      {
+                        text: "No",
+                        style: "cancel",
+                        onPress: () => res(false),
+                      },
+                    ]
+                  )
+                );
+                if (confirmDefault) {
+                  await setDefaultMethod(item, authState, dispatch);
+                }
+                break;
+              case 1:
+                const confirmRemove = await new Promise((res) =>
+                  Alert.alert("Remove Payment Method?", "Selected method will no more be charged", [
+                    {
+                      style: "default",
+                      text: "Yes",
+                      onPress: () => res(true),
+                    },
+                    {
+                      text: "No",
+                      style: "cancel",
+                      onPress: () => res(false),
+                    },
+                  ])
+                );
+                if (confirmRemove) {
+                  await removeMethod(item, authState, dispatch);
+                }
             }
-            break
-          case 1:
-            const confirmRemove = await (new Promise((res) => Alert.alert(
-              'Remove Payment Method?',
-              'Selected method will no more be charged',
-              [{
-                style: 'default',
-                text: 'Yes',
-                onPress: () => res(true)
-              }, {
-                text: 'No',
-                style: 'cancel',
-                onPress: () => res(false)
-              }])))
-            if (confirmRemove) {
-              await removeMethod(item, authState, dispatch)
-            }
+          } catch (e) {
+            console.log(e);
+            Alert.alert("Operation Failed", "Please try again");
+          }
         }
-      } catch (e) {
-        console.log(e)
-        Alert.alert('Operation Failed', 'Please try again')
-      }
-    })
-  }, [payments, authState])
+      );
+    },
+    [payments, authState]
+  );
 
-  useEffect(() => { refresh() }, [])
+  useEffect(() => {
+    refresh();
+  }, []);
 
   return (
     <Container
       flexible={false}
       navigation={navigation}
-      nextTitle="Save"
+      // nextTitle="Save"
       color="white"
       title="Payment"
       titleWeight="300"
       headerBackground="#3869f3"
-      nextProvider="Entypo"
-      nextIcon="dots-three-horizontal"
-      nextSize={25}
-      nextAction={() => { }}
+      // nextProvider="Entypo"
+      // nextIcon="dots-three-horizontal"
+      // nextSize={25}
+      // nextAction={() => { }}
     >
       <ScrollView
         scrollEnabled
-        style={{ height, paddingTop: 8, }}
+        style={{ height, paddingTop: 8 }}
         contentContainerStyle={{ paddingBottom: 200 }}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={false} tintColor='#888' onRefresh={refresh} />}
+        refreshControl={<RefreshControl refreshing={false} tintColor="#888" onRefresh={refresh} />}
       >
         {/* Payments Section */}
-        {authState.userData.role === 'contractor' && (<AccountView refreshing={refreshing} hasAccount={payments.hasAccount} hasActiveAccount={payments.hasActiveAccount} balance={payments.balance} />)}
+        {authState.userData.role === "contractor" && (
+          <AccountView
+            refreshing={refreshing}
+            hasAccount={payments.hasAccount}
+            hasActiveAccount={payments.hasActiveAccount}
+            balance={payments.balance}
+          />
+        )}
 
         <PaymentSection>
           <SectionTitle>
             <View style={{ margin: 10 }}>
-              <Text small bold color="#474747">PAYMENT METHODS</Text>
+              <Text small bold color="#474747">
+                PAYMENT METHODS
+              </Text>
             </View>
           </SectionTitle>
 
-
-          {payments.methods && payments.methods.length > 0 ? payments.methods.map((method) => <MethodView key={method.id} onPress={() => onMethodClick(method)} method={method} />) :
+          {payments.methods && payments.methods.length > 0 ? (
+            payments.methods.map((method) => <MethodView key={method.id} onPress={() => onMethodClick(method)} method={method} />)
+          ) : (
             <View style={{ paddingVertical: 28 }}>
-              <Text light small>NO PAYMENT METHOD ADDED YET</Text>
+              <Text light small>
+                NO PAYMENT METHOD ADDED YET
+              </Text>
             </View>
-          }
+          )}
 
           <PaymentItemRow>
             <PaymentItemRowLink onPress={() => setAddPaymentMethod(true)}>
               <Text small weight="700" color="#3869f3">
                 ADD PAYMENT METHOD
-            </Text>
+              </Text>
             </PaymentItemRowLink>
           </PaymentItemRow>
         </PaymentSection>
@@ -168,15 +197,21 @@ export default function PaymentScreen({ navigation }) {
         <PaymentSection>
           <SectionTitle>
             <View style={{ margin: 10 }}>
-              <Text small bold color="#474747">TRANSACTION HISTORY</Text>
+              <Text small bold color="#474747">
+                TRANSACTION HISTORY
+              </Text>
             </View>
           </SectionTitle>
 
-          {payments.transactions && payments.transactions.length > 0 ? payments.transactions.map((txn) => <TransactionRecord key={txn.id} onPress={() => onMethodClick(txn)} transaction={txn} />) :
+          {payments.transactions && payments.transactions.length > 0 ? (
+            payments.transactions.map((txn) => <TransactionRecord key={txn.id} onPress={() => onMethodClick(txn)} transaction={txn} />)
+          ) : (
             <View style={{ paddingVertical: 28 }}>
-              <Text light small>NO TRANSACTION YET</Text>
+              <Text light small>
+                NO TRANSACTION YET
+              </Text>
             </View>
-          }
+          )}
         </PaymentSection>
       </ScrollView>
     </Container>

@@ -288,3 +288,34 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
 exports.updateUserJob = (userID, jobID, updatedJob) => {
   if (!userID) throw new Error("User ID is required");
 };
+
+exports.getUserJobComments = (userID, state) => {
+  // Screen State
+  const { comments, setComments } = state;
+
+  const query = GeoFirestore.collection("comments").doc(userID).collection("messages");
+
+  const unsubscribe = query.onSnapshot((res) => {
+    res.docChanges().forEach((change) => {
+      const { doc: document } = change;
+      switch (change.type) {
+        case "added": {
+          const data = document.data();
+          data.id = document.id;
+          const newState = [...comments, data];
+          return setComments(newState);
+        }
+        case "modified": {
+          // Ignore
+        }
+        case "removed": {
+          // Ignore
+        }
+        default:
+          break;
+      }
+    });
+  });
+
+  return unsubscribe;
+};
