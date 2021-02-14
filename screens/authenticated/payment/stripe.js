@@ -51,7 +51,6 @@ export default function StripeCheckoutScreen({ children, close = () => { } }) {
           }])
         })
         if (sessionID) {
-          console.log(sessionID)
           setCheckOutSessionID(sessionID);
         }
       })();

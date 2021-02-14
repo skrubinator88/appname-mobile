@@ -11,7 +11,7 @@ import styled from "styled-components/native";
 import Confirm from "../../../components/confirm";
 import { GlobalContext } from "../../../components/context";
 import Text from "../../../components/text";
-import { initiateAccount, makePayment } from "../../../controllers/PaymentController";
+import { initiateAccount, fetchDashboardLink, makePayment } from "../../../controllers/PaymentController";
 import { CALLBACK_URL, MyWebView } from "./stripe";
 
 
@@ -132,20 +132,58 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAcco
     const setup = useCallback(async () => {
         setShowSetup(true)
         try {
+            if (hasActiveAccount) {
+                await Promise.reject({ messsage: 'You already have an account', code: 418 })
+            }
+
             const uri = await initiateAccount(authState)
             setURI(uri)
         } catch (e) {
             console.log(e)
-            Alert.alert('Account Setup Failed', 'Failed to setup your account')
+            Alert.alert('Account Setup Failed', e.code === 418 ? e.message : 'Failed to setup your account')
             setShowSetup(false)
         }
-    }, [authState, uri])
+    }, [uri, authState, hasActiveAccount])
+
+    const getDashboardLink = useCallback(async () => {
+        Confirm({
+            title: 'Open Stripe Dashboard',
+            message: 'You can open your Stripe dashboard to manage settings on your account',
+            options: ['Open', 'Cancel'],
+            cancelButtonIndex: 1,
+            onPress: async (i) => {
+                if (i === 0) {
+                    setShowSetup(true)
+                    try {
+                        if (!hasActiveAccount) {
+                            await Promise.reject({ messsage: 'Your account must be setup to continue', code: 418 })
+                        }
+
+                        const uri = await fetchDashboardLink(authState)
+                        setURI(uri)
+                    } catch (e) {
+                        console.log(e)
+                        Alert.alert('Manage Account Failed', e.code === 418 ? e.message : 'There was an error displaying your dashboard')
+                        setShowSetup(false)
+                    }
+                }
+            },
+        })
+
+    }, [uri, authState, hasActiveAccount])
+
+    const onSuccessfulSession = useCallback(() => {
+        setShowSetup(false)
+        if (!hasActiveAccount) {
+            Alert.alert('Acount Setup Complete', 'You account will be available after verification is complete')
+        }
+    }, [hasActiveAccount])
 
     return (
         <AccountSection>
 
-            {hasAccount &&
-                <TouchableOpacity onPress={setup} style={{ position: "absolute", top: 4, right: 4 }}>
+            {hasActiveAccount &&
+                <TouchableOpacity onPress={getDashboardLink} style={{ position: "absolute", top: 4, right: 4 }}>
                     <FontAwesome size={24} color="#3869f8" name="external-link-square" />
                 </TouchableOpacity>
             }
@@ -164,7 +202,8 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAcco
                 <TouchableOpacity style={{ backgroundColor: '#3869f3', marginBottom: 12, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' }}
                     onPress={() => {
                         if (hasActiveAccount) {
-
+                            // TODO: fix payout
+                            Alert.alert('Working on this', 'Will be out soon')
                         } else {
                             setup()
                         }
@@ -177,7 +216,7 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAcco
                     animationType="fade"
                     transparent
                     visible
-                    onRequestClose={() => setShowSetup(false)}
+                    onRequestClose={() => { }}
                     onDismiss={() => setShowSetup(false)}
                     style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
                 >
@@ -190,21 +229,19 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAcco
                                             <ActivityIndicator />
                                         </View>
                                         : null}
-                                    {uri ? <MyWebView forAccount
-                                        style={{ flex: 1, paddingVertical: 8, display: setupAccount && uri ? 'flex' : 'none' }}
-                                        options={{
-                                            uri,
-                                            successUrl: CALLBACK_URL.SUCCESS,
-                                            cancelUrl: CALLBACK_URL.CANCELLED,
-                                        }}
-                                        onLoadingComplete={() => setSetupAccount(true)}
-                                        onLoadingFail={() => setShowSetup(false)}
-                                        onSuccess={() => {
-                                            setShowSetup(false)
-                                            Alert.alert('Acount Setup Complete', 'You account will be available after verification is complete')
-                                        }}
-                                        onCancel={() => setShowSetup(false)}
-                                    />
+                                    {uri ?
+                                        <MyWebView forAccount
+                                            style={{ flex: 1, paddingVertical: 12, display: setupAccount && uri ? 'flex' : 'none' }}
+                                            options={{
+                                                uri,
+                                                successUrl: CALLBACK_URL.SUCCESS,
+                                                cancelUrl: CALLBACK_URL.CANCELLED,
+                                            }}
+                                            onLoadingComplete={() => setSetupAccount(true)}
+                                            onLoadingFail={() => setShowSetup(false)}
+                                            onSuccess={onSuccessfulSession}
+                                            onCancel={() => setShowSetup(false)}
+                                        />
                                         : null}
                                     <TouchableOpacity onPress={() => setShowSetup(false)} style={{ position: "absolute", top: 4, left: 4 }}>
                                         <MaterialCommunityIcons size={24} color="red" name="close-circle" />
@@ -295,6 +332,7 @@ export function PaymentMethodSelector({ jobID, recipient, description, onClose, 
                                         <Text>Enter mount You Intend To Pay</Text>
                                         <TextField
                                             disabled={loading}
+                                            editable={!loading}
                                             label="PAY"
                                             prefix="$"
                                             labelFontSize={14}

@@ -37,47 +37,26 @@ export default function PaymentScreen({ navigation }) {
     } finally {
       setRefreshing(false);
     }
-  }, [refreshing, authState, payments]);
+  }, [authState]);
 
-  const onMethodClick = useCallback(
-    async (item) => {
-      actionSheet.showActionSheetWithOptions(
-        {
-          title: "Manage Payment Method",
-          message: `${item.brand} ****${item.mask}`,
-          options: ["Make Default", "Remove", "Cancel"],
-          cancelButtonIndex: 2,
-          destructiveButtonIndex: 1,
-        },
-        async (i) => {
-          try {
-            switch (i) {
-              case 0:
-                const confirmDefault = await new Promise((res) =>
-                  Alert.alert(
-                    "Set Default Payment Method?",
-                    "Your default method will be used for fulfilling bills charged on your account",
-                    [
-                      {
-                        style: "default",
-                        text: "Yes",
-                        onPress: () => res(true),
-                      },
-                      {
-                        text: "No",
-                        style: "cancel",
-                        onPress: () => res(false),
-                      },
-                    ]
-                  )
-                );
-                if (confirmDefault) {
-                  await setDefaultMethod(item, authState, dispatch);
-                }
-                break;
-              case 1:
-                const confirmRemove = await new Promise((res) =>
-                  Alert.alert("Remove Payment Method?", "Selected method will no more be charged", [
+  const onMethodClick = useCallback(async (item) => {
+    actionSheet.showActionSheetWithOptions(
+      {
+        title: "Manage Payment Method",
+        message: `${item.brand} ****${item.mask}`,
+        options: ["Make Default", "Remove", "Cancel"],
+        cancelButtonIndex: 2,
+        destructiveButtonIndex: 1,
+      },
+      async (i) => {
+        try {
+          switch (i) {
+            case 0:
+              const confirmDefault = await new Promise((res) =>
+                Alert.alert(
+                  "Set Default Payment Method?",
+                  "Your default method will be used for fulfilling bills charged on your account",
+                  [
                     {
                       style: "default",
                       text: "Yes",
@@ -88,21 +67,41 @@ export default function PaymentScreen({ navigation }) {
                       style: "cancel",
                       onPress: () => res(false),
                     },
-                  ])
-                );
-                if (confirmRemove) {
-                  await removeMethod(item, authState, dispatch);
-                }
+                  ]
+                )
+              );
+              if (confirmDefault) {
+                await setDefaultMethod(item, authState, dispatch);
+              }
+              break;
+            case 1: {
+              const confirmRemove = await new Promise((res) =>
+                Alert.alert("Remove Payment Method?", "Selected method will no more be charged", [
+                  {
+                    style: "default",
+                    text: "Yes",
+                    onPress: () => res(true),
+                  },
+                  {
+                    text: "No",
+                    style: "cancel",
+                    onPress: () => res(false),
+                  },
+                ])
+              );
+              if (confirmRemove) {
+                await removeMethod(item, authState, dispatch);
+              }
             }
-          } catch (e) {
-            console.log(e);
-            Alert.alert("Operation Failed", "Please try again");
           }
+        } catch (e) {
+          console.log(e);
+          Alert.alert("Operation Failed", "Please try again");
         }
-      );
-    },
-    [payments, authState]
-  );
+      },
+      [payments, authState]
+    );
+  });
 
   useEffect(() => {
     refresh();
@@ -112,15 +111,12 @@ export default function PaymentScreen({ navigation }) {
     <Container
       flexible={false}
       navigation={navigation}
-      // nextTitle="Save"
       color="white"
       title="Payment"
       titleWeight="300"
       headerBackground="#3869f3"
-      // nextProvider="Entypo"
+      nextProvider="Entypo"
       // nextIcon="dots-three-horizontal"
-      // nextSize={25}
-      // nextAction={() => { }}
     >
       <ScrollView
         scrollEnabled

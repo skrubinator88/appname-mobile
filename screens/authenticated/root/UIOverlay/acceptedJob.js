@@ -82,14 +82,15 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
       destructiveButtonIndex: 0,
       onPress: async (i) => {
         if (i === 0) {
-          await JobsController.changeJobStatus(job_data._id, "available");
-          await sendNotification(authState.userToken, job_data.posted_by, {
-            title: `GigChasers - ${job_data.job_title}`,
-            body: `Job canceled`,
-            data: { type: "jobcancel", id: job_data._id, sender: authState.userID },
-          });
-          // TODO: Charge user for cancellation
-          changeRoute({ name: "dashboard" });
+          try {
+            await JobsController.cancelAcceptedJob(job_data._id, authState)
+            await sendNotification(authState.userToken, job_data.posted_by, { title: `GigChasers - ${job_data.job_title}`, body: `Job canceled`, data: { type: 'jobcancel', id: job_data._id, sender: authState.userID } })
+            // TODO: Charge user for cancellation
+            changeRoute({ name: "dashboard" })
+          } catch (e) {
+            console.log(e)
+            Alert.alert('Failed To Cancel Job', e.message)
+          }
         }
       },
     });

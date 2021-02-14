@@ -56,6 +56,7 @@ export const removeMethod = async (method, authState, dispatch) => {
   })
 };
 
+// TODO: will have to decide on mechanism to handle job schedules
 export const makePayment = async ({ method, recipient, amount, description, jobID }, authState, dispatch) => {
   return fetch(`${env.API_URL}/payments/pay`, {
     method: "POST",
@@ -77,6 +78,61 @@ export const makePayment = async ({ method, recipient, amount, description, jobI
   })
 };
 
+export const placeHold = async ({ method, recipient, amount, description, jobID }, authState, dispatch) => {
+  return fetch(`${env.API_URL}/payments/pay/hold`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
+    body: JSON.stringify({
+      paymentMethodID: method.id,
+      recipient,
+      amount,
+      description,
+      jobID
+    })
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+  })
+};
+
+export const completeHold = async ({ transactionID, amount, jobID }, authState, dispatch) => {
+  return fetch(`${env.API_URL}/payments/pay/hold`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
+    body: JSON.stringify({
+      transactionID,
+      amount,
+      jobID
+    })
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+  })
+};
+
+export const cancelHold = async ({ transactionID }, authState, dispatch) => {
+  return fetch(`${env.API_URL}/payments/pay/hold`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
+    body: JSON.stringify({ transactionID })
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+  })
+};
+
 export const initiateAccount = async (authState) => {
   return fetch(`${env.API_URL}/payments/setup_account`, {
     method: "POST",
@@ -85,6 +141,21 @@ export const initiateAccount = async (authState) => {
       'Authorization': `Bearer ${authState.userToken}`
     },
     body: JSON.stringify({ first_name: authState.userData.first_name, last_name: authState.userData.last_name, phone: authState.userData.phone_number, email: authState.userData.email }),
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+    return (await res.json()).url
+  })
+};
+
+export const fetchDashboardLink = async (authState) => {
+  return fetch(`${env.API_URL}/payments/dashboard_link`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
   }).then(async (res) => {
     if (!res.ok) {
       throw new Error((await res.json()).message)

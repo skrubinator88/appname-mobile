@@ -1,1 +1,44 @@
-{"Development":{"SETTINGS":{"PROJECT_MANAGER":{"LIMIT_ONLINE":100,"ACTION_RESPONSE_TIME":120,"JOB_LISTINGS_LIMIT":10},"CONTRACTOR":{"LIMIT_ONLINE":500,"ACTION_RESPONSE_TIME":15},"OTHERS":{"JOB_CIRCLE_RATIO":250}},"COUNTRY_CODE":"+1","API_URL":"http://192.168.100.132:3001/v1","SERVER_KEY":"abcd","GOOGLE":{"GEOLOCATION_KEY":"AIzaSyB8xVAMRa2hoq8lRXEG1wXG3v2yR1KkHsQ","PLACES_URI":"https://maps.googleapis.com/maps/api/place"},"PUSHER":{"API_KEY":"a86bd61a8fd06fbd858e","CLUSTER":"us2"},"STRIPE":{"PUBLIC_KEY":"pk_test_51He7zlL5334OlXzIlbQEJFcI254w2YQ6kVrZGnZqbFbGHStEoaxMBlxapPh9HsUfYDrgfO7jyukT3kzJC9Wt0SA800k3BQXTmj"}},"Production":{"API_URL":"https://contractor-app-test-api.herokuapp.com/v1","GOOGLE":{"GEOLOCATION_KEY":"AIzaSyB8xVAMRa2hoq8lRXEG1wXG3v2yR1KkHsQ","PLACES_URI":"https://maps.googleapis.com/maps/api/place"},"PUSHER":{"API_KEY":"a86bd61a8fd06fbd858e","CLUSTER":"us2"}}}
+{
+    "Development": {
+        "SETTINGS": {
+            "PROJECT_MANAGER": {
+                "LIMIT_ONLINE": 100,
+                "ACTION_RESPONSE_TIME": 120,
+                "JOB_LISTINGS_LIMIT": 10
+            },
+            "CONTRACTOR": {
+                "LIMIT_ONLINE": 500,
+                "ACTION_RESPONSE_TIME": 15
+            },
+            "CONTRACTOR_DEV_USER": null,
+            "PROJECT_MANAGER_DEV_USER": null,
+            "OTHERS": {
+                "JOB_CIRCLE_RATIO": 250
+            }
+        },
+        "API_URL": "http://192.168.10.101:3001/v1",
+        "COUNTRY_CODE": "+234",
+        "GOOGLE": {
+            "GEOLOCATION_KEY": "AIzaSyB8xVAMRa2hoq8lRXEG1wXG3v2yR1KkHsQ",
+            "PLACES_URI": "https://maps.googleapis.com/maps/api/place"
+        },
+        "PUSHER": {
+            "API_KEY": "a86bd61a8fd06fbd858e",
+            "CLUSTER": "us2"
+        },
+        "STRIPE": {
+            "PUBLIC_KEY": "pk_test_51HdfqZD7hKWg06ZYtjRqJCPDqw0l8HmR5BZMRbEzqwbOnGmWXz2iYR9tpjhbxmrZI3txHvHNl11sRxFYy3ckmzxl00jAFNd5I8"
+        }
+    },
+    "Production": {
+        "API_URL": "https://contractor-app-test-api.herokuapp.com/v1",
+        "GOOGLE": {
+            "GEOLOCATION_KEY": "AIzaSyB8xVAMRa2hoq8lRXEG1wXG3v2yR1KkHsQ",
+            "PLACES_URI": "https://maps.googleapis.com/maps/api/place"
+        },
+        "PUSHER": {
+            "API_KEY": "a86bd61a8fd06fbd858e",
+            "CLUSTER": "us2"
+        }
+    }
+}

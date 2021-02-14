@@ -122,13 +122,32 @@ exports.changeJobStatus = async (documentID, status, userID = "") => {
   await geoCollection.update({ status, executed_by: userID });
 };
 
+// TODO: upon cancellation, either suspend or bill the deployee or deployer
+exports.cancelAcceptedJob = async (documentID, authState) => {
+  const { userData: { role } } = authState
+  const geoCollection = GeoFirestore.collection("jobs").doc(documentID);
+
+  if (role === 'contractor') {
+    // Handle logic when a deployee cancels a job. 
+    // The deployee should receive a penalty.
+  } else {
+    // Penalty for cancellation as a deployer
+  }
+
+  // Update job status
+  await geoCollection.update({
+    "offer_received": firebase.firestore.FieldValue.delete(),
+    status: 'available'
+  });
+};
+
 /**
  * Used to send an offer by a deployee
  * @param {*} documentID
  * @param {*} deployee
  * @param {*} offer
  */
-exports.sendOffer = async (documentID, deployee, offer) => {
+exports.sendOffer = async (documentID, deployee, offer, wage = 'hr') => {
   if (!deployee) {
     throw new Error("User identity must be provided");
   }
@@ -136,18 +155,17 @@ exports.sendOffer = async (documentID, deployee, offer) => {
     throw new Error("You must provide a valid offer");
   }
   const doc = GeoFirestore.collection("jobs").doc(documentID);
-  await doc.update({
-    offer_received: {
-      deployee,
-      offer,
-      approved: false,
-    },
-  });
-  return {
+  const offer_received = {
     deployee,
     offer,
+    wage,
     approved: false,
   };
+
+  await doc.update({
+    offer_received
+  });
+  return offer_received
 };
 
 /**
@@ -175,13 +193,14 @@ exports.approveOffer = async (documentID, deployee) => {
   });
 };
 
-exports.counterOffer = async (documentID, offer) => {
+exports.counterOffer = async (documentID, offer, wage) => {
   if (!offer) {
     throw new Error("Offer must be provided");
   }
   const doc = GeoFirestore.collection("jobs").doc(documentID);
   await doc.update({
     "offer_received.counterOffer": offer,
+    "offer_received.counterWage": wage,
   });
 };
 
@@ -213,7 +232,7 @@ exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
     });
 };
 
-exports.currentUserJobsHistory = (user) => {};
+exports.currentUserJobsHistory = (user) => { };
 
 exports.postUserJob = async (userID, job, token, photos = []) => {
   if (!userID) throw new Error("User ID is required");
