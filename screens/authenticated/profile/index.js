@@ -1,34 +1,38 @@
 import React, { Component, useContext, useState, useEffect, useRef } from "react";
 
-import { Image, Button, Alert, TextInput, View, Animated, Easing } from "react-native";
+import { Image, Button, Alert, TextInput, View, Animated, Easing, ActivityIndicator, TouchableWithoutFeedback } from "react-native";
+import { StackActions } from "@react-navigation/native";
 
+// Styling
 import { Platform, Dimensions } from "react-native";
 import styled from "styled-components/native";
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import theme from "../../../theme.json";
 
 // Components
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
+import { GlobalContext } from "../../../components/context";
 import env from "../../../env";
+
+// Controller
+import JobController from "../../../controllers/JobsControllers";
 
 const isIos = Platform.OS === "ios";
 const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
 const width = Dimensions.get("window").width; //arbitrary size
 
-import { GlobalContext } from "../../../components/context";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
-import { ActivityIndicator } from "react-native";
-
 export default function ProfileScreen({ navigation }) {
   const global = useContext(GlobalContext);
   const { authActions, authState, errorActions, appActions, appState } = useContext(GlobalContext);
-  const { userData } = authState;
-
-  const loading = useState(true);
+  const { userData, userID } = authState;
 
   const [role, setRole] = useState(userData.role);
   const [roleSwitch, setRoleSwitch] = useState(role == "contractor" ? false : true);
+  const [loading, setLoading] = useState(true);
+  const [comments, setComments] = useState([]);
+  const [isMounted, setMounted] = useState(false);
+
   const ANIMATION_DURATION = 200;
   const ANIMATION_EASING = () => {
     return Easing.inOut(Easing.exp);
@@ -38,17 +42,37 @@ export default function ProfileScreen({ navigation }) {
     setRole(global.authState.userData.role);
   }, [global]);
 
+  useEffect(() => {
+    const unsubscribe = JobController.getUserJobComments(userID, { comments, setComments });
+
+    return () => unsubscribe && unsubscribe();
+  }, []);
+
+  // React navigation "onMounted lifecycle"
+  // useEffect(() => {
+  //   const unsubscribe = navigation.addListener("focus", (e) => {
+  //     // Prevent default action
+  //     console.log("Hey");
+  //   });
+
+  //   return () => unsubscribe();
+  // }, []);
+
   const slide = useRef(new Animated.Value(role == "contractor" ? width / 4 : 0)).current;
 
+  const changeRoleCallback = (role) => {
+    authActions.changeRole(authState, role);
+  };
+
   const slideRight = () => {
-    appActions.setLoading(true);
+    // appActions.setLoading(true);
     // Will change fadeAnim value to 1 in 5 seconds
     Animated.timing(slide, {
       toValue: width / 4,
       duration: ANIMATION_DURATION,
       easing: ANIMATION_EASING(),
       useNativeDriver: false,
-    }).start(() => authActions.changeRole(authState, "contractor"));
+    }).start(changeRoleCallback("contractor"));
   };
 
   const slideLeft = () => {
@@ -58,7 +82,7 @@ export default function ProfileScreen({ navigation }) {
       duration: ANIMATION_DURATION,
       easing: ANIMATION_EASING(),
       useNativeDriver: false,
-    }).start(() => authActions.changeRole(authState, "project_manager"));
+    }).start(changeRoleCallback("project_manager"));
   };
 
   const handleChangeRole = () => {
@@ -76,7 +100,7 @@ export default function ProfileScreen({ navigation }) {
       // nextTitle="Save"
       // nextProvider="Entypo"
       // nextIcon="dots-three-horizontal"
-      title={loading[0] ? () => <ActivityIndicator color="white" /> : ""}
+      title={loading ? () => <ActivityIndicator color="white" size={20} /> : ""}
     >
       {/* Profile Section */}
 
@@ -87,7 +111,9 @@ export default function ProfileScreen({ navigation }) {
             : { backgroundColor: theme.project_manager.primary }
         }
       >
-        <ProfilePicture source={{ uri: `${env.API_URL}${userData.profile_picture}` }} />
+        <View style={{ justifyContent: "center", alignContent: "center", flex: 1, width: 100, height: 100 }}>
+          <ProfilePicture source={{ uri: `${env.API_URL}${userData.profile_picture}` }} onLoad={() => setLoading(false)} />
+        </View>
 
         <Text title color="white" weight="700">
           {userData.first_name} {userData.last_name}
@@ -167,7 +193,7 @@ export default function ProfileScreen({ navigation }) {
         <DetailItemRow>
           <DetailItemRowLink>
             <Text small weight="700" color="#4a4a4a">
-              SKILLS & lICENSES
+              SKILLS & LICENSES
             </Text>
             <Ionicons name="ios-arrow-forward" size={20} />
           </DetailItemRowLink>
@@ -186,98 +212,36 @@ export default function ProfileScreen({ navigation }) {
       {/* Comments Section */}
 
       <CommentSection>
-        <CommentSectionRow>
-          <CommentItemColumn>
-            {/* <CommentTitleRowAndLink>
-              <Text medium weight="700">
-                Compliments
-              </Text>
-              <Text small weight="700" color="#a0a0a0">
-                View All
-              </Text>
-            </CommentTitleRowAndLink> */}
-            {/* Compliments Item */}
-            {/* <Compliments
-              horizontal={true}
-              alwaysBounceHorizontal={true}
-              alwaysBounceVertical={false}
-              decelerationRate={0}
-              snapToInterval={170} //your element width
-              snapToAlignment="start"
-            >
-              <ComplimentItem>
-                <Text medium align="center" color="white">
-                  Great Task Management
-                </Text>
-              </ComplimentItem>
-              <ComplimentItem>
-                <Text medium align="center" color="white">
-                  Great Task Management
-                </Text>
-              </ComplimentItem>
-              <ComplimentItem>
-                <Text medium align="center" color="white">
-                  Great Task Management
-                </Text>
-              </ComplimentItem>
-              <ComplimentItem>
-                <Text medium align="center" color="white">
-                  Great Task Management
-                </Text>
-              </ComplimentItem>
-              <ComplimentItem>
-                <Text medium align="center" color="white">
-                  Great Task Management
-                </Text>
-              </ComplimentItem>
-              <ComplimentItem>
-                <Text medium align="center" color="white">
-                  Great Task Management
-                </Text>
-              </ComplimentItem>
-            </Compliments> */}
-            {/*  */}
-          </CommentItemColumn>
-        </CommentSectionRow>
-
         <CommentSectionColumn>
           <CommentTitleRowAndLink>
             <Text medium weight="700">
               Comments
             </Text>
-            <Text small weight="700" color="#a0a0a0">
-              View All
-            </Text>
+            {comments.length > 3 && (
+              <Text small weight="700" color="#a0a0a0">
+                View All
+              </Text>
+            )}
           </CommentTitleRowAndLink>
 
           <Comments>
-            <CommentItem>
-              <Text small bold>
-                Customer Name
-              </Text>
-              <Text>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam alias asperiores quaerat ipsam ab sed vel commodi rerum
-                autem, itaque recusandae, voluptate perspiciatis iure dignissimos. Voluptatibus, nostrum deleniti. Et, nisi?
-              </Text>
-            </CommentItem>
-            <CommentItem>
-              <Text small bold>
-                Customer Name
-              </Text>
-              <Text>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam alias asperiores quaerat ipsam ab sed vel commodi rerum
-                autem, itaque recusandae, voluptate perspiciatis iure dignissimos. Voluptatibus, nostrum deleniti. Et, nisi?
-              </Text>
-            </CommentItem>
-            <CommentItem>
-              <Text small bold>
-                Customer Name
-              </Text>
-              <Text>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam alias asperiores quaerat ipsam ab sed vel commodi rerum
-                autem, itaque recusandae, voluptate perspiciatis iure dignissimos. Voluptatibus, nostrum deleniti. Et, nisi?
-              </Text>
-            </CommentItem>
+            {comments.length == 0 && (
+              <CommentItem key="not found" style={{ justifyContent: "center", alignItems: "center" }}>
+                <MaterialCommunityIcons name="comment-outline" size={width * 0.3} color="#999" />
+                <Text color="#999" bold>
+                  There are not comments yet.
+                </Text>
+              </CommentItem>
+            )}
+
+            {comments.map(({ first_name, last_name, text, posted_by, id }) => (
+              <CommentItem key={id}>
+                <Text small bold>
+                  {first_name} {last_name}
+                </Text>
+                <Text>{text}</Text>
+              </CommentItem>
+            ))}
           </Comments>
         </CommentSectionColumn>
       </CommentSection>
@@ -285,10 +249,6 @@ export default function ProfileScreen({ navigation }) {
   );
 }
 
-// const Container = styled.ScrollView`
-//   flex: 1;
-//   background: #e4e4e4;
-// `;
 const Selector = styled.View`
   width: ${width / 4}px;
   height: 40px;

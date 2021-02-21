@@ -18,17 +18,21 @@ export default function BackgroundCheck({ navigation, route }) {
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <Header navigation={navigation} />
 
-      <Text style={{ fontSize: 30, textAlign: "center" }}>Perform a Background Check</Text>
+      <Text style={{ fontSize: 30, textAlign: "center" }}>Perform a {"\n"}Background Check</Text>
       <Container>
         <Text medium>
           First, make sure you have a credit card registered in the{" "}
-          <Text style={{ color: colors.primary }} onPress={() => navigation.navigate("Payment")}>
+          <Text style={{ color: colors.primary }} onPress={() => navigation.navigate("Payments")}>
             Payment section.{" "}
           </Text>
           {"\n"}Then hit continue.
         </Text>
 
-        <Image source={require("../../../assets/backgroundCheck.png")} style={{ width: width * 0.5, height: width * 0.5 }} />
+        <Image
+          source={require("../../../assets/backgroundCheck.png")}
+          style={{ width: width * 0.6, height: width * 0.6 }}
+          resizeMethod="auto"
+        />
         {/* <SimpleLineIcons name="check" size={width * 0.5} color={colors.primary} /> */}
 
         <ButtonStyled
