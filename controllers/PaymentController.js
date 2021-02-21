@@ -16,9 +16,14 @@ export const getPaymentInfo = async (authState, dispatch) => {
     }
     const data = await res.json()
 
-    data.methods.map((method) => dispatch(PaymentActions.addMethod(method)))
-    data.transactions.map((txn) => dispatch(PaymentActions.updateTransaction(txn)))
-    await dispatch(PaymentActions.updateBalance({ balance: data.balance, hasActiveAccount: data.hasActiveAccount, hasAccount: data.hasAccount }))
+    await dispatch(PaymentActions.setTransaction(data.transactions))
+    await dispatch(PaymentActions.setMethod(data.methods))
+    await dispatch(PaymentActions.updateBalance({
+      balance: data.balance,
+      hasActiveAccount: data.hasActiveAccount,
+      suspended: data.suspended,
+      hasAccount: data.hasAccount
+    }))
     await dispatch(PaymentActions.updateDefault(data.methods.filter(v => v.isDefault)[0]))
   })
 };
