@@ -80,6 +80,9 @@ export const makePayment = async ({ method, recipient, amount, description, jobI
     if (!res.ok) {
       throw new Error((await res.json()).message)
     }
+
+    const data = await res.json()
+    await dispatch(PaymentActions.updateTransaction(data.transaction))
   })
 };
 

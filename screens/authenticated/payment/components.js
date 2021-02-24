@@ -2,8 +2,8 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { FontAwesome, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { TextField } from "@ubaids/react-native-material-textfield";
 import "intl";
-import moment from 'moment';
 import 'intl/locale-data/jsonp/en';
+import moment from 'moment';
 import React, { useCallback, useContext, useState } from "react";
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,8 +11,7 @@ import styled from "styled-components/native";
 import Confirm from "../../../components/confirm";
 import { GlobalContext } from "../../../components/context";
 import Text from "../../../components/text";
-import { initiateAccount, fetchDashboardLink, makePayment } from "../../../controllers/PaymentController";
-import { CALLBACK_URL, MyWebView } from "./stripe";
+import { makePayment } from "../../../controllers/PaymentController";
 
 
 export const CARD_ICON = {
@@ -123,65 +122,13 @@ export function PreferredMethodView({ method }) {
     )
 }
 
-export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAccount }) {
-    const { authState } = useContext(GlobalContext);
-    const [setupAccount, setSetupAccount] = useState(false)
-    const [showSetup, setShowSetup] = useState(false)
-    const [uri, setURI] = useState('')
-
-    const setup = useCallback(async () => {
-        setShowSetup(true)
-        try {
-            if (hasActiveAccount) {
-                await Promise.reject({ messsage: 'You already have an account', code: 418 })
-            }
-
-            const uri = await initiateAccount(authState)
-            setURI(uri)
-        } catch (e) {
-            console.log(e)
-            Alert.alert('Account Setup Failed', e.code === 418 ? e.message : 'Failed to setup your account')
-            setShowSetup(false)
-        }
-    }, [uri, authState, hasActiveAccount])
-
-    const getDashboardLink = useCallback(async () => {
-        Confirm({
-            title: 'Open Stripe Dashboard',
-            message: 'You can open your Stripe dashboard to manage settings on your account',
-            options: ['Open', 'Cancel'],
-            cancelButtonIndex: 1,
-            onPress: async (i) => {
-                if (i === 0) {
-                    setShowSetup(true)
-                    try {
-                        if (!hasActiveAccount) {
-                            await Promise.reject({ messsage: 'Your account must be setup to continue', code: 418 })
-                        }
-
-                        const uri = await fetchDashboardLink(authState)
-                        setURI(uri)
-                    } catch (e) {
-                        console.log(e)
-                        Alert.alert('Manage Account Failed', e.code === 418 ? e.message : 'There was an error displaying your dashboard')
-                        setShowSetup(false)
-                    }
-                }
-            },
-        })
-
-    }, [uri, authState, hasActiveAccount])
-
-    const onSuccessfulSession = useCallback(() => {
-        setShowSetup(false)
-        if (!hasActiveAccount) {
-            Alert.alert('Acount Setup Complete', 'You account will be available after verification is complete')
-        }
-    }, [hasActiveAccount])
-
+export function AccountView({
+    refreshing, balance = 0,
+    hasActiveAccount, getDashboardLink,
+    setup,
+}) {
     return (
         <AccountSection>
-
             {hasActiveAccount &&
                 <TouchableOpacity onPress={getDashboardLink} style={{ position: "absolute", top: 4, right: 4 }}>
                     <FontAwesome size={24} color="#3869f8" name="external-link-square" />
@@ -211,47 +158,6 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAcco
                     <Text small bold color='#fff' >{hasActiveAccount ? "PAYOUT" : "SETUP PAYOUT"}</Text>
                 </TouchableOpacity>
             }
-            {showSetup ?
-                <Modal
-                    animationType="fade"
-                    transparent
-                    visible
-                    onRequestClose={() => { }}
-                    onDismiss={() => setShowSetup(false)}
-                    style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
-                >
-                    <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0004" }}>
-                        <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 120, flexGrow: 1 }}>
-                            <KeyboardAvoidingView behavior="padding" style={{ justifyContent: "center", margin: 8, flex: 1 }}>
-                                <View style={{ flexGrow: 1, padding: 8, backgroundColor: '#fff', borderRadius: 8, alignItems: "stretch", }}>
-                                    {!setupAccount || !uri ?
-                                        <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
-                                            <ActivityIndicator />
-                                        </View>
-                                        : null}
-                                    {uri ?
-                                        <MyWebView forAccount
-                                            style={{ flex: 1, paddingVertical: 12, display: setupAccount && uri ? 'flex' : 'none' }}
-                                            options={{
-                                                uri,
-                                                successUrl: CALLBACK_URL.SUCCESS,
-                                                cancelUrl: CALLBACK_URL.CANCELLED,
-                                            }}
-                                            onLoadingComplete={() => setSetupAccount(true)}
-                                            onLoadingFail={() => setShowSetup(false)}
-                                            onSuccess={onSuccessfulSession}
-                                            onCancel={() => setShowSetup(false)}
-                                        />
-                                        : null}
-                                    <TouchableOpacity onPress={() => setShowSetup(false)} style={{ position: "absolute", top: 4, left: 4 }}>
-                                        <MaterialCommunityIcons size={24} color="red" name="close-circle" />
-                                    </TouchableOpacity>
-                                </View>
-                            </KeyboardAvoidingView>
-                        </SafeAreaView>
-                    </ScrollView>
-                </Modal>
-                : null}
         </AccountSection>
     )
 }
