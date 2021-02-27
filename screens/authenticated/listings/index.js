@@ -528,6 +528,7 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                           disabled={loading}
                           label="SUGGESTED OFFER"
                           prefix="$"
+                          suffix={`/${wage}`}
                           labelFontSize={14}
                           placeholder="0.00"
                           labelTextStyle={{ color: "grey", fontWeight: "700" }}
@@ -537,30 +538,6 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                           }}
                           value={salary}
                           onSubmitEditing={onSubmitOffer}
-                          renderRightAccessory={() => (
-                            <RateTouchable onPress={() => {
-                              showActionSheetWithOptions({
-                                options: ['Per Day', 'Per Deployment', 'Per Hour', 'Cancel'],
-                                cancelButtonIndex: 3,
-                                title: 'Select  Rate',
-                                showSeparators: true,
-                              }, async (num) => {
-                                switch (num) {
-                                  case 0:
-                                    setUnit('day')
-                                    break
-                                  case 1:
-                                    setUnit('deployment')
-                                    break
-                                  case 2:
-                                    setUnit('hr')
-                                    break
-                                }
-                              })
-                            }}>
-                              <Text color='#4a89f2'>/{wage}</Text>
-                            </RateTouchable>
-                          )}
                         />
                       </SalaryField>
                     </WageInput>

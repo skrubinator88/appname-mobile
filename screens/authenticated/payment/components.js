@@ -267,6 +267,112 @@ export function PaymentMethodSelector({ jobID, recipient, description, onClose, 
     )
 }
 
+export const PayoutSelector = ({ job_data, deployee, onCancel, onSubmit }) => {
+    const [loading, setLoading] = useState(false);
+    const [salary, setSalary] = useState("");
+    const [unit, setUnit] = useState(job_data.wage || 'deployment')
+
+    const { showActionSheetWithOptions } = useActionSheet()
+
+    const onSubmitOffer = useCallback(async () => {
+        if (salary) {
+            setLoading(true);
+
+            const offer = parseFloat(salary).toFixed(2);
+            if (Number.isNaN(offer) || isNaN(offer)) {
+                return;
+            }
+            await new Promise(async (res) => {
+                Confirm({
+                    title: "Confirm Offer",
+                    message: `Suggest offer of $${offer}/${unit} to deployer to complete this job?`,
+                    options: ["Yes", "No"],
+                    cancelButtonIndex: 1,
+                    onPress: async (number) => {
+                        if (number === 0) {
+                            // Save offer
+                            try {
+                                const offer_received = await JobsController.sendOffer(job_data._id, deployee, offer, unit);
+                                job_data.offer_received = offer_received;
+                                onSubmit(job_data);
+                            } catch (e) {
+                                console.log(e, "negotiation send failed");
+                                Alert.alert("Failed to confirm offer");
+                            }
+                        }
+                        res();
+                    },
+                    onCancel: res,
+                });
+            });
+
+            setLoading(false);
+        }
+    }, [loading, deployee, job_data, salary, unit]);
+
+    return (
+        <Modal coverScreen avoidKeyboard swipeDirection='down' onSwipeComplete={onCancel} isVisible>
+            <View style={{ backgroundColor: "#fff", borderRadius: 40, paddingVertical: 16 }}>
+                <Row>
+                    <JobDescriptionRow>
+                        <JobDescription>
+                            <Text small light marginBottom="5px">
+                                Current Offer
+                </Text>
+                            <Text small marginBottom="5px">
+                                ${job_data.salary}/{job_data.wage}
+                            </Text>
+                        </JobDescription>
+
+                        <Text small style={{ textTransform: "uppercase", marginVertical: 16, textAlign: "center" }} bold>
+                            What offer would you complete this job for?
+              </Text>
+
+                        <View style={{ marginVertical: 10, alignItems: 'stretch', justifyContent: 'center', }}>
+                            <WageInput style={{ alignItems: 'stretch' }}>
+                                <SalaryField style={{ alignItems: 'stretch' }}>
+                                    <TextField
+                                        disabled={loading}
+                                        label="PAY"
+                                        prefix="$"
+                                        suffix={`/${unit}`}
+                                        labelFontSize={14}
+                                        placeholder="0.00"
+                                        labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                                        keyboardType="numeric"
+                                        onChangeText={(text) => {
+                                            setSalary(text);
+                                        }}
+                                        value={salary}
+                                        onSubmitEditing={onSubmitOffer}
+                                    />
+                                </SalaryField>
+                            </WageInput>
+                        </View>
+                    </JobDescriptionRow>
+                </Row>
+
+                <Row last>
+                    <Column style={{ alignItems: "center" }}>
+                        <Button disabled={loading} decline onPress={onCancel}>
+                            <Text style={{ color: "red" }} medium>
+                                Cancel
+                </Text>
+                        </Button>
+                    </Column>
+                    <Column>
+                        <Button disabled={loading} style={{ flexDirection: "row" }} accept onPress={onSubmitOffer}>
+                            {loading ? <ActivityIndicator animating style={{ marginEnd: 4 }} color="white" /> : null}
+                            <Text style={{ color: "white" }} medium>
+                                Save
+                </Text>
+                        </Button>
+                    </Column>
+                </Row>
+            </View>
+        </Modal>
+    );
+};
 
 const SectionTitle = styled.View`
   width: 100%;

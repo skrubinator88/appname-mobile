@@ -38,8 +38,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
           case "added": {
             const data = document.data();
 
-            if (!isCurrentJob(data) || isCurrentJobCreatedByUser(data, authState.userID)) {
-              // if job has a future schedule, skip entry
+            if (isCurrentJobCreatedByUser(data, authState.userID)) {
               return;
             }
             data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
@@ -47,8 +46,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
           }
           case "modified": {
             const data = document.data();
-            if (!isCurrentJob(data) || isCurrentJobCreatedByUser(data, authState.userID)) {
-              // if not current job, skip entry
+            if ( isCurrentJobCreatedByUser(data, authState.userID)) {
               return;
             }
             data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);

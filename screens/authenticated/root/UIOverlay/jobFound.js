@@ -17,6 +17,7 @@ import AnimationsController from "../../../../controllers/AnimationsControllers"
 import JobsController from "../../../../controllers/JobsControllers";
 import { default as config } from "../../../../env";
 import { sendNotification } from "../../../../functions";
+import { getPriorityColor, priorityMap } from "../../listings/listingItem";
 import PhotoItem from "../../listings/listItemImage";
 
 const deviceHeight = Dimensions.get("window").height;
@@ -276,9 +277,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
             <Row>
               <JobDescriptionRow>
                 <JobDescription>
-                  <Text small light marginBottom="5px">
-                    Job Description
-                </Text>
+                  <Text small light marginBottom="5px">Job Description</Text>
                   <Text small marginBottom="5px">
                     ${job_data.salary}/{job_data.wage}
                   </Text>
@@ -287,6 +286,17 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
                 {description.map((item) => {
                   return <Text key={item.id}>{item.text}</Text>;
                 })}
+
+                <JobDescription style={{ marginTop: 5, alignItems: 'center' }}>
+                  <Text small light>Priority</Text>
+                  {!!job_data.priority &&
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                      <Text small textTransform='uppercase' style={{ fontSize: 12 }}>{priorityMap[job_data.priority]}</Text>
+                      <FontAwesome name="exclamation-triangle" color={getPriorityColor(job_data.priority)} style={{ marginStart: 8, fontSize: 12 }} />
+                    </View>
+                  }
+                </JobDescription>
+
               </JobDescriptionRow>
             </Row>
 
@@ -385,7 +395,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
 const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [salary, setSalary] = useState("");
-  const [unit, setUnit] = useState(job_data.wage || 'hr')
+  const [unit, setUnit] = useState(job_data.wage || 'deployment')
 
   const { showActionSheetWithOptions } = useActionSheet()
 
@@ -435,7 +445,7 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
                 Current Offer
               </Text>
               <Text small marginBottom="5px">
-                ${job_data.salary}/hr
+                ${job_data.salary}/{job_data.wage}
               </Text>
             </JobDescription>
 
@@ -450,6 +460,7 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
                     disabled={loading}
                     label="PAY"
                     prefix="$"
+                    suffix={`/${unit}`}
                     labelFontSize={14}
                     placeholder="0.00"
                     labelTextStyle={{ color: "grey", fontWeight: "700" }}
@@ -459,30 +470,6 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
                     }}
                     value={salary}
                     onSubmitEditing={onSubmitOffer}
-                    renderRightAccessory={() => (
-                      <RateTouchable onPress={() => {
-                        showActionSheetWithOptions({
-                          options: ['Per Day', 'Per Deployment', 'Per Hour', 'Cancel'],
-                          cancelButtonIndex: 3,
-                          title: 'Select  Rate',
-                          showSeparators: true,
-                        }, async (num) => {
-                          switch (num) {
-                            case 0:
-                              setUnit('day')
-                              break
-                            case 1:
-                              setUnit('deployment')
-                              break
-                            case 2:
-                              setUnit('hr')
-                              break
-                          }
-                        })
-                      }}>
-                        <Text color='#4a89f2'>/{unit}</Text>
-                      </RateTouchable>
-                    )}
                   />
                 </SalaryField>
               </WageInput>

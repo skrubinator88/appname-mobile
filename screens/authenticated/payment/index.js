@@ -15,6 +15,7 @@ import { fetchDashboardLink, getPaymentInfo, initiateAccount, removeMethod, setD
 import { Alert } from "react-native";
 import { StatusBar } from "react-native";
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import Confirm from "../../../components/confirm";
 
 const height = Dimensions.get("window").height;
 
