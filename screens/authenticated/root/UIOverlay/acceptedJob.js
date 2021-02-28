@@ -75,8 +75,8 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
 
   const cancelJob = useCallback(() => {
     Confirm({
-      title: "Cancel Job",
-      message: `Are you sure about canceling this accepted job?`,
+      title: "Cancel Job?",
+      message: `Cancelling a job outside the cancellation window will attract a penalty`,
       options: ["Yes", "No"],
       cancelButtonIndex: 1,
       destructiveButtonIndex: 0,
@@ -85,7 +85,6 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
           try {
             await JobsController.cancelAcceptedJob(job_data._id, authState)
             await sendNotification(authState.userToken, job_data.posted_by, { title: `GigChasers - ${job_data.job_title}`, body: `Job canceled`, data: { type: 'jobcancel', id: job_data._id, sender: authState.userID } })
-            // TODO: Charge user for cancellation
             changeRoute({ name: "dashboard" })
           } catch (e) {
             console.log(e)

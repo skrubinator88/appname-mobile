@@ -4,7 +4,7 @@ import { GeoFirestore } from "../config/firebase";
 // Config
 import config from "../env";
 // Functions
-import { distanceBetweenTwoCoordinates, isCurrentJob, isCurrentJobCreatedByUser, sortJobsByProximity } from "../functions";
+import { distanceBetweenTwoCoordinates, isCurrentJobCreatedByUser, sortJobsByProximity } from "../functions";
 // Redux Actions
 import JobsStoreActions from "../rdx-actions/jobs.action";
 import ListingsActions from "../rdx-actions/listings.action";
@@ -46,7 +46,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
           }
           case "modified": {
             const data = document.data();
-            if ( isCurrentJobCreatedByUser(data, authState.userID)) {
+            if (isCurrentJobCreatedByUser(data, authState.userID)) {
               return;
             }
             data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
@@ -120,23 +120,36 @@ exports.changeJobStatus = async (documentID, status, userID = "") => {
   await geoCollection.update({ status, executed_by: userID });
 };
 
-// TODO: upon cancellation, either suspend or bill the deployee or deployer
-exports.cancelAcceptedJob = async (documentID, authState) => {
-  const { userData: { role } } = authState
-  const geoCollection = GeoFirestore.collection("jobs").doc(documentID);
-
-  if (role === 'contractor') {
-    // Handle logic when a deployee cancels a job. 
-    // The deployee should receive a penalty.
-  } else {
-    // Penalty for cancellation as a deployer
+exports.acceptJob = async (jobID, authState) => {
+  const apiResponse = await fetch(`${config.API_URL}/users/acceptJob`, {
+    method: "POST",
+    headers: {
+      Authorization: `bearer ${authState.userToken}`,
+    },
+    body: JSON.stringify({ jobID }),
+  });
+  if (!apiResponse.ok) {
+    throw new Error((await apiResponse.json()).message || "Failed to accept job");
   }
 
-  // Update job status
-  await geoCollection.update({
-    "offer_received": firebase.firestore.FieldValue.delete(),
-    status: 'available'
+  return true
+};
+
+exports.cancelAcceptedJob = async (jobID, authState) => {
+  const { userData: { role } } = authState
+
+  const apiResponse = await fetch(`${config.API_URL}/users/cancelJob`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `bearer ${authState.userToken}`,
+    },
+    body: JSON.stringify({ jobID, role }),
   });
+  if (!apiResponse.ok) {
+    throw new Error((await apiResponse.json()).message || "Failed to cancel job");
+  }
+
+  return true
 };
 
 /**
@@ -180,15 +193,24 @@ exports.cancelOffer = async (documentID) => {
   });
 };
 
-exports.approveOffer = async (documentID, deployee) => {
+exports.approveOffer = async (jobID, deployee, authState) => {
   if (!deployee) {
     throw new Error("Deployee identity must be provided");
   }
-  const doc = GeoFirestore.collection("jobs").doc(documentID);
-  await doc.update({
-    "offer_received.approved": true,
-    status: "accepted",
+
+  const apiResponse = await fetch(`${config.API_URL}/users/acceptOffer`, {
+    method: "POST",
+    headers: {
+      Authorization: `bearer ${authState.userToken}`,
+    },
+    body: JSON.stringify({ jobID, deployee }),
   });
+  if (!apiResponse.ok) {
+    throw new Error((await apiResponse.json()).message || "Failed to accept job");
+  }
+
+  return true
+
 };
 
 exports.counterOffer = async (documentID, offer, wage) => {
@@ -202,17 +224,23 @@ exports.counterOffer = async (documentID, offer, wage) => {
   });
 };
 
-exports.counterApprove = async (documentID, offer) => {
+exports.counterApprove = async (jobID, offer, authState) => {
   if (!offer) {
     throw new Error("Offer must be provided");
   }
-  const doc = GeoFirestore.collection("jobs").doc(documentID);
-  await doc.update({
-    "offer_received.counterOffer": firebase.firestore.FieldValue.delete(),
-    "offer_received.offer": offer,
-    "offer_received.approved": true,
-    status: "accepted",
+
+  const apiResponse = await fetch(`${config.API_URL}/users/acceptJob`, {
+    method: "POST",
+    headers: {
+      Authorization: `bearer ${authState.userToken}`,
+    },
+    body: JSON.stringify({ jobID }),
   });
+  if (!apiResponse.ok) {
+    throw new Error((await apiResponse.json()).message || "Failed to accept job");
+  }
+
+  return true
 };
 
 exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {

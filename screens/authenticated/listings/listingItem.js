@@ -53,8 +53,8 @@ export const getPriorityColor = (priority) => {
 }
 export const priorityMap = {
   high0: 'High (15 mins)',
-  medium0: 'Medium (15 mins)',
-  low0: 'Low (15 mins)',
+  medium0: 'Medium (1 hour)',
+  low0: 'Low (1 hour 30 mins)',
 }
 
 export default function ListingItem({ navigation, route }) {
@@ -344,7 +344,7 @@ export default function ListingItem({ navigation, route }) {
       if (success) return navigation.goBack();
     } catch (e) {
       console.log(e);
-      Alert.alert("Failed to create job");
+      Alert.alert("Failed to create job", e.code === 418 ? e.message : undefined);
     } finally {
       setLoading(false);
     }

@@ -173,14 +173,12 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
       async () => {
         try {
           data.accepted = true
-          await JobsController.changeJobStatus(job_data._id, "accepted", authState.userID);
+          await JobsController.acceptJob(job_data._id, authState);
           await sendNotification(authState.userToken, projectManager._id, {
             title: `GigChasers - ${job_data.job_title}`,
             body: `Job accepted`,
             data: { type: "jobaccept", id: job_data._id, sender: authState.userID },
           });
-
-          console.log(data)
 
           //TODO: Save job ID in local storage to retrieve it later on.
           changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
@@ -205,8 +203,8 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
             body: `Offer accepted`,
             data: { type: "offeraccept", id: job_data._id, sender: authState.userID },
           });
-          //TODO: Save job ID in local storage to retrieve it later on.
 
+          //TODO: Save job ID in local storage to retrieve it later on.
           changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
         } catch (e) {
           console.log(e, "counter offer approve");
@@ -292,7 +290,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
                   {!!job_data.priority &&
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
                       <Text small textTransform='uppercase' style={{ fontSize: 12 }}>{priorityMap[job_data.priority]}</Text>
-                      <FontAwesome name="exclamation-triangle" color={getPriorityColor(job_data.priority)} style={{ marginStart: 8, fontSize: 12 }} />
+                      <FontAwesome name="exclamation-triangle" color={getPriorityColor(job_data.priority)} style={{ marginStart: 8 }} />
                     </View>
                   }
                 </JobDescription>

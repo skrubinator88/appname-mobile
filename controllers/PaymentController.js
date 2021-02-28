@@ -94,7 +94,6 @@ export const placeHold = async ({ method, recipient, amount, description, jobID 
       'Authorization': `Bearer ${authState.userToken}`
     },
     body: JSON.stringify({
-      paymentMethodID: method.id,
       recipient,
       amount,
       description,

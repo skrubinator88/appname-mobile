@@ -442,7 +442,7 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                     data: { type: "offerreceive", id: job_data.id, sender: authState.userID },
                   });
                 } else {
-                  await JobsControllers.approveOffer(job_data.id, deployee.id);
+                  await JobsControllers.approveOffer(job_data.id, deployee.id, authState);
                   sendNotification(authState.userToken, deployee.id, {
                     title: `GigChasers - ${job_data.job_title}`,
                     body: `Offer approved`,
