@@ -43,9 +43,7 @@ export default function ProfileScreen({ navigation }) {
   }, [global]);
 
   useEffect(() => {
-    const unsubscribe = JobController.getUserJobComments(userID, { comments, setComments });
-
-    return () => unsubscribe && unsubscribe();
+    JobController.getUserJobComments(userID, { setComments });
   }, []);
 
   // React navigation "onMounted lifecycle"
@@ -93,7 +91,8 @@ export default function ProfileScreen({ navigation }) {
   return (
     <Container
       navigation={navigation}
-      color="white"
+      // flexible={false}
+      titleColor="white"
       headerBackground={authState.userData.role == "contractor" ? theme.contractor.primary : theme.project_manager.primary}
       endBackground="white"
       // nextAction={() => {}}
@@ -101,6 +100,8 @@ export default function ProfileScreen({ navigation }) {
       // nextProvider="Entypo"
       // nextIcon="dots-three-horizontal"
       title={loading ? () => <ActivityIndicator color="white" size={20} /> : ""}
+      enableRefreshFeedback={true}
+      refreshingProperties={{ refreshing: false, tintColor: "white", onRefresh: () => {} }}
     >
       {/* Profile Section */}
 

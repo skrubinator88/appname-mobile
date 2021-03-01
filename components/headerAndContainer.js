@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 
-import { Platform, SafeAreaView, Dimensions, View, ScrollView, KeyboardAvoidingView, ActivityIndicator } from "react-native";
+import {
+  Platform,
+  SafeAreaView,
+  Dimensions,
+  View,
+  ScrollView,
+  KeyboardAvoidingView,
+  ActivityIndicator,
+  RefreshControl,
+} from "react-native";
 import styled from "styled-components/native";
 import * as VectorIcons from "@expo/vector-icons";
-import { RefreshControl } from "react-native";
 
 const isIos = Platform.OS === "ios";
 const height = Dimensions.get("window").height;
@@ -16,12 +24,17 @@ export default function Header({
   navigation, // @Required
 
   // General Settings
-  titleWeight = "700",
-  background = "#f5f5f5",
+  flexible = true,
   headerBackground = "transparent",
-  endBackground = "transparent",
-  color = "black",
-  loading = false,
+  bottomBackground = "transparent",
+  containerBackground = "#f5f5f5",
+  loadingContent = false,
+  children, // @required
+
+  // Bar Properties
+  titleWeight = "700",
+  titleColor = "black",
+  title = "",
 
   // Back Button Properties
   backProvider = "",
@@ -31,18 +44,17 @@ export default function Header({
   backColor = "",
   backAction = "",
 
-  // Middle Section
-  title = "",
-
   // Next Button Properties
   nextProvider = "",
   nextIcon = "",
   nextTitle = "",
   nextSize = 30,
   nextColor = "",
-  nextAction,
-  children,
-  flexible = true,
+  nextAction = () => {},
+
+  // Refresh Handler
+  enableRefreshFeedback = false,
+  refreshingProperties = { tintColor: "grey" },
 }) {
   // @Required
   if (!navigation) throw Error("navigation: Navigation is Required");
@@ -60,13 +72,13 @@ export default function Header({
       return handleIcons(backProvider, {
         name: backIcon,
         size: backSize,
-        color: backColor || color,
+        color: backColor || titleColor,
       });
     } else {
       return handleIcons("AntDesign", {
         name: "arrowleft",
         size: backSize,
-        color: backColor || color,
+        color: backColor || titleColor,
       });
     }
   }
@@ -76,7 +88,7 @@ export default function Header({
       return handleIcons(nextProvider, {
         name: nextIcon,
         size: nextSize,
-        color: nextColor || color,
+        color: nextColor || titleColor,
       });
     } else if (nextTitle) {
       return nextTitle;
@@ -100,46 +112,53 @@ export default function Header({
         bounces={flexible}
         scrollEnabled={flexible}
         contentInset={{
-          top: -SPACER_SIZE + statusBarHeight,
+          // top: -SPACER_SIZE + statusBarHeight,
           bottom: -SPACER_SIZE + statusBarHeight,
         }}
-        contentOffset={{ y: SPACER_SIZE - statusBarHeight }}
-        style={{ backgroundColor: background }}
+        // contentOffset={{ y: SPACER_SIZE - statusBarHeight }}
+        style={{ backgroundColor: headerBackground }}
+        refreshControl={enableRefreshFeedback ? <RefreshControl {...refreshingProperties} /> : null}
       >
-        {isIos && (
+        <View style={{ backgroundColor: containerBackground }}>
+          {/* {isIos && (
           <View
             style={{
               height: SPACER_SIZE,
               backgroundColor: headerBackground,
             }}
           />
-        )}
-        <SafeAreaView style={{ backgroundColor: headerBackground }}>
-          <Container>
-            <Column back>
-              <Text style={{ color: backColor || color }} onPress={backAction != "" ? backAction : () => handleBackAction()}>
-                {handleBackButton()}
-              </Text>
-            </Column>
+        )} */}
+          <SafeAreaView style={{ backgroundColor: headerBackground }}>
+            <Container>
+              <Column back>
+                <Text style={{ color: backColor || titleColor }} onPress={backAction != "" ? backAction : () => handleBackAction()}>
+                  {handleBackButton()}
+                </Text>
+              </Column>
 
-            <Column middle>
-              {typeof title == "string" ? <TitleTextBox style={{ color, fontWeight: titleWeight }}>{title}</TitleTextBox> : title()}
-            </Column>
+              <Column middle>
+                {typeof title == "string" ? (
+                  <TitleTextBox style={{ color: titleColor, fontWeight: titleWeight }}>{title}</TitleTextBox>
+                ) : (
+                  title()
+                )}
+              </Column>
 
-            <Column next>
-              <Text style={{ color: nextColor || color, fontWeight: "700" }} onPress={nextAction}>
-                {handleNextButton()}
-              </Text>
-            </Column>
-          </Container>
-        </SafeAreaView>
+              <Column next>
+                <Text style={{ color: nextColor || titleColor, fontWeight: "700" }} onPress={nextAction}>
+                  {handleNextButton()}
+                </Text>
+              </Column>
+            </Container>
+          </SafeAreaView>
 
-        {/* Children */}
-        {children}
+          {/* Children */}
+          {children}
 
-        {isIos && <View style={{ height: SPACER_SIZE, backgroundColor: endBackground }} />}
+          {isIos && <View style={{ height: SPACER_SIZE, backgroundColor: bottomBackground || containerBackground }} />}
+        </View>
       </ScrollView>
-      {loading && (
+      {loadingContent && (
         <Loader>
           <ActivityIndicator color={headerBackground} />
         </Loader>

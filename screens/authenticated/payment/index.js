@@ -111,7 +111,7 @@ export default function PaymentScreen({ navigation }) {
     <Container
       flexible={false}
       navigation={navigation}
-      color="white"
+      titleColor="white"
       title="Payment"
       titleWeight="300"
       headerBackground="#3869f3"

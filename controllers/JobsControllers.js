@@ -124,11 +124,13 @@ exports.changeJobStatus = async (documentID, status, userID = "") => {
 
 // TODO: upon cancellation, either suspend or bill the deployee or deployer
 exports.cancelAcceptedJob = async (documentID, authState) => {
-  const { userData: { role } } = authState
+  const {
+    userData: { role },
+  } = authState;
   const geoCollection = GeoFirestore.collection("jobs").doc(documentID);
 
-  if (role === 'contractor') {
-    // Handle logic when a deployee cancels a job. 
+  if (role === "contractor") {
+    // Handle logic when a deployee cancels a job.
     // The deployee should receive a penalty.
   } else {
     // Penalty for cancellation as a deployer
@@ -136,8 +138,8 @@ exports.cancelAcceptedJob = async (documentID, authState) => {
 
   // Update job status
   await geoCollection.update({
-    "offer_received": firebase.firestore.FieldValue.delete(),
-    status: 'available'
+    offer_received: firebase.firestore.FieldValue.delete(),
+    status: "available",
   });
 };
 
@@ -147,7 +149,7 @@ exports.cancelAcceptedJob = async (documentID, authState) => {
  * @param {*} deployee
  * @param {*} offer
  */
-exports.sendOffer = async (documentID, deployee, offer, wage = 'hr') => {
+exports.sendOffer = async (documentID, deployee, offer, wage = "hr") => {
   if (!deployee) {
     throw new Error("User identity must be provided");
   }
@@ -163,9 +165,9 @@ exports.sendOffer = async (documentID, deployee, offer, wage = 'hr') => {
   };
 
   await doc.update({
-    offer_received
+    offer_received,
   });
-  return offer_received
+  return offer_received;
 };
 
 /**
@@ -232,7 +234,7 @@ exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
     });
 };
 
-exports.currentUserJobsHistory = (user) => { };
+exports.currentUserJobsHistory = (user) => {};
 
 exports.postUserJob = async (userID, job, token, photos = []) => {
   if (!userID) throw new Error("User ID is required");
@@ -310,31 +312,18 @@ exports.updateUserJob = (userID, jobID, updatedJob) => {
 
 exports.getUserJobComments = (userID, state) => {
   // Screen State
-  const { comments, setComments } = state;
+  const { setComments } = state;
 
   const query = GeoFirestore.collection("comments").doc(userID).collection("messages");
 
-  const unsubscribe = query.onSnapshot((res) => {
-    res.docChanges().forEach((change) => {
-      const { doc: document } = change;
-      switch (change.type) {
-        case "added": {
-          const data = document.data();
-          data.id = document.id;
-          const newState = [...comments, data];
-          return setComments(newState);
-        }
-        case "modified": {
-          // Ignore
-        }
-        case "removed": {
-          // Ignore
-        }
-        default:
-          break;
-      }
+  let comments = [];
+
+  query.get().then((querySnapshot) => {
+    const array = querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      comments.push(doc.data());
     });
   });
 
-  return unsubscribe;
+  setComments(comments);
 };
