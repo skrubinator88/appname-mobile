@@ -1,5 +1,5 @@
 // Dependencies React
-import { Ionicons, AntDesign, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, AntDesign, MaterialCommunityIcons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Camera, requestPermissionsAsync } from "expo-camera";
@@ -18,7 +18,6 @@ import {
   TouchableWithoutFeedback,
   View,
   SafeAreaView,
-  TouchableNativeFeedback,
 } from "react-native";
 import Constants from "expo-constants";
 
@@ -40,7 +39,23 @@ import TaskModal from "./taskModal";
 
 // Miscellaneous
 const width = Dimensions.get("window").width;
-const height = Dimensions.get("window").height;
+export const getPriorityColor = (priority) => {
+  switch (priority) {
+    case 'high0':
+      return 'firebrick'
+    case 'medium0':
+      return 'darkorange'
+    case 'low0':
+      return 'mediumblue'
+    default:
+      return '#222'
+  }
+}
+export const priorityMap = {
+  high0: 'High (15 mins)',
+  medium0: 'Medium (1 hour)',
+  low0: 'Low (1 hour 30 mins)',
+}
 
 export default function ListingItem({ navigation, route }) {
   // - - Constructor - -
@@ -52,7 +67,7 @@ export default function ListingItem({ navigation, route }) {
   const [job_title, setJobTitle] = useState(""); // Input Field
   const [location, setLocation] = useState(""); // Input Field
   const [salary, setSalary] = useState(""); // Input Field
-  const [wage, setWage] = useState("hr"); // Input Field
+  const [wage, setWage] = useState("deployment"); // Input Field
   const [tasks, setTasks] = useState([]); // Input Field (With Modal)
 
   const [loading, setLoading] = useState(false);
@@ -64,6 +79,7 @@ export default function ListingItem({ navigation, route }) {
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState(Platform.OS === "ios" ? "datetime" : "date");
   const [showDate, setShowDate] = useState(false);
+  const [priority, setPriority] = useState('');
 
   // - - Refs - -
   const job_type_ref = useRef(null);
@@ -207,8 +223,33 @@ export default function ListingItem({ navigation, route }) {
     }
   }, [photos]);
 
+
+  const onSetPriority = useCallback(async () => {
+    showActionSheetWithOptions({
+      options: ['High (15 mins)', 'Medium (15 mins)', 'Low (15 mins)', 'None', 'Cancel'],
+      cancelButtonIndex: 4,
+      destructiveButtonIndex: 3,
+      title: 'Set Priority',
+      message: 'Specify how long after accepting a job the deployee is allowed to cancel'
+    }, (i) => {
+      switch (i) {
+        case 0:
+          setPriority('high0')
+          break
+        case 1:
+          setPriority('medium0')
+          break
+        case 2:
+          setPriority('low0')
+          break
+        case 3:
+          setPriority('')
+      }
+    })
+  }, [priority]);
+
   // - - Extra Setup - -
-  const form = { job_type: selected_job_type, job_title, tasks, location, salary, wage, date };
+  const form = { job_type: selected_job_type, job_title, tasks, location, salary, wage, date, priority };
 
   // - - Life Cycles - -
   // Create session for google suggestions (This will reduce billing expenses)
@@ -303,7 +344,7 @@ export default function ListingItem({ navigation, route }) {
       if (success) return navigation.goBack();
     } catch (e) {
       console.log(e);
-      Alert.alert("Failed to create job");
+      Alert.alert("Failed to create job", e.code === 418 ? e.message : undefined);
     } finally {
       setLoading(false);
     }
@@ -482,47 +523,36 @@ export default function ListingItem({ navigation, route }) {
                   <TextField
                     {...commonInputProps(salary, setSalary)}
                     prefix="$"
+                    suffix={`/${wage}`}
                     label="PAY"
                     labelFontSize={14}
                     placeholder="0.00"
                     labelTextStyle={{ color: "grey", fontWeight: "700" }}
                     keyboardType="numeric"
-                    renderRightAccessory={() => (
-                      <TouchableOpacity
-                        onPress={() => {
-                          showActionSheetWithOptions({
-                            options: ['Per Day', 'Per Deployment', 'Per Hour', 'Cancel'],
-                            cancelButtonIndex: 3,
-                            title: 'Select  Rate',
-                            showSeparators: true,
-                          }, async (num) => {
-                            switch (num) {
-                              case 0:
-                                setWage('day')
-                                break
-                              case 1:
-                                setWage('deployment')
-                                break
-                              case 2:
-                                setWage('hr')
-                                break
-                            }
-                          })
-                        }}>
-                        <View style={{ marginHorizontal: 10 }}>
-                          <Text color="#4a89f2" bold>/{wage}</Text>
-                        </View>
-                      </TouchableOpacity>
-                    )}
                   />
                 </SalaryField>
-                {/* <WageTimeField>
-                  <WageTimeFieldInput selectedValue={wage} mode="dropdown" onValueChange={(value) => setWage(value)}>
-                    <WageTimeFieldInput.Item label="Year" value="yr" />
-                    <WageTimeFieldInput.Item label="Hour" value="hr" />
-                  </WageTimeFieldInput>
-                </WageTimeField> */}
               </WageInput>
+            </Item>
+
+            <Item style={{ marginVertical: 4 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
+                <Text style={{ fontWeight: "bold", color: "grey", alignItems: 'center' }}>PRIORITY</Text>
+                {!!priority && <FontAwesome name="circle" color={getPriorityColor(priority)} style={{ marginStart: 12, fontSize: 16 }} />}
+              </View>
+              <TouchableOpacity
+                style={{ alignSelf: "stretch", flex: 1 }}
+                onPress={onSetPriority}
+              >
+                <ScheduleButton
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center", paddingVertical: 2,
+                    backgroundColor: "#fafafa",
+                  }}
+                >
+                  <Text light={!priority} textTransform='uppercase'>{priorityMap?.[priority] || 'none'}</Text>
+                </ScheduleButton>
+              </TouchableOpacity>
             </Item>
 
             <Item style={{ marginVertical: 4 }}>
@@ -591,8 +621,9 @@ export default function ListingItem({ navigation, route }) {
 
             <Item>
               <Text style={{ color: "#444", textAlign: "center", marginTop: 8, textTransform: "uppercase" }}>
-                Job will be available {date.getTime() <= Date.now() + 5000 ? "immediately" : moment(date).calendar()}
+                Job will be started {date.getTime() <= Date.now() + 5000 ? "immediately" : moment(date).calendar()}
               </Text>
+              <Text light small style={{ textAlign: "center", marginTop: 4, fontSize: 10, textTransform: "uppercase" }}>(You can only schedule up to 6 days from now)</Text>
             </Item>
             <TouchableOpacity
               style={{ alignSelf: "center", width: width * 0.7, marginBottom: 12 }}
@@ -622,6 +653,7 @@ export default function ListingItem({ navigation, route }) {
                 style={{ marginBottom: 20 }}
                 minimumDate={new Date()}
                 mode={mode}
+                maximumDate={moment().add(6, 'days').toDate()}
                 onChange={updateDate}
                 value={date}
               />

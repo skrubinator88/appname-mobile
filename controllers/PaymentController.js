@@ -16,9 +16,15 @@ export const getPaymentInfo = async (authState, dispatch) => {
     }
     const data = await res.json()
 
-    data.methods.map((method) => dispatch(PaymentActions.addMethod(method)))
-    data.transactions.map((txn) => dispatch(PaymentActions.updateTransaction(txn)))
-    await dispatch(PaymentActions.updateBalance({ balance: data.balance, hasActiveAccount: data.hasActiveAccount, hasAccount: data.hasAccount }))
+    await dispatch(PaymentActions.setTransaction(data.transactions))
+    await dispatch(PaymentActions.setMethod(data.methods))
+    await dispatch(PaymentActions.setAccount(data.externalAccounts))
+    await dispatch(PaymentActions.updateBalance({
+      balance: data.balance,
+      hasActiveAccount: data.hasActiveAccount,
+      suspended: data.suspended,
+      hasAccount: data.hasAccount
+    }))
     await dispatch(PaymentActions.updateDefault(data.methods.filter(v => v.isDefault)[0]))
   })
 };
@@ -56,6 +62,27 @@ export const removeMethod = async (method, authState, dispatch) => {
   })
 };
 
+export const payout = async ({ destination, amount }, authState) => {
+  return fetch(`${env.API_URL}/payments/payout`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
+    body: JSON.stringify({
+      destination,
+      amount,
+    })
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+
+    const data = await res.json()
+    await dispatch(PaymentActions.updateTransaction(data.transaction))
+  })
+};
+
 // TODO: will have to decide on mechanism to handle job schedules
 export const makePayment = async ({ method, recipient, amount, description, jobID }, authState, dispatch) => {
   return fetch(`${env.API_URL}/payments/pay`, {
@@ -75,6 +102,9 @@ export const makePayment = async ({ method, recipient, amount, description, jobI
     if (!res.ok) {
       throw new Error((await res.json()).message)
     }
+
+    const data = await res.json()
+    await dispatch(PaymentActions.updateTransaction(data.transaction))
   })
 };
 
@@ -86,7 +116,6 @@ export const placeHold = async ({ method, recipient, amount, description, jobID 
       'Authorization': `Bearer ${authState.userToken}`
     },
     body: JSON.stringify({
-      paymentMethodID: method.id,
       recipient,
       amount,
       description,

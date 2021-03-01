@@ -1,4 +1,8 @@
 // Store
+exports.setMethod = (data) => {
+  return { type: "SET_PAYMENT_METHOD", data };
+};
+
 exports.addMethod = (data) => {
   return { type: "ADD_PAYMENT_METHOD", data };
 };
@@ -15,8 +19,16 @@ exports.updateDefault = (data) => {
   return { type: "SET_DEFAULT_METHOD", data };
 };
 
-exports.updateTransaction = (data) => {
+exports.setTransaction = (data) => {
   return { type: "SET_TRANSACTION", data };
+};
+
+exports.updateTransaction = (data) => {
+  return { type: "UPDATE_TRANSACTION", data };
+};
+
+exports.setAccount = (data) => {
+  return { type: "SET_ACCOUNT", data };
 };
 
 exports.clear = () => {

@@ -2,17 +2,17 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { FontAwesome, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { TextField } from "@ubaids/react-native-material-textfield";
 import "intl";
-import moment from 'moment';
 import 'intl/locale-data/jsonp/en';
-import React, { useCallback, useContext, useState } from "react";
+import moment from 'moment';
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import ModalImport from "react-native-modal";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
 import Confirm from "../../../components/confirm";
 import { GlobalContext } from "../../../components/context";
 import Text from "../../../components/text";
-import { initiateAccount, fetchDashboardLink, makePayment } from "../../../controllers/PaymentController";
-import { CALLBACK_URL, MyWebView } from "./stripe";
+import { makePayment, payout } from "../../../controllers/PaymentController";
 
 
 export const CARD_ICON = {
@@ -74,6 +74,42 @@ export function MethodView({ method, onPress }) {
     )
 }
 
+export function ExternalAccountView({ account, onPress }) {
+    return (
+        <PaymentItemRow key={account.id} style={{ paddingTop: 0, paddingBottom: 0, paddingLeft: 0, paddingRight: 0, alignItems: 'stretch' }}>
+            {account.isBank ?
+                <PaymentItemRowLink onPress={onPress} style={{ flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch', paddingTop: 12, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
+                    <FontAwesome name='bank' style={{ textAlign: 'center' }} size={20} />
+                    <View style={{ paddingHorizontal: 8, paddingVertical: 8, justifyContent: 'center', alignItems: 'stretch' }}>
+                        {account.name && <Text small align='center' weight="bold" textTransform='capitalize' color="#111">{account.name}</Text>}
+                        <View style={{ flexDirection: 'column', alignItems: 'stretch', justifyContent: 'center' }}>
+                            <Text small light align='center' textTransform='uppercase' color="#4a4a4a">{account.bankName}</Text>
+                            <View style={{ flexDirection: 'row', marginTop: 4, alignItems: 'stretch', justifyContent: 'space-between' }}>
+                                <Text small weight="700" color="#4a4a4a">{account.routingNumber}</Text>
+                                <Text small weight="700" textTransform='uppercase' color="#4a4a4a"> ****{account.mask}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </PaymentItemRowLink>
+                :
+                <PaymentItemRowLink style={{ paddingTop: 12, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
+                    <Column>
+                        {account.name && <Text small weight="bold" textTransform='capitalize' color="#111">{account.name}</Text>}
+                        <Row>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                {CARD_ICON[account.brand]({ size: 20 })}
+                                <Text small weight="700" style={{ marginStart: 4 }} textTransform='uppercase' color="#4a4a4a"> ****{account.mask}</Text>
+                            </View>
+
+                            <Text small weight="700" color="#4a4a4a">EXP: {`${account.month.padStart(2, '0')}/${account.year}`}</Text>
+                        </Row>
+                    </Column>
+                </PaymentItemRowLink >
+            }
+        </PaymentItemRow >
+    )
+}
+
 export function TransactionRecord({ transaction: txn, onPress }) {
     return (
         <PaymentItemRow key={txn.id} style={{ borderLeftWidth: 8, borderLeftColor: getTransactionStatusColor(txn.status) }} >
@@ -123,65 +159,15 @@ export function PreferredMethodView({ method }) {
     )
 }
 
-export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAccount }) {
-    const { authState } = useContext(GlobalContext);
-    const [setupAccount, setSetupAccount] = useState(false)
-    const [showSetup, setShowSetup] = useState(false)
-    const [uri, setURI] = useState('')
-
-    const setup = useCallback(async () => {
-        setShowSetup(true)
-        try {
-            if (hasActiveAccount) {
-                await Promise.reject({ messsage: 'You already have an account', code: 418 })
-            }
-
-            const uri = await initiateAccount(authState)
-            setURI(uri)
-        } catch (e) {
-            console.log(e)
-            Alert.alert('Account Setup Failed', e.code === 418 ? e.message : 'Failed to setup your account')
-            setShowSetup(false)
-        }
-    }, [uri, authState, hasActiveAccount])
-
-    const getDashboardLink = useCallback(async () => {
-        Confirm({
-            title: 'Open Stripe Dashboard',
-            message: 'You can open your Stripe dashboard to manage settings on your account',
-            options: ['Open', 'Cancel'],
-            cancelButtonIndex: 1,
-            onPress: async (i) => {
-                if (i === 0) {
-                    setShowSetup(true)
-                    try {
-                        if (!hasActiveAccount) {
-                            await Promise.reject({ messsage: 'Your account must be setup to continue', code: 418 })
-                        }
-
-                        const uri = await fetchDashboardLink(authState)
-                        setURI(uri)
-                    } catch (e) {
-                        console.log(e)
-                        Alert.alert('Manage Account Failed', e.code === 418 ? e.message : 'There was an error displaying your dashboard')
-                        setShowSetup(false)
-                    }
-                }
-            },
-        })
-
-    }, [uri, authState, hasActiveAccount])
-
-    const onSuccessfulSession = useCallback(() => {
-        setShowSetup(false)
-        if (!hasActiveAccount) {
-            Alert.alert('Acount Setup Complete', 'You account will be available after verification is complete')
-        }
-    }, [hasActiveAccount])
+export function AccountView({
+    refreshing, balance = 0,
+    hasActiveAccount, getDashboardLink,
+    setup,
+}) {
+    const [showPayout, setShowPayout] = useState(false)
 
     return (
         <AccountSection>
-
             {hasActiveAccount &&
                 <TouchableOpacity onPress={getDashboardLink} style={{ position: "absolute", top: 4, right: 4 }}>
                     <FontAwesome size={24} color="#3869f8" name="external-link-square" />
@@ -202,8 +188,7 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAcco
                 <TouchableOpacity style={{ backgroundColor: '#3869f3', marginBottom: 12, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' }}
                     onPress={() => {
                         if (hasActiveAccount) {
-                            // TODO: fix payout
-                            Alert.alert('Working on this', 'Will be out soon')
+                            setShowPayout(true)
                         } else {
                             setup()
                         }
@@ -211,47 +196,7 @@ export function AccountView({ refreshing, balance = 0, hasActiveAccount, hasAcco
                     <Text small bold color='#fff' >{hasActiveAccount ? "PAYOUT" : "SETUP PAYOUT"}</Text>
                 </TouchableOpacity>
             }
-            {showSetup ?
-                <Modal
-                    animationType="fade"
-                    transparent
-                    visible
-                    onRequestClose={() => { }}
-                    onDismiss={() => setShowSetup(false)}
-                    style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
-                >
-                    <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0004" }}>
-                        <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 120, flexGrow: 1 }}>
-                            <KeyboardAvoidingView behavior="padding" style={{ justifyContent: "center", margin: 8, flex: 1 }}>
-                                <View style={{ flexGrow: 1, padding: 8, backgroundColor: '#fff', borderRadius: 8, alignItems: "stretch", }}>
-                                    {!setupAccount || !uri ?
-                                        <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
-                                            <ActivityIndicator />
-                                        </View>
-                                        : null}
-                                    {uri ?
-                                        <MyWebView forAccount
-                                            style={{ flex: 1, paddingVertical: 12, display: setupAccount && uri ? 'flex' : 'none' }}
-                                            options={{
-                                                uri,
-                                                successUrl: CALLBACK_URL.SUCCESS,
-                                                cancelUrl: CALLBACK_URL.CANCELLED,
-                                            }}
-                                            onLoadingComplete={() => setSetupAccount(true)}
-                                            onLoadingFail={() => setShowSetup(false)}
-                                            onSuccess={onSuccessfulSession}
-                                            onCancel={() => setShowSetup(false)}
-                                        />
-                                        : null}
-                                    <TouchableOpacity onPress={() => setShowSetup(false)} style={{ position: "absolute", top: 4, left: 4 }}>
-                                        <MaterialCommunityIcons size={24} color="red" name="close-circle" />
-                                    </TouchableOpacity>
-                                </View>
-                            </KeyboardAvoidingView>
-                        </SafeAreaView>
-                    </ScrollView>
-                </Modal>
-                : null}
+            <PayoutSelector show={showPayout} onSubmit={() => setShowPayout(false)} onCancel={() => setShowPayout(false)} />
         </AccountSection>
     )
 }
@@ -361,6 +306,179 @@ export function PaymentMethodSelector({ jobID, recipient, description, onClose, 
     )
 }
 
+export const PayoutSelector = ({ show, onCancel: onCancelProp, onSubmit: onSubmitProp }) => {
+    const [loading, setLoading] = useState(false);
+    const [amount, setAmount] = useState("");
+    const [selectAccount, setSelectAccount] = useState(false)
+    const { authState } = useContext(GlobalContext)
+
+    const payments = useSelector((state) => state.payment)
+
+    const onCancel = useCallback(() => {
+        setSelectAccount(false)
+        setAmount('')
+        onCancelProp()
+    }, [])
+    const onSubmit = useMemo(() => () => {
+        setSelectAccount(false)
+        setAmount('')
+        onSubmitProp()
+    }, [])
+
+    const onSubmitPayout = useCallback(async () => {
+        if (amount) {
+            if (!selectAccount) {
+                Alert.alert('Payout Failed', 'Invalid account specified')
+                return;
+            }
+
+            const payoutAmount = parseFloat(amount).toFixed(2);
+            if (Number.isNaN(payoutAmount) || isNaN(payoutAmount)) {
+                Alert.alert('Payout Failed', 'Invalid amount specified')
+                return;
+            }
+            await new Promise(async (res) => {
+                Confirm({
+                    title: "Confirm Payout",
+                    message: `Send $${payoutAmount} to your selected account?`,
+                    options: ["Yes", "No"],
+                    cancelButtonIndex: 1,
+                    onPress: async (number) => {
+                        if (number === 0) {
+                            setLoading(true);
+                            try {
+                                await payout({ destination: selectAccount.id, amount: payoutAmount * 100 }, authState);
+                                onSubmit(job_data);
+                            } catch (e) {
+                                Alert.alert('Payout Failed', e.message || "Failed to initiate payout", [{ style: 'cancel', onPress: onCancel }]);
+                            }
+                        }
+                        res();
+                    },
+                    onCancel: res,
+                });
+            });
+
+            setLoading(false);
+        }
+    }, [loading, selectAccount, amount]);
+
+    return show ?
+        (
+            <ModalImport coverScreen avoidKeyboard swipeDirection='down' onSwipeComplete={onCancel} isVisible={show}>
+                <View style={{ backgroundColor: "#fff", borderRadius: 40, paddingVertical: 16 }}>
+                    <View style={{ justifyContent: 'space-between', padding: 4, marginHorizontal: 4, alignItems: 'stretch', }}>
+                        <Text small textTransform="uppercase" style={{ marginBottom: 8, textAlign: "center" }} bold>PAYOUT</Text>
+
+                        <Text align='center' light small marginBottom="5px">Specify amount you want transferred into your account. 12.5% of the specified amount is charged for instant payout</Text>
+                    </View>
+                    {loading ?
+                        <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+                            <ActivityIndicator />
+                        </View>
+                        :
+                        !selectAccount ?
+                            <View style={{ justifyContent: 'center', padding: 20 }}>
+                                {payments.externalAccounts && payments.externalAccounts.length >= 1 ?
+                                    payments.externalAccounts.map(a => <ExternalAccountView key={a.id} account={a} onPress={() => setSelectAccount(a)} />)
+                                    :
+                                    <Text align='center' light marginBottom="5px">No account available! Update your dashboard to select an account!</Text>
+                                }
+                            </View>
+                            :
+                            <View style={{ justifyContent: 'center', padding: 20 }}>
+                                <Text>Enter mount You Intend To Pay</Text>
+                                <TextField
+                                    disabled={loading}
+                                    editable={!loading}
+                                    label="PAY"
+                                    prefix="$"
+                                    labelFontSize={14}
+                                    placeholder="0.00"
+                                    labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                                    keyboardType="numeric"
+                                    onChangeText={(text) => {
+                                        setAmount(text);
+                                    }}
+                                    value={amount}
+                                />
+                                <TouchableOpacity style={{ backgroundColor: '#3869f3', marginTop: 8, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' }}
+                                    onPress={onSubmit}>
+                                    <Text small bold color='#fff' >PAY</Text>
+                                </TouchableOpacity>
+                                <Column style={{ alignItems: "center" }}>
+                                    <Button disabled={loading} decline onPress={onCancel}>
+                                        <Text style={{ color: "red" }} medium>Cancel</Text>
+                                    </Button>
+                                </Column>
+                            </View>
+                    }
+
+                </View>
+            </ModalImport>
+        ) : null
+};
+
+const Button = styled.TouchableOpacity`
+  ${({ decline, accept, negotiate, negotiationSent, row }) => {
+        switch (true) {
+            case accept:
+                return `
+        background: #228b22; 
+        padding: 10px 40px; 
+        border-radius: 8px;
+        `;
+
+            case decline:
+                return `
+        border: 1px solid red; 
+        background: white; 
+        padding: 10px 40px; 
+        border-radius: 8px;
+        `;
+
+            case negotiate:
+                return `
+        border-color: #00bfff;
+        border-width: 1px;
+        text-align: center;
+        padding: 10px 40px; 
+        border-radius: 8px;
+        `;
+
+            case negotiationSent:
+                return `
+        background-color: slategray;
+        text-align: center;
+        padding: 10px 40px; 
+        border-radius: 8px;
+        `;
+        }
+    }};
+`;
+
+const Row = styled.View`
+  flex-direction: row;
+  justify-content: ${({ first, last }) => {
+        switch (true) {
+            case first:
+                return "space-between";
+            case last:
+                return "space-around";
+            default:
+                return "flex-start";
+        }
+    }};
+  ${({ first }) => {
+        switch (true) {
+            case first:
+                return `margin: 4% 0 0 0;`;
+        }
+    }}
+  padding: 3% 30px;
+  border-bottom-color: #eaeaea;
+  border-bottom-width: ${(props) => (props.last ? "0px" : "1px")};
+`;
 
 const SectionTitle = styled.View`
   width: 100%;
