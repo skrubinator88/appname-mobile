@@ -4,14 +4,15 @@ import { TextField } from "@ubaids/react-native-material-textfield";
 import "intl";
 import 'intl/locale-data/jsonp/en';
 import moment from 'moment';
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import ModalImport from "react-native-modal";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
 import Confirm from "../../../components/confirm";
 import { GlobalContext } from "../../../components/context";
 import Text from "../../../components/text";
-import { makePayment } from "../../../controllers/PaymentController";
+import { makePayment, payout } from "../../../controllers/PaymentController";
 
 
 export const CARD_ICON = {
@@ -73,6 +74,42 @@ export function MethodView({ method, onPress }) {
     )
 }
 
+export function ExternalAccountView({ account, onPress }) {
+    return (
+        <PaymentItemRow key={account.id} style={{ paddingTop: 0, paddingBottom: 0, paddingLeft: 0, paddingRight: 0, alignItems: 'stretch' }}>
+            {account.isBank ?
+                <PaymentItemRowLink onPress={onPress} style={{ flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch', paddingTop: 12, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
+                    <FontAwesome name='bank' style={{ textAlign: 'center' }} size={20} />
+                    <View style={{ paddingHorizontal: 8, paddingVertical: 8, justifyContent: 'center', alignItems: 'stretch' }}>
+                        {account.name && <Text small align='center' weight="bold" textTransform='capitalize' color="#111">{account.name}</Text>}
+                        <View style={{ flexDirection: 'column', alignItems: 'stretch', justifyContent: 'center' }}>
+                            <Text small light align='center' textTransform='uppercase' color="#4a4a4a">{account.bankName}</Text>
+                            <View style={{ flexDirection: 'row', marginTop: 4, alignItems: 'stretch', justifyContent: 'space-between' }}>
+                                <Text small weight="700" color="#4a4a4a">{account.routingNumber}</Text>
+                                <Text small weight="700" textTransform='uppercase' color="#4a4a4a"> ****{account.mask}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </PaymentItemRowLink>
+                :
+                <PaymentItemRowLink style={{ paddingTop: 12, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
+                    <Column>
+                        {account.name && <Text small weight="bold" textTransform='capitalize' color="#111">{account.name}</Text>}
+                        <Row>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                {CARD_ICON[account.brand]({ size: 20 })}
+                                <Text small weight="700" style={{ marginStart: 4 }} textTransform='uppercase' color="#4a4a4a"> ****{account.mask}</Text>
+                            </View>
+
+                            <Text small weight="700" color="#4a4a4a">EXP: {`${account.month.padStart(2, '0')}/${account.year}`}</Text>
+                        </Row>
+                    </Column>
+                </PaymentItemRowLink >
+            }
+        </PaymentItemRow >
+    )
+}
+
 export function TransactionRecord({ transaction: txn, onPress }) {
     return (
         <PaymentItemRow key={txn.id} style={{ borderLeftWidth: 8, borderLeftColor: getTransactionStatusColor(txn.status) }} >
@@ -127,6 +164,8 @@ export function AccountView({
     hasActiveAccount, getDashboardLink,
     setup,
 }) {
+    const [showPayout, setShowPayout] = useState(false)
+
     return (
         <AccountSection>
             {hasActiveAccount &&
@@ -149,8 +188,7 @@ export function AccountView({
                 <TouchableOpacity style={{ backgroundColor: '#3869f3', marginBottom: 12, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' }}
                     onPress={() => {
                         if (hasActiveAccount) {
-                            // TODO: fix payout
-                            Alert.alert('Working on this', 'Will be out soon')
+                            setShowPayout(true)
                         } else {
                             setup()
                         }
@@ -158,6 +196,7 @@ export function AccountView({
                     <Text small bold color='#fff' >{hasActiveAccount ? "PAYOUT" : "SETUP PAYOUT"}</Text>
                 </TouchableOpacity>
             }
+            <PayoutSelector show={showPayout} onSubmit={() => setShowPayout(false)} onCancel={() => setShowPayout(false)} />
         </AccountSection>
     )
 }
@@ -267,37 +306,51 @@ export function PaymentMethodSelector({ jobID, recipient, description, onClose, 
     )
 }
 
-export const PayoutSelector = ({ job_data, deployee, onCancel, onSubmit }) => {
+export const PayoutSelector = ({ show, onCancel: onCancelProp, onSubmit: onSubmitProp }) => {
     const [loading, setLoading] = useState(false);
-    const [salary, setSalary] = useState("");
-    const [unit, setUnit] = useState(job_data.wage || 'deployment')
+    const [amount, setAmount] = useState("");
+    const [selectAccount, setSelectAccount] = useState(false)
+    const { authState } = useContext(GlobalContext)
 
-    const { showActionSheetWithOptions } = useActionSheet()
+    const payments = useSelector((state) => state.payment)
 
-    const onSubmitOffer = useCallback(async () => {
-        if (salary) {
-            setLoading(true);
+    const onCancel = useCallback(() => {
+        setSelectAccount(false)
+        setAmount('')
+        onCancelProp()
+    }, [])
+    const onSubmit = useMemo(() => () => {
+        setSelectAccount(false)
+        setAmount('')
+        onSubmitProp()
+    }, [])
 
-            const offer = parseFloat(salary).toFixed(2);
-            if (Number.isNaN(offer) || isNaN(offer)) {
+    const onSubmitPayout = useCallback(async () => {
+        if (amount) {
+            if (!selectAccount) {
+                Alert.alert('Payout Failed', 'Invalid account specified')
+                return;
+            }
+
+            const payoutAmount = parseFloat(amount).toFixed(2);
+            if (Number.isNaN(payoutAmount) || isNaN(payoutAmount)) {
+                Alert.alert('Payout Failed', 'Invalid amount specified')
                 return;
             }
             await new Promise(async (res) => {
                 Confirm({
-                    title: "Confirm Offer",
-                    message: `Suggest offer of $${offer}/${unit} to deployer to complete this job?`,
+                    title: "Confirm Payout",
+                    message: `Send $${payoutAmount} to your selected account?`,
                     options: ["Yes", "No"],
                     cancelButtonIndex: 1,
                     onPress: async (number) => {
                         if (number === 0) {
-                            // Save offer
+                            setLoading(true);
                             try {
-                                const offer_received = await JobsController.sendOffer(job_data._id, deployee, offer, unit);
-                                job_data.offer_received = offer_received;
+                                await payout({ destination: selectAccount.id, amount: payoutAmount * 100 }, authState);
                                 onSubmit(job_data);
                             } catch (e) {
-                                console.log(e, "negotiation send failed");
-                                Alert.alert("Failed to confirm offer");
+                                Alert.alert('Payout Failed', e.message || "Failed to initiate payout", [{ style: 'cancel', onPress: onCancel }]);
                             }
                         }
                         res();
@@ -308,71 +361,124 @@ export const PayoutSelector = ({ job_data, deployee, onCancel, onSubmit }) => {
 
             setLoading(false);
         }
-    }, [loading, deployee, job_data, salary, unit]);
+    }, [loading, selectAccount, amount]);
 
-    return (
-        <Modal coverScreen avoidKeyboard swipeDirection='down' onSwipeComplete={onCancel} isVisible>
-            <View style={{ backgroundColor: "#fff", borderRadius: 40, paddingVertical: 16 }}>
-                <Row>
-                    <JobDescriptionRow>
-                        <JobDescription>
-                            <Text small light marginBottom="5px">
-                                Current Offer
-                </Text>
-                            <Text small marginBottom="5px">
-                                ${job_data.salary}/{job_data.wage}
-                            </Text>
-                        </JobDescription>
+    return show ?
+        (
+            <ModalImport coverScreen avoidKeyboard swipeDirection='down' onSwipeComplete={onCancel} isVisible={show}>
+                <View style={{ backgroundColor: "#fff", borderRadius: 40, paddingVertical: 16 }}>
+                    <View style={{ justifyContent: 'space-between', padding: 4, marginHorizontal: 4, alignItems: 'stretch', }}>
+                        <Text small textTransform="uppercase" style={{ marginBottom: 8, textAlign: "center" }} bold>PAYOUT</Text>
 
-                        <Text small style={{ textTransform: "uppercase", marginVertical: 16, textAlign: "center" }} bold>
-                            What offer would you complete this job for?
-              </Text>
-
-                        <View style={{ marginVertical: 10, alignItems: 'stretch', justifyContent: 'center', }}>
-                            <WageInput style={{ alignItems: 'stretch' }}>
-                                <SalaryField style={{ alignItems: 'stretch' }}>
-                                    <TextField
-                                        disabled={loading}
-                                        label="PAY"
-                                        prefix="$"
-                                        suffix={`/${unit}`}
-                                        labelFontSize={14}
-                                        placeholder="0.00"
-                                        labelTextStyle={{ color: "grey", fontWeight: "700" }}
-                                        keyboardType="numeric"
-                                        onChangeText={(text) => {
-                                            setSalary(text);
-                                        }}
-                                        value={salary}
-                                        onSubmitEditing={onSubmitOffer}
-                                    />
-                                </SalaryField>
-                            </WageInput>
+                        <Text align='center' light small marginBottom="5px">Specify amount you want transferred into your account. 12.5% of the specified amount is charged for instant payout</Text>
+                    </View>
+                    {loading ?
+                        <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+                            <ActivityIndicator />
                         </View>
-                    </JobDescriptionRow>
-                </Row>
+                        :
+                        !selectAccount ?
+                            <View style={{ justifyContent: 'center', padding: 20 }}>
+                                {payments.externalAccounts && payments.externalAccounts.length >= 1 ?
+                                    payments.externalAccounts.map(a => <ExternalAccountView key={a.id} account={a} onPress={() => setSelectAccount(a)} />)
+                                    :
+                                    <Text align='center' light marginBottom="5px">No account available! Update your dashboard to select an account!</Text>
+                                }
+                            </View>
+                            :
+                            <View style={{ justifyContent: 'center', padding: 20 }}>
+                                <Text>Enter mount You Intend To Pay</Text>
+                                <TextField
+                                    disabled={loading}
+                                    editable={!loading}
+                                    label="PAY"
+                                    prefix="$"
+                                    labelFontSize={14}
+                                    placeholder="0.00"
+                                    labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                                    keyboardType="numeric"
+                                    onChangeText={(text) => {
+                                        setAmount(text);
+                                    }}
+                                    value={amount}
+                                />
+                                <TouchableOpacity style={{ backgroundColor: '#3869f3', marginTop: 8, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' }}
+                                    onPress={onSubmit}>
+                                    <Text small bold color='#fff' >PAY</Text>
+                                </TouchableOpacity>
+                                <Column style={{ alignItems: "center" }}>
+                                    <Button disabled={loading} decline onPress={onCancel}>
+                                        <Text style={{ color: "red" }} medium>Cancel</Text>
+                                    </Button>
+                                </Column>
+                            </View>
+                    }
 
-                <Row last>
-                    <Column style={{ alignItems: "center" }}>
-                        <Button disabled={loading} decline onPress={onCancel}>
-                            <Text style={{ color: "red" }} medium>
-                                Cancel
-                </Text>
-                        </Button>
-                    </Column>
-                    <Column>
-                        <Button disabled={loading} style={{ flexDirection: "row" }} accept onPress={onSubmitOffer}>
-                            {loading ? <ActivityIndicator animating style={{ marginEnd: 4 }} color="white" /> : null}
-                            <Text style={{ color: "white" }} medium>
-                                Save
-                </Text>
-                        </Button>
-                    </Column>
-                </Row>
-            </View>
-        </Modal>
-    );
+                </View>
+            </ModalImport>
+        ) : null
 };
+
+const Button = styled.TouchableOpacity`
+  ${({ decline, accept, negotiate, negotiationSent, row }) => {
+        switch (true) {
+            case accept:
+                return `
+        background: #228b22; 
+        padding: 10px 40px; 
+        border-radius: 8px;
+        `;
+
+            case decline:
+                return `
+        border: 1px solid red; 
+        background: white; 
+        padding: 10px 40px; 
+        border-radius: 8px;
+        `;
+
+            case negotiate:
+                return `
+        border-color: #00bfff;
+        border-width: 1px;
+        text-align: center;
+        padding: 10px 40px; 
+        border-radius: 8px;
+        `;
+
+            case negotiationSent:
+                return `
+        background-color: slategray;
+        text-align: center;
+        padding: 10px 40px; 
+        border-radius: 8px;
+        `;
+        }
+    }};
+`;
+
+const Row = styled.View`
+  flex-direction: row;
+  justify-content: ${({ first, last }) => {
+        switch (true) {
+            case first:
+                return "space-between";
+            case last:
+                return "space-around";
+            default:
+                return "flex-start";
+        }
+    }};
+  ${({ first }) => {
+        switch (true) {
+            case first:
+                return `margin: 4% 0 0 0;`;
+        }
+    }}
+  padding: 3% 30px;
+  border-bottom-color: #eaeaea;
+  border-bottom-width: ${(props) => (props.last ? "0px" : "1px")};
+`;
 
 const SectionTitle = styled.View`
   width: 100%;

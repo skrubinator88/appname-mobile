@@ -196,7 +196,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
       cardRef,
       async () => {
         try {
-          await JobsController.counterApprove(job_data._id, job_data.offer_received.counterOffer);
+          await JobsController.counterApprove(job_data._id, job_data.offer_received.counterOffer, authState);
           data.accepted = true
           await sendNotification(authState.userToken, projectManager._id, {
             title: `GigChasers - ${job_data.job_title}`,

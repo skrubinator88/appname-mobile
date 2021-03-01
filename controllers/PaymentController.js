@@ -18,6 +18,7 @@ export const getPaymentInfo = async (authState, dispatch) => {
 
     await dispatch(PaymentActions.setTransaction(data.transactions))
     await dispatch(PaymentActions.setMethod(data.methods))
+    await dispatch(PaymentActions.setAccount(data.externalAccounts))
     await dispatch(PaymentActions.updateBalance({
       balance: data.balance,
       hasActiveAccount: data.hasActiveAccount,
@@ -58,6 +59,27 @@ export const removeMethod = async (method, authState, dispatch) => {
     }
     await dispatch(PaymentActions.updateDefault(null))
     await dispatch(PaymentActions.removeMethod(method))
+  })
+};
+
+export const payout = async ({ destination, amount }, authState) => {
+  return fetch(`${env.API_URL}/payments/payout`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${authState.userToken}`
+    },
+    body: JSON.stringify({
+      destination,
+      amount,
+    })
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error((await res.json()).message)
+    }
+
+    const data = await res.json()
+    await dispatch(PaymentActions.updateTransaction(data.transaction))
   })
 };
 

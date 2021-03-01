@@ -124,6 +124,7 @@ exports.acceptJob = async (jobID, authState) => {
   const apiResponse = await fetch(`${config.API_URL}/users/acceptJob`, {
     method: "POST",
     headers: {
+      "Content-Type": "application/json",
       Authorization: `bearer ${authState.userToken}`,
     },
     body: JSON.stringify({ jobID }),
@@ -141,6 +142,7 @@ exports.cancelAcceptedJob = async (jobID, authState) => {
   const apiResponse = await fetch(`${config.API_URL}/users/cancelJob`, {
     method: "DELETE",
     headers: {
+      "Content-Type": "application/json",
       Authorization: `bearer ${authState.userToken}`,
     },
     body: JSON.stringify({ jobID, role }),
@@ -201,6 +203,7 @@ exports.approveOffer = async (jobID, deployee, authState) => {
   const apiResponse = await fetch(`${config.API_URL}/users/acceptOffer`, {
     method: "POST",
     headers: {
+      "Content-Type": "application/json",
       Authorization: `bearer ${authState.userToken}`,
     },
     body: JSON.stringify({ jobID, deployee }),
@@ -232,6 +235,7 @@ exports.counterApprove = async (jobID, offer, authState) => {
   const apiResponse = await fetch(`${config.API_URL}/users/acceptJob`, {
     method: "POST",
     headers: {
+      "Content-Type": "application/json",
       Authorization: `bearer ${authState.userToken}`,
     },
     body: JSON.stringify({ jobID }),

@@ -5,11 +5,15 @@ const initialState = {
     hasActiveAccount: false,
     hasAccount: false,
     suspended: false,
-    transactions: []
+    transactions: [],
+    externalAccounts: []
 }
 
 export const PaymentReducer = (prevState = initialState, action) => {
     switch (action.type) {
+        case "SET_ACCOUNT":
+            return { ...prevState, externalAccounts: action.data }
+
         case "REMOVE_PAYMENT_METHOD":
             const { methods: existing } = prevState
             return { ...prevState, methods: [...existing.filter(v => v.id !== action.data.id)] }

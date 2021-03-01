@@ -27,6 +27,10 @@ exports.updateTransaction = (data) => {
   return { type: "UPDATE_TRANSACTION", data };
 };
 
+exports.setAccount = (data) => {
+  return { type: "SET_ACCOUNT", data };
+};
+
 exports.clear = () => {
   return { type: "CLEAR_PAYMENTS" }; // Empty store
 };
