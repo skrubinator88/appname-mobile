@@ -4,7 +4,7 @@ import { GeoFirestore } from "../config/firebase";
 // Config
 import config from "../env";
 // Functions
-import { distanceBetweenTwoCoordinates, isCurrentJob, isCurrentJobCreatedByUser, sortJobsByProximity } from "../functions";
+import { distanceBetweenTwoCoordinates, isCurrentJobCreatedByUser, sortJobsByProximity } from "../functions";
 // Redux Actions
 import JobsStoreActions from "../rdx-actions/jobs.action";
 import ListingsActions from "../rdx-actions/listings.action";
@@ -38,8 +38,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
           case "added": {
             const data = document.data();
 
-            if (!isCurrentJob(data) || isCurrentJobCreatedByUser(data, authState.userID)) {
-              // if job has a future schedule, skip entry
+            if (isCurrentJobCreatedByUser(data, authState.userID)) {
               return;
             }
             data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
@@ -47,8 +46,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
           }
           case "modified": {
             const data = document.data();
-            if (!isCurrentJob(data) || isCurrentJobCreatedByUser(data, authState.userID)) {
-              // if not current job, skip entry
+            if (isCurrentJobCreatedByUser(data, authState.userID)) {
               return;
             }
             data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
@@ -184,15 +182,24 @@ exports.cancelOffer = async (documentID) => {
   });
 };
 
-exports.approveOffer = async (documentID, deployee) => {
+exports.approveOffer = async (jobID, deployee, authState) => {
   if (!deployee) {
     throw new Error("Deployee identity must be provided");
   }
-  const doc = GeoFirestore.collection("jobs").doc(documentID);
-  await doc.update({
-    "offer_received.approved": true,
-    status: "accepted",
+
+  const apiResponse = await fetch(`${config.API_URL}/users/acceptOffer`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `bearer ${authState.userToken}`,
+    },
+    body: JSON.stringify({ jobID, deployee }),
   });
+  if (!apiResponse.ok) {
+    throw new Error((await apiResponse.json()).message || "Failed to accept job");
+  }
+
+  return true;
 };
 
 exports.counterOffer = async (documentID, offer, wage) => {
@@ -206,17 +213,24 @@ exports.counterOffer = async (documentID, offer, wage) => {
   });
 };
 
-exports.counterApprove = async (documentID, offer) => {
+exports.counterApprove = async (jobID, offer, authState) => {
   if (!offer) {
     throw new Error("Offer must be provided");
   }
-  const doc = GeoFirestore.collection("jobs").doc(documentID);
-  await doc.update({
-    "offer_received.counterOffer": firebase.firestore.FieldValue.delete(),
-    "offer_received.offer": offer,
-    "offer_received.approved": true,
-    status: "accepted",
+
+  const apiResponse = await fetch(`${config.API_URL}/users/acceptJob`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `bearer ${authState.userToken}`,
+    },
+    body: JSON.stringify({ jobID }),
   });
+  if (!apiResponse.ok) {
+    throw new Error((await apiResponse.json()).message || "Failed to accept job");
+  }
+
+  return true;
 };
 
 exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
