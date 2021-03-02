@@ -1,18 +1,22 @@
 // Dependencies
 import React, { useState, useContext, useEffect } from "react";
-import { SafeAreaView, Keyboard, KeyboardAvoidingView, Platform, View, Text, Dimensions, TouchableOpacity } from "react-native";
+import { SafeAreaView, Keyboard, KeyboardAvoidingView, Platform, View, Dimensions, TouchableOpacity } from "react-native";
+
 import styled from "styled-components/native";
 
 // Components
 import Card from "../../../../components/card_animated";
+import Text from "../../../../components/text";
 
 // Expo
-import { MaterialIcons, AntDesign } from "@expo/vector-icons";
+import { MaterialIcons, AntDesign, Entypo } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 
 // Miscellaneous
 const height = Dimensions.get("screen").height;
 import fetchedSuggestedItems from "../../../../models/fetchedSuggestedItems"; // Simulating an API
+import { getStatusBarHeight } from "react-native-status-bar-height";
+const statusBarHeight = getStatusBarHeight();
 
 // Context
 import { UIOverlayContext, GlobalContext } from "../../../../components/context";
@@ -136,11 +140,19 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
           </MenuButton>
 
           <Card>
-            <ResetCameraBackground onPress={() => {}}>
-              <ResetCamera>
-                <MaterialIcons backgroundColor="white" color="#444" name="gps-fixed" size={30} />
-              </ResetCamera>
-            </ResetCameraBackground>
+            <OverlayMenu>
+              <OverlayMenuItem onPress={() => {}}>
+                <Item>
+                  <MaterialIcons backgroundColor="white" color="#444" name="gps-fixed" size={30} />
+                </Item>
+              </OverlayMenuItem>
+
+              <OverlayMenuItem size={70}>
+                <Item onPress={() => navigation.navigate("Job Listings", { screen: "Listing Item" })} color="#39c64e" size={70}>
+                  <Entypo backgroundColor="white" color="white" name="plus" size={40} />
+                </Item>
+              </OverlayMenuItem>
+            </OverlayMenu>
 
             <Row style={{ padding: Platform.OS == "ios" ? 20 : 10, justifyContent: "center" }}>
               <Text small>1.0.0.0</Text>
@@ -152,25 +164,35 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
   );
 }
 
-const ResetCameraBackground = styled.View`
-  z-index: 1;
-  top: -150%;
+const OverlayMenu = styled.View`
+  z-index: -1;
+  bottom: 200%;
   right: 5%;
   position: absolute;
-  background: white;
   border-radius: 10px;
-  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  /* background: red; */
 `;
 
-const ResetCamera = styled.TouchableOpacity`
-  flex: 1;
+const OverlayMenuItem = styled.View`
+  background: white;
+  border-radius: 100px;
+  margin: 10px 0;
+  height: ${(props) => props.size || 50}px;
+  width: ${(props) => props.size || 50}px;
+`;
+
+const Item = styled.TouchableOpacity`
   justify-content: center;
   align-items: center;
-  height: 50px;
-  width: 50px;
-  border-radius: 10px;
+  height: ${(props) => props.size || 50}px;
+  width: ${(props) => props.size || 50}px;
+  border-radius: 100px;
   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
-  background: white;
+  background: ${(props) => props.color || "white"};
+  flex-direction: row;
 `;
 
 const MenuButton = styled.TouchableOpacity`
