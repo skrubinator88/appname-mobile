@@ -59,7 +59,6 @@ exports.registerForPushNotificationsAsync = async (userToken, setToken) => {
       return;
     }
     const token = (await Notifications.getExpoPushTokenAsync()).data;
-    console.log(token);
     if (token) {
       try {
         const response = await fetch(`${config.API_URL}/notification/setup`, {

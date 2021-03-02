@@ -1,28 +1,25 @@
 // Dependencies
-import React, { useEffect, useState, useContext, useReducer, useRef } from "react";
-import { View, Keyboard, Dimensions, Platform } from "react-native";
-import MapView, { Marker, Circle } from "react-native-maps";
-import styled from "styled-components/native";
-import { Provider } from "react-redux";
-
-// Interfaces
-import { CameraInterface } from "../../../interfaces/mapview-interfaces";
-
-// Controllers
-import JobsControllers from "../../../controllers/JobsControllers";
-import PermissionsControllers from "../../../controllers/PermissionsControllers";
-import MapController from "../../../controllers/MapController";
-
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { Dimensions, Keyboard, View } from "react-native";
+import MapView, { Circle, Marker } from "react-native-maps";
 // Redux
 import { useDispatch, useSelector } from "react-redux";
-
+import styled from "styled-components/native";
 // Context Store
 import { GlobalContext } from "../../../components/context";
-
+// Controllers
+import JobsControllers from "../../../controllers/JobsControllers";
+import { getPaymentInfo } from "../../../controllers/PaymentController";
+import PermissionsControllers from "../../../controllers/PermissionsControllers";
+// Interfaces
+import { CameraInterface } from "../../../interfaces/mapview-interfaces";
 // Components
 import HandleUIComponents from "./UIOverlay/handleUIComponents";
-import { clear } from "../../../rdx-actions/jobs.action";
-import { getPaymentInfo } from "../../../controllers/PaymentController";
+
+
+
+
+
 
 // - - Fixes - -
 
