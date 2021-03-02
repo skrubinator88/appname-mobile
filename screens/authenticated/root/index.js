@@ -22,6 +22,7 @@ import { GlobalContext } from "../../../components/context";
 // Components
 import HandleUIComponents from "./UIOverlay/handleUIComponents";
 import { clear } from "../../../rdx-actions/jobs.action";
+import { getPaymentInfo } from "../../../controllers/PaymentController";
 
 // - - Fixes - -
 
@@ -118,6 +119,10 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
     });
   }
 
+  useEffect(() => {
+    getPaymentInfo(authState, dispatch)
+  }, [])
+
   if (location != null && jobs != undefined) {
     return (
       <Container>
@@ -136,7 +141,7 @@ export function RootScreen({ navigation, clearTemporalCircle }) {
           style={{ height }}
           maxZoomLevel={18} // recommended 18 / min: 1, max: 19
           minZoomLevel={9} // recommended 9 / min: 1, max: 19
-          // customMapStyle={mapStyle}
+        // customMapStyle={mapStyle}
         >
           {jobs.map(({ coordinates, _id }) => (
             <Marker

@@ -36,6 +36,7 @@ import JobsController from "../../../controllers/JobsControllers";
 import PermissionsControllers from "../../../controllers/PermissionsControllers";
 import PhotoItem from "./listItemImage";
 import TaskModal from "./taskModal";
+import { useDispatch, useSelector } from "react-redux";
 
 // Miscellaneous
 const width = Dimensions.get("window").width;
@@ -60,6 +61,8 @@ export const priorityMap = {
 export default function ListingItem({ navigation, route }) {
   // - - Constructor - -
   const { authState } = useContext(GlobalContext);
+
+  const payments = useSelector((state) => state.payment)
 
   // - - State - -
   const [job_type, setJobType] = useState(""); // Input Field
@@ -328,6 +331,11 @@ export default function ListingItem({ navigation, route }) {
       setLoading(true);
       // const formattedForm = await formatForm(form);
       let formattedForm;
+
+      if (!payments.defaultMethod) {
+        await Promise.reject({ message: 'You must set your default payment method before creating a job', code: 418 })
+      }
+
       if (form.location.coords == undefined) {
         // Formats form when job location was pulled from Google Location API
         formattedForm = await formatForm(form);
@@ -338,7 +346,7 @@ export default function ListingItem({ navigation, route }) {
 
       console.log("FORMATTED FORM", formattedForm);
 
-      // // Sends the job details and associated photos for upload and job creation
+      // Sends the job details and associated photos for upload and job creation
       const { success } = await JobsController.postUserJob(authState.userID, formattedForm, authState.userToken, photos);
 
       if (success) return navigation.goBack();

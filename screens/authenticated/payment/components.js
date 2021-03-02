@@ -76,7 +76,7 @@ export function MethodView({ method, onPress }) {
 
 export function ExternalAccountView({ account, onPress }) {
     return (
-        <PaymentItemRow key={account.id} style={{ paddingTop: 0, paddingBottom: 0, paddingLeft: 0, paddingRight: 0, alignItems: 'stretch' }}>
+        <PaymentItemRow key={account.id} style={{ paddingTop: 0, paddingBottom: 0, paddingLeft: 0, paddingRight: 0, marginVertical: 4, alignItems: 'stretch' }}>
             {account.isBank ?
                 <PaymentItemRowLink onPress={onPress} style={{ flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch', paddingTop: 12, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
                     <FontAwesome name='bank' style={{ textAlign: 'center' }} size={20} />
@@ -92,18 +92,18 @@ export function ExternalAccountView({ account, onPress }) {
                     </View>
                 </PaymentItemRowLink>
                 :
-                <PaymentItemRowLink style={{ paddingTop: 12, paddingBottom: 12, paddingLeft: 8, paddingRight: 8 }}>
-                    <Column>
+                <PaymentItemRowLink onPress={onPress} style={{ paddingTop: 12, paddingBottom: 12, paddingLeft: 8, paddingRight: 8, flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
+                    <View style={{ paddingHorizontal: 8, paddingVertical: 8, justifyContent: 'center', alignItems: 'stretch' }}>
                         {account.name && <Text small weight="bold" textTransform='capitalize' color="#111">{account.name}</Text>}
-                        <Row>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-                                {CARD_ICON[account.brand]({ size: 20 })}
+                                {CARD_ICON[account.brand.toLowerCase()]({ size: 20 })}
                                 <Text small weight="700" style={{ marginStart: 4 }} textTransform='uppercase' color="#4a4a4a"> ****{account.mask}</Text>
                             </View>
 
                             <Text small weight="700" color="#4a4a4a">EXP: {`${account.month.padStart(2, '0')}/${account.year}`}</Text>
-                        </Row>
-                    </Column>
+                        </View>
+                    </View>
                 </PaymentItemRowLink >
             }
         </PaymentItemRow >
@@ -113,7 +113,7 @@ export function ExternalAccountView({ account, onPress }) {
 export function TransactionRecord({ transaction: txn, onPress }) {
     return (
         <PaymentItemRow key={txn.id} style={{ borderLeftWidth: 8, borderLeftColor: getTransactionStatusColor(txn.status) }} >
-            <PaymentItemRowLink onPress={onPress}>
+            <PaymentItemRowLink activeOpacity={1}>
                 <View style={{ flex: 1, justifyContent: 'space-between', alignItems: 'stretch' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -315,6 +315,9 @@ export const PayoutSelector = ({ show, onCancel: onCancelProp, onSubmit: onSubmi
     const payments = useSelector((state) => state.payment)
 
     const onCancel = useCallback(() => {
+        if (loading) {
+            return Alert.alert('Payout Processing', 'Cannot dismiss while payout request is being processed')
+        }
         setSelectAccount(false)
         setAmount('')
         onCancelProp()
@@ -348,7 +351,7 @@ export const PayoutSelector = ({ show, onCancel: onCancelProp, onSubmit: onSubmi
                             setLoading(true);
                             try {
                                 await payout({ destination: selectAccount.id, amount: payoutAmount * 100 }, authState);
-                                onSubmit(job_data);
+                                Alert.alert('Payout Successful', 'Payout was initiated successfully', [{ style: 'cancel', onPress: onSubmit }]);
                             } catch (e) {
                                 Alert.alert('Payout Failed', e.message || "Failed to initiate payout", [{ style: 'cancel', onPress: onCancel }]);
                             }
@@ -403,18 +406,17 @@ export const PayoutSelector = ({ show, onCancel: onCancelProp, onSubmit: onSubmi
                                     value={amount}
                                 />
                                 <TouchableOpacity style={{ backgroundColor: '#3869f3', marginTop: 8, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' }}
-                                    onPress={onSubmit}>
+                                    onPress={onSubmitPayout}>
                                     <Text small bold color='#fff' >PAY</Text>
                                 </TouchableOpacity>
-                                <Column style={{ alignItems: "center" }}>
-                                    <Button disabled={loading} decline onPress={onCancel}>
-                                        <Text style={{ color: "red" }} medium>Cancel</Text>
-                                    </Button>
-                                </Column>
+                                <TouchableOpacity style={{ backgroundColor: 'white', borderColor: 'red', borderWidth: StyleSheet.hairlineWidth, marginTop: 8, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' }}
+                                    onPress={onCancel}>
+                                    <Text small bold textTransform='uppercase' style={{ color: "red" }}>Cancel</Text>
+                                </TouchableOpacity>
                             </View>
                     }
-
-                </View>
+                    {loading && <Text align='center' light small style={{ marginVertical: 8, fontSize: 12 }}>Do not exit this view while payout is processing</Text>}
+                </View >
             </ModalImport>
         ) : null
 };
