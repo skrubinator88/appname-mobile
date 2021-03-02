@@ -91,7 +91,7 @@ export default function BackgroundCheckPricing({ navigation, route }) {
       backColor="white"
       color="white"
       title="Tier List"
-      loading={loading}
+      loadingContent={loading}
     >
       {packages_info.map((checkr_package) => {
         let dollars = String(Math.ceil(checkr_package.price * 1.15)).slice(0, -2);

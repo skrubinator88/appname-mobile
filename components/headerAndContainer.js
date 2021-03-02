@@ -33,7 +33,7 @@ export default function Header({
 
   // Bar Properties
   titleWeight = "700",
-  titleColor = "black",
+  titleColor = "white",
   title = "",
 
   // Back Button Properties
@@ -155,12 +155,12 @@ export default function Header({
           {/* Children */}
           {children}
 
-          {isIos && <View style={{ height: SPACER_SIZE, backgroundColor: bottomBackground || containerBackground }} />}
+          {isIos && !loadingContent && <View style={{ height: SPACER_SIZE, backgroundColor: bottomBackground || containerBackground }} />}
         </View>
       </ScrollView>
       {loadingContent && (
         <Loader>
-          <ActivityIndicator color={headerBackground} />
+          <ActivityIndicator color="white" size={20} />
         </Loader>
       )}
     </>
