@@ -78,8 +78,7 @@ export const payout = async ({ destination, amount }, authState) => {
       throw new Error((await res.json()).message)
     }
 
-    const data = await res.json()
-    await dispatch(PaymentActions.updateTransaction(data.transaction))
+    return true
   })
 };
 

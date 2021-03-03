@@ -1,19 +1,13 @@
-import React, { useState, useEffect, useContext, useRef, useCallback } from "react";
-
-import { Image, Button, Alert, TextInput, View, ActivityIndicator } from "react-native";
-
-import { Platform, Dimensions } from "react-native";
-import styled from "styled-components/native";
-import { FontAwesome, Ionicons, Octicons } from "@expo/vector-icons";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, View } from "react-native";
 import { WebView } from "react-native-webview";
-
-import StripeCheckout from "react-native-stripe-checkout-webview";
-
-// Components
-import Header from "../../../components/header";
-import Text from "../../../components/text";
-import env from "../../../env";
+import styled from "styled-components/native";
 import { GlobalContext } from "../../../components/context";
+import env from "../../../env";
+
+
+
+
 
 export const CALLBACK_URL = {
   // SUCCESS: process.env.BASE_HOST_URI + '/api/payments/session/success',

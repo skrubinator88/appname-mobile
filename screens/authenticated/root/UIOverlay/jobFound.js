@@ -184,7 +184,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
           changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
         } catch (e) {
           console.log(e, "job approve");
-          Alert.alert("Please Try Again", "Failed to accept job");
+          Alert.alert("Please Try Again", "Failed to accept job", [{ style: 'cancel', onPress: cardRef.current.slideIn }]);
         }
       },
       true
@@ -208,7 +208,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
           changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
         } catch (e) {
           console.log(e, "counter offer approve");
-          Alert.alert("Please Try Again", "Failed to accept counter offer");
+          Alert.alert("Please Try Again", "Failed to accept counter offer", [{ style: 'cancel', onPress: cardRef.current.slideIn }]);
         }
       },
       true

@@ -163,10 +163,6 @@ export default function PaymentScreen({ navigation }) {
 
   }, [uri, authState, payments])
 
-  useEffect(() => {
-    refresh();
-  }, []);
-
   return (
     <Container
       flexible={false}
