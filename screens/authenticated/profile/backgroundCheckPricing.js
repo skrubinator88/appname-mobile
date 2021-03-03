@@ -68,6 +68,7 @@ export default function BackgroundCheckPricing({ navigation, route }) {
     );
   };
 
+  // Render screen for user feedback depending in the report status
   const conditionalRendering = () => {
     switch (status) {
       case "pending": {

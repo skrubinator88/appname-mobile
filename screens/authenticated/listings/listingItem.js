@@ -41,21 +41,27 @@ import TaskModal from "./taskModal";
 const width = Dimensions.get("window").width;
 export const getPriorityColor = (priority) => {
   switch (priority) {
-    case 'high0':
-      return 'firebrick'
-    case 'medium0':
-      return 'darkorange'
-    case 'low0':
-      return 'mediumblue'
+    case "high0":
+      return "firebrick";
+    case "medium0":
+      return "darkorange";
+    case "low0":
+      return "mediumblue";
     default:
-      return '#222'
+      return "#222";
   }
-}
+};
 export const priorityMap = {
-  high0: 'High (15 mins)',
-  medium0: 'Medium (1 hour)',
-  low0: 'Low (1 hour 30 mins)',
-}
+  high0: "High (15 mins)",
+  medium0: "Medium (1 hour)",
+  low0: "Low (1 hour 30 mins)",
+};
+
+export const wageMap = {
+  hour: "Per Hour",
+  day: "Per Day",
+  deployment: "Per Deployment",
+};
 
 export default function ListingItem({ navigation, route }) {
   // - - Constructor - -
@@ -67,7 +73,7 @@ export default function ListingItem({ navigation, route }) {
   const [job_title, setJobTitle] = useState(""); // Input Field
   const [location, setLocation] = useState(""); // Input Field
   const [salary, setSalary] = useState(""); // Input Field
-  const [wage, setWage] = useState("deployment"); // Input Field
+  const [wage, setWageRate] = useState("deployment"); // Input Field
   const [tasks, setTasks] = useState([]); // Input Field (With Modal)
 
   const [loading, setLoading] = useState(false);
@@ -79,7 +85,7 @@ export default function ListingItem({ navigation, route }) {
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState(Platform.OS === "ios" ? "datetime" : "date");
   const [showDate, setShowDate] = useState(false);
-  const [priority, setPriority] = useState('');
+  const [priority, setPriority] = useState("");
 
   // - - Refs - -
   const job_type_ref = useRef(null);
@@ -223,29 +229,56 @@ export default function ListingItem({ navigation, route }) {
     }
   }, [photos]);
 
-
   const onSetPriority = useCallback(async () => {
-    showActionSheetWithOptions({
-      options: ['High (15 mins)', 'Medium (15 mins)', 'Low (15 mins)', 'None', 'Cancel'],
-      cancelButtonIndex: 4,
-      destructiveButtonIndex: 3,
-      title: 'Set Priority',
-      message: 'Specify how long after accepting a job the deployee is allowed to cancel'
-    }, (i) => {
-      switch (i) {
-        case 0:
-          setPriority('high0')
-          break
-        case 1:
-          setPriority('medium0')
-          break
-        case 2:
-          setPriority('low0')
-          break
-        case 3:
-          setPriority('')
+    showActionSheetWithOptions(
+      {
+        options: ["High (15 mins)", "Medium (15 mins)", "Low (15 mins)", "None", "Cancel"],
+        cancelButtonIndex: 4,
+        destructiveButtonIndex: 3,
+        title: "Set Priority",
+        message: "Specify how long after accepting a job the deployee is allowed to cancel",
+      },
+      (i) => {
+        switch (i) {
+          case 0:
+            setPriority("high0");
+            break;
+          case 1:
+            setPriority("medium0");
+            break;
+          case 2:
+            setPriority("low0");
+            break;
+          case 3:
+            setPriority("");
+        }
       }
-    })
+    );
+  }, [priority]);
+
+  const onSetWageRate = useCallback(async () => {
+    showActionSheetWithOptions(
+      {
+        options: ["Per Hour", "Per Day", "Per Deployment", "Cancel"],
+        cancelButtonIndex: 3,
+        // destructiveButtonIndex: 2,
+        title: "Set Wage Rate",
+        message: "Specify payments calculator cycle",
+      },
+      (i) => {
+        switch (i) {
+          case 0:
+            setWageRate("hour");
+            break;
+          case 1:
+            setWageRate("day");
+            break;
+          case 2:
+            setWageRate("deployment");
+            break;
+        }
+      }
+    );
   }, [priority]);
 
   // - - Extra Setup - -
@@ -519,7 +552,7 @@ export default function ListingItem({ navigation, route }) {
 
             <Item style={{ marginVertical: 20 }}>
               <WageInput>
-                <SalaryField style={{ alignItems: 'stretch' }}>
+                <SalaryField style={{ alignSelf: "stretch" }}>
                   <TextField
                     {...commonInputProps(salary, setSalary)}
                     prefix="$"
@@ -532,25 +565,39 @@ export default function ListingItem({ navigation, route }) {
                   />
                 </SalaryField>
               </WageInput>
-            </Item>
-
-            <Item style={{ marginVertical: 4 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
-                <Text style={{ fontWeight: "bold", color: "grey", alignItems: 'center' }}>PRIORITY</Text>
-                {!!priority && <FontAwesome name="circle" color={getPriorityColor(priority)} style={{ marginStart: 12, fontSize: 16 }} />}
-              </View>
-              <TouchableOpacity
-                style={{ alignSelf: "stretch", flex: 1 }}
-                onPress={onSetPriority}
-              >
+              <TouchableOpacity onPress={onSetWageRate}>
                 <ScheduleButton
                   style={{
                     justifyContent: "center",
-                    alignItems: "center", paddingVertical: 2,
+                    alignItems: "center",
+                    paddingVertical: 2,
                     backgroundColor: "#fafafa",
                   }}
                 >
-                  <Text light={!priority} textTransform='uppercase'>{priorityMap?.[priority] || 'none'}</Text>
+                  <Text light={!priority} textTransform="uppercase">
+                    Choose cycle (/hr, /day, per deployment)
+                  </Text>
+                </ScheduleButton>
+              </TouchableOpacity>
+            </Item>
+
+            <Item style={{ marginVertical: 4 }}>
+              <View style={{ flexDirection: "row", justifyContent: "flex-start" }}>
+                <Text style={{ fontWeight: "bold", color: "grey", alignItems: "center" }}>PRIORITY</Text>
+                {!!priority && <FontAwesome name="circle" color={getPriorityColor(priority)} style={{ marginStart: 12, fontSize: 16 }} />}
+              </View>
+              <TouchableOpacity style={{ alignSelf: "stretch", flex: 1 }} onPress={onSetPriority}>
+                <ScheduleButton
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    paddingVertical: 2,
+                    backgroundColor: "#fafafa",
+                  }}
+                >
+                  <Text light={!priority} textTransform="uppercase">
+                    {priorityMap?.[priority] || "none"}
+                  </Text>
                 </ScheduleButton>
               </TouchableOpacity>
             </Item>
@@ -583,8 +630,8 @@ export default function ListingItem({ navigation, route }) {
                       {loadingMedia ? (
                         <ActivityIndicator color="black" size="small" />
                       ) : (
-                          <Ionicons name="ios-add" style={{ fontSize: 40 }} />
-                        )}
+                        <Ionicons name="ios-add" style={{ fontSize: 40 }} />
+                      )}
                     </ScheduleButton>
                   </TouchableOpacity>
                 )}
@@ -623,7 +670,9 @@ export default function ListingItem({ navigation, route }) {
               <Text style={{ color: "#444", textAlign: "center", marginTop: 8, textTransform: "uppercase" }}>
                 Job will be started {date.getTime() <= Date.now() + 5000 ? "immediately" : moment(date).calendar()}
               </Text>
-              <Text light small style={{ textAlign: "center", marginTop: 4, fontSize: 10, textTransform: "uppercase" }}>(You can only schedule up to 6 days from now)</Text>
+              <Text light small style={{ textAlign: "center", marginTop: 4, fontSize: 10, textTransform: "uppercase" }}>
+                (You can only schedule up to 6 days from now)
+              </Text>
             </Item>
             <TouchableOpacity
               style={{ alignSelf: "center", width: width * 0.7, marginBottom: 12 }}
@@ -653,7 +702,7 @@ export default function ListingItem({ navigation, route }) {
                 style={{ marginBottom: 20 }}
                 minimumDate={new Date()}
                 mode={mode}
-                maximumDate={moment().add(6, 'days').toDate()}
+                maximumDate={moment().add(6, "days").toDate()}
                 onChange={updateDate}
                 value={date}
               />
@@ -790,8 +839,8 @@ const ModalBackground = styled.View`
 
 const WageInput = styled.View`
   flex-direction: row;
-  justify-content: center;
-  align-items: center;
+  /* justify-content: center; */
+  /* align-items: center; */
 `;
 
 const SalaryField = styled.View`

@@ -147,11 +147,13 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
                 </Item>
               </OverlayMenuItem>
 
-              <OverlayMenuItem size={70}>
-                <Item onPress={() => navigation.navigate("Job Listings", { screen: "Listing Item" })} color="#39c64e" size={70}>
-                  <Entypo backgroundColor="white" color="white" name="plus" size={40} />
-                </Item>
-              </OverlayMenuItem>
+              {userData.role == "project_manager" && (
+                <OverlayMenuItem size={70}>
+                  <Item onPress={() => navigation.navigate("Job Listings", { screen: "Listing Item" })} color="#39c64e" size={70}>
+                    <Entypo backgroundColor="white" color="white" name="plus" size={40} />
+                  </Item>
+                </OverlayMenuItem>
+              )}
             </OverlayMenu>
 
             <Row style={{ padding: Platform.OS == "ios" ? 20 : 10, justifyContent: "center" }}>
