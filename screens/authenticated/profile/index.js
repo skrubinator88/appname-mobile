@@ -1,7 +1,10 @@
-import React, { Component, useContext, useState, useEffect, useRef } from "react";
+import React, { Component, useContext, useState, useEffect, useRef, useCallback } from "react";
 
 import { Image, Button, Alert, TextInput, View, Animated, Easing, ActivityIndicator, TouchableWithoutFeedback } from "react-native";
 import { StackActions } from "@react-navigation/native";
+import { Camera, requestPermissionsAsync } from "expo-camera";
+import { launchImageLibraryAsync, MediaTypeOptions, requestMediaLibraryPermissionsAsync } from "expo-image-picker";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 
 // Styling
 import { Platform, Dimensions } from "react-native";
@@ -14,9 +17,11 @@ import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
 import { GlobalContext } from "../../../components/context";
 import env from "../../../env";
+import { JobCamera } from "../listings/listingItem";
 
 // Controller
 import JobController from "../../../controllers/JobsControllers";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const isIos = Platform.OS === "ios";
 const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
@@ -33,6 +38,12 @@ export default function ProfileScreen({ navigation }) {
   const [comments, setComments] = useState([]);
   const [isMounted, setMounted] = useState(false);
 
+  // Setup Profile Picture Selection
+  const [profilePictureURI, setProfilePictureURI] = useState(`${env.API_URL}${userData.profile_picture}`);
+  const [loadingMedia, setloadingMedia] = useState(false);
+  const { showActionSheetWithOptions } = useActionSheet();
+  const [showCamera, setShowCamera] = useState(false);
+
   const ANIMATION_DURATION = 200;
   const ANIMATION_EASING = () => {
     return Easing.inOut(Easing.exp);
@@ -45,6 +56,97 @@ export default function ProfileScreen({ navigation }) {
   useEffect(() => {
     JobController.getUserJobComments(userID, { setComments });
   }, []);
+
+  // Functions
+  const handleProfilePictureUpload = useCallback(async () => {
+    try {
+      // Send picture to server
+      // Set picture in Redux
+      // setProfilePictureURI(res.uri);
+    } catch {
+    } finally {
+    }
+  }, [profilePictureURI]);
+
+  const getPhoto = useCallback(async () => {
+    try {
+      showActionSheetWithOptions(
+        {
+          options: ["Capture Photo", "Select From Library", "Cancel"],
+          title: "Select Photo",
+          message: "You can select a photo from your library or capture a new photo",
+          cancelButtonIndex: 2,
+          useModal: true,
+        },
+        async (i) => {
+          switch (i) {
+            case 0:
+              getPhotoFromCamera();
+              break;
+            case 1:
+              getPhotoFromLibrary();
+              break;
+          }
+        }
+      );
+    } catch (e) {
+      console.log(e);
+      Alert.alert("Failed To Select Photo", e.message);
+    }
+  }, [profilePictureURI]);
+
+  const getPhotoFromLibrary = useCallback(async () => {
+    try {
+      setloadingMedia(true);
+      if (Platform.OS === "ios") {
+        let perms = await requestMediaLibraryPermissionsAsync();
+        if (!perms.granted) {
+          Alert.alert("Access to media library denied", "You need to grant access to image library to continue");
+          setloadingMedia(false);
+          return;
+        }
+      }
+      let res = await launchImageLibraryAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        mediaTypes: MediaTypeOptions.Images,
+        allowsMultipleSelection: false,
+      });
+
+      if (!res.cancelled) {
+        setProfilePictureURI(res.uri);
+      }
+    } catch (e) {
+      console.log(e);
+      Alert.alert(e.message);
+    } finally {
+      setloadingMedia(false);
+    }
+  }, [profilePictureURI]);
+
+  const getPhotoFromCamera = useCallback(async () => {
+    try {
+      setloadingMedia(true);
+
+      let hasPermission = false;
+      await (async () => {
+        const { status } = await requestPermissionsAsync();
+        hasPermission = status === "granted";
+      })();
+
+      if (hasPermission !== true) {
+        Alert.alert("Camera Access Required", "The application requires permission to use your camera");
+        return;
+      }
+
+      setShowCamera(true);
+    } catch (e) {
+      console.log(e);
+      Alert.alert("Failed To Capture Photo", e.message);
+    } finally {
+      setloadingMedia(false);
+    }
+  }, [profilePictureURI]);
 
   // React navigation "onMounted lifecycle"
   // useEffect(() => {
@@ -113,7 +215,9 @@ export default function ProfileScreen({ navigation }) {
         }
       >
         <View style={{ justifyContent: "center", alignContent: "center", flex: 1, width: 100, height: 100 }}>
-          <ProfilePicture source={{ uri: `${env.API_URL}${userData.profile_picture}` }} onLoad={() => setLoading(false)} />
+          <TouchableOpacity onPress={getPhoto}>
+            <ProfilePicture source={{ uri: profilePictureURI }} onLoad={() => setLoading(false)} />
+          </TouchableOpacity>
         </View>
 
         <Text title color="white" weight="700">
@@ -246,6 +350,26 @@ export default function ProfileScreen({ navigation }) {
           </Comments>
         </CommentSectionColumn>
       </CommentSection>
+
+      <JobCamera
+        showCamera={showCamera}
+        onSuccess={async (res) => {
+          if (!res) {
+            return setShowCamera(false);
+          }
+          // console.log(res);
+          try {
+            if (!res.cancelled) {
+              handleProfilePictureUpload(res.uri);
+            }
+          } catch (e) {
+            console.log(e);
+            Alert.alert(e.message || "Failed to add photo");
+          } finally {
+            setShowCamera(false);
+          }
+        }}
+      />
     </Container>
   );
 }
