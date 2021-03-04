@@ -19,6 +19,10 @@ import { TextField } from "@ubaids/react-native-material-textfield";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
+// Platform Fixes
+import { getStatusBarHeight } from "react-native-status-bar-height";
+const statusBarHeight = getStatusBarHeight();
+
 // import CheckBox from "@react-native-community/checkbox";
 import styled from "styled-components/native";
 
@@ -47,7 +51,7 @@ function formatDate(date) {
   const month = date.getMonth();
   const day = date.getDate();
   const year = date.getFullYear();
-  return `${month_names[month]} ${day}, ${year} - ${date.toLocaleDateString()}`;
+  return `${month_names[month]} ${day}, ${year}`;
 }
 
 export default function licenseModal({ navigation, onHandleCancel, onHandleSave, licenseModalVisible, state }) {
@@ -87,7 +91,7 @@ export default function licenseModal({ navigation, onHandleCancel, onHandleSave,
     const expiration_date_string = formatDate(expiration_date);
 
     const form = {
-      id: state.edit ? state.id : registrationState.educational_background.length,
+      // id: state.edit ? state.id : registrationState.licenses.length,
       license_number,
       date_obtained,
       expiration_date,
@@ -110,77 +114,117 @@ export default function licenseModal({ navigation, onHandleCancel, onHandleSave,
   }
 
   return (
-    <Modal coverScreen={false} isVisible={licenseModalVisible} onModalHide={() => clear()}>
-      <KeyboardAvoidingView enabled behavior={Platform.OS == "android" ? "height" : "padding"} style={{ flex: 1 }}>
-        <TouchableWithoutFeedback style={{ flex: 1 }} onPress={() => Keyboard.dismiss()}>
-          <Container>
-            <ScrollView>
-              <Fields>
-                <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>LICENSE NUMBER</Text>
-                <TextField label="License Number" {...commonInputProps(state.license_number || license_number, setLicenseNumber)} />
+    <Modal
+      isVisible={licenseModalVisible}
+      avoidKeyboard={Platform.OS == "ios" ? true : false}
+      style={{
+        marginTop: statusBarHeight,
+        backgroundColor: Platform.OS == "ios" ? "transparent" : "white",
+        borderRadius: 10,
+        elevation: 10,
+      }}
+      // onModalWillShow={() => {
+      //   setTasks(items || []);
+      //   if (items?.length < 1) setEditing(true);
+      // }}
+      onModalHide={() => clear()}
+      hideModalContentWhileAnimating={true}
+      animationInTiming={500}
+      animationOutTiming={500}
+      backdropOpacity={0.2}
+      backdropTransitionOutTiming={0}
+      animationIn="fadeIn"
+      animationOut="fadeOut"
+      //
+      // coverScreen={false}
+    >
+      {/* <KeyboardAvoidingView enabled behavior={Platform.OS == "android" ? "height" : "padding"} style={{ flex: 1 }}> */}
+      {/* <TouchableWithoutFeedback style={{ flex: 1 }} onPress={() => Keyboard.dismiss()}> */}
+      <Container
+        style={{ backgroundColor: "white", borderRadius: 10, shadowRadius: 100, shadowColor: "black" }}
+        keyboardShouldPersistTaps="always"
+      >
+        <ScrollView>
+          <Fields>
+            <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>LICENSE NUMBER</Text>
+            <TextField label="License Number" {...commonInputProps(state.license_number || license_number, setLicenseNumber)} />
 
-                <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE STARTED</Text>
-                <TouchableWithoutFeedback
-                  onPress={() => {
-                    setShow1(true);
-                    setShow2(false);
-                    Keyboard.dismiss();
-                  }}
-                >
-                  <DatePicker>
-                    <Text>{date_obtained && formatDate(date_obtained)}</Text>
-                    <AntDesign name="calendar" size={24} />
-                  </DatePicker>
-                </TouchableWithoutFeedback>
+            <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE STARTED</Text>
+            <TouchableWithoutFeedback
+              onPress={() => {
+                setShow1(true);
+                setShow2(false);
+                Keyboard.dismiss();
+              }}
+            >
+              <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
+                {/* <DatePicker>
+                <Text>{date_obtained && formatDate(date_obtained)}</Text>
+                <AntDesign name="calendar" size={24} />
+              </DatePicker> */}
+                <AntDesign name="calendar" size={24} />
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={date_obtained}
+                  mode="date"
+                  is24Hour={true}
+                  onChange={onChangeDateObtained}
+                  // collapsable={true}
+                  display="default"
+                  style={{ flex: 1, marginHorizontal: 10 }}
+                />
+              </View>
+            </TouchableWithoutFeedback>
 
-                <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE ENDED</Text>
-                <TouchableWithoutFeedback
-                  onPress={() => {
-                    setShow1(false);
-                    setShow2(true);
-                    Keyboard.dismiss();
-                  }}
-                >
-                  <DatePicker>
-                    <Text>{expiration_date && formatDate(expiration_date)}</Text>
-                    <AntDesign name="calendar" size={24} />
-                  </DatePicker>
-                </TouchableWithoutFeedback>
+            <Text style={{ fontWeight: "bold", color: "grey", marginTop: 20 }}>DATE ENDED</Text>
+            <TouchableWithoutFeedback
+              onPress={() => {
+                setShow1(false);
+                setShow2(true);
+                Keyboard.dismiss();
+              }}
+            >
+              <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
+                {/* <DatePicker>
+                <Text>{expiration_date && formatDate(expiration_date)}</Text>
+                <AntDesign name="calendar" size={24} />
+              </DatePicker> */}
+                <AntDesign name="calendar" size={24} />
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={expiration_date}
+                  mode="date"
+                  is24Hour={true}
+                  display="default"
+                  onChange={onChangeExpirationDate}
+                  style={{ flex: 1, marginHorizontal: 10 }}
+                />
+              </View>
+            </TouchableWithoutFeedback>
 
-                <Buttons>
-                  <Text medium bold onPress={() => onHandleCancel()}>
-                    Cancel
-                  </Text>
+            <Buttons>
+              <Text medium bold onPress={() => onHandleCancel()}>
+                Cancel
+              </Text>
 
-                  <Text medium bold color="#1c55ef" onPress={() => onHandleSave(checkFormPayload())}>
-                    Save
-                  </Text>
-                </Buttons>
-              </Fields>
-            </ScrollView>
-          </Container>
-        </TouchableWithoutFeedback>
-        {show1 && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={date_obtained}
-            mode="date"
-            is24Hour={true}
-            display="default"
-            onChange={onChangeDateObtained}
-          />
-        )}
-        {show2 && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={expiration_date}
-            mode="date"
-            is24Hour={true}
-            display="default"
-            onChange={onChangeExpirationDate}
-          />
-        )}
-      </KeyboardAvoidingView>
+              <Text
+                medium
+                bold
+                color="#1c55ef"
+                onPress={() => onHandleSave(checkFormPayload(), { isEdited: state.edit, index: state.edit && state.index })}
+              >
+                Save
+              </Text>
+            </Buttons>
+          </Fields>
+        </ScrollView>
+      </Container>
+      {/* </TouchableWithoutFeedback> */}
+      {/* {show1 && (
+      )} */}
+      {/* {show2 && (
+      )} */}
+      {/* // </KeyboardAvoidingView> */}
     </Modal>
   );
 }

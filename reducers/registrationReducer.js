@@ -7,16 +7,34 @@ const registrationReducer = (prevState, action) => {
         formSended: action.formSended || prevState.formSended,
       };
 
-    case "PUSH":
+    case "PUSH": {
       let newState = {
         ...prevState,
       };
-      if (newState[action.field][action.item.id]) {
-        newState[action.field][action.item.id] = action.item;
-      } else {
-        newState[action.field].push(action.item);
-      }
+      newState[action.field].push(action.item);
+
       return newState;
+    }
+
+    case "UPDATE_LICENSE": {
+      let newState = {
+        ...prevState,
+      };
+
+      newState["licenses"][action.index] = action.item;
+
+      return newState;
+    }
+
+    case "DELETE_LICENSE": {
+      let newState = {
+        ...prevState,
+      };
+
+      newState["licenses"].splice(action.index, 1);
+
+      return newState;
+    }
 
     case "DELETE":
       return {};

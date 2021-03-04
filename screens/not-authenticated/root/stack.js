@@ -53,6 +53,12 @@ export function NotAuthenticatedStackScreen({ navigation }) {
       pushItemFormField: (item, field) => {
         dispatch({ type: "PUSH", item, field });
       },
+      updateItemFromLicenses: (index, item) => {
+        dispatch({ type: "UPDATE_LICENSE", index, item });
+      },
+      deleteItemFromLicenses: (index) => {
+        dispatch({ type: "DELETE_LICENSE", index });
+      },
     }),
     []
   );

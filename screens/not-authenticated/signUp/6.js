@@ -1,5 +1,5 @@
-import React, { useState, useContext, useEffect } from "react";
-import { View, TouchableWithoutFeedback, Keyboard, ScrollView } from "react-native";
+import React, { useState, useContext, useEffect, useCallback } from "react";
+import { View, TouchableWithoutFeedback, Keyboard, ScrollView, Alert } from "react-native";
 import styled from "styled-components/native";
 import { useTheme } from "@react-navigation/native";
 
@@ -22,7 +22,7 @@ export default function signUp6({ navigation }) {
   // const [work_history_items, setWorkHistoryItems] = useState([]);
 
   const { registrationState, methods } = useContext(RegistrationContext);
-  const { pushItemFormField } = methods;
+  const { pushItemFormField, updateItemFromLicenses, deleteItemFromLicenses } = methods;
 
   const handleSubmit = () => {
     navigation.navigate("SignUp8");
@@ -36,6 +36,16 @@ export default function signUp6({ navigation }) {
       setLicenseItems(registrationState.licenses);
     }
   }, [registrationState]);
+
+  // Functions
+  const deleteItem = useCallback(
+    (index) =>
+      Alert.alert("Delete this item", "Are you sure you want to delete this license from this list?", [
+        { text: "Cancel", type: "cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: () => deleteItemFromLicenses(index) },
+      ]),
+    [licenses_items]
+  );
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -58,10 +68,14 @@ export default function signUp6({ navigation }) {
             setLicenseModalState({});
             setLicenseModalVisible(false);
           }}
-          onHandleSave={(form) => {
+          onHandleSave={(form, { isEdited, index }) => {
             setLicenseModalState({});
             setLicenseModalVisible(false);
-            pushItemFormField(form, "licenses");
+            if (isEdited) {
+              updateItemFromLicenses(index, form);
+            } else {
+              pushItemFormField(form, "licenses");
+            }
           }}
           state={licenseModalState}
         />
@@ -109,6 +123,7 @@ export default function signUp6({ navigation }) {
             <Text small>LICENSES</Text>
             <AddButton
               onPress={() => {
+                setLicenseModalState({ edit: false });
                 setLicenseModalVisible(true);
               }}
             >
@@ -122,21 +137,59 @@ export default function signUp6({ navigation }) {
               <TouchableWithoutFeedback
                 key={index}
                 onPress={() => {
-                  setLicenseModalState({ ...item, edit: true });
+                  setLicenseModalState({ ...item, edit: true, index: index });
                   setLicenseModalVisible(true);
                 }}
               >
                 <WorkHistoryItem>
-                  <Row>
-                    <Text small>License: {item.license_number}</Text>
-                    <Entypo color="black" name="pencil" size={16} />
-                  </Row>
-                  <Row>
-                    <Text small>Date Obtained: {item.date_obtained_string}</Text>
-                  </Row>
-                  <Row>
-                    <Text small>Expires: {item.expiration_date_string}</Text>
-                  </Row>
+                  <WorkHistoryItemDetail>
+                    <Row>
+                      <Text small>License: {item.license_number}</Text>
+                    </Row>
+                    <Row>
+                      <Text small>Date Obtained: {item.date_obtained_string}</Text>
+                    </Row>
+                    <Row>
+                      <Text small>Expires: {item.expiration_date_string}</Text>
+                    </Row>
+                  </WorkHistoryItemDetail>
+                  <SelectionItem style={{ flexDirection: "row-reverse" }}>
+                    <TouchableWithoutFeedback
+                      onPress={() => {
+                        setLicenseModalState({ ...item, edit: true, index });
+                        setLicenseModalVisible(true);
+                      }}
+                    >
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          flex: 3,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          backgroundColor: colors.primary,
+                          padding: 10,
+                          borderBottomRightRadius: 10,
+                        }}
+                      >
+                        <Entypo color="black" name="pencil" size={25} color="white" />
+                      </View>
+                    </TouchableWithoutFeedback>
+                    <TouchableWithoutFeedback onPress={deleteItem}>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          flex: 1,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          backgroundColor: "#ea3c2c",
+                          padding: 10,
+                          borderBottomLeftRadius: 10,
+                        }}
+                      >
+                        <Entypo color="black" name="cross" size={25} color="white" />
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </SelectionItem>
                 </WorkHistoryItem>
               </TouchableWithoutFeedback>
             ))}
@@ -158,11 +211,23 @@ const Row = styled.View`
 
 const WorkHistoryItem = styled.View`
   flex-direction: column;
-  padding: 10px;
+  /* padding: 10px; */
   background: #ececec;
   margin: 10px 0;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 `;
 
+const WorkHistoryItemDetail = styled.View`
+  flex: 3;
+  margin: 10px;
+`;
+
+const SelectionItem = styled.View`
+  flex: 1;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+`;
 const WorkHistorySection = styled.View`
   margin: 20px 0;
 `;
