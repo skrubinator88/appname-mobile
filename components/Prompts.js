@@ -12,7 +12,7 @@ export default function Prompts() {
 
 const Container = styled.View`
   position: absolute;
-  background-color: red;
+  background-color: transparent;
   top: 0;
   left: 0;
   height: ${height}px;

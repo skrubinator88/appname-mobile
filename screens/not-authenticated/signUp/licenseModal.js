@@ -133,8 +133,8 @@ export default function licenseModal({ navigation, onHandleCancel, onHandleSave,
       animationOutTiming={500}
       backdropOpacity={0.2}
       backdropTransitionOutTiming={0}
-      animationIn="fadeIn"
-      animationOut="fadeOut"
+      animationIn="slideInLeft"
+      animationOut="slideOutLeft"
       //
       // coverScreen={false}
     >
@@ -203,18 +203,23 @@ export default function licenseModal({ navigation, onHandleCancel, onHandleSave,
             </TouchableWithoutFeedback>
 
             <Buttons>
-              <Text medium bold onPress={() => onHandleCancel()}>
-                Cancel
-              </Text>
+              <TouchableWithoutFeedback onPress={() => onHandleCancel()}>
+                <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+                  <Text medium bold>
+                    Cancel
+                  </Text>
+                </View>
+              </TouchableWithoutFeedback>
 
-              <Text
-                medium
-                bold
-                color="#1c55ef"
+              <TouchableWithoutFeedback
                 onPress={() => onHandleSave(checkFormPayload(), { isEdited: state.edit, index: state.edit && state.index })}
               >
-                Save
-              </Text>
+                <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+                  <Text medium bold color="#1c55ef">
+                    Save
+                  </Text>
+                </View>
+              </TouchableWithoutFeedback>
             </Buttons>
           </Fields>
         </ScrollView>

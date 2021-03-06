@@ -20,7 +20,7 @@ export default function ({ navigation }) {
     // navigation.navigate("SignUp1"); // ORIGINAL
 
     // DEV
-    navigation.navigate("SignUp6", { name: "Bryan" });
+    navigation.navigate("SignUp5", { name: "Bryan" });
     updateForm({ phone_number: "+14049901671" });
   };
 
