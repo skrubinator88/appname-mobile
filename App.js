@@ -23,31 +23,17 @@ import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/st
 import Prompts from "./components/Prompts";
 import { default as Example } from "./components/Example";
 
-// Disable Font Scaling
+// // Disable Font Scaling
 Text.defaultProps = Text.defaultProps || {};
 Text.defaultProps.allowFontScaling = false;
 TextInput.defaultProps = TextInput.defaultProps || {};
 TextInput.defaultProps.allowFontScaling = false;
 
-// Ignore Some Warnings
+// // Ignore Some Warnings
 LogBox.ignoreLogs(["Setting a timer", "VirtualizedLists should never be nested inside plain ScrollViews with the same orientation"]);
 
-// DEPRECATED
-// LogBox.ignoreWarnings(["Setting a timer"]);
-// const _console = _.clone(console);
-// console.warn = (message) => {
-//   if (message.indexOf("Setting a timer") != -1) {
-//     return;
-//   }
-//   if (message.indexOf("VirtualizedLists") != -1) {
-//     return;
-//   }
-//   _console.warn(message);
-// };
-// console.disableYellowBox = true;
-
-// Theme
-export const Theme = {
+// // Theme
+const Theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
