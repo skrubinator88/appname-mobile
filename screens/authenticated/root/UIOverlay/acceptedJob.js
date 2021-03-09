@@ -27,12 +27,13 @@ import { TouchableOpacity } from "react-native";
 import JobsController from "../../../../controllers/JobsControllers";
 import { sendNotification } from "../../../../functions";
 import Confirm from "../../../../components/confirm";
+import { ActivityIndicator } from "react-native";
 
 // BODY
 export default function Screen45({ navigation, projectManagerInfo, job_data }) {
   const { authState } = useContext(GlobalContext);
   const { changeRoute } = useContext(UIOverlayContext);
-  const [pay, setPay] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
 
   const [onSite, setOnSite] = useState(false);
   const [location, setLocation] = useState(null);
@@ -83,11 +84,14 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
       onPress: async (i) => {
         if (i === 0) {
           try {
+            setIsCanceling(true)
             await JobsController.cancelAcceptedJob(job_data._id, authState)
             await sendNotification(authState.userToken, job_data.posted_by, { title: `GigChasers - ${job_data.job_title}`, body: `Job canceled`, data: { type: 'jobcancel', id: job_data._id, sender: authState.userID } })
+            setIsCanceling(false)
             changeRoute({ name: "dashboard" })
           } catch (e) {
             console.log(e)
+            setIsCanceling(false)
             Alert.alert('Failed To Cancel Job', e.message)
           }
         }
@@ -115,10 +119,12 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
           </Column>
 
           <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            <TouchableOpacity activeOpacity={0.8} onPress={cancelJob}>
-              <Text style={{ paddingBottom: 10 }} color="#999">
-                Cancel Job
-              </Text>
+            <TouchableOpacity disabled={isCanceling} activeOpacity={0.8} onPress={cancelJob}>
+              {isCanceling ?
+                <ActivityIndicator size='small' color='888' />
+                :
+                <Text style={{ paddingBottom: 10 }} color="#999">Cancel Job</Text>
+              }
             </TouchableOpacity>
 
             <Column>
@@ -176,7 +182,7 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
               </Column> */}
 
               <Column style={{ justifyContent: "center" }}>
-                <Button accept onPress={() => navigation.navigate("Chat", { receiver: job_data.posted_by })}>
+                <Button disabled={isCanceling} accept onPress={() => navigation.navigate("Chat", { receiver: job_data.posted_by })}>
                   <Text style={{ color: "white" }} medium>
                     Message
                   </Text>
@@ -185,14 +191,14 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
             </View>
           </Column>
         </Row>
-        <CardOptionItem row onPress={() => navigation.navigate("QR Code", job_data)}>
+        <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("QR Code", job_data)}>
           <Text small bold color={onSite ? colors.primary : "grey"}>
             QR Code {onSite && " - Proceed"}
           </Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
 
-        <CardOptionItem row>
+        <CardOptionItem disabled={isCanceling} row>
           <Text small>View Job Description</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
@@ -202,38 +208,16 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem> */}
 
-        <CardOptionItem row>
+        <CardOptionItem disabled={isCanceling} row>
           <Text small>Report Job</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
 
-        <CardOptionItem row>
+        <CardOptionItem disabled={isCanceling} row>
           <Text small>Reschedule Job</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
-
-        <CardOptionItem
-          onPress={() => {
-            setPay(true);
-          }}
-          row
-        >
-          <Text small>Test Pay</Text>
-          <Ionicons name="ios-arrow-forward" size={24} />
-        </CardOptionItem>
       </View>
-      {pay && (
-        <PaymentMethodSelector
-          description={`Payment for Job - ${job_data.job_title}`}
-          jobID={job_data._id}
-          recipient={authState.userId}
-          onClose={() => setPay(false)}
-          onError={() => setPay(false)}
-          onSuccess={() => {
-            setPay(false);
-          }}
-        />
-      )}
     </Card>
   );
 }
