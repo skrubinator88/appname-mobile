@@ -172,6 +172,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
       cardRef,
       async () => {
         try {
+          setLoading(true)
           data.accepted = true
           await JobsController.acceptJob(job_data._id, authState);
           await sendNotification(authState.userToken, projectManager._id, {
@@ -185,6 +186,8 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
         } catch (e) {
           console.log(e, "job approve");
           Alert.alert("Please Try Again", "Failed to accept job", [{ style: 'cancel', onPress: cardRef.current.slideIn }]);
+        } finally {
+          setLoading(false)
         }
       },
       true
@@ -196,6 +199,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
       cardRef,
       async () => {
         try {
+          setLoading(true)
           await JobsController.counterApprove(job_data._id, job_data.offer_received.counterOffer, authState);
           data.accepted = true
           await sendNotification(authState.userToken, projectManager._id, {
@@ -209,6 +213,8 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
         } catch (e) {
           console.log(e, "counter offer approve");
           Alert.alert("Please Try Again", "Failed to accept counter offer", [{ style: 'cancel', onPress: cardRef.current.slideIn }]);
+        } finally {
+          setLoading(false)
         }
       },
       true
@@ -616,10 +622,3 @@ const JobDescription = styled.View`
   flex-direction: row;
   justify-content: space-between;
 `;
-
-const RateTouchable = styled.TouchableOpacity`
-  padding: 4px 12px;
-  background-color: #fafafa;
-  margin: 0 2px
-`;
-
