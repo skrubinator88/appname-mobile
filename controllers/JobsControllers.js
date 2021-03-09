@@ -120,6 +120,40 @@ exports.changeJobStatus = async (documentID, status, userID = "") => {
   await geoCollection.update({ status, executed_by: userID });
 };
 
+exports.acceptJob = async (jobID, authState) => {
+  const apiResponse = await fetch(`${config.API_URL}/users/acceptJob`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `bearer ${authState.userToken}`,
+    },
+    body: JSON.stringify({ jobID }),
+  });
+  if (!apiResponse.ok) {
+    throw new Error((await apiResponse.json()).message || "Failed to accept job");
+  }
+
+  return true
+};
+
+exports.cancelAcceptedJob = async (jobID, authState) => {
+  const { userData: { role } } = authState
+
+  const apiResponse = await fetch(`${config.API_URL}/users/cancelJob`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `bearer ${authState.userToken}`,
+    },
+    body: JSON.stringify({ jobID, role }),
+  });
+  if (!apiResponse.ok) {
+    throw new Error((await apiResponse.json()).message || "Failed to cancel job");
+  }
+
+  return true
+}
+
 // TODO: upon cancellation, either suspend or bill the deployee or deployer
 exports.cancelAcceptedJob = async (documentID, authState) => {
   const {
@@ -147,7 +181,7 @@ exports.cancelAcceptedJob = async (documentID, authState) => {
  * @param {*} deployee
  * @param {*} offer
  */
-exports.sendOffer = async (documentID, deployee, offer, wage = "hr") => {
+exports.sendOffer = async (documentID, deployee, offer, wage = "deployment") => {
   if (!deployee) {
     throw new Error("User identity must be provided");
   }
