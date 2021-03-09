@@ -4,7 +4,7 @@ import React, { useState, useContext, useEffect, useCallback } from "react";
 import { TouchableWithoutFeedback, TextInput, View, Keyboard, ScrollView, Platform, SafeAreaView } from "react-native";
 import Modal from "react-native-modal";
 import { TextField } from "@ubaids/react-native-material-textfield";
-import { AntDesign, MaterialIcons, Foundation } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons, Foundation, Entypo } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 // Platform Fixes
@@ -22,9 +22,12 @@ import Text from "../../../components/text";
 import { RegistrationContext } from "../../../components/context";
 
 export default function workModal({ navigation, onHandleCancel, onHandleSave, workModalVisible, state }) {
+  // External
   const statusBarHeight = getStatusBarHeight();
+  // Context
   const { registrationState, methods } = useContext(RegistrationContext);
 
+  // State
   const [employer_name, setEmployerName] = useState("");
   const [employer_phone_number, setEmployerPhoneNumber] = useState("");
   const [employer_address, setEmployerAddress] = useState("");
@@ -34,14 +37,12 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, wo
   const [salary, setSalary] = useState("");
   const [wage, setWage] = useState("hr");
   const [description, setDescription] = useState("");
-  // Date Obtained
   const [date_started, setDateStarted] = useState(new Date());
-  const [show1, setShow1] = useState(false);
-  // Expiration Date
+  const [show1, setShow1] = useState(false); // Date Started Modal
   const [date_ended, setDateEnded] = useState(new Date());
-  const [show2, setShow2] = useState(false);
-  // Switch
+  const [show2, setShow2] = useState(false); // Date Ended Modal
   const [actual_job, setActualJob] = useState(false);
+  const [required, setRequired] = useState({});
 
   const [month_names, setMonthNames] = useState([
     "January",
@@ -59,6 +60,32 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, wo
   ]);
 
   // Functions
+  const onHandleSubmit = useCallback(
+    (form) => {
+      const fieldVarNames = [];
+
+      // List out all required fields in this way
+      !form["employer_name"] && fieldVarNames.push("employer_name"); // name of the variable
+      !form["user_position_title"] && fieldVarNames.push("user_position_title");
+      !form["salary"] && fieldVarNames.push("salary");
+
+      // console.log(fieldVarNames);
+
+      if (fieldVarNames.length == 0) {
+        onHandleSave(form);
+      } else {
+        const requiredFields = {};
+        for (const item of fieldVarNames) {
+          Object.assign(requiredFields, { [item]: true });
+        }
+        setRequired(requiredFields);
+      }
+
+      return;
+    },
+    [employer_name]
+  );
+
   const onChangeDateObtained = useCallback(
     (event, selectedDate) => {
       const currentDate = selectedDate || date_started;
@@ -140,7 +167,7 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, wo
     setSupervisorTitle(state.supervisor_title);
     setPositionTitle(state.user_position_title);
     setSalary(state.salary);
-    setWage(state.wage);
+    setWage(state.wage || wage);
     setDescription(state.description || description);
     setActualJob(state.actual_job);
     setDateStarted(state.date_started || date_started);
@@ -160,6 +187,7 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, wo
     setSalary("");
     setWage("hr");
     setDescription("");
+    setRequired({});
   }, [
     employer_name,
     employer_phone_number,
@@ -173,6 +201,7 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, wo
     salary,
     wage,
     description,
+    required,
   ]);
 
   return (
@@ -210,7 +239,7 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, wo
           title="Add Work"
           nextTitle="Save"
           nextColor="#548ff7"
-          nextAction={() => onHandleSave(checkFormPayload())}
+          nextAction={() => onHandleSubmit(checkFormPayload())}
         />
 
         {/* <KeyboardAvoidingView enabled behavior={Platform.OS == "android" ? "height" : "padding"} style={{ flex: 1 }}> */}
@@ -238,15 +267,7 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, wo
                       <MaterialIcons name="business-center" size={24} />
                     </View>
                   )}
-                  // renderRightAccessory={() => (
-                  //   <TouchableWithoutFeedback onPress={() => job_type_ref.current.clear()}>
-                  //     <View style={{ width: 40, marginHorizontal: 10 }}>
-                  //       <Text color="#4a89f2" bold>
-                  //         Clear
-                  //       </Text>
-                  //     </View>
-                  //   </TouchableWithoutFeedback>
-                  // )}
+                  error={required["employer_name"] && "This field is required"}
                 />
 
                 <TextField
@@ -263,6 +284,7 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, wo
                       <MaterialIcons name="phone" size={24} />
                     </View>
                   )}
+
                   // renderRightAccessory={() => (
                   //   <TouchableWithoutFeedback onPress={() => job_type_ref.current.clear()}>
                   //     <View style={{ width: 40, marginHorizontal: 10 }}>
@@ -333,6 +355,7 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, wo
                   labelFontSize={14}
                   labelTextStyle={{ color: "black", fontWeight: "700" }}
                   placeholder="Type your title position"
+                  error={required["user_position_title"] && "This field is required"}
                   {...commonInputProps(state.user_position_title || user_position_title, setPositionTitle)}
                 />
 
@@ -350,6 +373,7 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, wo
                           <MaterialIcons name="attach-money" size={24} />
                         </View>
                       )}
+                      error={required["salary"] && "This field is required"}
                       keyboardType="numeric"
                       {...commonInputProps(state.salary || salary, setSalary)}
                     />
