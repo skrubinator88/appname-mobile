@@ -21,6 +21,7 @@ import SignUpScreen9 from "../signUp/9";
 import Camera from "../signUp/camera";
 
 import { RegistrationContext } from "../../../components/context";
+import RegistrationActions from "../../../actions/RegistrationActions";
 import registrationReducer from "../../../reducers/registrationReducer";
 
 const initialState = {
@@ -44,27 +45,13 @@ const initialState = {
 };
 
 export function NotAuthenticatedStackScreen({ navigation }) {
+  // CONTEXT
   const [registrationState, dispatch] = useReducer(registrationReducer, initialState);
-  const registrationContext = React.useMemo(
-    () => ({
-      updateForm: (form, formSended_Boolean) => {
-        dispatch({ type: "UPDATE", form, formSended_Boolean });
-      },
-      pushItemFormField: (item, field) => {
-        dispatch({ type: "PUSH", item, field });
-      },
-      updateItemFromLicenses: (index, item) => {
-        dispatch({ type: "UPDATE_LICENSE", index, item });
-      },
-      deleteItemFromLicenses: (index) => {
-        dispatch({ type: "DELETE_LICENSE", index });
-      },
-    }),
-    []
-  );
+  const thisComponentRegistrationState = { dispatch };
+  const registrationAction = RegistrationActions.memo(thisComponentRegistrationState);
 
   return (
-    <RegistrationContext.Provider value={{ registrationState, methods: registrationContext }}>
+    <RegistrationContext.Provider value={{ registrationState, methods: registrationAction }}>
       <RootStack.Navigator headerMode="none">
         <RootStack.Screen name="Root" component={RootScreen} />
 

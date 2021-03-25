@@ -22,7 +22,7 @@ export default function signUp6({ navigation }) {
   // const [work_history_items, setWorkHistoryItems] = useState([]);
 
   const { registrationState, methods } = useContext(RegistrationContext);
-  const { pushItemFormField, updateItemFromLicenses, deleteItemFromLicenses } = methods;
+  const { addItemInField, updateItemFromField, deleteItemFromField } = methods;
 
   const handleSubmit = () => {
     navigation.navigate("SignUp8");
@@ -42,7 +42,7 @@ export default function signUp6({ navigation }) {
     (index) =>
       Alert.alert("Delete this item", "Are you sure you want to delete this license from this list?", [
         { text: "Cancel", type: "cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: () => deleteItemFromLicenses(index) },
+        { text: "Delete", style: "destructive", onPress: () => deleteItemFromField("licenses", index) },
       ]),
     [licenses_items]
   );
@@ -68,13 +68,13 @@ export default function signUp6({ navigation }) {
             setLicenseModalState({});
             setLicenseModalVisible(false);
           }}
-          onHandleSave={(form, { isEdited, index }) => {
+          onHandleSave={(item, { isEdited, index }) => {
             setLicenseModalState({});
             setLicenseModalVisible(false);
             if (isEdited) {
-              updateItemFromLicenses(index, form);
+              updateItemFromField("licenses", index, item);
             } else {
-              pushItemFormField(form, "licenses");
+              addItemInField(item, "licenses");
             }
           }}
           state={licenseModalState}

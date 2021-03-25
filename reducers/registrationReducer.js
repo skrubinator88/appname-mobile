@@ -16,22 +16,22 @@ const registrationReducer = (prevState, action) => {
       return newState;
     }
 
-    case "UPDATE_LICENSE": {
+    case "UPDATE_FIELD_ITEM": {
       let newState = {
         ...prevState,
       };
 
-      newState["licenses"][action.index] = action.item;
+      newState[action.field][action.index] = action.item;
 
       return newState;
     }
 
-    case "DELETE_LICENSE": {
+    case "DELETE_FIELD_ITEM": {
       let newState = {
         ...prevState,
       };
 
-      newState["licenses"].splice(action.index, 1);
+      newState[action.field].splice(action.index, 1);
 
       return newState;
     }

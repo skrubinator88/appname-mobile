@@ -19,7 +19,7 @@ export default function ({ navigation }) {
     updateForm({ role: chosenOption });
     // navigation.navigate("SignUp1"); // ORIGINAL
 
-    // DEV
+    // ONLY FOR DEV
     navigation.navigate("SignUp5", { name: "Bryan" });
     updateForm({ phone_number: "+14049901671" });
   };

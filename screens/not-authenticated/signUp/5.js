@@ -59,10 +59,20 @@ export default function ({ navigation }) {
             setWorkModalState({});
             setWorkModalVisible(false);
           }}
-          onHandleSave={(form) => {
+          // onHandleSave={(form) => {
+          //   setWorkModalState({});
+          //   setWorkModalVisible(false);
+          //   pushItemFormField(form, "work_history");
+          // }}
+
+          onHandleSave={(form, { isEdited, index }) => {
             setWorkModalState({});
             setWorkModalVisible(false);
-            pushItemFormField(form, "work_history");
+            if (isEdited) {
+              updateItemFromLicenses(index, form);
+            } else {
+              pushItemFormField(form, "licenses");
+            }
           }}
           state={workModalState}
         />
