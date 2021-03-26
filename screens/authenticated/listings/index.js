@@ -20,6 +20,7 @@ import config from "../../../env";
 // Functions
 import { isCurrentJob, sendNotification } from "../../../functions";
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 export default function JobListing({ navigation }) {
   // Constructor
@@ -72,7 +73,7 @@ export default function JobListing({ navigation }) {
       <Container navigation={navigation} titleColor="white" title="Job Listings" titleWeight="300" headerBackground="#3869f3">
         {/* Payments Section */}
         <Item>
-          <JobItemLink onPress={() => navigation.navigate("Listing Item")}>
+          <JobItemLink onPress={() => navigation.navigate("Listing Item", { edit: false })}>
             <JobItemRow>
               <Row>
                 <Text small weight="700" color="#1b5cce">
@@ -194,7 +195,7 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
 
   return (
     <Item key={item}>
-      <JobItemLink>
+      <JobItemLink activeOpacity={0.6} onPress={() => navigation.navigate("Listing Item", { edit: true, data: item })}>
         <JobItemRow>
           <Column>
             <Row>
@@ -634,12 +635,7 @@ const JobItemRow = styled.View`
   border: 1px solid #f5f5f5;
 `;
 
-const JobItemLink = (props) => (
-  <Setup {...props} activeOpacity={0.6}>
-    {props.children}
-  </Setup>
-);
-const Setup = styled.TouchableOpacity`
+const JobItemLink = styled.TouchableOpacity`
   flex-direction: row;
 `;
 

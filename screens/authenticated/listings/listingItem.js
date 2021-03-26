@@ -66,6 +66,7 @@ export const wageMap = {
 
 export default function ListingItem({ navigation, route }) {
   // - - Constructor - -
+  const { params } = route;
   const { authState } = useContext(GlobalContext);
 
   const payments = useSelector((state) => state.payment);
@@ -100,6 +101,31 @@ export default function ListingItem({ navigation, route }) {
     const input = job_type.toLowerCase().trim();
     return title.indexOf(input) != -1;
   });
+
+  useState(() => {
+    if (params.edit) {
+      // console.log(params.data);
+      // date;
+      // date_completed;
+      // date_created;
+      // ("g");
+      // id;
+      // job_title;
+      // job_type;
+      // location;
+      // location.coords;
+      // photo_files;
+      // posted_by;
+      // posted_by_profile_picture;
+      // priority;
+      // salary;
+      // star_rate;
+      // start_at;
+      // status;
+      // tasks[{ id, text }];
+      // wage;
+    }
+  }, []);
 
   const updateDate = async (e, dateParam) => {
     if (dateParam) {
