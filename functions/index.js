@@ -1,5 +1,5 @@
 import env from "../env";
-import moment, { duration, unix } from 'moment'
+import moment, { duration, unix } from "moment";
 
 exports.distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2, unit = "miles") => {
   // generally used geo measurement function
@@ -82,7 +82,7 @@ exports.getActualDateFormatted = (date) => {
   const day = date.getDate();
   const year = date.getFullYear();
 
-  return `${month_names[month]} ${day}, ${year} - ${date.toLocaleDateString()}`;
+  return `${month_names[month]} ${day}, ${year}`;
 };
 
 exports.convertFirestoreTimestamp = (date) => {

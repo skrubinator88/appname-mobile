@@ -17,7 +17,7 @@ exports.memo = ({ dispatch }) => {
         dispatch({ type: `UPDATE_FIELD_ITEM`, field, index, item });
       },
       deleteItemFromField: (field, index) => {
-        dispatch({ type: `DELETE_FIELD_ITEM}`, field, index });
+        dispatch({ type: "DELETE_FIELD_ITEM", field, index });
       },
     }),
     []

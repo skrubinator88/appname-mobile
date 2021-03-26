@@ -137,7 +137,7 @@ export default function signUp6({ navigation }) {
               <TouchableWithoutFeedback
                 key={index}
                 onPress={() => {
-                  setLicenseModalState({ ...item, edit: true, index: index });
+                  setLicenseModalState({ ...item, edit: true, index });
                   setLicenseModalVisible(true);
                 }}
               >
@@ -174,7 +174,7 @@ export default function signUp6({ navigation }) {
                         <Entypo color="black" name="pencil" size={25} color="white" />
                       </View>
                     </TouchableWithoutFeedback>
-                    <TouchableWithoutFeedback onPress={deleteItem}>
+                    <TouchableWithoutFeedback onPress={() => deleteItem(index)}>
                       <View
                         style={{
                           flexDirection: "row",

@@ -182,7 +182,12 @@ export default function schoolModal({ navigation, onHandleCancel, onHandleSave, 
                 Cancel
               </Text>
 
-              <Text medium bold color="#1c55ef" onPress={() => onHandleSave(checkFormPayload())}>
+              <Text
+                medium
+                bold
+                color="#1c55ef"
+                onPress={() => onHandleSave(checkFormPayload(), { isEdited: state.edit, index: state.edit && state.index })}
+              >
                 Save
               </Text>
             </Buttons>
