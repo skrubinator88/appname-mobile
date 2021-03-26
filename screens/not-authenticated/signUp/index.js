@@ -17,11 +17,11 @@ export default function ({ navigation }) {
 
   const handleChosenOption = (chosenOption) => {
     updateForm({ role: chosenOption });
-    // navigation.navigate("SignUp1"); // ORIGINAL
+    navigation.navigate("SignUp1"); // ORIGINAL
 
     // ONLY FOR DEV
-    navigation.navigate("SignUp5", { name: "Bryan" });
-    updateForm({ phone_number: "+14049901671" });
+    // navigation.navigate("SignUp5", { name: "Bryan" });
+    // updateForm({ phone_number: "+14049901671" });
   };
 
   useEffect(() => {

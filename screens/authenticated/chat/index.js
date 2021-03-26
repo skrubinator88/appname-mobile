@@ -49,7 +49,7 @@ export default function Chat({ route, navigation }) {
     (async () => {
       const retrieveReceiverInfo = await ChatController.getReceiverData(receiver, authState.userToken);
 
-      console.log(retrieveReceiverInfo);
+      // console.log(retrieveReceiverInfo);
 
       setReceiverName(`${retrieveReceiverInfo.first_name} ${retrieveReceiverInfo.last_name}`);
     })();
@@ -59,7 +59,7 @@ export default function Chat({ route, navigation }) {
     if (chatID.length != 0) ChatController.sendMessage(chatID, message, dispatch);
   };
 
-  console.log("MY CHAT", Object.values(chats[chatID] || {}));
+  // console.log("MY CHAT", Object.values(chats[chatID] || {}));
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>

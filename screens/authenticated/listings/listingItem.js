@@ -68,7 +68,7 @@ export default function ListingItem({ navigation, route }) {
   // - - Constructor - -
   const { authState } = useContext(GlobalContext);
 
-  const payments = useSelector((state) => state.payment)
+  const payments = useSelector((state) => state.payment);
 
   // - - State - -
   const [job_type, setJobType] = useState(""); // Input Field
@@ -366,7 +366,7 @@ export default function ListingItem({ navigation, route }) {
       let formattedForm;
 
       if (!payments.defaultMethod) {
-        await Promise.reject({ message: 'You must set your default payment method before creating a job', code: 418 })
+        await Promise.reject({ message: "You must set your default payment method before creating a job", code: 418 });
       }
 
       if (form.location.coords == undefined) {
@@ -377,7 +377,7 @@ export default function ListingItem({ navigation, route }) {
         formattedForm = formatFormV2(form);
       }
 
-      console.log("FORMATTED FORM", formattedForm);
+      // console.log("FORMATTED FORM", formattedForm);
 
       // Sends the job details and associated photos for upload and job creation
       const { success } = await JobsController.postUserJob(authState.userID, formattedForm, authState.userToken, photos);

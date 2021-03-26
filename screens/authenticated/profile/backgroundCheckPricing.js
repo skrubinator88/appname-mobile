@@ -60,7 +60,7 @@ export default function BackgroundCheckPricing({ navigation, route }) {
           text: "Accept",
           onPress: async () => {
             let result = await WebBrowser.openBrowserAsync(url, { controlsColor: theme.contractor.primary });
-            console.log(result);
+            // console.log(result);
           },
         },
       ],

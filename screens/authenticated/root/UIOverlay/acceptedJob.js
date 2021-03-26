@@ -45,7 +45,7 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
 
     return () => {
       if (subscription) {
-        console.log("removed");
+        // console.log("removed");
         subscription.then(({ remove }) => remove());
       }
     };
@@ -83,12 +83,16 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
       onPress: async (i) => {
         if (i === 0) {
           try {
-            await JobsController.cancelAcceptedJob(job_data._id, authState)
-            await sendNotification(authState.userToken, job_data.posted_by, { title: `GigChasers - ${job_data.job_title}`, body: `Job canceled`, data: { type: 'jobcancel', id: job_data._id, sender: authState.userID } })
-            changeRoute({ name: "dashboard" })
+            await JobsController.cancelAcceptedJob(job_data._id, authState);
+            await sendNotification(authState.userToken, job_data.posted_by, {
+              title: `GigChasers - ${job_data.job_title}`,
+              body: `Job canceled`,
+              data: { type: "jobcancel", id: job_data._id, sender: authState.userID },
+            });
+            changeRoute({ name: "dashboard" });
           } catch (e) {
-            console.log(e)
-            Alert.alert('Failed To Cancel Job', e.message)
+            console.log(e);
+            Alert.alert("Failed To Cancel Job", e.message);
           }
         }
       },
