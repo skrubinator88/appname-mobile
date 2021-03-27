@@ -91,6 +91,12 @@ export default function ListingItem({ navigation, route }) {
   const [showDate, setShowDate] = useState(false);
   const [priority, setPriority] = useState("");
 
+  // Setup job photo selection
+  const [photos, setPhotos] = useState([]);
+  const [loadingMedia, setloadingMedia] = useState(false);
+  const { showActionSheetWithOptions } = useActionSheet();
+  const [showCamera, setShowCamera] = useState(false);
+
   // - - Refs - -
   const job_type_ref = useRef(null);
   const scroll = useRef(null);
@@ -105,27 +111,28 @@ export default function ListingItem({ navigation, route }) {
   useState(() => {
     if (params.edit) {
       // console.log(params.data);
-      // date;
-      // date_completed;
-      // date_created;
-      // ("g");
-      // id;
-      // job_title;
-      // job_type;
-      // location;
-      // location.coords;
-      // photo_files;
-      // posted_by;
-      // posted_by_profile_picture;
-      // priority;
-      // salary;
-      // star_rate;
-      // start_at;
-      // status;
-      // tasks[{ id, text }];
-      // wage;
+      setSelectedJobType(params.data.job_type);
+      setJobTitle(params.data.job_title);
+
+      // Location
+      if (params.data.location.address == undefined) {
+        const location = params.data.location;
+        location.address = "Original Location";
+        setLocation(params.data.location);
+      } else {
+        setLocation(params.data.location); // Not working
+      }
+
+      setSalary(params.data.salary);
+      setWageRate(params.data.wage);
+      setTasks(params.data.tasks); // Not working
+      // setDate(params.data.date); // Not working
+      setShowDate(params.data.showDate);
+      setPriority(params.data.priority);
+    } else {
+      return null;
     }
-  }, []);
+  });
 
   const updateDate = async (e, dateParam) => {
     if (dateParam) {
@@ -172,12 +179,6 @@ export default function ListingItem({ navigation, route }) {
       return true;
     });
   }, [showDate]);
-
-  // Setup job photo selection
-  const [photos, setPhotos] = useState([]);
-  const [loadingMedia, setloadingMedia] = useState(false);
-  const { showActionSheetWithOptions } = useActionSheet();
-  const [showCamera, setShowCamera] = useState(false);
 
   const getPhoto = useCallback(async () => {
     try {
@@ -355,6 +356,7 @@ export default function ListingItem({ navigation, route }) {
       location_address_ref.current.setValue(item);
     } else {
       setLocation(item);
+
       location_address_ref.current.setValue(item.address);
     }
     location_address_ref.current.blur();

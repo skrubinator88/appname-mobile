@@ -36,7 +36,6 @@ export default function ProfileScreen({ navigation }) {
   const [roleSwitch, setRoleSwitch] = useState(role == "contractor" ? false : true);
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
-  const [isMounted, setMounted] = useState(false);
 
   // Setup Profile Picture Selection
   const [profilePictureURI, setProfilePictureURI] = useState(`${env.API_URL}${userData.profile_picture}`);
@@ -54,7 +53,7 @@ export default function ProfileScreen({ navigation }) {
   }, [global]);
 
   useEffect(() => {
-    JobController.getUserJobComments(userID, { setComments });
+    JobController.getUserJobComments(userID, { setComments, limit: 3 });
   }, []);
 
   // Functions
@@ -203,7 +202,14 @@ export default function ProfileScreen({ navigation }) {
       // nextIcon="dots-three-horizontal"
       title={loading ? () => <ActivityIndicator color="white" size={20} /> : ""}
       enableRefreshFeedback={true}
-      refreshingProperties={{ refreshing: false, tintColor: "white", onRefresh: () => {} }}
+      refreshingProperties={{
+        refreshing: false,
+        tintColor: "white",
+        onRefresh: () => {
+          setComments([]); // Clear
+          JobController.getUserJobComments(userID, { setComments });
+        },
+      }}
     >
       {/* Profile Section */}
 
@@ -322,10 +328,14 @@ export default function ProfileScreen({ navigation }) {
             <Text medium weight="700">
               Comments
             </Text>
-            {comments.length > 3 && (
-              <Text small weight="700" color="#a0a0a0">
-                View All
-              </Text>
+            {comments.length == 3 && (
+              <TouchableWithoutFeedback onPress={() => navigation.navigate("Comments", { comments, userID })}>
+                <View style={{ paddingVertical: 10, paddingHorizontal: 20 }}>
+                  <Text small weight="700" color="#a0a0a0">
+                    View All
+                  </Text>
+                </View>
+              </TouchableWithoutFeedback>
             )}
           </CommentTitleRowAndLink>
 
@@ -339,14 +349,7 @@ export default function ProfileScreen({ navigation }) {
               </CommentItem>
             )}
 
-            {comments.map(({ first_name, last_name, text, posted_by, id }) => (
-              <CommentItem key={id}>
-                <Text small bold>
-                  {first_name} {last_name}
-                </Text>
-                <Text>{text}</Text>
-              </CommentItem>
-            ))}
+            <RenderIndividualComments items={comments} />
           </Comments>
         </CommentSectionColumn>
       </CommentSection>
@@ -372,6 +375,25 @@ export default function ProfileScreen({ navigation }) {
       />
     </Container>
   );
+}
+
+function RenderIndividualComments({ items }) {
+  if (items.length > 0) {
+    const final = [];
+    for (let i = 0; i < items.length; i++) {
+      let { first_name, last_name, text, posted_by, id } = items[i];
+      final.push(
+        <CommentItem key={id}>
+          <Text small bold>
+            {first_name} {last_name}
+          </Text>
+          <Text>{text}</Text>
+        </CommentItem>
+      );
+    }
+    return final;
+  }
+  return <View></View>;
 }
 
 const Selector = styled.View`

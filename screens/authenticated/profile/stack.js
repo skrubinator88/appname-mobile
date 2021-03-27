@@ -10,6 +10,7 @@ export const ProfileStack = createStackNavigator();
 import ProfileScreen from "./";
 import BackgroundCheckScreen from "./backgroundCheck";
 import BackgroundCheckPricingScreen from "./backgroundCheckPricing";
+import CommentsScreen from "./comments";
 
 export default function ProfileStackScreen() {
   return (
@@ -17,6 +18,8 @@ export default function ProfileStackScreen() {
       <ProfileStack.Screen name="Profile" component={ProfileScreen} />
       <ProfileStack.Screen name="Background Check" component={BackgroundCheckScreen} />
       <ProfileStack.Screen name="Background Check Pricing" component={BackgroundCheckPricingScreen} />
+
+      <ProfileStack.Screen name="Comments" component={CommentsScreen} />
     </ProfileStack.Navigator>
   );
 }
