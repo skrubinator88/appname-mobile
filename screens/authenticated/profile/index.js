@@ -53,8 +53,13 @@ export default function ProfileScreen({ navigation }) {
   }, [global]);
 
   useEffect(() => {
-    JobController.getUserJobComments(userID, { setComments, limit: 3 });
+    retrieveComments();
   }, []);
+
+  function retrieveComments() {
+    setComments([]);
+    JobController.getUserJobComments(userID, { setComments, limit: 3 });
+  }
 
   // Functions
   const handleProfilePictureUpload = useCallback(async () => {
@@ -206,8 +211,7 @@ export default function ProfileScreen({ navigation }) {
         refreshing: false,
         tintColor: "white",
         onRefresh: () => {
-          setComments([]); // Clear
-          JobController.getUserJobComments(userID, { setComments });
+          retrieveComments();
         },
       }}
     >

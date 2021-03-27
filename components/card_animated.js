@@ -82,6 +82,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     width: Dimensions.get("screen").width,
     paddingBottom: Platform.OS == "ios" ? 40 : 0,
+
+    // Shadows
     elevation: 10,
     shadowColor: "black",
     shadowOpacity: 0.4,
@@ -90,10 +92,5 @@ const styles = StyleSheet.create({
       width: 5,
       height: 5,
     },
-    // transform: Tran,
-    // opacity: 0,
-    // shadowRadius: 10,
-    // shadowColor: "red",
-    // shadowOffset: { x: 10, y: 10 },
   },
 });

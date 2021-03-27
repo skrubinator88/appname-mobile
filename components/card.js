@@ -12,16 +12,9 @@ export default function Card(props) {
 
   useEffect(() => {
     if (animate) {
-      // Animated.timing(opacity, { toValue: 1, duration: 100 }).start();
       Animated.timing(slideAnim, { toValue: 0, duration: 300 }).start();
     }
   }, [slideAnim, animate]);
-
-  // useEffect(() => {
-  //   return () => {
-  //     Animated.timing(slideAnim, { toValue: 1000, duration: 300 }).start();
-  //   };
-  // }, []);
 
   function definePosition(layout) {
     slideAnim.setValue(layout.height);
@@ -30,7 +23,6 @@ export default function Card(props) {
 
   return (
     <Animated.View
-      // ref={animatedBox}
       onLayout={({ nativeEvent }) => definePosition(nativeEvent.layout)}
       style={{ ...styles.card, transform: [{ translateY: slideAnim }] }}
     >
