@@ -65,21 +65,21 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, wo
       const fieldVarNames = [];
 
       // List out all required fields in this way
-      !form["employer_name"] && fieldVarNames.push("employer_name"); // name of the variable
-      !form["user_position_title"] && fieldVarNames.push("user_position_title");
-      !form["salary"] && fieldVarNames.push("salary");
+      // !form["employer_name"] && fieldVarNames.push("employer_name"); // name of the variable
+      // !form["user_position_title"] && fieldVarNames.push("user_position_title");
+      // !form["salary"] && fieldVarNames.push("salary");
 
       // console.log(fieldVarNames);
 
-      if (fieldVarNames.length == 0) {
-        onHandleSave(form);
-      } else {
-        const requiredFields = {};
-        for (const item of fieldVarNames) {
-          Object.assign(requiredFields, { [item]: true });
-        }
-        setRequired(requiredFields);
-      }
+      // if (fieldVarNames.length == 0) {
+      onHandleSave(form, { isEdited: state.edit, index: state.edit && state.index });
+      // } else {
+      // const requiredFields = {};
+      // for (let item of fieldVarNames) {
+      //   Object.assign(requiredFields, { [item]: true });
+      // }
+      // setRequired(requiredFields);
+      // }
 
       return;
     },

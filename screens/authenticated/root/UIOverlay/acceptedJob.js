@@ -46,7 +46,7 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
 
     return () => {
       if (subscription) {
-        console.log("removed");
+        // console.log("removed");
         subscription.then(({ remove }) => remove());
       }
     };

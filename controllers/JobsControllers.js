@@ -133,11 +133,13 @@ exports.acceptJob = async (jobID, authState) => {
     throw new Error((await apiResponse.json()).message || "Failed to accept job");
   }
 
-  return true
+  return true;
 };
 
 exports.cancelAcceptedJob = async (jobID, authState) => {
-  const { userData: { role } } = authState
+  const {
+    userData: { role },
+  } = authState;
 
   const apiResponse = await fetch(`${config.API_URL}/users/cancelJob`, {
     method: "DELETE",
@@ -151,8 +153,8 @@ exports.cancelAcceptedJob = async (jobID, authState) => {
     throw new Error((await apiResponse.json()).message || "Failed to cancel job");
   }
 
-  return true
-}
+  return true;
+};
 
 // TODO: upon cancellation, either suspend or bill the deployee or deployer
 exports.cancelAcceptedJob = async (documentID, authState) => {
@@ -358,20 +360,23 @@ exports.updateUserJob = (userID, jobID, updatedJob) => {
   if (!userID) throw new Error("User ID is required");
 };
 
-exports.getUserJobComments = (userID, state) => {
+exports.getUserJobComments = async (userID, state) => {
   // Screen State
-  const { setComments } = state;
+  const { setComments, limit } = state;
 
-  const query = GeoFirestore.collection("comments").doc(userID).collection("messages");
+  const query = GeoFirestore.collection("comments")
+    .doc(userID)
+    .collection("messages")
+    .limit(limit ? limit : 50);
 
   let comments = [];
 
-  query.get().then((querySnapshot) => {
-    const array = querySnapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      comments.push(doc.data());
-    });
+  const querySnapshot = await query.get();
+  querySnapshot.forEach((doc) => {
+    const comment = doc.data();
+    comment.id = doc.id;
+    comments.push(comment);
   });
 
-  setComments(comments);
+  return setComments(comments);
 };

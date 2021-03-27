@@ -16,7 +16,7 @@ export const ListingsReducer = (prevState = [], action) => {
       //   return [];
     }
     case "CLEAR_LISTING": {
-      console.log("LISTINGS STATE CLEARED \n");
+      // console.log("LISTINGS STATE CLEARED \n");
       return [];
     }
     default:

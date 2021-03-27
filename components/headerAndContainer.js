@@ -119,15 +119,21 @@ export default function Header({
         style={{ backgroundColor: headerBackground }}
         refreshControl={enableRefreshFeedback ? <RefreshControl {...refreshingProperties} /> : null}
       >
-        <View style={{ backgroundColor: containerBackground }}>
-          {/* {isIos && (
-          <View
-            style={{
-              height: SPACER_SIZE,
-              backgroundColor: headerBackground,
-            }}
-          />
-        )} */}
+        <View
+          style={{
+            backgroundColor: containerBackground,
+            borderBottomEndRadius: 45,
+            borderBottomStartRadius: 45,
+            // elevation: 10,
+            // shadowColor: "black",
+            // shadowOpacity: 0.4,
+            // shadowRadius: 7,
+            // shadowOffset: {
+            //   width: 5,
+            //   height: 50,
+            // },
+          }}
+        >
           <SafeAreaView style={{ backgroundColor: headerBackground }}>
             <Container>
               <Column back>
@@ -154,10 +160,19 @@ export default function Header({
 
           {/* Children */}
           {children}
-
-          {isIos && !loadingContent && <View style={{ height: SPACER_SIZE, backgroundColor: bottomBackground || containerBackground }} />}
+          {isIos && !loadingContent && (
+            <View
+              style={{
+                height: SPACER_SIZE,
+                borderBottomEndRadius: 45,
+                borderBottomStartRadius: 45,
+                backgroundColor: bottomBackground || containerBackground,
+              }}
+            />
+          )}
         </View>
       </ScrollView>
+
       {loadingContent && (
         <Loader>
           <ActivityIndicator color="white" size={20} />

@@ -64,7 +64,7 @@ function DrawerContent({ navigation }) {
             <DrawerItem
               labelStyle={{ fontSize: 20 }}
               label="Job Listings"
-              onPress={() => navigation.navigate("Job Listings")}
+              onPress={() => navigation.navigate("Job Listings", { screen: "Root" })}
               icon={() => <Entypo name="megaphone" size={24} color="black" />}
             />
             <DrawerItem

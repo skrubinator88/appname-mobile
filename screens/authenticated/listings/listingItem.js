@@ -66,9 +66,10 @@ export const wageMap = {
 
 export default function ListingItem({ navigation, route }) {
   // - - Constructor - -
+  const { params } = route;
   const { authState } = useContext(GlobalContext);
 
-  const payments = useSelector((state) => state.payment)
+  const payments = useSelector((state) => state.payment);
 
   // - - State - -
   const [job_type, setJobType] = useState(""); // Input Field
@@ -90,6 +91,12 @@ export default function ListingItem({ navigation, route }) {
   const [showDate, setShowDate] = useState(false);
   const [priority, setPriority] = useState("");
 
+  // Setup job photo selection
+  const [photos, setPhotos] = useState([]);
+  const [loadingMedia, setloadingMedia] = useState(false);
+  const { showActionSheetWithOptions } = useActionSheet();
+  const [showCamera, setShowCamera] = useState(false);
+
   // - - Refs - -
   const job_type_ref = useRef(null);
   const scroll = useRef(null);
@@ -99,6 +106,32 @@ export default function ListingItem({ navigation, route }) {
     const title = item.toLowerCase();
     const input = job_type.toLowerCase().trim();
     return title.indexOf(input) != -1;
+  });
+
+  useState(() => {
+    if (params.edit) {
+      // console.log(params.data);
+      setSelectedJobType(params.data.job_type);
+      setJobTitle(params.data.job_title);
+
+      // Location
+      if (params.data.location.address == undefined) {
+        const location = params.data.location;
+        location.address = "Original Location";
+        setLocation(params.data.location);
+      } else {
+        setLocation(params.data.location); // Not working
+      }
+
+      setSalary(params.data.salary);
+      setWageRate(params.data.wage);
+      setTasks(params.data.tasks); // Not working
+      // setDate(params.data.date); // Not working
+      setShowDate(params.data.showDate);
+      setPriority(params.data.priority);
+    } else {
+      return null;
+    }
   });
 
   const updateDate = async (e, dateParam) => {
@@ -146,12 +179,6 @@ export default function ListingItem({ navigation, route }) {
       return true;
     });
   }, [showDate]);
-
-  // Setup job photo selection
-  const [photos, setPhotos] = useState([]);
-  const [loadingMedia, setloadingMedia] = useState(false);
-  const { showActionSheetWithOptions } = useActionSheet();
-  const [showCamera, setShowCamera] = useState(false);
 
   const getPhoto = useCallback(async () => {
     try {
@@ -329,6 +356,7 @@ export default function ListingItem({ navigation, route }) {
       location_address_ref.current.setValue(item);
     } else {
       setLocation(item);
+
       location_address_ref.current.setValue(item.address);
     }
     location_address_ref.current.blur();
@@ -366,7 +394,7 @@ export default function ListingItem({ navigation, route }) {
       let formattedForm;
 
       if (!payments.defaultMethod) {
-        await Promise.reject({ message: 'You must set your default payment method before creating a job', code: 418 })
+        await Promise.reject({ message: "You must set your default payment method before creating a job", code: 418 });
       }
 
       if (form.location.coords == undefined) {
@@ -377,7 +405,7 @@ export default function ListingItem({ navigation, route }) {
         formattedForm = formatFormV2(form);
       }
 
-      console.log("FORMATTED FORM", formattedForm);
+      // console.log("FORMATTED FORM", formattedForm);
 
       // Sends the job details and associated photos for upload and job creation
       const { success } = await JobsController.postUserJob(authState.userID, formattedForm, authState.userToken, photos);

@@ -58,7 +58,7 @@ exports.getUserChats = (user_id, setChats) => {
     .onSnapshot((res) => {
       res.docChanges().forEach((change) => {
         const { doc: document } = change;
-        console.log(change.type);
+        // console.log(change.type);
         switch (change.type) {
           case "added": {
             setChats((prevState) => [...prevState, { id: document.id, ...document.data() }]);
