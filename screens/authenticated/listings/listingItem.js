@@ -37,6 +37,7 @@ import PermissionsControllers from "../../../controllers/PermissionsControllers"
 import PhotoItem from "./listItemImage";
 import TaskModal from "./taskModal";
 import { useDispatch, useSelector } from "react-redux";
+import env from "../../../env";
 
 // Miscellaneous
 const width = Dimensions.get("window").width;
@@ -129,10 +130,20 @@ export default function ListingItem({ navigation, route }) {
       // setDate(params.data.date); // Not working
       setShowDate(params.data.showDate);
       setPriority(params.data.priority);
+
+      // Photos
+      const formattedPhotos = params.data.photo_files.map((item) => {
+        return { heigh: "original size", type: "image/png", uri: `${env.API_URL}/images/${item}.png` };
+      });
+      // setPhotos(params.data.photo_files);
+      // console.log(params.data.photos_files);
+      console.log(authState.userToken);
     } else {
       return null;
     }
   });
+
+  useEffect(() => console.log(photos), [photos]);
 
   const updateDate = async (e, dateParam) => {
     if (dateParam) {
@@ -410,7 +421,7 @@ export default function ListingItem({ navigation, route }) {
       // Sends the job details and associated photos for upload and job creation
       const { success } = await JobsController.postUserJob(authState.userID, formattedForm, authState.userToken, photos);
 
-      if (success) return navigation.goBack();
+      if (success) return route.params?.quickAdd ? navigation.navigate() : navigation.goBack();
     } catch (e) {
       console.log(e);
       Alert.alert("Failed to create job", e.code === 418 ? e.message : undefined);
@@ -435,10 +446,9 @@ export default function ListingItem({ navigation, route }) {
 
           <Header
             navigation={navigation}
-            backAction={() => onHandleCancel()}
             backTitle="Cancel"
             title="Add Work"
-            backAction={() => navigation.goBack()}
+            backAction={() => (route.params?.quickAdd ? navigation.navigate("Root") : navigation.goBack())}
           />
 
           <Fields>
