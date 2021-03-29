@@ -104,9 +104,8 @@ export default function PaymentScreen({ navigation }) {
           Alert.alert("Operation Failed", "Please try again");
         }
       },
-      [payments, authState]
     );
-  });
+  },[]);
 
   const setup = useCallback(async () => {
     setShowSetup(true)
