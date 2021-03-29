@@ -59,11 +59,11 @@ export const priorityMap = {
   low0: "Low (1 hour 30 mins)",
 };
 
-export const wageMap = {
-  hour: "Per Hour",
-  day: "Per Day",
-  deployment: "Per Deployment",
-};
+// export const wageMap = {
+//   hour: "Per Hour",
+//   day: "Per Day",
+//   deployment: "Per Deployment",
+// };
 
 export default function ListingItem({ navigation, route }) {
   // - - Constructor - -
@@ -78,7 +78,7 @@ export default function ListingItem({ navigation, route }) {
   const [job_title, setJobTitle] = useState(""); // Input Field
   const [location, setLocation] = useState(""); // Input Field
   const [salary, setSalary] = useState(""); // Input Field
-  const [wage, setWageRate] = useState("deployment"); // Input Field
+  // const [wage, setWageRate] = useState("deployment"); // Input Field // Not longer needed
   const [tasks, setTasks] = useState([]); // Input Field (With Modal)
 
   const [loading, setLoading] = useState(false);
@@ -125,7 +125,7 @@ export default function ListingItem({ navigation, route }) {
       }
 
       setSalary(params.data.salary);
-      setWageRate(params.data.wage);
+      // setWageRate(params.data.wage); // Not Longer needed
       setTasks(params.data.tasks); // Not working
       // setDate(params.data.date); // Not working
       setShowDate(params.data.showDate);
@@ -297,33 +297,33 @@ export default function ListingItem({ navigation, route }) {
     );
   }, [priority]);
 
-  const onSetWageRate = useCallback(async () => {
-    showActionSheetWithOptions(
-      {
-        options: ["Per Hour", "Per Day", "Per Deployment", "Cancel"],
-        cancelButtonIndex: 3,
-        // destructiveButtonIndex: 2,
-        title: "Set Wage Rate",
-        message: "Specify payments calculator cycle",
-      },
-      (i) => {
-        switch (i) {
-          case 0:
-            setWageRate("hour");
-            break;
-          case 1:
-            setWageRate("day");
-            break;
-          case 2:
-            setWageRate("deployment");
-            break;
-        }
-      }
-    );
-  }, [priority]);
+  // const onSetWageRate = useCallback(async () => {
+  //   showActionSheetWithOptions(
+  //     {
+  //       options: ["Per Hour", "Per Day", "Per Deployment", "Cancel"],
+  //       cancelButtonIndex: 3,
+  //       // destructiveButtonIndex: 2,
+  //       title: "Set Wage Rate",
+  //       message: "Specify payments calculator cycle",
+  //     },
+  //     (i) => {
+  //       switch (i) {
+  //         case 0:
+  //           setWageRate("hour");
+  //           break;
+  //         case 1:
+  //           setWageRate("day");
+  //           break;
+  //         case 2:
+  //           setWageRate("deployment");
+  //           break;
+  //       }
+  //     }
+  //   );
+  // }, [priority]);
 
   // - - Extra Setup - -
-  const form = { job_type: selected_job_type, job_title, tasks, location, salary, wage, date, priority };
+  const form = { job_type: selected_job_type, job_title, tasks, location, salary, /* wage, */ date, priority };
 
   // - - Life Cycles - -
   // Create session for google suggestions (This will reduce billing expenses)
@@ -442,7 +442,17 @@ export default function ListingItem({ navigation, route }) {
     <>
       <KeyboardAvoidingView enabled behavior="height" style={{ flex: 1 }}>
         <Container bounces={false} showsVerticalScrollIndicator={false} ref={scroll} keyboardShouldPersistTaps="always">
-          <TaskModal showModal={showModal} onHandleModalClose={(tasks) => handleSaveTasks(tasks)} items={tasks} />
+          <TaskModal
+            showModal={showModal}
+            onHandleModalClose={(tasks) => {
+              if (tasks == undefined) {
+                setShowModal(false);
+                return;
+              }
+              handleSaveTasks(tasks);
+            }}
+            items={tasks}
+          />
 
           <Header
             navigation={navigation}
@@ -596,7 +606,7 @@ export default function ListingItem({ navigation, route }) {
               )}
             </Item>
 
-            <Item style={{ marginVertical: 20 }}>
+            {/* <Item style={{ marginVertical: 20 }}>
               <WageInput>
                 <SalaryField style={{ alignSelf: "stretch" }}>
                   <TextField
@@ -625,7 +635,7 @@ export default function ListingItem({ navigation, route }) {
                   </Text>
                 </ScheduleButton>
               </TouchableOpacity>
-            </Item>
+            </Item> */}
 
             <Item style={{ marginVertical: 4 }}>
               <View style={{ flexDirection: "row", justifyContent: "flex-start" }}>

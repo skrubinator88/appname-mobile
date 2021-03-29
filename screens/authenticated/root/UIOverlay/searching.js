@@ -1,5 +1,5 @@
 // Dependencies
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef, useLayoutEffect } from "react";
 import { SafeAreaView, TouchableWithoutFeedback } from "react-native";
 import styled from "styled-components/native";
 import * as Progress from "react-native-progress";
@@ -29,31 +29,56 @@ export default function Searching({ keyword }) {
   // State
   const jobs = useSelector((store) => store.jobs);
   const dispatch = useDispatch();
-  const CardUI = useRef(null);
+  const CardUI = useRef();
   const [jobSelected, setJobSelected] = useState(false);
+  const jobFoundProcessRef = useRef();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const job_found = JobsController.findFirstJobWithKeyword(keyword, jobs, authState.userID);
 
-    if (job_found && jobSelected === false) {
+    if (job_found && jobSelected === false && CardUI.current != null) {
       setJobSelected(true);
 
-      AnimationsController.CardUISlideOut(CardUI, () => {
-        /**
-         * Update job status to "In Review" (This will pop the job out from
-         * local store since is going to update in the backend)
-         **/
-        JobsController.changeJobStatus(job_found._id, "in review", authState.userID);
+      const jobFoundProcess = AnimationsController.CardUISlideOut(
+        CardUI,
+        () => {
+          /**
+           * Update job status to "In Review" (This will pop the job out from
+           * local store since is going to update in the backend)
+           **/
+          JobsController.changeJobStatus(job_found._id, "in review", authState.userID);
 
-        // Move Camera
-        // console.log(job_found.location.coords);
-        MapController.handleCameraCoordinates(job_found.coordinates, dispatch);
+          // Move Camera
+          // console.log(job_found.location.coords);
+          MapController.handleCameraCoordinates(job_found.coordinates, dispatch);
 
-        changeRoute({ name: "job_found", props: { job_data: job_found, keyword } });
-      });
+          changeRoute({ name: "job_found", props: { job_data: job_found, keyword } });
+        },
+        false
+      );
+      jobFoundProcessRef.current = jobFoundProcess;
     }
-    // }
-  }, [jobs]);
+  }, [jobs, CardUI]);
+
+  function cancel() {
+    // Kill searching process
+    clearTimeout(jobFoundProcessRef.current);
+
+    setTimeout(
+      () =>
+        AnimationsController.CardUISlideOut(
+          CardUI,
+          () => {
+            MapController.clearTemporalCirclesAndTags(dispatch);
+            changeRoute({ name: "dashboard" });
+          },
+          true
+        ),
+      100
+    );
+    // MapController.clearTemporalCirclesAndTags(dispatch);
+    // changeRoute({ name: "dashboard" });
+  }
 
   return (
     <Card ref={CardUI}>
@@ -67,13 +92,7 @@ export default function Searching({ keyword }) {
         <Progress.Bar indeterminate indeterminateAnimationDuration={4000} width={250} borderWidth={0} useNativeDriver={true} />
       </Row>
       <Row>
-        <TouchableWithoutFeedback
-          onPress={() => {
-            // Move Camera
-            MapController.clearTemporalCirclesAndTags(dispatch);
-            changeRoute({ name: "dashboard" });
-          }}
-        >
+        <TouchableWithoutFeedback onPress={() => cancel()}>
           <Text small cancel>
             Cancel
           </Text>
