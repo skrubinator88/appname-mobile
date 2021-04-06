@@ -80,6 +80,9 @@ exports.currentUserActiveJobs = (userID, dispatch) => {
         case "modified": {
           return dispatch(ListingsActions.update(document.id, document.data()));
         }
+        case "removed": {
+          return dispatch(ListingsActions.remove(document.id));
+        }
         default:
           break;
       }
@@ -356,8 +359,71 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
   // Test
 };
 
-exports.updateUserJob = (userID, jobID, updatedJob) => {
+exports.updateUserJob = async (userID, job, token, photos = []) => {
   if (!userID) throw new Error("User ID is required");
+  if (!job) throw new Error("A job is required");
+
+  const newJob = {
+    status: "available",
+    ...job,
+  };
+
+  const geoCollection = GeoFirestore.collection("jobs"); // Create a GeoCollection reference
+  const { coordinates } = newJob;
+  const GeoPoint = new firebase.firestore.GeoPoint(...coordinates);
+
+  let newJobDoc;
+  let filenames = null;
+
+  try {
+    newJobDoc = geoCollection.doc(job.id);
+    if (photos && photos.length > 0) {
+      const body = new FormData();
+
+      photos.map((photo) => {
+        const uriSplit = photo.uri.split("/");
+        body.append("photo", {
+          uri: photo.uri,
+          type: photo.type,
+          name: uriSplit[uriSplit.length - 1],
+        });
+      });
+
+      const apiResponse = await fetch(`${config.API_URL}/job/upload`, {
+        method: "POST",
+        headers: {
+          Authorization: `bearer ${token}`,
+          "x-job-id": newJobDoc.id,
+        },
+        body,
+      });
+
+      if (!apiResponse.ok) {
+        throw new Error((await apiResponse.json()).message || "Failed to upload job");
+      }
+
+      filenames = (await apiResponse.json()).data;
+    }
+
+    return newJobDoc
+      .set({ ...newJob, coordinates: GeoPoint, photo_files: filenames }, { merge: true })
+      .then(() => {
+        return new Promise((resolution, rejection) => {
+          resolution({ success: true });
+        });
+      })
+      .catch((error) => {
+        return new Promise((resolution, rejection) => {
+          rejection({ success: false, error: error.message });
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    if (newJobDoc) {
+      newJobDoc.delete();
+    }
+    throw e;
+  }
 };
 
 exports.getUserJobComments = async (userID, state) => {

@@ -150,13 +150,7 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
               {userData.role == "project_manager" && (
                 <OverlayMenuItem size={70}>
                   <Item
-                    // onPress={() => navigation.navigate("Job Listings", { screen: "Listing Item", params: { edit: false } })}
-                    onPress={() =>
-                      navigation.reset({
-                        index: 0,
-                        routes: [{ name: "Job Listings" }],
-                      })
-                    }
+                    onPress={() => navigation.navigate("Job Listings", { screen: "Listing Item", params: { edit: false, quickAdd: true } })}
                     color="#39c64e"
                     size={70}
                   >

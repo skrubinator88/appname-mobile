@@ -1,5 +1,6 @@
 // Dependencies
 import { useMemo } from "react";
+import { Platform } from "react-native";
 import AsyncStorage from "@react-native-community/async-storage";
 import PermissionsControllers from "../controllers/PermissionsControllers";
 import env from "../env";
@@ -17,7 +18,7 @@ exports.memo = ({ dispatch }) => {
         try {
           const userToken = foundUser[0].userToken;
           const userID = foundUser[0].userName;
-          const response = await fetch(`${env.API_URL}/users/${userID}`, {
+          const response = await fetch(`${Platform.OS == "ios" ? env.API_URL : env.API_URL_AVD}/users/${userID}`, {
             method: "GET",
             headers: {
               Authorization: `bearer ${userToken}`,
@@ -47,7 +48,7 @@ exports.memo = ({ dispatch }) => {
           await AsyncStorage.getItem("app.token").then(async (token) => {
             if (token) {
               try {
-                const response = await fetch(`${env.API_URL}/notification/setup`, {
+                const response = await fetch(`${Platform.OS == "ios" ? env.API_URL : env.API_URL_AVD}/notification/setup`, {
                   method: "DELETE",
                   headers: {
                     Authorization: `bearer ${userToken}`,
@@ -83,7 +84,7 @@ exports.memo = ({ dispatch }) => {
 
       changeRole: async (prevData, newRole) => {
         // Update role in back end database
-        const res = await axios.put(`${env.API_URL}/users/change_role`, {
+        const res = await axios.put(`${Platform.OS == "ios" ? env.API_URL : env.API_URL_AVD}/users/change_role`, {
           phone_number: prevData.userData.phone_number,
           role: newRole,
         });
@@ -112,7 +113,7 @@ exports.retrieve_user_info = async ({ dispatch }) => {
     const userData = JSON.parse(data);
 
     if (userData) {
-      const response = await fetch(`${env.API_URL}/users/${userData?.userID}`, {
+      const response = await fetch(`${Platform.OS == "ios" ? env.API_URL : env.API_URL_AVD}/users/${userData?.userID}`, {
         method: "GET",
         headers: {
           Authorization: `bearer ${userData?.userToken}`,
