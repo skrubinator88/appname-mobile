@@ -3,7 +3,8 @@ import axios from "axios";
 import * as firebase from "firebase";
 
 // Config
-import config from "../env";
+import { Platform } from "react-native";
+import env from "../env";
 import { firestore, GeoFirestore } from "../config/firebase";
 
 // Functions
@@ -23,7 +24,7 @@ exports.initializeChatBetween = (user1, user2, job_id = "") => {
 };
 
 exports.getReceiverData = async (receiver, token) => {
-  const res = await fetch(`${config.API_URL}/users/${receiver}`, {
+  const res = await fetch(`${Platform.OS == "ios" ? env.API_URL : env.API_URL_AVD}/users/${receiver}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

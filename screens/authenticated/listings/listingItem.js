@@ -5,7 +5,7 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Camera, requestPermissionsAsync } from "expo-camera";
 import { launchImageLibraryAsync, MediaTypeOptions, requestMediaLibraryPermissionsAsync } from "expo-image-picker";
 import moment from "moment";
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState, useLayoutEffect } from "react";
 import {
   ActivityIndicator,
   Modal,
@@ -78,7 +78,7 @@ export default function ListingItem({ navigation, route }) {
   const [job_title, setJobTitle] = useState(""); // Input Field
   const [location, setLocation] = useState(""); // Input Field
   const [salary, setSalary] = useState(""); // Input Field
-  // const [wage, setWageRate] = useState("deployment"); // Input Field // Not longer needed
+  const [wage, setWageRate] = useState("deployment"); // Not longer needed
   const [tasks, setTasks] = useState([]); // Input Field (With Modal)
 
   const [loading, setLoading] = useState(false);
@@ -109,41 +109,42 @@ export default function ListingItem({ navigation, route }) {
     return title.indexOf(input) != -1;
   });
 
+  let placeHolderForEditedAddress = "Original GPS Location";
+
   useState(() => {
     if (params.edit) {
-      // console.log(params.data);
       setSelectedJobType(params.data.job_type);
       setJobTitle(params.data.job_title);
-
-      // Location
-      if (params.data.location.address == undefined) {
-        const location = params.data.location;
-        location.address = "Original Location";
-        setLocation(params.data.location);
-      } else {
-        setLocation(params.data.location); // Not working
-      }
-
+      setLocation(params.data.location);
       setSalary(params.data.salary);
-      // setWageRate(params.data.wage); // Not Longer needed
-      setTasks(params.data.tasks); // Not working
-      // setDate(params.data.date); // Not working
+      setTasks(params.data.tasks);
       setShowDate(params.data.showDate);
       setPriority(params.data.priority);
+      setLocation(params.data.location);
 
-      // Photos
-      const formattedPhotos = params.data.photo_files.map((item) => {
-        return { heigh: "original size", type: "image/png", uri: `${env.API_URL}/images/${item}.png` };
-      });
-      // setPhotos(params.data.photo_files);
-      // console.log(params.data.photos_files);
-      console.log(authState.userToken);
-    } else {
-      return null;
+      if (params.data.start_at) {
+        setDate(new Date(params.data.start_at));
+        setShowDate(true);
+      }
     }
   });
 
-  useEffect(() => console.log(photos), [photos]);
+  useLayoutEffect(() => {
+    if (params.edit) {
+      if (params.data.location.coords && params.data.location.address == undefined) {
+        location_address_ref.current.setValue(placeHolderForEditedAddress);
+      }
+
+      if (params.data.photo_files != null) {
+        const formattedPhotos = params.data.photo_files.map((item) => {
+          return { type: "image/png", uri: `${env.API_URL}/job/${params.data.id}/${item}` };
+        });
+        setPhotos(formattedPhotos);
+      }
+    }
+  }, []);
+
+  // useEffect(() => console.log(photos), [photos]);
 
   const updateDate = async (e, dateParam) => {
     if (dateParam) {
@@ -363,16 +364,15 @@ export default function ListingItem({ navigation, route }) {
 
   function handleSuggestionEditing(item) {
     if (item == "Current Location") {
-      PermissionsControllers.getLocation().then((position) => setLocation(position));
+      PermissionsControllers.getLocation().then((position) => setLocation({ ...position, address: null, id: null, place_id: null }));
       location_address_ref.current.setValue(item);
     } else {
-      setLocation(item);
+      setLocation({ ...item, coords: null, timestamp: null });
 
       location_address_ref.current.setValue(item.address);
     }
     location_address_ref.current.blur();
     setSuggestionsEditing(false);
-    // console.log(location);
   }
 
   function handleSaveTasks(tasks) {
@@ -382,46 +382,45 @@ export default function ListingItem({ navigation, route }) {
 
   async function formatForm(data) {
     const form = { ...data };
-    const place_data = await GoogleServicesController.getCoordinatesFromPlaceID(form.location.place_id);
-    form.start_at = form.date?.getTime() || Date.now();
     form.date = null;
-    form.coordinates = [place_data.geometry.location["lat"], place_data.geometry.location["lng"]];
-    return form;
-  }
 
-  // When google suggestion is disabled
-  function formatFormV2(data) {
-    const form = { ...data }; // Copy data
-    form.start_at = form.date?.getTime() || Date.now();
-    form.date = null;
-    form.coordinates = [form.location.coords.latitude, form.location.coords.longitude];
+    if (params.edit == true) {
+      form.id = params.data.id;
+    } else {
+      form.start_at = form.date?.getTime() || Date.now();
+    }
+
+    if (form.location.coords == undefined) {
+      // Formats form when job location was pulled from Google Location API
+      const place_data = await GoogleServicesController.getCoordinatesFromPlaceID(form.location.place_id);
+      form.coordinates = [place_data.geometry.location["lat"], place_data.geometry.location["lng"]];
+    } else {
+      // Formats form when job location was pulled from client GPS
+      form.coordinates = [form.location.coords.latitude, form.location.coords.longitude];
+    }
+
     return form;
   }
 
   async function handleSubmit(form) {
     try {
       setLoading(true);
-      // const formattedForm = await formatForm(form);
-      let formattedForm;
+      let success;
 
       if (!payments.defaultMethod) {
         await Promise.reject({ message: "You must set your default payment method before creating a job", code: 418 });
       }
 
-      if (form.location.coords == undefined) {
-        // Formats form when job location was pulled from Google Location API
-        formattedForm = await formatForm(form);
-      } else {
-        // Formats form when job location was pulled from client GPS
-        formattedForm = formatFormV2(form);
-      }
-
-      // console.log("FORMATTED FORM", formattedForm);
+      const formattedForm = await formatForm(form);
 
       // Sends the job details and associated photos for upload and job creation
-      const { success } = await JobsController.postUserJob(authState.userID, formattedForm, authState.userToken, photos);
+      if (params.edit == false) {
+        success = (await JobsController.postUserJob(authState.userID, formattedForm, authState.userToken, photos)).success;
+      } else {
+        success = (await JobsController.updateUserJob(authState.userID, formattedForm, authState.userToken, photos)).success;
+      }
 
-      if (success) return route.params?.quickAdd ? navigation.navigate() : navigation.goBack();
+      if (success) return params?.quickAdd ? navigation.navigate() : navigation.goBack();
     } catch (e) {
       console.log(e);
       Alert.alert("Failed to create job", e.code === 418 ? e.message : undefined);
@@ -606,7 +605,7 @@ export default function ListingItem({ navigation, route }) {
               )}
             </Item>
 
-            {/* <Item style={{ marginVertical: 20 }}>
+            <Item style={{ marginVertical: 20 }}>
               <WageInput>
                 <SalaryField style={{ alignSelf: "stretch" }}>
                   <TextField
@@ -621,7 +620,7 @@ export default function ListingItem({ navigation, route }) {
                   />
                 </SalaryField>
               </WageInput>
-              <TouchableOpacity onPress={onSetWageRate}>
+              {/* <TouchableOpacity onPress={onSetWageRate}>
                 <ScheduleButton
                   style={{
                     justifyContent: "center",
@@ -634,8 +633,8 @@ export default function ListingItem({ navigation, route }) {
                     Choose cycle (/hr, /day, per deployment)
                   </Text>
                 </ScheduleButton>
-              </TouchableOpacity>
-            </Item> */}
+              </TouchableOpacity> */}
+            </Item>
 
             <Item style={{ marginVertical: 4 }}>
               <View style={{ flexDirection: "row", justifyContent: "flex-start" }}>
@@ -662,10 +661,12 @@ export default function ListingItem({ navigation, route }) {
               <Text style={{ color: "#444", textAlign: "center", marginTop: 8, marginBottom: 4, textTransform: "uppercase" }}>
                 ADD JOB PHOTOS (OPTIONAL)
               </Text>
+
               <FlatList
                 data={photos}
                 keyExtractor={(v) => v.uri}
                 centerContent
+                horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingVertical: 40, justifyContent: "center", paddingTop: 12 }}
                 ListHeaderComponent={() => (
@@ -691,15 +692,7 @@ export default function ListingItem({ navigation, route }) {
                     </ScheduleButton>
                   </TouchableOpacity>
                 )}
-                horizontal
-                renderItem={({ item }) => (
-                  <PhotoItem
-                    item={item}
-                    onRemove={() => {
-                      setPhotos(photos.filter((v) => v.uri !== item.uri));
-                    }}
-                  />
-                )}
+                renderItem={({ item }) => <PhotoItem item={item} onRemove={() => setPhotos(photos.filter((v) => v.uri !== item.uri))} />}
               />
               <JobCamera
                 showCamera={showCamera}

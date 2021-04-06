@@ -12,7 +12,7 @@ export default function Card(props) {
 
   useEffect(() => {
     if (animate) {
-      Animated.timing(slideAnim, { toValue: 0, duration: 300 }).start();
+      Animated.timing(slideAnim, { toValue: 0, duration: 300 }, { useNativeDriver: true }).start();
     }
   }, [slideAnim, animate]);
 
