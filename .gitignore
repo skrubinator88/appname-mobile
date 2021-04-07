@@ -13,9 +13,5 @@ npm-debug.*
 web-build/
 web-report/
 yarn.lock
-config.json
-
-# macOS
-
 components/Example-Style.js
-
+config.json
