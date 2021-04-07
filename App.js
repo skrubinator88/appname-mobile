@@ -3,7 +3,7 @@ import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import _ from "lodash";
 import React, { useEffect, useReducer } from "react";
-import { ActivityIndicator, Text, TextInput, View, AppState, LogBox } from "react-native";
+import { ActivityIndicator, Text, TextInput, View, AppState, LogBox, Platform ,An} from "react-native";
 import * as ExpoNotif from "expo-notifications";
 // Redux
 import { Provider } from "react-redux";
@@ -22,6 +22,7 @@ import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
 import Prompts from "./components/Prompts";
 import { default as Example } from "./components/Example";
+import { AndroidImportance, AndroidNotificationVisibility } from "expo-notifications";
 
 // // Disable Font Scaling
 Text.defaultProps = Text.defaultProps || {};
@@ -107,8 +108,8 @@ export default function App({ navigation }) {
         }
       },
     ])
-      .then((subscriptions) => {
-        subscriptions = subscriptions;
+      .then((subs) => {
+        subscriptions = subs;
       })
       .catch((e) => {
         console.log(e, "Failed to set notification listener");
@@ -157,10 +158,10 @@ export default function App({ navigation }) {
                 </Provider>
               </>
             ) : (
-              <>
-                <NotAuthenticatedStackScreen />
-              </>
-            )}
+                <>
+                  <NotAuthenticatedStackScreen />
+                </>
+              )}
           </NavigationContainer>
         </GlobalContext.Provider>
       </ActionSheetProvider>

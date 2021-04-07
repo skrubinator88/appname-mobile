@@ -1,6 +1,6 @@
 // Dependencies
 import * as firebase from "firebase";
-import { GeoFirestore } from "../config/firebase";
+import { GeoFirestore ,firestore} from "../config/firebase";
 // Config
 import config from "../env";
 // Functions
@@ -96,7 +96,6 @@ exports.getJobTagType = (imageType) => {
   switch (imageType) {
     case "user":
       return require("../assets/user-icon2.png");
-      break;
   }
 };
 
@@ -273,7 +272,7 @@ exports.counterApprove = async (jobID, offer, authState) => {
 };
 
 exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
-  db.collection("jobs")
+  firestore.collection("jobs")
     .doc(qr_code)
     .get()
     .then((doc) => {

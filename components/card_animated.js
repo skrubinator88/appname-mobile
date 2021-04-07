@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Animated, Text, View, StyleSheet, Button, Dimensions, Easing } from "react-native";
+import { Animated, Text, View, StyleSheet, Button, Dimensions, Easing, Platform } from "react-native";
 
 export default class Card extends Component {
   state = {

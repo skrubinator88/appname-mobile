@@ -203,13 +203,10 @@ const Column = styled.View`
     switch (true) {
       case back:
         return "flex: 1";
-        break;
       case middle:
         return "flex: 2";
-        break;
       case next:
         return "flex: 1";
-        break;
     }
   }};
   justify-content: center;

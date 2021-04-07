@@ -5,6 +5,11 @@ import styled from "styled-components/native";
 import * as VectorIcons from "@expo/vector-icons";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 
+
+const isIos = Platform.OS === "ios";
+const statusBarHeight = getStatusBarHeight();
+const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
+
 export default function Header({
   // Navigation
   navigation, // @Required
@@ -36,10 +41,6 @@ export default function Header({
   nextAction,
   children,
 }) {
-  const isIos = Platform.OS === "ios";
-  const statusBarHeight = getStatusBarHeight();
-  const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
-
   // @Required
   // if (!navigation) throw Error("navigation: Navigation is Required");
   if (nextTitle && !nextAction) throw Error("nextAction: Action is Required");
@@ -127,13 +128,10 @@ const Column = styled.View`
     switch (true) {
       case back:
         return "flex: 1";
-        break;
       case middle:
         return "flex: 2";
-        break;
       case next:
         return "flex: 1";
-        break;
     }
   }};
   justify-content: center;

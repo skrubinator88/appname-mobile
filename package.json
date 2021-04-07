@@ -1,6 +1,7 @@
 {
     "main": "node_modules/expo/AppEntry.js",
     "scripts": {
+        "prestart": "npm run eslint --quiet .",
         "start": "npm run generate-config && expo start",
         "nvm": "nvm use 12.18.3",
         "dev": "npm run generate-config && expo start",
@@ -32,7 +33,7 @@
         "expo-permissions": "~10.0.0",
         "expo-stripe-checkout": "^1.0.1",
         "expo-web-browser": "~8.6.0",
-        "firebase": "7.9.0",
+        "firebase": "^8.3.2",
         "geofirestore": "^4.3.0",
         "intl": "^1.2.5",
         "moment": "^2.29.1",
@@ -66,7 +67,11 @@
     },
     "devDependencies": {
         "@babel/core": "~7.9.0",
+        "@react-native-community/eslint-config": "^2.0.0",
         "babel-preset-expo": "8.3.0",
+        "eslint": "^7.23.0",
+        "eslint-plugin-react": "^7.23.1",
+        "prettier": "^2.2.1",
         "yamljs": "^0.3.0"
     },
     "private": true
