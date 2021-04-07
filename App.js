@@ -22,6 +22,7 @@ import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
 import Prompts from "./components/Prompts";
 import { default as Example } from "./components/Example";
+import SVG from "./assets/gig-logo";
 
 // // Disable Font Scaling
 Text.defaultProps = Text.defaultProps || {};
