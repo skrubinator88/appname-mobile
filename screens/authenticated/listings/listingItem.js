@@ -456,7 +456,12 @@ export default function ListingItem({ navigation, route }) {
           <Header
             navigation={navigation}
             backTitle="Cancel"
-            title="Add Work"
+            title={() => (
+              <>
+                <Text style={{ color: "black", fontWeight: "300", fontSize: 23 }}>Add</Text>
+                <GigChaserJobWord color="black" width="40px" height="40px" style={{ marginHorizontal: 10 }} />
+              </>
+            )}
             backAction={() => (route.params?.quickAdd ? navigation.navigate("Root") : navigation.goBack())}
           />
 

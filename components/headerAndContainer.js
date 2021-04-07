@@ -146,7 +146,7 @@ export default function Header({
                 {typeof title == "string" ? (
                   <TitleTextBox style={{ color: titleColor, fontWeight: titleWeight }}>{title}</TitleTextBox>
                 ) : (
-                  title()
+                  <Row>{title()}</Row>
                 )}
               </Column>
 
@@ -212,6 +212,12 @@ const Column = styled.View`
         break;
     }
   }};
+  justify-content: center;
+  align-items: center;
+`;
+
+const Row = styled.View`
+  flex-direction: row;
   justify-content: center;
   align-items: center;
 `;
