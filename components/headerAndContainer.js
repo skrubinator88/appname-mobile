@@ -1,16 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 
-import {
-  Platform,
-  SafeAreaView,
-  Dimensions,
-  View,
-  ScrollView,
-  KeyboardAvoidingView,
-  ActivityIndicator,
-  RefreshControl,
-} from "react-native";
+import { Platform, SafeAreaView, Dimensions, View, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
 import styled from "styled-components/native";
 import * as VectorIcons from "@expo/vector-icons";
 
@@ -29,6 +20,7 @@ export default function Header({
   bottomBackground = "transparent",
   containerBackground = "#f5f5f5",
   loadingContent = false,
+  disableContainer = false,
   children, // @required
 
   // Bar Properties
@@ -159,8 +151,8 @@ export default function Header({
           </SafeAreaView>
 
           {/* Children */}
-          {children}
-          {isIos && !loadingContent && (
+          {!disableContainer && children}
+          {isIos && !loadingContent && !disableContainer && (
             <View
               style={{
                 height: SPACER_SIZE,

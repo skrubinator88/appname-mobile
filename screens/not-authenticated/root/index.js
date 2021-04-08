@@ -8,28 +8,30 @@ export function RootScreen({ navigation }) {
 
   return (
     <Container>
-      <ContainerLogo>
+      {/* <ContainerLogo>
         <Image source={require("../../../assets/rootWallpaper.jpg")} />
-      </ContainerLogo>
+      </ContainerLogo> */}
       <ContainerLogin>
-        <ContainerLoginLeft>
-          <Button onPress={() => navigation.navigate("SignIn")} style={{ backgroundColor: colors.primary }}>
-            <Text style={{ color: "white" }}>Sign In</Text>
-          </Button>
-        </ContainerLoginLeft>
-        <ContainerLoginRight>
-          <Text small>
-            New user?{"  "}
-            <TextStyled
-              onPress={() => {
-                navigation.navigate("SignUpIndex");
-              }}
-              style={{ color: colors.primary }}
-            >
-              Register
-            </TextStyled>
-          </Text>
-        </ContainerLoginRight>
+        <UI>
+          <ContainerLoginLeft>
+            <Button onPress={() => navigation.navigate("SignIn")} style={{ backgroundColor: colors.primary }}>
+              <Text style={{ color: "white" }}>Sign In</Text>
+            </Button>
+          </ContainerLoginLeft>
+          <ContainerLoginRight>
+            <Text small>
+              New user?{"  "}
+              <TextStyled
+                onPress={() => {
+                  navigation.navigate("SignUpIndex");
+                }}
+                style={{ color: colors.primary }}
+              >
+                Register
+              </TextStyled>
+            </Text>
+          </ContainerLoginRight>
+        </UI>
       </ContainerLogin>
     </Container>
   );
@@ -65,13 +67,18 @@ const ContainerLogo = styled.View`
 `;
 
 const ContainerLogin = styled.View`
-  flex: 0.2;
+  flex: 1;
+  justify-content: flex-end;
+`;
+
+const UI = styled.View`
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   background-color: white;
   flex-direction: row;
   border-top-left-radius: 30px;
   border-top-right-radius: 30px;
+  padding: 60px 0;
 `;
 
 const ContainerLoginLeft = styled.View`

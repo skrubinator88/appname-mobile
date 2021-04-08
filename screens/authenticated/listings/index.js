@@ -75,7 +75,7 @@ export default function JobListing({ navigation }) {
         titleColor="white"
         title={() => (
           <>
-            <GigChaserJobWord color="white" width="40px" height="40px" style={{ marginHorizontal: 10 }} />
+            <GigChaserJobWord color="white" width="60px" height="25px" style={{ marginHorizontal: 10 }} />
             <Text style={{ color: "white", fontWeight: "300", fontSize: 23 }}>Listing</Text>
           </>
         )}
@@ -89,7 +89,7 @@ export default function JobListing({ navigation }) {
                 <Text small weight="700" color="#1b5cce">
                   NEW
                 </Text>
-                <GigChaserJobWord color="#1b5cce" width="40px" height="40px" style={{ marginHorizontal: 10 }} />
+                <GigChaserJobWord color="#1b5cce" width="60px" height="25px" style={{ marginHorizontal: 10 }} />
                 <Text small weight="700" color="#1b5cce">
                   POSTING
                 </Text>

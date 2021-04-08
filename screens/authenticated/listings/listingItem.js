@@ -27,10 +27,11 @@ import styled from "styled-components/native";
 // Context
 import { GlobalContext } from "../../../components/context";
 // Components
-import Header from "../../../components/header";
+import Header from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
 import GoogleServicesController from "../../../controllers/GoogleServicesController";
 import JobSuggestions from "../../../models/fetchedSuggestedItems";
+import GigChaserJobWord from "../../../assets/gig-logo";
 // Controllers
 import JobsController from "../../../controllers/JobsControllers";
 import PermissionsControllers from "../../../controllers/PermissionsControllers";
@@ -358,6 +359,7 @@ export default function ListingItem({ navigation, route }) {
       onChangeText: (text) => {
         setElementValue(text);
       },
+      contentInset: { top: -10 },
       value: elementValue,
     };
   }
@@ -454,12 +456,14 @@ export default function ListingItem({ navigation, route }) {
           />
 
           <Header
+            disableContainer={true}
             navigation={navigation}
             backTitle="Cancel"
+            backColor="black"
             title={() => (
               <>
                 <Text style={{ color: "black", fontWeight: "300", fontSize: 23 }}>Add</Text>
-                <GigChaserJobWord color="black" width="40px" height="40px" style={{ marginHorizontal: 10 }} />
+                <GigChaserJobWord color="black" width="60px" height="30px" style={{ marginHorizontal: 10 }} />
               </>
             )}
             backAction={() => (route.params?.quickAdd ? navigation.navigate("Root") : navigation.goBack())}
@@ -467,13 +471,20 @@ export default function ListingItem({ navigation, route }) {
 
           <Fields>
             <Item>
+              <InputTitle>
+                <GigChaserJobWord color="#444" width="60px" height="20px" />
+                <Text small bold color="#444">
+                  TYPES
+                </Text>
+              </InputTitle>
               <TextField
                 {...commonInputProps(job_type, setJobType)}
-                labelOffset={{ x0: 0, y0: 0, x1: -40, y1: -6 }}
-                contentInset={{ top: 16, left: 0, right: 0, label: 4, input: 8 }}
-                label="JOB TYPE"
-                labelFontSize={14}
-                labelTextStyle={{ color: "black", fontWeight: "700" }}
+                // labelOffset={{ x0: 0, y0: 0, x1: -40, y1: -6 }}
+                // contentInset={{ top: 16, left: 0, right: 0, label: 4, input: 8 }}
+                // label="JOB TYPE"
+                // labelFontSize={14}
+                // labelTextStyle={{ color: "black", fontWeight: "700" }}
+                // containerStyle={{ borderWidth: 1 }}
                 placeholder="Search Job Types"
                 ref={job_type_ref}
                 renderLeftAccessory={() => (
@@ -513,8 +524,14 @@ export default function ListingItem({ navigation, route }) {
             </Item>
 
             <Item>
+              <InputTitle>
+                <GigChaserJobWord color="#444" width="60px" height="20px" />
+                <Text small bold color="#444">
+                  TITLE
+                </Text>
+              </InputTitle>
               <TextField
-                label="JOB TITLE"
+                // label="JOB TITLE"
                 placeholder="Job Title"
                 labelFontSize={14}
                 labelTextStyle={{ color: "grey", fontWeight: "700" }}
@@ -543,6 +560,9 @@ export default function ListingItem({ navigation, route }) {
             </Item>
 
             <Item>
+              <Text small bold color="#444">
+                LOCATION ADDRESS
+              </Text>
               <TextField
                 {...commonInputProps(location.address, setLocation)}
                 textContentType="addressCityAndState"
@@ -556,8 +576,8 @@ export default function ListingItem({ navigation, route }) {
                 }}
                 onBlur={() => setSuggestionsEditing(false)}
                 labelOffset={{ x0: 0, y0: 0, x1: -40, y1: -6 }}
-                contentInset={{ top: 16, left: 0, right: 0, label: 4, input: 8 }}
-                label="LOCATION ADDRESS"
+                // contentInset={{ top: 16, left: 0, right: 0, label: 4, input: 8 }}
+                // label="LOCATION ADDRESS"
                 placeholder="Type the first line of the address"
                 value={location.address}
                 ref={location_address_ref}
@@ -613,11 +633,14 @@ export default function ListingItem({ navigation, route }) {
             <Item style={{ marginVertical: 20 }}>
               <WageInput>
                 <SalaryField style={{ alignSelf: "stretch" }}>
+                  <Text small bold color="#444">
+                    PAY
+                  </Text>
                   <TextField
                     {...commonInputProps(salary, setSalary)}
                     prefix="$"
                     suffix={`/${wage}`}
-                    label="PAY"
+                    // label="PAY"
                     labelFontSize={14}
                     placeholder="0.00"
                     labelTextStyle={{ color: "grey", fontWeight: "700" }}
@@ -663,9 +686,15 @@ export default function ListingItem({ navigation, route }) {
             </Item>
 
             <Item style={{ marginVertical: 4 }}>
-              <Text style={{ color: "#444", textAlign: "center", marginTop: 8, marginBottom: 4, textTransform: "uppercase" }}>
-                ADD JOB PHOTOS (OPTIONAL)
-              </Text>
+              <InputTitle style={{ justifyContent: "center" }}>
+                <Text small bold color="#444">
+                  ADD
+                </Text>
+                <GigChaserJobWord color="#444" width="60px" height="20px" />
+                <Text small bold color="#444">
+                  PHOTOS (OPTIONAL)
+                </Text>
+              </InputTitle>
 
               <FlatList
                 data={photos}
@@ -721,9 +750,12 @@ export default function ListingItem({ navigation, route }) {
             </Item>
 
             <Item>
-              <Text style={{ color: "#444", textAlign: "center", marginTop: 8, textTransform: "uppercase" }}>
-                Job will be started {date.getTime() <= Date.now() + 5000 ? "immediately" : moment(date).calendar()}
-              </Text>
+              <InputTitle style={{ justifyContent: "center" }}>
+                <Text style={{ color: "#444", textAlign: "center", marginTop: 8, textTransform: "uppercase" }}>
+                  <GigChaserJobWord color="#444" width="60px" height="20px" /> will be started{" "}
+                  {date.getTime() <= Date.now() + 5000 ? "immediately" : moment(date).calendar()}
+                </Text>
+              </InputTitle>
               <Text light small style={{ textAlign: "center", marginTop: 4, fontSize: 10, textTransform: "uppercase" }}>
                 (You can only schedule up to 6 days from now)
               </Text>
@@ -935,6 +967,11 @@ const Fields = styled.View`
 
 const Item = styled.View`
   margin: 10px 0;
+`;
+
+const InputTitle = styled.View`
+  flex-direction: row;
+  align-items: center;
 `;
 
 const ScheduleButton = styled.View`
