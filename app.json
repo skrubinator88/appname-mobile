@@ -5,8 +5,9 @@
     "platforms": ["ios", "android"],
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon_ios.png",
     "splash": {
-      "image": "./assets/blue_original.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -15,6 +16,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
+      "icon": "./assets/icon_ios.png",
       "bundleIdentifier": "com.example.gig-chasers",
       "supportsTablet": false,
       "config": {
@@ -22,6 +24,7 @@
       }
     },
     "android": {
+      "icon": "./assets/icon_android.png",
       "useNextNotificationsApi": true
     }
   }
