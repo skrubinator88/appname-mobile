@@ -1,7 +1,10 @@
 import React, { useContext } from "react";
-import { Image, Alert } from "react-native";
+import { Image, Alert, Dimensions } from "react-native";
 import styled from "styled-components/native";
 import { useTheme } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
+
+const width = Dimensions.get("screen").width;
 
 export function RootScreen({ navigation }) {
   const { colors } = useTheme();
@@ -11,28 +14,40 @@ export function RootScreen({ navigation }) {
       {/* <ContainerLogo>
         <Image source={require("../../../assets/rootWallpaper.jpg")} />
       </ContainerLogo> */}
-      <ContainerLogin>
-        <UI>
-          <ContainerLoginLeft>
-            <Button onPress={() => navigation.navigate("SignIn")} style={{ backgroundColor: colors.primary }}>
-              <Text style={{ color: "white" }}>Sign In</Text>
-            </Button>
-          </ContainerLoginLeft>
-          <ContainerLoginRight>
-            <Text small>
-              New user?{"  "}
-              <TextStyled
-                onPress={() => {
-                  navigation.navigate("SignUpIndex");
-                }}
-                style={{ color: colors.primary }}
-              >
-                Register
-              </TextStyled>
-            </Text>
-          </ContainerLoginRight>
-        </UI>
-      </ContainerLogin>
+      <LinearGradient start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }} colors={["#54bac2", "#d3f3cd", "#51a5ab"]} style={{ flex: 1 }}>
+        <ContainerLogin>
+          <Logo>
+            <Image
+              style={{
+                width: width - 50,
+                resizeMode: "contain",
+              }}
+              source={require("../../../assets/logo.png")}
+            />
+          </Logo>
+
+          <UI>
+            <ContainerLoginLeft>
+              <Button onPress={() => navigation.navigate("SignIn")} style={{ backgroundColor: colors.primary }}>
+                <Text style={{ color: "white" }}>Sign In</Text>
+              </Button>
+            </ContainerLoginLeft>
+            <ContainerLoginRight>
+              <Text small>
+                New user?{"  "}
+                <TextStyled
+                  onPress={() => {
+                    navigation.navigate("SignUpIndex");
+                  }}
+                  style={{ color: colors.primary }}
+                >
+                  Register
+                </TextStyled>
+              </Text>
+            </ContainerLoginRight>
+          </UI>
+        </ContainerLogin>
+      </LinearGradient>
     </Container>
   );
 }
@@ -78,7 +93,14 @@ const UI = styled.View`
   flex-direction: row;
   border-top-left-radius: 30px;
   border-top-right-radius: 30px;
-  padding: 60px 0;
+  /* padding: 60px 0; */
+  flex: 0.17;
+`;
+
+const Logo = styled.View`
+  flex: 0.83;
+  align-items: center;
+  justify-content: center;
 `;
 
 const ContainerLoginLeft = styled.View`

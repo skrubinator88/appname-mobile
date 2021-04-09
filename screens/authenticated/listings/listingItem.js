@@ -778,7 +778,7 @@ export default function ListingItem({ navigation, route }) {
                 }}
               >
                 <Text bold color={showDate && Platform.OS === "ios" ? "white" : "black"}>
-                  {showDate && Platform.OS === "ios" ? "Close Date Picker" : "Schedule Job"}
+                  {showDate && Platform.OS === "ios" ? "Close Date Picker" : "Schedule"}
                 </Text>
               </ScheduleButton>
             </TouchableOpacity>
