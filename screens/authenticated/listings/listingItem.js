@@ -554,6 +554,7 @@ export default function ListingItem({ navigation, route }) {
                         </Text>
                       </Task>
                     )}
+                    ListEmptyComponent={() => <Text style={{ textAlign: "center", color: "#888" }}>Tap on this section to add tasks</Text>}
                   />
                 </Tasks>
               </TouchableWithoutFeedback>
