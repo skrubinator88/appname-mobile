@@ -1,9 +1,10 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 
 import { Platform, SafeAreaView, Dimensions, View, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
 import styled from "styled-components/native";
 import * as VectorIcons from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 const isIos = Platform.OS === "ios";
 const height = Dimensions.get("window").height;
@@ -97,6 +98,11 @@ export default function Header({
     }
   }
 
+  useEffect(() => {
+    console.log(children?.length);
+    return () => {};
+  }, []);
+
   // Structure
   return (
     <>
@@ -152,6 +158,7 @@ export default function Header({
 
           {/* Children */}
           {!disableContainer && children}
+
           {isIos && !loadingContent && !disableContainer && (
             <View
               style={{
@@ -160,7 +167,11 @@ export default function Header({
                 borderBottomStartRadius: 45,
                 backgroundColor: bottomBackground || containerBackground,
               }}
-            />
+            >
+              {children == undefined && (
+                <LinearGradient style={{ flex: 1 }} start={{ x: 1, y: 1 }} end={{ x: 0, y: 0 }} colors={["white", containerBackground]} />
+              )}
+            </View>
           )}
         </View>
       </ScrollView>
