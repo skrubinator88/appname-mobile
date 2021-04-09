@@ -2,34 +2,28 @@ import * as React from "react";
 import Svg, { Defs, LinearGradient, Stop, G, Rect, Path } from "react-native-svg";
 /* SVGR has dropped some elements not supported by react-native-svg: style */
 
-/* ORIGINAL COLORS
-
-
-*/
-
 function SvgComponent(props) {
   return (
     <Svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78.081 34.091" {...props}>
       <Defs>
         <LinearGradient id="prefix__a" y1={0.5} x2={1} y2={0.5} gradientUnits="objectBoundingBox">
           <Stop offset={0} stopColor={props.color} />
-          <Stop offset={1} stopColor={props.color} stopOpacity={0} />
+          <Stop offset={1} stopColor={"white"} stopOpacity={0} />
         </LinearGradient>
       </Defs>
 
       <G transform="translate(-78.496 -320.656)">
-        <Rect fill={props.color} className="prefix__a" width={24.743} height={1.944} rx={0.972} transform="translate(131.834 351.434)" />
+        <Rect fill={"url(#prefix__a)"} width={24.743} height={1.944} rx={0.972} transform="translate(131.834 351.434)" />
 
-        <Rect fill={props.color} className="prefix__a" width={23.784} height={1.766} rx={0.883} transform="translate(129.48 333.513)" />
+        <Rect fill={"url(#prefix__a)"} width={23.784} height={1.766} rx={0.883} transform="translate(129.48 333.513)" />
 
         <G transform="translate(78.496 321.165)">
           <Path
-            className="prefix__a"
-            fill={props.color}
+            fill={"url(#prefix__a)"}
             d="M32.321 33.432h-14.19c-.519-.158-.932-.417-.932-.931a.931.931 0 01.932-.932h14.19a.932.932 0 01.932.932.932.932 0 01-.932.931z"
           />
 
-          <Rect className="prefix__a" fill={props.color} width={55.998} height={1.863} rx={0.932} transform="translate(11.452 2.134)" />
+          <Rect fill={"url(#prefix__a)"} width={55.998} height={1.863} rx={0.932} transform="translate(11.452 2.134)" />
 
           {/* GIG WORD */}
           <Path

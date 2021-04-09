@@ -9,7 +9,7 @@ import { useTheme } from "@react-navigation/native";
 import env from "../../../env";
 
 // Styling
-import { Entypo, Octicons, Feather } from "@expo/vector-icons";
+import { Octicons, Feather } from "@expo/vector-icons";
 
 // Controllers
 import ChatsController from "../../../controllers/ChatsController";
