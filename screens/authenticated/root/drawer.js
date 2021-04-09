@@ -99,7 +99,8 @@ function DrawerContent({ navigation }) {
                   <MaterialIcons name="history" size={24} color="black" />
                 </DrawerIcon>
                 <Text color="#555" style={{ fontSize: 21, marginLeft: 5, fontWeight: "400" }}>
-                  <GigChaserJobWord color="#555" width="60px" height="20px" /> History
+                  <GigChaserJobWord color="#555" width="60px" height="20px" />
+                  History
                 </Text>
               </DrawerItemAlternative>
             </TouchableOpacity>

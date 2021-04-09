@@ -159,7 +159,7 @@ export default function JobListing({ navigation }) {
                 <JobItemLink>
                   <JobItemRow>
                     <Column>
-                      <Row>
+                      <Row style={{ justifyContent: "space-between" }}>
                         <Text small weight="700" color="#1b5cce">
                           {item.job_type}
                         </Text>
@@ -212,7 +212,7 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
       <JobItemLink activeOpacity={0.6} onPress={() => navigation.navigate("Listing Item", { edit: true, data: item })}>
         <JobItemRow>
           <Column>
-            <Row>
+            <Row style={{ justifyContent: "space-between" }}>
               <Text small weight="700">
                 {item.job_title}
               </Text>

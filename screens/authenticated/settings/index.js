@@ -9,6 +9,7 @@ import { FontAwesome, Ionicons, Octicons } from "@expo/vector-icons";
 // Components
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
+import env from "../../../env";
 
 const isIos = Platform.OS === "ios";
 const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
@@ -22,15 +23,15 @@ export default function SettingsScreen({ navigation }) {
   return (
     <Container
       navigation={navigation}
-      nextTitle="Save"
+      // nextTitle="Save"
       color="white"
       title="Legal"
       titleWeight="300"
       headerBackground="#3869f3"
       nextProvider="Entypo"
-      nextIcon="dots-three-horizontal"
+      // nextIcon="dots-three-horizontal"
       nextSize={25}
-      nextAction={() => { }}
+      // nextAction={() => {}}
     >
       {/* Preffered Section */}
 
@@ -39,19 +40,19 @@ export default function SettingsScreen({ navigation }) {
           <Column ProfilePicture>
             <ProfilePicture
               source={{
-                uri: "https://i.insider.com/5899ffcf6e09a897008b5c04?width=1200",
+                uri: `${env.API_URL}${authState.userData.profile_picture}`,
               }}
             ></ProfilePicture>
           </Column>
           <Column ProfilePictureDescription>
             <Text medium color="#474747">
-              John Doe
+              {authState.userData.first_name} {authState.userData.last_name}
             </Text>
             <Text medium color="#474747">
-              000.000.0000
+              {authState.userData.phone_number}
             </Text>
             <Text small color="#474747">
-              JohnDoe@company.net
+              {authState.userData.email}
             </Text>
           </Column>
         </PrefferedLegalItemRow>

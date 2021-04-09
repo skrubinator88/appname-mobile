@@ -125,7 +125,7 @@ export default function ListingItem({ navigation, route }) {
 
       if (params.data.start_at) {
         setDate(new Date(params.data.start_at));
-        setShowDate(true);
+        // setShowDate(true);
       }
     }
   });
@@ -474,7 +474,7 @@ export default function ListingItem({ navigation, route }) {
               <InputTitle>
                 <GigChaserJobWord color="#444" width="60px" height="20px" />
                 <Text small bold color="#444">
-                  TYPES
+                  TYPE
                 </Text>
               </InputTitle>
               <TextField
@@ -938,6 +938,9 @@ const Task = styled.View`
   flex-direction: row;
   justify-content: space-between;
   padding: 2px 10px;
+  background-color: #efefef;
+  border-radius: 3px;
+  margin-bottom: 10px;
 `;
 
 const WageTimeField = styled.View`
@@ -993,9 +996,11 @@ const Container = styled.ScrollView`
 const Suggestions = styled.View``;
 
 const Tasks = styled.View`
+  background-color: white;
   min-height: 100px;
-  border: 1px solid grey;
   border-radius: 6px;
+  border: #548ff7;
+  padding: 0 20px;
 `;
 
 const SuggestedItem = styled.View`
