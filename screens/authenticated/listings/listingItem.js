@@ -1,28 +1,34 @@
 // Dependencies React
-import { Ionicons, AntDesign, MaterialCommunityIcons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import { AntDesign, FontAwesome, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
+// Styling Dependencies
+import { TextField } from "@ubaids/react-native-material-textfield";
 import { Camera, requestPermissionsAsync } from "expo-camera";
+import Constants from "expo-constants";
 import { launchImageLibraryAsync, MediaTypeOptions, requestMediaLibraryPermissionsAsync } from "expo-image-picker";
 import moment from "moment";
-import React, { useCallback, useContext, useEffect, useRef, useState, useLayoutEffect } from "react";
+import React, { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Modal,
+
   Alert,
   Dimensions,
   FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-  SafeAreaView,
-} from "react-native";
-import Constants from "expo-constants";
+  KeyboardAvoidingView, Modal,
 
-// Styling Dependencies
-import { TextField } from "@ubaids/react-native-material-textfield";
+
+
+
+  Platform,
+
+
+
+  SafeAreaView, TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
+} from "react-native";
+import { useSelector } from "react-redux";
 import styled from "styled-components/native";
 // Context
 import { GlobalContext } from "../../../components/context";
@@ -30,14 +36,14 @@ import { GlobalContext } from "../../../components/context";
 import Header from "../../../components/header";
 import Text from "../../../components/text";
 import GoogleServicesController from "../../../controllers/GoogleServicesController";
-import JobSuggestions from "../../../models/fetchedSuggestedItems";
 // Controllers
 import JobsController from "../../../controllers/JobsControllers";
 import PermissionsControllers from "../../../controllers/PermissionsControllers";
+import env from "../../../env";
+import JobSuggestions from "../../../models/fetchedSuggestedItems";
 import PhotoItem from "./listItemImage";
 import TaskModal from "./taskModal";
-import { useDispatch, useSelector } from "react-redux";
-import env from "../../../env";
+
 
 // Miscellaneous
 const width = Dimensions.get("window").width;
@@ -668,7 +674,7 @@ export default function ListingItem({ navigation, route }) {
                 centerContent
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingVertical: 40, justifyContent: "center", paddingTop: 12 }}
+                contentContainerStyle={{ paddingVertical: 40, justifyContent: "center", paddingTop: 12, flexGrow: 1 }}
                 ListHeaderComponent={() => (
                   <TouchableOpacity
                     disabled={loadingMedia}
@@ -687,8 +693,8 @@ export default function ListingItem({ navigation, route }) {
                       {loadingMedia ? (
                         <ActivityIndicator color="black" size="small" />
                       ) : (
-                        <Ionicons name="ios-add" style={{ fontSize: 40 }} />
-                      )}
+                          <Ionicons name="ios-add" style={{ fontSize: 40 }} />
+                        )}
                     </ScheduleButton>
                   </TouchableOpacity>
                 )}
@@ -789,7 +795,7 @@ export const JobCamera = ({ showCamera, onSuccess }) => {
         setFlash({ icon: "flash-on", mode: "on" });
         break;
     }
-  });
+  }, [flash]);
 
   useEffect(() => {
     return () => {
@@ -797,86 +803,88 @@ export const JobCamera = ({ showCamera, onSuccess }) => {
         cameraRef.current.pausePreview();
       }
     };
-  }, []);
+  }, [showCamera]);
 
   return (
-    <Modal visible={showCamera} transparent onRequestClose={onSuccess} onDismiss={onSuccess} style={{ height: "100%", width: "100%" }}>
-      <Camera
-        ref={cameraRef}
-        type={useBack ? "back" : "front"}
-        flashMode={flash.mode}
-        style={{ flex: 1, justifyContent: "space-between", flexDirection: "column", alignItems: "stretch" }}
-      >
-        <SafeAreaView
-          style={{ flex: 1, justifyContent: "space-between", alignItems: "stretch", margin: 12, backgroundColor: "transparent" }}
+    <Modal visible={showCamera} transparent onRequestClose={() => onSuccess()} onDismiss={() => onSuccess()} style={{ height: "100%", width: "100%" }}>
+      <>
+        <Camera
+          ref={cameraRef}
+          type={useBack ? "back" : "front"}
+          flashMode={flash.mode} useCamera2Api
+          style={{ flex: 1, justifyContent: "space-between", flexDirection: "column", alignItems: "stretch" }}
         >
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={{
-              backgroundColor: "#fff4",
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 28,
-              height: 56,
-              width: 56,
-            }}
-            onPress={() => onSuccess()}
+          <SafeAreaView
+            style={{ flex: 1, justifyContent: "space-between", alignItems: "stretch", margin: 12, backgroundColor: "transparent" }}
           >
-            <AntDesign name="arrowleft" size={28} color={"#000a"} />
-          </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={{
+                backgroundColor: "#fff4",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 28,
+                height: 56,
+                width: 56,
+              }}
+              onPress={() => onSuccess()}
+            >
+              <AntDesign name="arrowleft" size={28} color={"#000a"} />
+            </TouchableOpacity>
 
-          <View
-            style={{
-              flexDirection: "row",
-              paddingHorizontal: 8,
-              marginBottom: 20,
-              justifyContent: "space-evenly",
-              alignItems: "center",
-            }}
-          >
-            <TouchableOpacity
+            <View
               style={{
-                backgroundColor: "#fffc",
-                justifyContent: "center",
+                flexDirection: "row",
+                paddingHorizontal: 8,
+                marginBottom: 20,
+                justifyContent: "space-evenly",
                 alignItems: "center",
-                borderRadius: 24,
-                height: 48,
-                width: 48,
               }}
-              onPress={async () => setUseBack(!useBack)}
             >
-              <AntDesign name="swap" size={28} color={"#000a"} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#fffc",
-                justifyContent: "center",
-                alignItems: "center",
-                borderRadius: 32,
-                height: 64,
-                width: 64,
-                marginHorizontal: 8,
-              }}
-              onPress={async () => onSuccess(await cameraRef.current.takePictureAsync())}
-            >
-              <MaterialCommunityIcons size={30} name="camera" color="#000a" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#fffc",
-                justifyContent: "center",
-                alignItems: "center",
-                borderRadius: 24,
-                height: 48,
-                width: 48,
-              }}
-              onPress={toggleFlash}
-            >
-              <MaterialIcons size={28} name={flash.icon} color="#000a" />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      </Camera>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "#fffc",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 24,
+                  height: 48,
+                  width: 48,
+                }}
+                onPress={async () => setUseBack(!useBack)}
+              >
+                <AntDesign name="swap" size={28} color={"#000a"} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "#fffc",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 32,
+                  height: 64,
+                  width: 64,
+                  marginHorizontal: 8,
+                }}
+                onPress={async () => onSuccess(await cameraRef.current.takePictureAsync())}
+              >
+                <MaterialCommunityIcons size={30} name="camera" color="#000a" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "#fffc",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 24,
+                  height: 48,
+                  width: 48,
+                }}
+                onPress={toggleFlash}
+              >
+                <MaterialIcons size={28} name={flash.icon} color="#000a" />
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
+        </Camera>
+      </>
     </Modal>
   );
 };

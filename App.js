@@ -3,7 +3,7 @@ import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import _ from "lodash";
 import React, { useEffect, useReducer } from "react";
-import { ActivityIndicator, Text, TextInput, View, AppState, LogBox, Platform ,An} from "react-native";
+import { ActivityIndicator, Text, TextInput, View, AppState, LogBox, Platform, An } from "react-native";
 import * as ExpoNotif from "expo-notifications";
 // Redux
 import { Provider } from "react-redux";
@@ -117,7 +117,7 @@ export default function App({ navigation }) {
 
     return () => {
       if (subscriptions) {
-        subscriptions.map((v) => v.remove());
+        subscriptions.map((v) => v && v.remove ? v.remove() : null);
       }
     };
   }, []);

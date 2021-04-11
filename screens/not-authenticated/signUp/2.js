@@ -60,7 +60,7 @@ export default function ({ navigation, route }) {
   };
 
   const handleSubmit = async (e) => {
-    const phone_number = `${env.COUNTRY_CODE ? "+1" : "+1"}${textInput}`; // TODO: Look for another solution. This should be changed
+    const phone_number = `${env.COUNTRY_CODE ? env.COUNTRY_CODE : "+1"}${textInput}`; // TODO: Look for another solution. This should be changed
     try {
       // Check if phone number exist in database
       const response = await fetch(`${env.API_URL}/users/phone/${phone_number}`, {
