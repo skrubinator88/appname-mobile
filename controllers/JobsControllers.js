@@ -1,6 +1,6 @@
 // Dependencies
 import * as firebase from "firebase";
-import { GeoFirestore ,firestore} from "../config/firebase";
+import { GeoFirestore, firestore } from "../config/firebase";
 // Config
 import config from "../env";
 // Functions
@@ -286,7 +286,31 @@ exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
     });
 };
 
-exports.currentUserJobsHistory = (user) => {};
+exports.currentUserJobsHistory = (user) => { };
+
+exports.completeJob = async (jobID, authState, image) => {
+  const body = new FormData();
+  const uriSplit = image.uri.split("/");
+  body.append('photo', {
+    uri: image.uri,
+    type: image.type,
+    name: uriSplit[uriSplit.length - 1],
+  })
+
+  const apiResponse = await fetch(`${config.API_URL}/users/completeJob`, {
+    method: "POST",
+    headers: {
+      Authorization: `bearer ${authState.userToken}`,
+      'x-job-id': jobID,
+    },
+    body,
+  });
+  if (!apiResponse.ok) {
+    throw new Error((await apiResponse.json()).message || "Failed to complete job");
+  }
+
+  return true;
+};
 
 exports.postUserJob = async (userID, job, token, photos = []) => {
   if (!userID) throw new Error("User ID is required");

@@ -1,17 +1,16 @@
-import React, { useState, useMemo, useEffect, useContext } from "react";
-import { Text, View } from "react-native";
-
-// Card UI Components
-import Dashboard from "./dashboard";
-import Searching from "./searching";
-import JobFound from "./jobFound";
-import AcceptedJob from "./acceptedJob";
-
-import { GlobalContext } from "../../../../components/context";
-import { UIOverlayContext } from "../../../../components/context";
-
+import React, { useContext, useState } from "react";
 // Actions
 import OverlayActions from "../../../../actions/OverlayActions";
+import { GlobalContext, UIOverlayContext } from "../../../../components/context";
+import AcceptedJob from "./acceptedJob";
+// Card UI Components
+import Dashboard from "./dashboard";
+import JobFound from "./jobFound";
+import ReportJob from "./reportJob";
+import Searching from "./searching";
+
+
+
 
 function HandleOverlayUIContractorComponents({ route, navigation, location }) {
   switch (route.name) {
@@ -26,7 +25,8 @@ function HandleOverlayUIContractorComponents({ route, navigation, location }) {
       break;
     case "acceptedJob":
       return <AcceptedJob navigation={navigation} {...route.props} />;
-      break;
+    case "Report Job":
+      return <ReportJob navigation={navigation} {...route.props} />;
     case "example":
       return <Example navigation={navigation} {...route.props} />;
       break;
@@ -67,8 +67,8 @@ export default function UIComponents({ navigation }) {
       {userData.role == "contractor" ? (
         <HandleOverlayUIContractorComponents route={route} navigation={navigation} />
       ) : (
-        <HandleOverlayUIProjectManagerComponents route={route} navigation={navigation} />
-      )}
+          <HandleOverlayUIProjectManagerComponents route={route} navigation={navigation} />
+        )}
     </UIOverlayContext.Provider>
   );
 }

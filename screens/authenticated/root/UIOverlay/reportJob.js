@@ -30,7 +30,7 @@ import Confirm from "../../../../components/confirm";
 import { ActivityIndicator } from "react-native";
 
 // BODY
-export default function Screen45({ navigation, projectManagerInfo, job_data }) {
+export default function ReportJob({ navigation, projectManagerInfo, job_data }) {
   const { authState } = useContext(GlobalContext);
   const { changeRoute } = useContext(UIOverlayContext);
   const [isCanceling, setIsCanceling] = useState(false);
@@ -191,7 +191,7 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
             </View>
           </Column>
         </Row>
-        <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("QR Code", { job_data })}>
+        <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("QR Code", job_data)}>
           <Text small bold color={onSite ? colors.primary : "grey"}>
             QR Code {onSite && " - Proceed"}
           </Text>
@@ -208,14 +208,12 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem> */}
 
-        <CardOptionItem onPress={() => changeRoute('Report Job', { job_data })} disabled={isCanceling} row>
+        <CardOptionItem disabled={isCanceling} row>
           <Text small>Report Job</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
 
-        <CardOptionItem onPress={() => {
-          navigation.changeRoute('Complete Job', { job_data })
-        }} disabled={isCanceling} row>
+        <CardOptionItem disabled={isCanceling} row>
           <Text small>Complete Job</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>

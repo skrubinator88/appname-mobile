@@ -14,9 +14,9 @@
                 "JOB_CIRCLE_RATIO": 250
             }
         },
-        "API_URL_AVD": "http://192.168.10.100:3001/v1",
+        "API_URL_AVD": "http://192.168.10.103:3001/v1",
         "COUNTRY_CODE": "+234",
-        "API_URL": "http://192.168.10.100:3001/v1",
+        "API_URL": "http://192.168.10.103:3001/v1",
         "GOOGLE": {
             "GEOLOCATION_KEY": "AIzaSyB8xVAMRa2hoq8lRXEG1wXG3v2yR1KkHsQ",
             "PLACES_URI": "https://maps.googleapis.com/maps/api/place"

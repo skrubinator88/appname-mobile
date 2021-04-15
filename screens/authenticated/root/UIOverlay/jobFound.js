@@ -162,7 +162,7 @@ export default function JobFound({ job_data: job_data_prop, keyword, navigation 
         // Add job to "already"
         changeRoute({ name: "searching", props: { keyword } });
       }
-    } catch (E) {
+    } catch (e) {
       console.log(e);
     }
   };
@@ -420,7 +420,7 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
       if (Number.isNaN(offer) || isNaN(offer)) {
         return;
       }
-      await new Promise(async (res) => {
+      await new Promise((res) => {
         Confirm({
           title: "Confirm Offer",
           message: `Suggest offer of $${offer}/${unit} to deployer to complete this job?`,

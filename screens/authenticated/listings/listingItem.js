@@ -706,7 +706,6 @@ export default function ListingItem({ navigation, route }) {
                   if (!res) {
                     return setShowCamera(false);
                   }
-                  // console.log(res);
                   try {
                     if (!res.cancelled && !photos.find((v) => v.uri === res.uri)) {
                       setPhotos([{ uri: res.uri, type: "image/png", height: res.height, width: res.width }, ...photos]);
@@ -799,7 +798,7 @@ export const JobCamera = ({ showCamera, onSuccess }) => {
 
   useEffect(() => {
     return () => {
-      if (cameraRef.current && Constants.isDevice) {
+      if (showCamera && cameraRef.current && Constants.isDevice) {
         cameraRef.current.pausePreview();
       }
     };

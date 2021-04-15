@@ -60,33 +60,33 @@ function DrawerContent({ navigation }) {
             icon={() => <MaterialIcons name="history" size={24} color="black" />}
           />
         ) : (
-          <>
-            <DrawerItem
-              labelStyle={{ fontSize: 20 }}
-              label="Job Listings"
-              onPress={() => navigation.navigate("Job Listings", { screen: "Root" })}
-              icon={() => <Entypo name="megaphone" size={24} color="black" />}
-            />
-            <DrawerItem
-              labelStyle={{ fontSize: 20 }}
-              label="Messages"
-              onPress={() => navigation.navigate("Messages")}
-              icon={() => <MaterialIcons name="chat" size={24} color="black" />}
-            />
-            <DrawerItem
-              labelStyle={{ fontSize: 20 }}
-              label="Scan QR Code"
-              onPress={() => navigation.navigate("Scanner")}
-              icon={() => <MaterialCommunityIcons name="qrcode-scan" size={24} color="black" />}
-            />
-            <DrawerItem
-              labelStyle={{ fontSize: 20 }}
-              label="Work History"
-              onPress={() => navigation.navigate("Work History")}
-              icon={() => <MaterialIcons name="history" size={24} color="black" />}
-            />
-          </>
-        )}
+            <>
+              <DrawerItem
+                labelStyle={{ fontSize: 20 }}
+                label="Job Listings"
+                onPress={() => navigation.navigate("Job Listings", { screen: "Root" })}
+                icon={() => <Entypo name="megaphone" size={24} color="black" />}
+              />
+              <DrawerItem
+                labelStyle={{ fontSize: 20 }}
+                label="Messages"
+                onPress={() => navigation.navigate("Messages")}
+                icon={() => <MaterialIcons name="chat" size={24} color="black" />}
+              />
+              <DrawerItem
+                labelStyle={{ fontSize: 20 }}
+                label="Scan QR Code"
+                onPress={() => navigation.navigate("Scanner")}
+                icon={() => <MaterialCommunityIcons name="qrcode-scan" size={24} color="black" />}
+              />
+              <DrawerItem
+                labelStyle={{ fontSize: 20 }}
+                label="Work History"
+                onPress={() => navigation.navigate("Work History")}
+                icon={() => <MaterialIcons name="history" size={24} color="black" />}
+              />
+            </>
+          )}
         <DrawerItem
           labelStyle={{ fontSize: 20 }}
           label="Payments"
@@ -180,6 +180,7 @@ import Scanner from "../scanner/";
 import WorkHistory from "../work-history/";
 import SettingsScreen from "../settings";
 import QRCode from "./UIOverlay/jobFound/qr_code";
+import CompleteJob from "./UIOverlay/jobFound/completeJob";
 
 export function Drawer({ navigation }) {
   return (
@@ -203,6 +204,7 @@ export function Drawer({ navigation }) {
 
         <AuthenticatedDrawer.Screen name="Chat" component={Chat} />
         <AuthenticatedDrawer.Screen name="QR Code" component={QRCode} />
+        <AuthenticatedDrawer.Screen options={{ unmountOnBlur: true }} name="Complete Job" component={CompleteJob} />
       </AuthenticatedDrawer.Navigator>
     </NavigationContainer>
   );

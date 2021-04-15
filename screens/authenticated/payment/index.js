@@ -175,11 +175,12 @@ export default function PaymentScreen({ navigation }) {
     >
       <ScrollView
         scrollEnabled
+        bounces={true}
         style={{ height, paddingTop: 8 }}
         contentContainerStyle={{ paddingBottom: 200 }}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={false} tintColor="#888" onRefresh={refresh} />}
+        refreshControl={<RefreshControl refreshing={refreshing} tintColor="#888" onRefresh={refresh} />}
       >
         {/* Payments Section */}
         {authState.userData.role === "contractor" && (
