@@ -214,10 +214,9 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
         </CardOptionItem>
 
         <CardOptionComplete onPress={() => {
-          navigation.changeRoute('Complete Job', { job_data })
+          navigation.navigate('Complete Job', { job_data })
         }} disabled={isCanceling} row>
-          <Text small>Complete Job</Text>
-          <Ionicons name="ios-arrow-forward" size={24} />
+          <Text bold color='white' small>Complete Job</Text>
         </CardOptionComplete>
       </View>
     </Card>
@@ -294,12 +293,14 @@ const CardOptionItem = styled.TouchableOpacity`
 
 const CardOptionComplete = styled.TouchableOpacity`
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 10px 30px;
-  width: 100%;
-  border-bottom-color: #eaeaea;
-  border-bottom-width: 1px;
+  align-self: center;
+  margin: 8% 4%;
+  color: white;
+  border-radius: 8px;
+  background: #17a525;
+  padding: 16px 40px;
 `;
 
 const Button = styled.TouchableOpacity`
