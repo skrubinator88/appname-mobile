@@ -213,12 +213,12 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
 
-        <CardOptionItem onPress={() => {
+        <CardOptionComplete onPress={() => {
           navigation.changeRoute('Complete Job', { job_data })
         }} disabled={isCanceling} row>
           <Text small>Complete Job</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
-        </CardOptionItem>
+        </CardOptionComplete>
       </View>
     </Card>
   );
@@ -283,6 +283,16 @@ const Column = styled.View`
 `;
 
 const CardOptionItem = styled.TouchableOpacity`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 30px;
+  width: 100%;
+  border-bottom-color: #eaeaea;
+  border-bottom-width: 1px;
+`;
+
+const CardOptionComplete = styled.TouchableOpacity`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;

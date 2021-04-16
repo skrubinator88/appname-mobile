@@ -42,7 +42,6 @@ import GigChaserJobWord from "../../../assets/gig-logo";
 import JobsController from "../../../controllers/JobsControllers";
 import PermissionsControllers from "../../../controllers/PermissionsControllers";
 import env from "../../../env";
-import JobSuggestions from "../../../models/fetchedSuggestedItems";
 import PhotoItem from "./listItemImage";
 import TaskModal from "./taskModal";
 
