@@ -458,7 +458,7 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
                 Current Offer
               </Text>
               <Text small marginBottom="5px">
-                ${job_data.salary}/{job_data.wage}
+                ${job_data.salary}/{job_data.wage || 'deployment'}
               </Text>
             </JobDescription>
 

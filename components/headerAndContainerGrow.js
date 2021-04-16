@@ -43,7 +43,7 @@ export default function Header({
   nextTitle = "",
   nextSize = 30,
   nextColor = "",
-  nextAction = () => {},
+  nextAction = () => { },
 
   // Refresh Handler
   enableRefreshFeedback = false,
@@ -99,7 +99,7 @@ export default function Header({
   }
 
   useEffect(() => {
-    return () => {};
+    return () => { };
   }, []);
 
   // Structure
@@ -113,14 +113,14 @@ export default function Header({
           bottom: -SPACER_SIZE + statusBarHeight,
         }}
         // contentOffset={{ y: SPACER_SIZE - statusBarHeight }}
-        style={{ backgroundColor: headerBackground }}
+        style={{ backgroundColor: headerBackground, flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1 }}
         refreshControl={enableRefreshFeedback ? <RefreshControl {...refreshingProperties} /> : null}
       >
         <View
           style={{
             backgroundColor: containerBackground,
-            borderBottomEndRadius: 45,
-            borderBottomStartRadius: 45,
+            flex: 1,
             // elevation: 10,
             // shadowColor: "black",
             // shadowOpacity: 0.4,
@@ -143,8 +143,8 @@ export default function Header({
                 {typeof title == "string" ? (
                   <TitleTextBox style={{ color: titleColor, fontWeight: titleWeight }}>{title}</TitleTextBox>
                 ) : (
-                  <Row>{title()}</Row>
-                )}
+                    <Row>{title()}</Row>
+                  )}
               </Column>
 
               <Column next>
@@ -157,21 +157,6 @@ export default function Header({
 
           {/* Children */}
           {!disableContainer && children}
-
-          {isIos && !loadingContent && !disableContainer && (
-            <View
-              style={{
-                height: SPACER_SIZE,
-                borderBottomEndRadius: 45,
-                borderBottomStartRadius: 45,
-                backgroundColor: bottomBackground || containerBackground,
-              }}
-            >
-              {children == undefined && (
-                <LinearGradient style={{ flex: 1 }} start={{ x: 1, y: 1 }} end={{ x: 0, y: 0 }} colors={["white", containerBackground]} />
-              )}
-            </View>
-          )}
         </View>
       </ScrollView>
 

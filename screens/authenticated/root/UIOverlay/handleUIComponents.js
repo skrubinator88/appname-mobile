@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 // Actions
 import OverlayActions from "../../../../actions/OverlayActions";
 import { GlobalContext, UIOverlayContext } from "../../../../components/context";
@@ -8,6 +8,7 @@ import Dashboard from "./dashboard";
 import JobFound from "./jobFound";
 import ReportJob from "./reportJob";
 import Searching from "./searching";
+import { useRoute } from "@react-navigation/native";
 
 
 
@@ -54,6 +55,11 @@ export default function UIComponents({ navigation }) {
       // data: "Some Data" or {name: "Some Data"} or ["Some Data"]
     },
   });
+
+  const { screen, props } = useRoute().params || {}
+  useEffect(() => {
+
+  }, [screen])
 
   // Authentication Context
   const { authActions, authState, errorActions } = useContext(GlobalContext);

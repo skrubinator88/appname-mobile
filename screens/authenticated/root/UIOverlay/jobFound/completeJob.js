@@ -5,7 +5,7 @@ import { ActivityIndicator, Alert, Dimensions, Image, Text, View } from "react-n
 import styled from "styled-components/native";
 import { GlobalContext } from "../../../../../components/context";
 // Components
-import Container from "../../../../../components/headerAndContainer";
+import Container from "../../../../../components/headerAndContainerGrow";
 import { completeJob } from "../../../../../controllers/JobsControllers";
 import { JobCamera } from "../../../listings/listingItem";
 import GigChaserJobWord from "../../../../../assets/gig-logo";
@@ -53,19 +53,26 @@ export default function CompleteJob({ navigation }) {
       nextProvider="Entypo"
     >
       <View style={{ justifyContent: 'space-between', flexGrow: 1 }}>
-        <View style={{ justifyContent: 'center' }}>
+        <View style={{ justifyContent: 'center' ,flex:1}}>
           <SectionTitle>Confirm the gig completion by taking a picture of the finished work</SectionTitle>
         </View>
 
-        {(!!image || capture) &&
-          <View style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 20 }}>
-            <CaptureScreen image={image} capture={capture} onCapture={onCapture} />
-            <RetakeButton disabled={loading} onPress={() => setCapturing(true)} activeOpacity={0.8}><Text style={{ color: '#888', fontSize: 16, fontWeight: 'bold' }}>Retake Picture</Text></RetakeButton>
-          </View>
-        }
+        <View style={{ flex: 3, paddingHorizontal: 12, paddingVertical: 20 }}>
+          {(!!image || capture) &&
+            <>
+              <CaptureScreen image={image} capture={capture} onCapture={onCapture} />
+              <RetakeButton disabled={loading} onPress={() => setCapturing(true)} activeOpacity={0.8}><Text style={{ color: '#888', fontSize: 16, fontWeight: 'bold' }}>Retake Picture</Text></RetakeButton>
+            </>
+          }
+          {!image &&
+            <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 12, paddingVertical: 20 }}>
+              <CompleteButton disabled={loading} onPress={() => setCapturing(true)} activeOpacity={0.8}><Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Take Photo</Text></CompleteButton>
+            </View>
+          }
+        </View>
 
-        <View style={{ paddingVertical: 16, justifyContent: 'center' }}>
-          {!!image ?
+        {!!image &&
+          <View style={{ flex: 1, paddingVertical: 16, justifyContent: 'center' }}>
             <CompleteButton disabled={loading} onPress={async () => {
               try {
                 setLoading(true)
@@ -86,10 +93,8 @@ export default function CompleteJob({ navigation }) {
                 </>
               }
             </CompleteButton>
-            :
-            <CompleteButton disabled={loading} onPress={() => setCapturing(true)} activeOpacity={0.8}><Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Take Photo</Text></CompleteButton>
-          }
-        </View>
+          </View>
+        }
       </View>
     </Container>
   );
@@ -116,7 +121,7 @@ const CaptureScreen = ({ capture, onCapture, image }) => {
 
       {image ?
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'stretch' }}>
-          <Image source={{ uri: image.uri }} style={{ backgroundColor: "transparent", aspectRatio: 1, height: '100%' }} />
+          <Image source={{ uri: image.uri }} style={{ backgroundColor: "tranredsparent", flex: 1 }} />
         </View>
         :
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'stretch' }}>
