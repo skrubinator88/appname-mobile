@@ -1,10 +1,9 @@
 import React from "react";
 
-import { Platform, SafeAreaView, Dimensions, View, ScrollView, StatusBar } from "react-native";
+import { Platform, SafeAreaView, Dimensions } from "react-native";
 import styled from "styled-components/native";
 import * as VectorIcons from "@expo/vector-icons";
 import { getStatusBarHeight } from "react-native-status-bar-height";
-
 
 const isIos = Platform.OS === "ios";
 const statusBarHeight = getStatusBarHeight();

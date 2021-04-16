@@ -2,12 +2,10 @@
   "expo": {
     "name": "Gig-Chasers",
     "slug": "Gig-Chasers",
-    "platforms": [
-      "ios",
-      "android"
-    ],
+    "platforms": ["ios", "android"],
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon_ios.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -16,10 +14,9 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
+      "icon": "./assets/icon_ios.png",
       "bundleIdentifier": "com.example.gig-chasers",
       "supportsTablet": false,
       "config": {
@@ -27,6 +24,7 @@
       }
     },
     "android": {
+      "icon": "./assets/icon_android.png",
       "useNextNotificationsApi": true
     }
   }

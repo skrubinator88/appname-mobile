@@ -23,6 +23,7 @@ import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/st
 import Prompts from "./components/Prompts";
 import { default as Example } from "./components/Example";
 import { AndroidImportance, AndroidNotificationVisibility } from "expo-notifications";
+import SVG from "./assets/gig-logo";
 
 // // Disable Font Scaling
 Text.defaultProps = Text.defaultProps || {};

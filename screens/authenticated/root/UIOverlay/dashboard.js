@@ -1,6 +1,6 @@
 // Dependencies
 import React, { useState, useContext, useEffect } from "react";
-import { SafeAreaView, Keyboard, KeyboardAvoidingView, Platform, View, Dimensions, TouchableOpacity } from "react-native";
+import { SafeAreaView, Keyboard, KeyboardAvoidingView, Platform, View, Dimensions, Image } from "react-native";
 
 import styled from "styled-components/native";
 
@@ -14,6 +14,7 @@ import { ScrollView } from "react-native-gesture-handler";
 
 // Miscellaneous
 const height = Dimensions.get("screen").height;
+const width = Dimensions.get("screen").width;
 import fetchedSuggestedItems from "../../../../models/fetchedSuggestedItems"; // Simulating an API
 import { getStatusBarHeight } from "react-native-status-bar-height";
 const statusBarHeight = getStatusBarHeight();
@@ -150,7 +151,7 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
               {userData.role == "project_manager" && (
                 <OverlayMenuItem size={70}>
                   <Item
-                    onPress={() => navigation.navigate("Job Listings", { screen: "Listing Item", params: { edit: false, quickAdd: true } })}
+                    // onPress={() => navigation.navigate("Job Listings", { screen: "Listing Item", params: { edit: false, quickAdd: true } })}
                     color="#39c64e"
                     size={70}
                   >
@@ -161,6 +162,17 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
             </OverlayMenu>
 
             <Row style={{ padding: Platform.OS == "ios" ? 20 : 10, justifyContent: "center" }}>
+              <Image
+                source={require("../../../../assets/logo.png")}
+                style={{
+                  width: 200,
+                  height: 50,
+                  resizeMode: "contain",
+                }}
+              />
+            </Row>
+
+            <Row style={{ justifyContent: "center" }}>
               <Text small>1.0.0.0</Text>
             </Row>
           </Card>
@@ -172,7 +184,7 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
 
 const OverlayMenu = styled.View`
   z-index: -1;
-  bottom: 200%;
+  bottom: 150%;
   right: 5%;
   position: absolute;
   border-radius: 10px;

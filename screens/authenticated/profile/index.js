@@ -224,7 +224,19 @@ export default function ProfileScreen({ navigation }) {
             : { backgroundColor: theme.project_manager.primary }
         }
       >
-        <View style={{ justifyContent: "center", alignContent: "center", flex: 1, width: 100, height: 100 }}>
+        <View
+          style={{
+            justifyContent: "center",
+            alignContent: "center",
+            flex: 1,
+            width: 100,
+            height: 100,
+            backgroundColor: loading ? "#333" : null,
+            borderRadius: loading ? 50 : null,
+            opacity: loading ? 0.3 : 1,
+            margin: 10,
+          }}
+        >
           <TouchableOpacity onPress={getPhoto}>
             <ProfilePicture source={{ uri: profilePictureURI }} onLoad={() => setLoading(false)} />
           </TouchableOpacity>

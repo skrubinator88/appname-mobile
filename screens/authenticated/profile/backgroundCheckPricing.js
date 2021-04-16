@@ -27,6 +27,7 @@ export default function BackgroundCheckPricing({ navigation, route }) {
     (async () => {
       const response = await fetch(`${env.API_URL}/background_check/packages`);
       const { data } = await response.json();
+      console.log(`${env.API_URL}/background_check/packages`);
       setPackagesInfo(data);
       setLoading(false);
     })();
@@ -94,42 +95,43 @@ export default function BackgroundCheckPricing({ navigation, route }) {
       title="Tier List"
       loadingContent={loading}
     >
-      {packages_info.map((checkr_package) => {
-        let dollars = String(Math.ceil(checkr_package.price * 1.15)).slice(0, -2);
-        let cents = String(Math.ceil(checkr_package.price * 1.15)).slice(-2);
+      {packages_info &&
+        packages_info.map((checkr_package) => {
+          let dollars = String(Math.ceil(checkr_package.price * 1.15)).slice(0, -2);
+          let cents = String(Math.ceil(checkr_package.price * 1.15)).slice(-2);
 
-        return (
-          <TouchableWithoutFeedback onPress={() => openLink(checkr_package.apply_url, checkr_package.name)} key={checkr_package.name}>
-            <Card>
-              <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                <Text title bold>
-                  {checkr_package.name}
-                </Text>
-                <Text title>
-                  ${dollars}.{cents}
-                </Text>
-              </View>
-              <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", marginVertical: 10 }}>
-                {renderIconByTier(checkr_package.name)}
-              </View>
+          return (
+            <TouchableWithoutFeedback onPress={() => openLink(checkr_package.apply_url, checkr_package.name)} key={checkr_package.name}>
+              <Card>
+                <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                  <Text title bold>
+                    {checkr_package.name}
+                  </Text>
+                  <Text title>
+                    ${dollars}.{cents}
+                  </Text>
+                </View>
+                <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", marginVertical: 10 }}>
+                  {renderIconByTier(checkr_package.name)}
+                </View>
 
-              <View medium style={{ padding: 10 }}>
-                {checkr_package.screenings.map(({ type }, index) => {
-                  const bullet_point = (type.charAt(0).toUpperCase() + type.slice(1)).replace(/_/g, " ");
-                  const extraInfoForProPackages = type.includes("county") && checkr_package.name.includes("Pro") && "(All Counties)";
+                <View medium style={{ padding: 10 }}>
+                  {checkr_package.screenings.map(({ type }, index) => {
+                    const bullet_point = (type.charAt(0).toUpperCase() + type.slice(1)).replace(/_/g, " ");
+                    const extraInfoForProPackages = type.includes("county") && checkr_package.name.includes("Pro") && "(All Counties)";
 
-                  return (
-                    <Text small key={index}>
-                      <Octicons name="primitive-dot" size={10} /> {bullet_point}
-                      <Text bold> {extraInfoForProPackages}</Text>
-                    </Text>
-                  );
-                })}
-              </View>
-            </Card>
-          </TouchableWithoutFeedback>
-        );
-      })}
+                    return (
+                      <Text small key={index}>
+                        <Octicons name="primitive-dot" size={10} /> {bullet_point}
+                        <Text bold> {extraInfoForProPackages}</Text>
+                      </Text>
+                    );
+                  })}
+                </View>
+              </Card>
+            </TouchableWithoutFeedback>
+          );
+        })}
     </Container>
   );
 }

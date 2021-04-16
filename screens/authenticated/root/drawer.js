@@ -1,6 +1,6 @@
 // IMPORT
 import React, { useContext } from "react";
-import { Alert, SafeAreaView, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, SafeAreaView, TouchableWithoutFeedback, TouchableOpacity, View } from "react-native";
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 
 // Styling
@@ -11,6 +11,10 @@ import theme from "../../../theme.json";
 
 // Screens
 import { RootScreen } from "./index";
+
+// Components
+import Text from "../../../components/text";
+import GigChaserJobWord from "../../../assets/gig-logo";
 
 // Miscellaneous
 import { GlobalContext } from "../../../components/context";
@@ -41,17 +45,17 @@ function DrawerContent({ navigation }) {
               <ProfilePicture source={{ uri: `${env.API_URL}${authState.userData.profile_picture}` }} />
             </Column>
             <Column>
-              <Text title>
+              <DrawerText title>
                 {authState.userData.first_name} {authState.userData.last_name}
-              </Text>
-              <Text medium bold>
+              </DrawerText>
+              <DrawerText medium bold>
                 <FontAwesome name="star" size={17} color="white" /> {authState.userData.star_rate}
-              </Text>
+              </DrawerText>
             </Column>
           </Row>
         </TouchableWithoutFeedback>
       </DrawerHeader>
-      <DrawerContentScrollView>
+      <DrawerContentScrollView contentInset={{ top: -50 }}>
         {authState.userData.role == "contractor" ? (
           <DrawerItem
             labelStyle={{ fontSize: 20 }}
@@ -60,33 +64,54 @@ function DrawerContent({ navigation }) {
             icon={() => <MaterialIcons name="history" size={24} color="black" />}
           />
         ) : (
-            <>
-              <DrawerItem
-                labelStyle={{ fontSize: 20 }}
-                label="Job Listings"
-                onPress={() => navigation.navigate("Job Listings", { screen: "Root" })}
-                icon={() => <Entypo name="megaphone" size={24} color="black" />}
-              />
-              <DrawerItem
-                labelStyle={{ fontSize: 20 }}
-                label="Messages"
-                onPress={() => navigation.navigate("Messages")}
-                icon={() => <MaterialIcons name="chat" size={24} color="black" />}
-              />
-              <DrawerItem
-                labelStyle={{ fontSize: 20 }}
-                label="Scan QR Code"
-                onPress={() => navigation.navigate("Scanner")}
-                icon={() => <MaterialCommunityIcons name="qrcode-scan" size={24} color="black" />}
-              />
-              <DrawerItem
-                labelStyle={{ fontSize: 20 }}
-                label="Work History"
-                onPress={() => navigation.navigate("Work History")}
-                icon={() => <MaterialIcons name="history" size={24} color="black" />}
-              />
-            </>
-          )}
+          <>
+            <TouchableOpacity onPress={() => navigation.navigate("Job Listings", { screen: "Root" })}>
+              <DrawerItemAlternative>
+                <DrawerIcon>
+                  <Entypo name="megaphone" size={24} color="black" />
+                </DrawerIcon>
+                <Text color="#555" style={{ fontSize: 21, marginLeft: 5, fontWeight: "400" }}>
+                  <GigChaserJobWord color="#555" width="60px" height="20px" /> Listings
+                </Text>
+              </DrawerItemAlternative>
+            </TouchableOpacity>
+            {/* <DrawerItem
+              labelStyle={{ fontSize: 20 }}
+              label="Job Listings"
+              onPress={() => navigation.navigate("Job Listings", { screen: "Root" })}
+              icon={() => <Entypo name="megaphone" size={24} color="black" />}
+            /> */}
+            <DrawerItem
+              labelStyle={{ fontSize: 20 }}
+              label="Messages"
+              onPress={() => navigation.navigate("Messages")}
+              icon={() => <MaterialIcons name="chat" size={24} color="black" />}
+            />
+            <DrawerItem
+              labelStyle={{ fontSize: 20 }}
+              label="Scan QR Code"
+              onPress={() => navigation.navigate("Scanner")}
+              icon={() => <MaterialCommunityIcons name="qrcode-scan" size={24} color="black" />}
+            />
+            <TouchableOpacity onPress={() => navigation.navigate("Work History")}>
+              <DrawerItemAlternative>
+                <DrawerIcon>
+                  <MaterialIcons name="history" size={24} color="black" />
+                </DrawerIcon>
+                <Text color="#555" style={{ fontSize: 21, marginLeft: 5, fontWeight: "400" }}>
+                  <GigChaserJobWord color="#555" width="60px" height="20px" />
+                  History
+                </Text>
+              </DrawerItemAlternative>
+            </TouchableOpacity>
+            {/* <DrawerItem
+              labelStyle={{ fontSize: 20 }}
+              label="Work History"
+              onPress={() => navigation.navigate("Work History")}
+              icon={() => <MaterialIcons name="history" size={24} color="black" />}
+            /> */}
+          </>
+        )}
         <DrawerItem
           labelStyle={{ fontSize: 20 }}
           label="Payments"
@@ -119,6 +144,15 @@ function DrawerContent({ navigation }) {
   );
 }
 
+const DrawerItemAlternative = styled.View`
+  flex-direction: row;
+  align-items: center;
+`;
+
+const DrawerIcon = styled.View`
+  margin: 17px;
+`;
+
 const Divider = styled.View`
   border: solid #ececec;
   border-bottom-width: 0.5px;
@@ -143,7 +177,7 @@ const Column = styled.View`
   align-items: center;
 `;
 
-const Text = styled.Text`
+const DrawerText = styled.Text`
   width: 100%;
   color: white;
   padding: 0 0 0 10px;

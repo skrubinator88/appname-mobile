@@ -14,13 +14,13 @@ import { GlobalContext } from "../../../components/context";
 // Components
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
+import GigChaserJobWord from "../../../assets/gig-logo";
 // Controllers
 import JobsControllers from "../../../controllers/JobsControllers";
 import config from "../../../env";
 // Functions
 import { isCurrentJob, sendNotification } from "../../../functions";
 import { useActionSheet } from "@expo/react-native-action-sheet";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 export default function JobListing({ navigation }) {
   // Constructor
@@ -70,14 +70,28 @@ export default function JobListing({ navigation }) {
 
   return (
     <>
-      <Container navigation={navigation} titleColor="white" title="Job Listings" titleWeight="300" headerBackground="#3869f3">
+      <Container
+        navigation={navigation}
+        titleColor="white"
+        title={() => (
+          <>
+            <GigChaserJobWord color="white" width="60px" height="25px" style={{ marginHorizontal: 10 }} />
+            <Text style={{ color: "white", fontWeight: "300", fontSize: 23 }}>Listing</Text>
+          </>
+        )}
+        headerBackground="#3869f3"
+      >
         {/* Payments Section */}
         <Item>
           <JobItemLink onPress={() => navigation.navigate("Listing Item", { edit: false })}>
             <JobItemRow>
               <Row>
                 <Text small weight="700" color="#1b5cce">
-                  NEW JOB POSTING
+                  NEW
+                </Text>
+                <GigChaserJobWord color="#1b5cce" width="60px" height="25px" style={{ marginHorizontal: 10 }} />
+                <Text small weight="700" color="#1b5cce">
+                  POSTING
                 </Text>
               </Row>
             </JobItemRow>
@@ -145,7 +159,7 @@ export default function JobListing({ navigation }) {
                 <JobItemLink>
                   <JobItemRow>
                     <Column>
-                      <Row>
+                      <Row style={{ justifyContent: "space-between" }}>
                         <Text small weight="700" color="#1b5cce">
                           {item.job_type}
                         </Text>
@@ -198,7 +212,7 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
       <JobItemLink activeOpacity={0.6} onPress={() => navigation.navigate("Listing Item", { edit: true, data: item })}>
         <JobItemRow>
           <Column>
-            <Row>
+            <Row style={{ justifyContent: "space-between" }}>
               <Text small weight="700">
                 {item.job_title}
               </Text>
@@ -648,7 +662,7 @@ const Row = styled.View`
   flex: 1;
   padding: 0px 5%;
   flex-direction: row;
-  justify-content: space-between;
+  align-items: center;
 `;
 
 const WageInput = styled.View`

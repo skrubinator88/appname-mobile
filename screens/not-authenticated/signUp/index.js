@@ -8,6 +8,7 @@ import { AntDesign } from "@expo/vector-icons";
 
 // Components
 import Header from "../../../components/header";
+import GigChaserJobWord from "../../../assets/gig-logo";
 
 import { RegistrationContext } from "../../../components/context";
 
@@ -43,10 +44,14 @@ export default function ({ navigation }) {
         </TextStyledContent>
         <ContainerMiddle>
           <ButtonStyled onPress={(e) => handleChosenOption("project_manager")}>
-            <TextStyledBtn style={{ color: "white" }}>I want to post jobs</TextStyledBtn>
+            <TextStyledBtn style={{ color: "white" }}>
+              I want to post <GigChaserJobWord color="white" width="60px" height="20px" />
+            </TextStyledBtn>
           </ButtonStyled>
           <ButtonStyledWork onPress={(e) => handleChosenOption("contractor")}>
-            <TextStyledBtn style={{ color: "black" }}>I want to find work</TextStyledBtn>
+            <TextStyledBtn style={{ color: "black" }}>
+              I want to find <GigChaserJobWord color="black" width="60px" height="20px" />
+            </TextStyledBtn>
           </ButtonStyledWork>
           <TextStyledHelp onPress={(e) => {}}>Need help choosing?</TextStyledHelp>
         </ContainerMiddle>
