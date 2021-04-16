@@ -8,7 +8,7 @@ import { GlobalContext } from "../../../../../components/context";
 import Container from "../../../../../components/headerAndContainer";
 import { completeJob } from "../../../../../controllers/JobsControllers";
 import { JobCamera } from "../../../listings/listingItem";
-
+import GigChaserJobWord from "../../../../../assets/gig-logo";
 
 
 const height = Dimensions.get("window").height;
@@ -42,9 +42,12 @@ export default function CompleteJob({ navigation }) {
     <Container
       flexible={false}
       navigation={navigation}
-      titleColor="white"
-      title="Complete Gig"
-      titleWeight="300"
+      title={() => (
+        <>
+          <Text style={{ color: "white", fontWeight: "300", fontSize: 23 }}>Complete</Text>
+          <GigChaserJobWord color="white" width="60px" height="25px" style={{ marginHorizontal: 10 }} />
+        </>
+      )}
       containerBackground="white"
       headerBackground="#17a525"
       nextProvider="Entypo"
@@ -77,7 +80,10 @@ export default function CompleteJob({ navigation }) {
               {loading ?
                 <ActivityIndicator size='small' color='white' />
                 :
-                <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Complete Gig</Text>
+                <>
+                  <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>Complete</Text>
+                  <GigChaserJobWord color="white" width="60px" height="18" style={{ marginHorizontal: 0 }} />
+                </>
               }
             </CompleteButton>
             :

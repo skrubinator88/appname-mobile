@@ -28,6 +28,7 @@ import JobsController from "../../../../controllers/JobsControllers";
 import { sendNotification } from "../../../../functions";
 import Confirm from "../../../../components/confirm";
 import { ActivityIndicator } from "react-native";
+import GigChaserJobWord from "../../../../assets/gig-logo";
 
 // BODY
 export default function Screen45({ navigation, projectManagerInfo, job_data }) {
@@ -216,7 +217,10 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
         <CardOptionComplete onPress={() => {
           navigation.navigate('Complete Job', { job_data })
         }} disabled={isCanceling} row>
-          <Text bold color='white' small>Complete Job</Text>
+          <>
+            <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>Complete</Text>
+            <GigChaserJobWord color="white" width="60px" height="18" style={{ marginHorizontal: 0 }} />
+          </>
         </CardOptionComplete>
       </View>
     </Card>
