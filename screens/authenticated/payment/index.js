@@ -105,7 +105,7 @@ export default function PaymentScreen({ navigation }) {
         }
       },
     );
-  },[]);
+  }, []);
 
   const setup = useCallback(async () => {
     setShowSetup(true)
@@ -198,16 +198,16 @@ export default function PaymentScreen({ navigation }) {
                 animationType="fade"
                 transparent
                 visible
-                onRequestClose={() => { setShowSetup(false) }}
+                onRequestClose={() => setShowSetup(false)}
                 onDismiss={() => setShowSetup(false)}
                 style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
               >
-                <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0004" }}>
-                  <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 120, flexGrow: 1 }}>
+                <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0008" }}>
+                  <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 60, flexGrow: 1 }}>
                     <KeyboardAvoidingView behavior="padding" style={{ justifyContent: "center", margin: 8, flex: 1 }}>
-                      <View style={{ flexGrow: 1, padding: 8, backgroundColor: '#fff', borderRadius: 8, alignItems: "stretch", }}>
+                      <View style={{ flexGrow: 1, padding: 8, backgroundColor: '#fff', borderRadius: 8, paddingTop: 28, alignItems: "stretch", }}>
                         {!setupAccount || !uri ?
-                          <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+                          <View style={{ height: '100%', justifyContent: 'center', padding: 20 }}>
                             <ActivityIndicator />
                           </View>
                           : null}
@@ -225,7 +225,7 @@ export default function PaymentScreen({ navigation }) {
                             onCancel={() => setShowSetup(false)}
                           />
                           : null}
-                        <TouchableOpacity onPress={() => setShowSetup(false)} style={{ position: "absolute", top: 4, left: 4 }}>
+                        <TouchableOpacity activeOpacity={0.8} onPress={() => setShowSetup(false)} style={{ position: "absolute", top: 4, left: 4 }}>
                           <MaterialCommunityIcons size={24} color="red" name="close-circle" />
                         </TouchableOpacity>
                       </View>
@@ -273,11 +273,11 @@ export default function PaymentScreen({ navigation }) {
             onDismiss={() => setAddPaymentMethod(false)}
             style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
           >
-            <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0004" }}>
-              <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 120, flexGrow: 1 }}>
+            <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0008" }}>
+              <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 60, flexGrow: 1 }}>
                 <KeyboardAvoidingView behavior="padding" style={{ justifyContent: "center", margin: 8, flex: 1 }}>
                   <StripeCheckoutScreen close={() => setAddPaymentMethod(false)}>
-                    <TouchableOpacity onPress={() => setAddPaymentMethod(false)} style={{ position: "absolute", top: 4, left: 4 }}>
+                    <TouchableOpacity activeOpacity={0.8} onPress={() => setAddPaymentMethod(false)} style={{ position: "absolute", top: 4, left: 4 }}>
                       <MaterialCommunityIcons size={24} color="red" name="close-circle" />
                     </TouchableOpacity>
                   </StripeCheckoutScreen>

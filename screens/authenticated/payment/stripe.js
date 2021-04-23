@@ -18,7 +18,7 @@ export const CALLBACK_URL = {
 export default function StripeCheckoutScreen({ children, close = () => { } }) {
   const { authState } = useContext(GlobalContext);
   const [CHECKOUT_SESSION_ID, setCheckOutSessionID] = useState("");
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
     const signal = new AbortController();
@@ -39,10 +39,12 @@ export default function StripeCheckoutScreen({ children, close = () => { } }) {
           return res.json()
         }).catch(e => {
           console.error(e)
+
           Alert.alert('Payment Setup Failed', 'An error occurred while setting up your payment method', [{
             onPress: close,
             style: 'cancel'
           }])
+          return { sessionID: '' }
         })
         if (sessionID) {
           setCheckOutSessionID(sessionID);
@@ -53,7 +55,7 @@ export default function StripeCheckoutScreen({ children, close = () => { } }) {
   }, []);
 
   return (
-    <View style={{ flexGrow: 1, padding: 8, backgroundColor: '#fff', borderRadius: 8, alignItems: "stretch", }}>
+    <View style={{ flexGrow: 1, padding: 8, backgroundColor: '#fff', justifyContent: 'center', borderRadius: 8, alignItems: "stretch", }}>
       {!CHECKOUT_SESSION_ID ?
         <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
           <ActivityIndicator />
@@ -61,7 +63,7 @@ export default function StripeCheckoutScreen({ children, close = () => { } }) {
         :
         <>
           {!show ?
-            <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+            <View style={{ height: '100%', justifyContent: 'center', padding: 20 }}>
               <ActivityIndicator />
             </View>
             : null}
@@ -85,8 +87,9 @@ export default function StripeCheckoutScreen({ children, close = () => { } }) {
   );
 }
 
-export function MyWebView({ options, forAccount, stripePublicKey, onSuccess, onCancel, onLoadingComplete, onLoadingFail, style }) {
+export function MyWebView({ options, forAccount, stripePublicKey, onSuccess, onCancel, onLoadingComplete, onLoadingFail, style, timeout = 300000 }) {
   const webViewRef = useRef()
+  const timeoutRef = useRef({ timeout, triggerID: undefined })
   const STRIPE_CHECKOUT_HTML = `
   <html>
   <head>
@@ -98,13 +101,12 @@ export function MyWebView({ options, forAccount, stripePublicKey, onSuccess, onC
                  window.addEventListener('load', function(){
                       try{
                               var stripe = Stripe("${stripePublicKey}");
+                              window.ReactNativeWebView.postMessage('setup');
                               stripe.redirectToCheckout({ sessionId: "${options.sessionID}" })
                               .then(function(result){
                                       if (result.error) {
                                         return  window.ReactNativeWebView.postMessage('ping');
-                                      }
-                                      
-                                      window.ReactNativeWebView.postMessage('pong');
+                                      }                                      
                               })
                               .catch(function(error){
                                   window.ReactNativeWebView.postMessage('ping')
@@ -117,7 +119,6 @@ export function MyWebView({ options, forAccount, stripePublicKey, onSuccess, onC
               </script>
       </body>
   </html>
-
   `
 
   const onNavHandler = useCallback((event) => {
@@ -140,6 +141,14 @@ export function MyWebView({ options, forAccount, stripePublicKey, onSuccess, onC
     return true
   }, [options])
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current.triggerID) {
+        clearTimeout(timeoutRef.current.triggerID)
+      }
+    }
+  }, [])
+
   return (
     <WebView
       onShouldStartLoadWithRequest={onNavHandler}
@@ -149,13 +158,13 @@ export function MyWebView({ options, forAccount, stripePublicKey, onSuccess, onC
         uri: options.uri
       } : {
           html: STRIPE_CHECKOUT_HTML
-          // uri: 'https://google.com'
         }}
       onMessage={forAccount ? null : (e) => {
         switch (e.nativeEvent.data) {
-          case 'pong':
-            // Load and redirest to Stripe was successful
-            setTimeout(onLoadingComplete, 1000)
+          case 'setup':
+            if (!forAccount) {
+              timeoutRef.current.triggerID = setTimeout(onCancel, timeoutRef.current.timeout)
+            }
             break
           case 'ping':
             // An error occurred
@@ -166,6 +175,11 @@ export function MyWebView({ options, forAccount, stripePublicKey, onSuccess, onC
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
       bounces={false}
+      onLoadEnd={!forAccount ? (e) => {
+        if (e.nativeEvent.url.startsWith('https://checkout.stripe.com')) {
+          onLoadingComplete()
+        }
+      } : null}
       originWhitelist={'*'}
       onLoad={forAccount ? onLoadingComplete : null}
       onError={onLoadingFail}
