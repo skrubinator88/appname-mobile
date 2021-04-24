@@ -56,10 +56,16 @@ export default function UIComponents({ navigation }) {
     },
   });
 
-  const { screen, props } = useRoute().params || {}
+  const { screen, data } = useRoute().params || {}
   useEffect(() => {
-
-  }, [screen])
+    console.log(data, screen)
+    switch (data) {
+      case 'completedJob':
+        setRoute({ name: 'dashboard' })
+        navigation.setParams({ screen: undefined, data: undefined })
+        break
+    }
+  }, [screen, data])
 
   // Authentication Context
   const { authActions, authState, errorActions } = useContext(GlobalContext);
