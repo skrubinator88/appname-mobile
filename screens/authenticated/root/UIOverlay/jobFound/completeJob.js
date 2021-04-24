@@ -53,7 +53,7 @@ export default function CompleteJob({ navigation }) {
       nextProvider="Entypo"
     >
       <View style={{ justifyContent: 'space-between', flexGrow: 1 }}>
-        <View style={{ justifyContent: 'center' ,flex:1}}>
+        <View style={{ justifyContent: 'center', flex: 1 }}>
           <SectionTitle>Confirm the gig completion by taking a picture of the finished work</SectionTitle>
         </View>
 
@@ -66,7 +66,9 @@ export default function CompleteJob({ navigation }) {
           }
           {!image &&
             <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 12, paddingVertical: 20 }}>
-              <CompleteButton disabled={loading} onPress={() => setCapturing(true)} activeOpacity={0.8}><Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Take Photo</Text></CompleteButton>
+              <CompleteButton disabled={loading} onPress={() => setCapturing(true)} activeOpacity={0.8}>
+                <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Take Photo</Text>
+              </CompleteButton>
             </View>
           }
         </View>
@@ -77,7 +79,7 @@ export default function CompleteJob({ navigation }) {
               try {
                 setLoading(true)
                 await completeJob(job_data._id, authState, image)
-                Alert.alert('Completed Gig Successfully!', null, [{ style: 'cancel', onPress: () => navigation.navigate('Root', { screen: 'dashboard', props: 'completedJob' }), text: 'Continue' }])
+                Alert.alert('Completed Gig Successfully!', 'Thank you for using Gigchasers', [{ style: 'default', onPress: () => navigation.navigate('Root', { screen: 'dashboard', data: 'completedJob' }), text: 'Continue' }])
               } catch (e) {
                 Alert.alert('Failed To Complete Gig', e.message || 'There was an error while completing gig')
               } finally {
