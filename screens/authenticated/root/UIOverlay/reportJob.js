@@ -1,227 +1,175 @@
-// IMPORT
-import React, { useState, useEffect, useContext, useCallback } from "react";
-import { View, Platform, Dimensions, Alert } from "react-native";
-import styled from "styled-components/native";
-
-// Expo
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import { watchPositionAsync } from "expo-location";
-import env from "../../../../env";
-
-// Components
-// import Card from "../../../../components/card";
-import Text from "../../../../components/text";
-
-// Styling
-const deviceHeight = Dimensions.get("window").height;
-import { UIOverlayContext, GlobalContext } from "../../../../components/context";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useCallback, useEffect, useState, useContext, useMemo, useRef } from "react";
+import { ActivityIndicator, Alert, View, KeyboardAvoidingView, TextInput, StyleSheet } from "react-native";
 import { colors } from "react-native-elements";
-
-// Miscellaneous
-import { distanceBetweenTwoCoordinates } from "../../../../functions/";
-
-// Controllers
-import PermissionsControllers from "../../../../controllers/PermissionsControllers";
-import { PaymentMethodSelector } from "../../payment/components";
-import { TouchableOpacity } from "react-native";
-import JobsController from "../../../../controllers/JobsControllers";
-import { sendNotification } from "../../../../functions";
-import Confirm from "../../../../components/confirm";
-import { ActivityIndicator } from "react-native";
+import Modal from 'react-native-modal';
+import styled from "styled-components/native";
+import Text from "../../../../components/text";
+import { reportJob } from "../../../../controllers/JobsControllers";
+import { topics } from "../../../../models/report.json";
+import { GlobalContext } from "../../../../components/context";
+import { Animated } from "react-native";
 
 // BODY
-export default function ReportJob({ navigation, projectManagerInfo, job_data }) {
+export default function ReportJob({ job_data, onCancel, isVisible }) {
   const { authState } = useContext(GlobalContext);
-  const { changeRoute } = useContext(UIOverlayContext);
-  const [isCanceling, setIsCanceling] = useState(false);
+  const [topic, setTopic] = useState(null);
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const isOtherReport = useMemo(() => topic?.id === 3, [topic])
 
-  const [onSite, setOnSite] = useState(false);
-  const [location, setLocation] = useState(null);
+  const animValue = useRef(new Animated.Value(0)).current
 
-  // get location real time
-  useEffect(() => {
-    const subscription = watchPositionAsync({ distanceInterval: 2, timeInterval: 1000 }, (position) => {
-      setLocation(position);
-    });
-
-    return () => {
-      if (subscription) {
-        // console.log("removed");
-        subscription.then(({ remove }) => remove());
+  const onSubmit = useCallback(async (topic, details) => {
+    setLoading(true)
+    try {
+      if (!details || details.trim().split(/\W/).length < 5) {
+        throw new Error('Your report details must have at least 5 words')
       }
-    };
-  }, []);
+
+      await reportJob(job_data, topic.text, details, authState)
+      setSuccess(true)
+    } catch (e) {
+      Alert.alert('Report Failed', e.message || 'There was an error while sending your report')
+    } finally {
+      setLoading(false)
+    }
+  }, [topic])
 
   useEffect(() => {
-    if (location) {
-      const userLocation = location.coords;
-      const jobLocation = job_data.coordinates;
+    if (animValue && success && isVisible) {
+      Animated.timing(animValue, {
+        duration: 1600,
+        toValue: 1,
+        useNativeDriver: false
+      }).start()
+    }
+  }, [success, isVisible, animValue])
 
-      // console.log("user", userLocation);
-      // console.log("job", jobLocation);
-
-      // get distance between points in miles
-      const distance = distanceBetweenTwoCoordinates(userLocation.latitude, userLocation.longitude, jobLocation["U"], jobLocation["k"]);
-
-      // console.log("distance", `${distance} in miles`);
-
-      //  0.251866 is the sum of the radius of the 2 points in miles
-      if (distance < 0.2499363724) {
-        setOnSite(true); // Inside
-      } else {
-        setOnSite(false); // Outside
+  useEffect(() => {
+    return () => {
+      setTopic(null)
+      setSuccess(false)
+      if (animValue) {
+        animValue.setValue(0)
       }
     }
-  }, [location]);
+  }, [isVisible])
 
-  const cancelJob = useCallback(() => {
-    Confirm({
-      title: "Cancel Job?",
-      message: `Cancelling a job outside the cancellation window will attract a penalty`,
-      options: ["Yes", "No"],
-      cancelButtonIndex: 1,
-      destructiveButtonIndex: 0,
-      onPress: async (i) => {
-        if (i === 0) {
-          try {
-            setIsCanceling(true)
-            await JobsController.cancelAcceptedJob(job_data._id, authState)
-            await sendNotification(authState.userToken, job_data.posted_by, { title: `GigChasers - ${job_data.job_title}`, body: `Job canceled`, data: { type: 'jobcancel', id: job_data._id, sender: authState.userID } })
-            setIsCanceling(false)
-            changeRoute({ name: "dashboard" })
-          } catch (e) {
-            console.log(e)
-            setIsCanceling(false)
-            Alert.alert('Failed To Cancel Job', e.message)
-          }
-        }
-      },
-    });
-  }, [authState]);
+  return (
+    <Modal
+      avoidKeyboard
+      statusBarTranslucent
+      isVisible={isVisible}
+      swipeDirection={'down'}
+      onBackdropPress={success ? onCancel : null}
+      onSwipeComplete={(loading || topic) && !success ? null : onCancel}
+      onBackButtonPress={loading && !success ? null : onCancel}
+      style={{ margin: 0, justifyContent: 'center' }}>
+      {success === true ?
+        <Card>
+          <Animated.View style={{
+            opacity: animValue,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: 28
+          }}>
+            <Ionicons name='ios-checkmark-circle' color={colors.success} size={120} />
+            <Text small light textTransform='uppercase' >Report Posted Successfully</Text>
+
+          </Animated.View>
+        </Card>
+        :
+        <>
+          {!topic && <ReportJobMain onCancel={onCancel} onSelect={(topic) => setTopic(topic)} />}
+          {!!topic && <ReportJobDetails isOtherReport={isOtherReport} topic={topic} onSubmit={onSubmit} loading={loading} onCancel={() => setTopic(null)} />}
+        </>
+      }
+    </Modal>
+  );
+}
+
+function ReportJobMain({ onCancel, onSelect }) {
 
   return (
     <Card>
       <View>
-        <ProfilePicture
-          source={{
-            uri: `${env.API_URL}${job_data.posted_by_profile_picture}`,
-          }}
-        ></ProfilePicture>
-
         <Row first>
           <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            <Text title bold marginBottom="5px">
-              {projectManagerInfo.first_name} {projectManagerInfo.last_name}
-            </Text>
-            <Text small light marginBottom="5px">
-              Domestic Worker
-            </Text>
-          </Column>
-
-          <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            <TouchableOpacity disabled={isCanceling} activeOpacity={0.8} onPress={cancelJob}>
-              {isCanceling ?
-                <ActivityIndicator size='small' color='888' />
-                :
-                <Text style={{ paddingBottom: 10 }} color="#999">Cancel Job</Text>
-              }
-            </TouchableOpacity>
-
-            <Column>
-              <View style={{ flexDirection: "row" }}>
-                <Column
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: 24,
-                    height: 24,
-                  }}
-                >
-                  <FontAwesome name="star" size={24} color="black" />
-                </Column>
-
-                <Column style={{ paddingLeft: 5, justifyContent: "center" }}>
-                  <Text bold>{projectManagerInfo.star_rate}</Text>
-                </Column>
-              </View>
-
-              <View style={{ flexDirection: "row" }}>
-                <Column
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: 24,
-                    height: 24,
-                  }}
-                >
-                  <FontAwesome name="map-marker" size={24} color="black" />
-                </Column>
-
-                <Column style={{ paddingLeft: 5, justifyContent: "center" }}>
-                  <Text bold>15 min.</Text>
-                </Column>
-              </View>
-            </Column>
+            <Text align='center' title bold marginBottom="5px">How can we help?</Text>
+            <Text small light marginBottom="5px">What issue are you experiencing?</Text>
           </Column>
         </Row>
 
-        <Row>
-          <Column style={{ flex: 1 }}>
-            <View
-              style={{
-                flexDirection: "row",
-                flex: 1,
-                justifyContent: "center",
-              }}
-            >
-              {/* <Column location>
-                <Text small light marginBottom="5px">
-                  Location
-                </Text>
-                <Text small>{job_data.location.address}</Text>
-              </Column> */}
+        {topics.map(topic => (
+          <CardOptionItem activeOpacity={0.4} key={topic.id} onPress={() => { onSelect(topic) }}>
+            <Text small>{topic.text}</Text>
+            <Ionicons name="ios-chevron-forward" size={24} />
+          </CardOptionItem>
+        ))}
 
-              <Column style={{ justifyContent: "center" }}>
-                <Button disabled={isCanceling} accept onPress={() => navigation.navigate("Chat", { receiver: job_data.posted_by })}>
-                  <Text style={{ color: "white" }} medium>
-                    Message
-                  </Text>
-                </Button>
-              </Column>
-            </View>
-          </Column>
-        </Row>
-        <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("QR Code", job_data)}>
-          <Text small bold color={onSite ? colors.primary : "grey"}>
-            QR Code {onSite && " - Proceed"}
-          </Text>
-          <Ionicons name="ios-arrow-forward" size={24} />
-        </CardOptionItem>
-
-        <CardOptionItem disabled={isCanceling} row>
-          <Text small>View Job Description</Text>
-          <Ionicons name="ios-arrow-forward" size={24} />
-        </CardOptionItem>
-
-        {/* <CardOptionItem row>
-          <Text small>View Profile</Text>
-          <Ionicons name="ios-arrow-forward" size={24} />
-        </CardOptionItem> */}
-
-        <CardOptionItem disabled={isCanceling} row>
-          <Text small>Report Job</Text>
-          <Ionicons name="ios-arrow-forward" size={24} />
-        </CardOptionItem>
-
-        <CardOptionItem disabled={isCanceling} row>
-          <Text small>Complete Job</Text>
-          <Ionicons name="ios-arrow-forward" size={24} />
-        </CardOptionItem>
+        <CardOptionCancel activeOpacity={0.6} onPress={onCancel}>
+          <Text medium style={{ color: colors.error }}>Cancel</Text>
+        </CardOptionCancel>
       </View>
     </Card>
-  );
+  )
 }
 
+function ReportJobDetails({ onCancel, topic, loading, isOtherReport, onSubmit }) {
+  const [details, setDetails] = useState('')
+
+  const { id, text } = topic
+
+  return (
+    <Card>
+      <View>
+        {!isOtherReport &&
+          <Row first style={{ borderBottomWidth: 0 }}>
+            <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+              <>
+                <Text align='center' small light marginBottom="5px" textTransform='uppercase'>Send report to Gigchasers</Text>
+                <Text align='center' medium>"{text}"</Text>
+              </>
+            </Column>
+          </Row>
+        }
+
+        <Row style={[{ borderBottomWidth: 0, borderTopWidth: 0 }, isOtherReport && { marginTop: 12 }]}>
+          <TextInput
+            onChangeText={text => setDetails(text)}
+            value={details}
+            editable={!loading}
+            multiline
+            underlineColorAndroid='transparent'
+            autoFocus
+            style={{
+              fontSize: 16,
+              flex: 1, maxHeight: 120, marginVertical: 12,
+              borderWidth: StyleSheet.hairlineWidth * 2,
+              borderColor: '#eaeaea', borderRadius: 8, padding: 12,
+              minHeight: 60, textAlignVertical: 'top'
+            }}
+            placeholder='Kindly share details of your report'
+          />
+        </Row>
+
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginVertical: 12, alignItems: 'center' }}>
+          <CardOptionButton disabled={loading} isCancel activeOpacity={0.6} onPress={onCancel}>
+            <Ionicons name='ios-chevron-back' size={20} color='white' />
+            <Text medium style={{ marginLeft: 4, color: 'white' }}>Back</Text>
+          </CardOptionButton>
+
+          <CardOptionButton disabled={loading} isSuccess activeOpacity={0.6} onPress={() => onSubmit(topic, details)}>
+            {loading && <ActivityIndicator size='small' color='white' />}
+            <Text medium style={{ marginLeft: 4, color: 'white' }}>Done</Text>
+          </CardOptionButton>
+        </View>
+
+      </View>
+    </Card >
+  )
+}
 // STYLES
 
 const Card = styled.SafeAreaView`
@@ -233,13 +181,6 @@ const Card = styled.SafeAreaView`
   box-shadow: -10px 0px 20px #999;
   background: white;
   width: 100%;
-`;
-
-const ProfilePicture = styled.Image`
-  margin: -35px auto;
-  height: 70px;
-  width: 70px;
-  border-radius: 50px;
 `;
 
 const Row = styled.View`
@@ -284,29 +225,44 @@ const CardOptionItem = styled.TouchableOpacity`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 30px;
+  padding: 12px 30px;
   width: 100%;
   border-bottom-color: #eaeaea;
   border-bottom-width: 1px;
 `;
 
-const Button = styled.TouchableOpacity`
-  ${({ decline, accept, row }) => {
-    switch (true) {
-      case accept:
-        return `
-        background: #00a0e5; 
-        padding: 10px 40px; 
-        border-radius: 8px;
-        `;
+const CardOptionCancel = styled.TouchableOpacity`
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+  color: white;
+  background: transparent;
+  padding: 16px 40px;
+  margin: 5px 0px;
+  width: 100%;
+`;
 
-      case decline:
+const CardOptionButton = styled.TouchableOpacity`
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+  color: white;
+  padding: 12px 16px;
+  margin: 8px 0px;
+  border-radius: 28px;
+  ${({ isCancel, isSuccess }) => {
+    switch (true) {
+      case isCancel:
         return `
-        border: 1px solid red; 
-        background: white; 
-        padding: 10px 40px; 
-        border-radius: 8px;
-        `;
+          background-color: ${colors.error};
+        `
+      case isSuccess:
+        return `
+          padding: 12px 30px;
+          background-color: ${colors.success};
+        `
     }
   }};
 `;

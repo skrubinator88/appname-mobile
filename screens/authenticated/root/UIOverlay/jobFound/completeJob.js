@@ -59,13 +59,13 @@ export default function CompleteJob({ navigation }) {
 
         <View style={{ flex: 3, paddingHorizontal: 12, paddingVertical: 20 }}>
           {(!!image || capture) &&
-            <>
+            <View style={{ flex: 1, justifyContent: 'flex-start' }}>
               <CaptureScreen image={image} capture={capture} onCapture={onCapture} />
               <RetakeButton disabled={loading} onPress={() => setCapturing(true)} activeOpacity={0.8}><Text style={{ color: '#888', fontSize: 16, fontWeight: 'bold' }}>Retake Picture</Text></RetakeButton>
-            </>
+            </View>
           }
           {!image &&
-            <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 12, paddingVertical: 20 }}>
+            <View style={{ flex: 1, justifyContent: 'flex-start', paddingHorizontal: 12, paddingVertical: 20 }}>
               <CompleteButton disabled={loading} onPress={() => setCapturing(true)} activeOpacity={0.8}>
                 <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Take Photo</Text>
               </CompleteButton>

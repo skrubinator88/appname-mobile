@@ -1,0 +1,19 @@
+{
+    "topics": [{
+            "id": 0,
+            "text": "I lost an item"
+        },
+        {
+            "id": 1,
+            "text": "I had an issue with the gig"
+        },
+        {
+            "id": 2,
+            "text": "I had an issue with the client"
+        },
+        {
+            "id": 3,
+            "text": "Other"
+        }
+    ]
+}

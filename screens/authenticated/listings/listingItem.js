@@ -11,19 +11,11 @@ import moment from "moment";
 import React, { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-
   Alert,
   Dimensions,
   FlatList,
   KeyboardAvoidingView, Modal,
-
-
-
-
   Platform,
-
-
-
   SafeAreaView, TouchableOpacity,
   TouchableWithoutFeedback,
   View

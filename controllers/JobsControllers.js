@@ -312,6 +312,27 @@ exports.completeJob = async (jobID, authState, image) => {
   return true;
 };
 
+exports.reportJob = async (job_data, topic, details, authState) => {
+  const apiResponse = await fetch(`${config.API_URL}/job/report`, {
+    method: "POST",
+    headers: {
+      Authorization: `bearer ${authState.userToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      jobID: job_data._id,
+      deployer: job_data.posted_by,
+      topic,
+      details
+    }),
+  });
+  if (!apiResponse.ok) {
+    throw new Error((await apiResponse.json()).message || "Failed to report job");
+  }
+
+  return true;
+};
+
 exports.postUserJob = async (userID, job, token, photos = []) => {
   if (!userID) throw new Error("User ID is required");
   if (!job) throw new Error("A job is required");

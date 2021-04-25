@@ -29,6 +29,7 @@ import { sendNotification } from "../../../../functions";
 import Confirm from "../../../../components/confirm";
 import { ActivityIndicator } from "react-native";
 import GigChaserJobWord from "../../../../assets/gig-logo";
+import ReportJob from "./reportJob";
 
 // BODY
 export default function Screen45({ navigation, projectManagerInfo, job_data }) {
@@ -38,6 +39,7 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
 
   const [onSite, setOnSite] = useState(false);
   const [location, setLocation] = useState(null);
+  const [showReport, setShowReport] = useState(false)
 
   // get location real time
   useEffect(() => {
@@ -209,20 +211,21 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem> */}
 
-        <CardOptionItem onPress={() => navigation.navigate('Report Job', { job_data })} disabled={isCanceling} row>
+        <CardOptionItem onPress={() => setShowReport(true)} disabled={isCanceling} row>
           <Text small>Report Job</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem>
 
         <CardOptionComplete activeOpacity={0.6} onPress={() => {
           navigation.navigate('Complete Job', { job_data })
-        }} disabled={isCanceling} row>
+        }} disabled={isCanceling}>
           <>
             <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>Complete</Text>
             <GigChaserJobWord color="white" width="60px" height="18" style={{ marginHorizontal: 0 }} />
           </>
         </CardOptionComplete>
       </View>
+      <ReportJob job_data={job_data} isVisible={showReport} onCancel={() => setShowReport(false)} />
     </Card>
   );
 }

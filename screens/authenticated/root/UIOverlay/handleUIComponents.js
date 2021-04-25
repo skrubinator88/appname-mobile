@@ -26,8 +26,6 @@ function HandleOverlayUIContractorComponents({ route, navigation, location }) {
       break;
     case "acceptedJob":
       return <AcceptedJob navigation={navigation} {...route.props} />;
-    case "Report Job":
-      return <ReportJob navigation={navigation} {...route.props} />;
     case "example":
       return <Example navigation={navigation} {...route.props} />;
       break;
