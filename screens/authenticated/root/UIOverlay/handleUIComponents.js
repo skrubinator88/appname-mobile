@@ -1,4 +1,5 @@
-import React, { useContext, useState, useEffect } from "react";
+import { useRoute } from "@react-navigation/native";
+import React, { useContext, useEffect, useState } from "react";
 // Actions
 import OverlayActions from "../../../../actions/OverlayActions";
 import { GlobalContext, UIOverlayContext } from "../../../../components/context";
@@ -6,9 +7,7 @@ import AcceptedJob from "./acceptedJob";
 // Card UI Components
 import Dashboard from "./dashboard";
 import JobFound from "./jobFound";
-import ReportJob from "./reportJob";
 import Searching from "./searching";
-import { useRoute } from "@react-navigation/native";
 
 
 

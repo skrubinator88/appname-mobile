@@ -1,17 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useCallback, useEffect, useState, useContext, useMemo, useRef } from "react";
-import { ActivityIndicator, Alert, View, KeyboardAvoidingView, TextInput, StyleSheet } from "react-native";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Animated, StyleSheet, TextInput, View } from "react-native";
 import { colors } from "react-native-elements";
 import Modal from 'react-native-modal';
 import styled from "styled-components/native";
+import { GlobalContext } from "../../../../components/context";
 import Text from "../../../../components/text";
 import { reportJob } from "../../../../controllers/JobsControllers";
 import { topics } from "../../../../models/report.json";
-import { GlobalContext } from "../../../../components/context";
-import { Animated } from "react-native";
 
 // BODY
-export default function ReportJob({ job_data, onCancel, isVisible }) {
+export default function ReportJob({ job_data, onCancel, isVisible, onReportSuccess }) {
   const { authState } = useContext(GlobalContext);
   const [topic, setTopic] = useState(null);
   const [loading, setLoading] = useState(false)
@@ -62,6 +61,7 @@ export default function ReportJob({ job_data, onCancel, isVisible }) {
       statusBarTranslucent
       isVisible={isVisible}
       swipeDirection={'down'}
+      onModalHide={success ? onReportSuccess : null}
       onBackdropPress={success ? onCancel : null}
       onSwipeComplete={(loading || topic) && !success ? null : onCancel}
       onBackButtonPress={loading && !success ? null : onCancel}
@@ -72,7 +72,7 @@ export default function ReportJob({ job_data, onCancel, isVisible }) {
             opacity: animValue,
             justifyContent: 'center',
             alignItems: 'center',
-            paddingVertical: 28
+            paddingVertical: 28,
           }}>
             <Ionicons name='ios-checkmark-circle' color={colors.success} size={120} />
             <Text small light textTransform='uppercase' >Report Posted Successfully</Text>

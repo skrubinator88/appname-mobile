@@ -11,8 +11,6 @@ import { JobCamera } from "../../../listings/listingItem";
 import GigChaserJobWord from "../../../../../assets/gig-logo";
 
 
-const height = Dimensions.get("window").height;
-
 export default function CompleteJob({ navigation }) {
   const { authState } = useContext(GlobalContext)
 

@@ -23,14 +23,14 @@ import env from "../../../env";
 export const AuthenticatedDrawer = createDrawerNavigator();
 
 function DrawerContent({ navigation }) {
-  const { authActions, authState, errorActions } = useContext(GlobalContext);
+  const { authActions, authState } = useContext(GlobalContext);
   const { signOut } = authActions;
 
   return (
     <View style={{ flex: 1 }}>
       <DrawerHeader
         style={
-          authState.userData.role == "contractor"
+          authState.userData.role === "contractor"
             ? { backgroundColor: theme.contractor.primary }
             : { backgroundColor: theme.project_manager.primary }
         }
