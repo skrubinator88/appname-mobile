@@ -225,7 +225,7 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
           </>
         </CardOptionComplete>
       </View>
-      <ReportJob onReportSuccess={() => changeRoute({ name: 'dashbord' })} job_data={job_data} isVisible={showReport} onCancel={() => setShowReport(false)} />
+      <ReportJob onReportSuccess={() => changeRoute({ name: 'dashboard' })} job_data={job_data} isVisible={showReport} onCancel={() => setShowReport(false)} />
     </Card>
   );
 }

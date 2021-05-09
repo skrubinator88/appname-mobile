@@ -10,13 +10,19 @@ import { reportJob } from "../../../../controllers/JobsControllers";
 import { topics } from "../../../../models/report.json";
 
 // BODY
-export default function ReportJob({ job_data, onCancel, isVisible, onReportSuccess }) {
+export default function ReportJob({ job_data, onCancel: onCancelProp, isVisible, onReportSuccess }) {
   const { authState } = useContext(GlobalContext);
   const [topic, setTopic] = useState(null);
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const isOtherReport = useMemo(() => topic?.id === 3, [topic])
 
+  const onCancel = () => {
+    onCancelProp()
+    if (success) {
+      onReportSuccess()
+    }
+  }
   const animValue = useRef(new Animated.Value(0)).current
 
   const onSubmit = useCallback(async (topic, details) => {
@@ -61,7 +67,6 @@ export default function ReportJob({ job_data, onCancel, isVisible, onReportSucce
       statusBarTranslucent
       isVisible={isVisible}
       swipeDirection={'down'}
-      onModalHide={success ? onReportSuccess : null}
       onBackdropPress={success ? onCancel : null}
       onSwipeComplete={(loading || topic) && !success ? null : onCancel}
       onBackButtonPress={loading && !success ? null : onCancel}
