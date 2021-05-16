@@ -1,0 +1,49 @@
+Development:
+  # IN DEVELOPMENT ------------
+  SETTINGS:
+    PROJECT_MANAGER:
+      LIMIT_ONLINE: 100
+      ACTION_RESPONSE_TIME: 120 # Seconds
+      JOB_LISTINGS_LIMIT: 10
+    CONTRACTOR:
+      LIMIT_ONLINE: 500
+      ACTION_RESPONSE_TIME: 15 # Seconds
+
+    OTHERS:
+      JOB_CIRCLE_RATIO: 250 # Meters
+  # IN DEVELOPMENT -----------
+  # Point IP to Dev server (Locally: 10.0.2.2:3001/v1 or External: 192.169.0.{XXXX}:3001/v1)
+  API_URL_AVD: http://10.0.2.2:3001/v1 # AVD Android Emulator Local Server (Leave 10.0.2.2 if you are running Android AVD Emulator)
+  COUNTRY_CODE: "+1"
+  API_URL: https://contractor-app-test-api.herokuapp.com/v1 #--- Current prod
+  # API_URL: http://192.168.0.31:3001/v1 # External Server
+  GOOGLE:
+    GEOLOCATION_KEY: AIzaSyB8xVAMRa2hoq8lRXEG1wXG3v2yR1KkHsQ
+    PLACES_URI: https://maps.googleapis.com/maps/api/place
+  PUSHER:
+    API_KEY: a86bd61a8fd06fbd858e
+    CLUSTER: us2
+  STRIPE:
+    PUBLIC_KEY: pk_test_51HdfqZD7hKWg06ZYtjRqJCPDqw0l8HmR5BZMRbEzqwbOnGmWXz2iYR9tpjhbxmrZI3txHvHNl11sRxFYy3ckmzxl00jAFNd5I8
+
+Production:
+  SETTINGS:
+    PROJECT_MANAGER:
+      LIMIT_ONLINE: 100
+      ACTION_RESPONSE_TIME: 120 # Seconds
+      JOB_LISTINGS_LIMIT: 10
+    CONTRACTOR:
+      LIMIT_ONLINE: 500
+      ACTION_RESPONSE_TIME: 15 # Seconds
+    OTHERS:
+      JOB_CIRCLE_RATIO: 250 # Meter
+  API_URL: https://contractor-app-test-api.herokuapp.com/v1
+  GOOGLE:
+    GEOLOCATION_KEY: AIzaSyB8xVAMRa2hoq8lRXEG1wXG3v2yR1KkHsQ
+    PLACES_URI: https://maps.googleapis.com/maps/api/place
+  PUSHER:
+    API_KEY: a86bd61a8fd06fbd858e
+    CLUSTER: us2
+  STRIPE:
+    PUBLIC_KEY: pk_test_51HdfqZD7hKWg06ZYtjRqJCPDqw0l8HmR5BZMRbEzqwbOnGmWXz2iYR9tpjhbxmrZI3txHvHNl11sRxFYy3ckmzxl00jAFNd5I8
+

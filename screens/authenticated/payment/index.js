@@ -1,21 +1,18 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import { KeyboardAvoidingView, Dimensions, Modal, RefreshControl, SafeAreaView, View, ActivityIndicator } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import React, { useCallback, useContext, useState } from "react";
+import { ActivityIndicator, Alert, Dimensions, Platform, RefreshControl, SafeAreaView, TouchableOpacity, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import Modal from 'react-native-modal';
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
+import Confirm from "../../../components/confirm";
 import { GlobalContext } from "../../../components/context";
-// Components
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
+import { fetchDashboardLink, getPaymentInfo, initiateAccount, removeMethod, setDefaultMethod } from "../../../controllers/PaymentController";
 import { AccountView, MethodView, PreferredMethodView, TransactionRecord } from "./components";
 import StripeCheckoutScreen, { CALLBACK_URL, MyWebView } from "./stripe";
-import { TouchableOpacity } from "react-native";
-import { fetchDashboardLink, getPaymentInfo, initiateAccount, removeMethod, setDefaultMethod } from "../../../controllers/PaymentController";
-import { Alert } from "react-native";
-import { StatusBar } from "react-native";
-import { useActionSheet } from "@expo/react-native-action-sheet";
-import Confirm from "../../../components/confirm";
 
 const height = Dimensions.get("window").height;
 
@@ -143,6 +140,7 @@ export default function PaymentScreen({ navigation }) {
       onPress: async (i) => {
         if (i === 0) {
           setShowSetup(true)
+          setSetupAccount(false)
           try {
             if (!payments.hasActiveAccount) {
               await Promise.reject({ messsage: 'Your account must be setup to continue', code: 418 })
@@ -170,8 +168,13 @@ export default function PaymentScreen({ navigation }) {
       title="Payment"
       titleWeight="300"
       headerBackground="#3869f3"
-      nextProvider="Entypo"
-    // nextIcon="dots-three-horizontal"
+      nextProvider="EvilIcons"
+      nextIcon={Platform.OS === 'android' ? "refresh" : ""}
+      nextAction={() => {
+        if (Platform.OS === 'android') {
+          refresh()
+        }
+      }}
     >
       <ScrollView
         scrollEnabled
@@ -195,43 +198,36 @@ export default function PaymentScreen({ navigation }) {
             />
             {showSetup &&
               <Modal
-                animationType="fade"
-                transparent
-                visible
-                onRequestClose={() => setShowSetup(false)}
-                onDismiss={() => setShowSetup(false)}
-                style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
+                isVisible
+                avoidKeyboard
+                propagateSwipe
+                onBackButtonPress={() => setShowSetup(false)}
+                style={{ justifyContent: "center" }}
               >
-                <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0008" }}>
-                  <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 60, flexGrow: 1 }}>
-                    <KeyboardAvoidingView behavior="padding" style={{ justifyContent: "center", margin: 8, flex: 1 }}>
-                      <View style={{ flexGrow: 1, padding: 8, backgroundColor: '#fff', borderRadius: 8, paddingTop: 28, alignItems: "stretch", }}>
-                        {!setupAccount || !uri ?
-                          <View style={{ height: '100%', justifyContent: 'center', padding: 20 }}>
-                            <ActivityIndicator />
-                          </View>
-                          : null}
-                        {uri ?
-                          <MyWebView forAccount
-                            style={{ flex: 1, paddingVertical: 12, display: setupAccount && uri ? 'flex' : 'none' }}
-                            options={{
-                              uri,
-                              successUrl: CALLBACK_URL.SUCCESS,
-                              cancelUrl: CALLBACK_URL.CANCELLED,
-                            }}
-                            onLoadingComplete={() => setSetupAccount(true)}
-                            onLoadingFail={() => setShowSetup(false)}
-                            onSuccess={onSuccessfulSession}
-                            onCancel={() => setShowSetup(false)}
-                          />
-                          : null}
-                        <TouchableOpacity activeOpacity={0.8} onPress={() => setShowSetup(false)} style={{ position: "absolute", top: 4, left: 4 }}>
-                          <MaterialCommunityIcons size={24} color="red" name="close-circle" />
-                        </TouchableOpacity>
+                <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 20, flexGrow: 1 }}>
+                  <View style={{ flexGrow: 1, padding: 8, backgroundColor: '#fff', borderRadius: 8, paddingTop: 28, alignItems: "stretch", }}>
+                    {!setupAccount ?
+                      <View style={{ height: '100%', justifyContent: 'center', padding: 20 }}>
+                        <ActivityIndicator />
                       </View>
-                    </KeyboardAvoidingView>
-                  </SafeAreaView>
-                </ScrollView>
+                      : null}
+                    <MyWebView forAccount
+                      style={{ flex: 1, paddingVertical: 12, display: setupAccount && uri ? 'flex' : 'none' }}
+                      options={{
+                        uri,
+                        successUrl: CALLBACK_URL.SUCCESS,
+                        cancelUrl: CALLBACK_URL.CANCELLED,
+                      }}
+                      onLoadingComplete={() => { if (!setupAccount) setSetupAccount(true) }}
+                      onLoadingFail={() => setShowSetup(false)}
+                      onSuccess={onSuccessfulSession}
+                      onCancel={() => setShowSetup(false)}
+                    />
+                    <TouchableOpacity activeOpacity={0.8} onPress={() => setShowSetup(false)} style={{ position: "absolute", top: 4, left: 4 }}>
+                      <MaterialCommunityIcons size={24} color="red" name="close-circle" />
+                    </TouchableOpacity>
+                  </View>
+                </SafeAreaView>
               </Modal>
             }
           </>
@@ -249,12 +245,12 @@ export default function PaymentScreen({ navigation }) {
           {payments.methods && payments.methods.length > 0 ? (
             payments.methods.map((method) => <MethodView key={method.id} onPress={() => onMethodClick(method)} method={method} />)
           ) : (
-              <View style={{ paddingVertical: 28 }}>
-                <Text light small>
-                  NO PAYMENT METHOD ADDED YET
+            <View style={{ paddingVertical: 28 }}>
+              <Text light small>
+                NO PAYMENT METHOD ADDED YET
               </Text>
-              </View>
-            )}
+            </View>
+          )}
 
           <PaymentItemRow>
             <PaymentItemRowLink onPress={() => setAddPaymentMethod(true)}>
@@ -266,24 +262,20 @@ export default function PaymentScreen({ navigation }) {
         </PaymentSection>
         {addPaymentMethod && (
           <Modal
-            animationType="fade"
-            transparent
-            visible
-            onRequestClose={() => setAddPaymentMethod(false)}
-            onDismiss={() => setAddPaymentMethod(false)}
-            style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
+            isVisible
+            avoidKeyboard
+            statusBarTranslucent
+            propagateSwipe
+            onBackButtonPress={() => setAddPaymentMethod(false)}
+            style={{ justifyContent: "center" }}
           >
-            <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0008" }}>
-              <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 60, flexGrow: 1 }}>
-                <KeyboardAvoidingView behavior="padding" style={{ justifyContent: "center", margin: 8, flex: 1 }}>
-                  <StripeCheckoutScreen close={() => setAddPaymentMethod(false)}>
-                    <TouchableOpacity activeOpacity={0.8} onPress={() => setAddPaymentMethod(false)} style={{ position: "absolute", top: 4, left: 4 }}>
-                      <MaterialCommunityIcons size={24} color="red" name="close-circle" />
-                    </TouchableOpacity>
-                  </StripeCheckoutScreen>
-                </KeyboardAvoidingView>
-              </SafeAreaView>
-            </ScrollView>
+            <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 20, flexGrow: 1 }}>
+              <StripeCheckoutScreen close={() => setAddPaymentMethod(false)}>
+                <TouchableOpacity activeOpacity={0.8} onPress={() => setAddPaymentMethod(false)} style={{ position: "absolute", top: 4, left: 4 }}>
+                  <MaterialCommunityIcons size={24} color="red" name="close-circle" />
+                </TouchableOpacity>
+              </StripeCheckoutScreen>
+            </SafeAreaView>
           </Modal>
         )}
         {/* Preffered Section */}
@@ -303,12 +295,12 @@ export default function PaymentScreen({ navigation }) {
           {payments.transactions && payments.transactions.length > 0 ? (
             payments.transactions.map((txn) => <TransactionRecord key={txn.id} onPress={() => onMethodClick(txn)} transaction={txn} />)
           ) : (
-              <View style={{ paddingVertical: 28 }}>
-                <Text light small>
-                  NO TRANSACTION YET
+            <View style={{ paddingVertical: 28 }}>
+              <Text light small>
+                NO TRANSACTION YET
               </Text>
-              </View>
-            )}
+            </View>
+          )}
         </PaymentSection>
       </ScrollView>
     </Container>

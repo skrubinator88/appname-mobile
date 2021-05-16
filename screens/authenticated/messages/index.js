@@ -3,7 +3,7 @@ import { TouchableOpacity, View, Dimensions } from "react-native";
 import styled from "styled-components/native";
 
 // Components
-import Container from "../../../components/headerAndContainer";
+import Container from "../../../components/headerAndContainerGrow";
 import Text from "../../../components/text";
 import { useTheme } from "@react-navigation/native";
 import env from "../../../env";

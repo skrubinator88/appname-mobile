@@ -2,7 +2,6 @@ node_modules/**/*
 package-lock.json
 .expo/*
 .DS_Store
-config.yaml
 npm-debug.*
 *.jks
 *.p8
@@ -14,4 +13,3 @@ web-build/
 web-report/
 yarn.lock
 components/Example-Style.js
-config.json

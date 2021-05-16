@@ -1,3 +1,4 @@
+import moment from "moment";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, View } from "react-native";
 import { WebView } from "react-native-webview";
@@ -78,7 +79,7 @@ export default function StripeCheckoutScreen({ children, close = () => { } }) {
             onLoadingComplete={() => setShow(true)}
             onLoadingFail={() => Alert.alert('Payment Setup Failed', 'An error occurred while setting up your payment method', [{ onPress: close, style: 'cancel' }])}
             onSuccess={close}
-            onCancel={() => Alert.alert('Payment Setup Failed', 'Payment method setup was not completed', [{ onPress: close, style: 'cancel' }])}
+            onCancel={(e) => Alert.alert('Payment Setup Failed', e?.message || 'Payment method setup was not completed', [{ onPress: close, style: 'cancel' }])}
           />
         </>
       }
@@ -157,13 +158,13 @@ export function MyWebView({ options, forAccount, stripePublicKey, onSuccess, onC
       source={forAccount ? {
         uri: options.uri
       } : {
-          html: STRIPE_CHECKOUT_HTML
-        }}
+        html: STRIPE_CHECKOUT_HTML
+      }}
       onMessage={forAccount ? null : (e) => {
         switch (e.nativeEvent.data) {
           case 'setup':
             if (!forAccount) {
-              timeoutRef.current.triggerID = setTimeout(onCancel, timeoutRef.current.timeout)
+              timeoutRef.current.triggerID = setTimeout(() => onCancel(new Error(`Your session has expired\r\n\r\nWhen you try again, complete process within ${moment.duration(timeout, 'milliseconds').humanize()}`)), timeoutRef.current.timeout)
             }
             break
           case 'ping':
@@ -181,62 +182,10 @@ export function MyWebView({ options, forAccount, stripePublicKey, onSuccess, onC
         }
       } : null}
       originWhitelist={'*'}
-      onLoad={forAccount ? onLoadingComplete : null}
+      onLoad={onLoadingComplete}
       onError={onLoadingFail}
       onHttpError={onLoadingFail}
       ref={webViewRef}
     />
   )
 }
-
-// Payments Section
-const SectionTitle = styled.View`
-  width: 100%;
-  padding: 0 5%;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const PaymentSection = styled.View`
-  justify-content: center;
-  align-items: center;
-  margin: 20px 0 0 0;
-`;
-
-const PaymentItemRow = styled.View`
-  background: white;
-  padding: 10px;
-  flex-direction: row;
-  width: 100%;
-  justify-content: space-around;
-  border: 1px solid #f5f5f5;
-`;
-
-const PaymentItemRowLink = styled.View`
-  width: 100%;
-  padding: 0 5%;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-// Preferred Section
-
-const PrefferedPaymentItemRow = styled.View`
-  background: white;
-  padding: 0 5%;
-  flex-direction: row;
-  width: 100%;
-  justify-content: flex-start;
-  align-items: center;
-  border: 1px solid #f5f5f5;
-`;
-
-const Column = styled.View`
-  padding: 10px;
-  ${({ creditCardIcon, creditCardIconDescription }) => {
-    if (creditCardIcon) return "flex: 1";
-    if (creditCardIconDescription) return "flex: 3";
-  }}
-`;
