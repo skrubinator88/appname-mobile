@@ -62,7 +62,7 @@ exports.getUserChats = (user_id, setChats) => {
         // console.log(change.type);
         switch (change.type) {
           case "added": {
-            setChats((prevState) => [...prevState, { id: document.id, ...document.data() }]);
+            setChats((prevState) => [{ id: document.id, ...document.data() }, ...prevState]);
             // const data = document.data();
             // data.createdAt = data.createdAt.toDate();
             // return dispatch(ChatActions.add(chat_id, data));
@@ -70,11 +70,11 @@ exports.getUserChats = (user_id, setChats) => {
           case "modified": {
             setChats((prevState) => {
               const newArray = prevState.filter((item) => item.id !== document.id);
-              return [...newArray, { id: document.id, ...document.data() }];
+              return [{ id: document.id, ...document.data() }, ...newArray];
             });
           }
           case "removed": {
-            // return dispatch(JobsStoreActions.remove(document.id));
+            return setChats((prevState) => [...prevState.filter(i => i.id !== document.id)]);
           }
           default:
             break;
@@ -118,7 +118,7 @@ exports.getMessages = (chat_id, dispatch) => {
   return unsubscribe;
 };
 
-exports.getChats = (user_id, dispatch) => {};
+exports.getChats = (user_id, dispatch) => { };
 
 exports.clean = (chat_id, unsubscribe, dispatch) => {
   unsubscribe();

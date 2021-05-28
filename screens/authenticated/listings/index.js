@@ -1,29 +1,23 @@
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
+import { TextField } from "@ubaids/react-native-material-textfield";
 import { unix } from "moment";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Modal, SafeAreaView, ScrollView, View } from "react-native";
-import { TextField } from "@ubaids/react-native-material-textfield";
 import StarRating from "react-native-star-rating";
-// Redux
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
+import GigChaserJobWord from "../../../assets/gig-logo";
 import Confirm from "../../../components/confirm";
-// Context
 import { GlobalContext } from "../../../components/context";
-// Components
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
-import GigChaserJobWord from "../../../assets/gig-logo";
-// Controllers
 import JobsControllers from "../../../controllers/JobsControllers";
 import config from "../../../env";
-// Functions
 import { isCurrentJob, sendNotification } from "../../../functions";
-import { useActionSheet } from "@expo/react-native-action-sheet";
 
 export default function JobListing({ navigation }) {
-  // Constructor
   const { authState } = useContext(GlobalContext);
 
   // Store

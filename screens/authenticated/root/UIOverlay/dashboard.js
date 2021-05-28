@@ -1,42 +1,45 @@
-// Dependencies
-import React, { useState, useContext, useEffect } from "react";
-import { SafeAreaView, Keyboard, KeyboardAvoidingView, Platform, View, Dimensions, Image } from "react-native";
-
+import { AntDesign, Entypo, MaterialIcons } from "@expo/vector-icons";
+import React, { useContext, useState } from "react";
+import { Dimensions, Image, Keyboard, Platform } from "react-native";
+import { getStatusBarHeight } from "react-native-status-bar-height";
 import styled from "styled-components/native";
-
-// Components
 import Card from "../../../../components/card_animated";
+import { GlobalContext, UIOverlayContext } from "../../../../components/context";
 import Text from "../../../../components/text";
+import { USER_LOCATION_CONTEXT } from "../../../../contexts/userLocation";
+import fetchedSuggestedItems from "../../../../models/fetchedSuggestedItems"; // Simulating an API
+import { handleCameraCoordinates } from "../../../../controllers/MapController";
+import { useDispatch } from "react-redux";
 
-// Expo
-import { MaterialIcons, AntDesign, Entypo } from "@expo/vector-icons";
-import { ScrollView } from "react-native-gesture-handler";
 
-// Miscellaneous
+
+
 const height = Dimensions.get("screen").height;
 const width = Dimensions.get("screen").width;
-import fetchedSuggestedItems from "../../../../models/fetchedSuggestedItems"; // Simulating an API
-import { getStatusBarHeight } from "react-native-status-bar-height";
 const statusBarHeight = getStatusBarHeight();
 
-// Context
-import { UIOverlayContext, GlobalContext } from "../../../../components/context";
 
-export default function Dashboard({ navigation, onUIChange, willUnmountSignal, showCard }) {
-  const { authActions, authState, errorActions } = useContext(GlobalContext);
-  const { userToken, userID, userData } = authState;
+export default function Dashboard({ navigation, onUIChange, willUnmountSignal, showCard })
+{
+  const { authState } = useContext(GlobalContext);
+  const { userData } = authState;
   const { changeRoute } = useContext(UIOverlayContext);
+  const { location } = useContext(USER_LOCATION_CONTEXT)
   const [searchBarValue, setSearchBarValue] = useState("");
   const [searchBarFocus, setSearchBarFocus] = useState(false);
   let searchBar; // Search Bar Reference
 
-  const handleSubmit = (keyword) => {
+  const dispatch = useDispatch()
+
+  const handleSubmit = (keyword) =>
+  {
     searchBar.clear();
     setSearchBarFocus(false);
     changeRoute({ name: "searching", props: { keyword } });
   };
 
-  let suggestedItems = fetchedSuggestedItems.filter((item) => {
+  let suggestedItems = fetchedSuggestedItems.filter((item) =>
+  {
     const title = item.toLowerCase();
     const input = searchBarValue.toLowerCase().trim();
     return title.indexOf(input) != -1;
@@ -51,10 +54,12 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
             keyboardShouldPersistTaps="always"
             data={suggestedItems}
             keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => {
+            renderItem={({ item }) =>
+            {
               return (
                 <SuggestedItem
-                  onPress={() => {
+                  onPress={() =>
+                  {
                     setSearchBarValue(item);
                     setSearchBarFocus(false);
                     searchBar.blur();
@@ -81,10 +86,12 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
             keyboardShouldPersistTaps="always"
             data={suggestedItems}
             keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => {
+            renderItem={({ item }) =>
+            {
               return (
                 <SuggestedItem
-                  onPress={() => {
+                  onPress={() =>
+                  {
                     setSearchBarValue(item);
                     setSearchBarFocus(false);
                     searchBar.blur();
@@ -105,10 +112,12 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
           placeholderTextColor="#777"
           onChangeText={(text) => setSearchBarValue(text)}
           ref={(searchBarRef) => (searchBar = searchBarRef)}
-          onFocus={() => {
+          onFocus={() =>
+          {
             setSearchBarFocus(true);
           }}
-          onSubmitEditing={({ nativeEvent }) => {
+          onSubmitEditing={({ nativeEvent }) =>
+          {
             setSearchBarValue(nativeEvent.text);
             setSearchBarFocus(false);
             searchBar.blur();
@@ -120,7 +129,8 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
       {searchBarFocus && userData.role == "contractor" ? (
         <MenuButton
           activeOpacity={0.9}
-          onPress={() => {
+          onPress={() =>
+          {
             Keyboard.dismiss();
             setSearchBarFocus(false);
             searchBar.blur();
@@ -132,7 +142,8 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
         <>
           <MenuButton
             activeOpacity={0.9}
-            onPress={() => {
+            onPress={() =>
+            {
               Keyboard.dismiss();
               navigation.openDrawer();
             }}
@@ -142,8 +153,8 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
 
           <Card>
             <OverlayMenu>
-              <OverlayMenuItem onPress={() => {}}>
-                <Item>
+              <OverlayMenuItem>
+                <Item onPress={() => handleCameraCoordinates(location.coords, dispatch)}>
                   <MaterialIcons backgroundColor="white" color="#444" name="gps-fixed" size={30} />
                 </Item>
               </OverlayMenuItem>
@@ -151,7 +162,7 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
               {userData.role == "project_manager" && (
                 <OverlayMenuItem size={70}>
                   <Item
-                    // onPress={() => navigation.navigate("Job Listings", { screen: "Listing Item", params: { edit: false, quickAdd: true } })}
+                    onPress={() => navigation.navigate("Job Listings", { screen: "Listing Item", params: { edit: false, quickAdd: true } })}
                     color="#39c64e"
                     size={70}
                   >

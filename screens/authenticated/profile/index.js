@@ -27,14 +27,15 @@ const isIos = Platform.OS === "ios";
 const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
 const width = Dimensions.get("window").width; //arbitrary size
 
-export default function ProfileScreen({ navigation }) {
+export default function ProfileScreen({ navigation })
+{
   const global = useContext(GlobalContext);
-  const { authActions, authState, errorActions, appActions, appState } = useContext(GlobalContext);
+  const { authActions, authState, } = useContext(GlobalContext);
   const { userData, userID } = authState;
 
   const [role, setRole] = useState(userData.role);
   const [roleSwitch, setRoleSwitch] = useState(role == "contractor" ? false : true);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [comments, setComments] = useState([]);
 
   // Setup Profile Picture Selection
@@ -43,37 +44,59 @@ export default function ProfileScreen({ navigation }) {
   const { showActionSheetWithOptions } = useActionSheet();
   const [showCamera, setShowCamera] = useState(false);
 
+  const slide = useRef(new Animated.Value(role == "contractor" ? width / 4 : 0)).current;
+
   const ANIMATION_DURATION = 200;
-  const ANIMATION_EASING = () => {
+  const ANIMATION_EASING = () =>
+  {
     return Easing.inOut(Easing.exp);
   };
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     setRole(global.authState.userData.role);
   }, [global]);
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     retrieveComments();
   }, []);
 
-  function retrieveComments() {
+  async function retrieveComments()
+  {
+    setLoading(true)
     setComments([]);
-    JobController.getUserJobComments(userID, { setComments, limit: 3 });
+    try
+    {
+      await JobController.getUserJobComments(userID, { setComments, limit: 3 });
+    } catch (e)
+    {
+      console.log(e)
+      Alert.alert('Failed to retrieve user comments', e.message)
+    } finally
+    {
+      setLoading(false)
+    }
   }
 
   // Functions
-  const handleProfilePictureUpload = useCallback(async () => {
-    try {
+  const handleProfilePictureUpload = useCallback(async () =>
+  {
+    try
+    {
       // Send picture to server
       // Set picture in Redux
       // setProfilePictureURI(res.uri);
     } catch {
-    } finally {
+    } finally
+    {
     }
   }, [profilePictureURI]);
 
-  const getPhoto = useCallback(async () => {
-    try {
+  const getPhoto = useCallback(async () =>
+  {
+    try
+    {
       showActionSheetWithOptions(
         {
           options: ["Capture Photo", "Select From Library", "Cancel"],
@@ -82,8 +105,10 @@ export default function ProfileScreen({ navigation }) {
           cancelButtonIndex: 2,
           useModal: true,
         },
-        async (i) => {
-          switch (i) {
+        async (i) =>
+        {
+          switch (i)
+          {
             case 0:
               getPhotoFromCamera();
               break;
@@ -93,18 +118,23 @@ export default function ProfileScreen({ navigation }) {
           }
         }
       );
-    } catch (e) {
+    } catch (e)
+    {
       console.log(e);
       Alert.alert("Failed To Select Photo", e.message);
     }
   }, [profilePictureURI]);
 
-  const getPhotoFromLibrary = useCallback(async () => {
-    try {
+  const getPhotoFromLibrary = useCallback(async () =>
+  {
+    try
+    {
       setloadingMedia(true);
-      if (Platform.OS === "ios") {
+      if (Platform.OS === "ios")
+      {
         let perms = await requestMediaLibraryPermissionsAsync();
-        if (!perms.granted) {
+        if (!perms.granted)
+        {
           Alert.alert("Access to media library denied", "You need to grant access to image library to continue");
           setloadingMedia(false);
           return;
@@ -117,58 +147,57 @@ export default function ProfileScreen({ navigation }) {
         allowsMultipleSelection: false,
       });
 
-      if (!res.cancelled) {
+      if (!res.cancelled)
+      {
         setProfilePictureURI(res.uri);
       }
-    } catch (e) {
+    } catch (e)
+    {
       console.log(e);
       Alert.alert(e.message);
-    } finally {
+    } finally
+    {
       setloadingMedia(false);
     }
   }, [profilePictureURI]);
 
-  const getPhotoFromCamera = useCallback(async () => {
-    try {
+  const getPhotoFromCamera = useCallback(async () =>
+  {
+    try
+    {
       setloadingMedia(true);
 
       let hasPermission = false;
-      await (async () => {
+      await (async () =>
+      {
         const { status } = await requestPermissionsAsync();
         hasPermission = status === "granted";
       })();
 
-      if (hasPermission !== true) {
+      if (hasPermission !== true)
+      {
         Alert.alert("Camera Access Required", "The application requires permission to use your camera");
         return;
       }
 
       setShowCamera(true);
-    } catch (e) {
+    } catch (e)
+    {
       console.log(e);
       Alert.alert("Failed To Capture Photo", e.message);
-    } finally {
+    } finally
+    {
       setloadingMedia(false);
     }
   }, [profilePictureURI]);
 
-  // React navigation "onMounted lifecycle"
-  // useEffect(() => {
-  //   const unsubscribe = navigation.addListener("focus", (e) => {
-  //     // Prevent default action
-  //     console.log("Hey");
-  //   });
-
-  //   return () => unsubscribe();
-  // }, []);
-
-  const slide = useRef(new Animated.Value(role == "contractor" ? width / 4 : 0)).current;
-
-  const changeRoleCallback = (role) => {
+  const changeRoleCallback = (role) =>
+  {
     authActions.changeRole(authState, role);
   };
 
-  const slideRight = () => {
+  const slideRight = () =>
+  {
     // appActions.setLoading(true);
     // Will change fadeAnim value to 1 in 5 seconds
     Animated.timing(slide, {
@@ -179,7 +208,8 @@ export default function ProfileScreen({ navigation }) {
     }).start(changeRoleCallback("contractor"));
   };
 
-  const slideLeft = () => {
+  const slideLeft = () =>
+  {
     // Will change fadeAnim value to 1 in 5 seconds
     Animated.timing(slide, {
       toValue: 0,
@@ -189,7 +219,8 @@ export default function ProfileScreen({ navigation }) {
     }).start(changeRoleCallback("project_manager"));
   };
 
-  const handleChangeRole = () => {
+  const handleChangeRole = () =>
+  {
     roleSwitch ? slideRight() : slideLeft();
     setRoleSwitch(!roleSwitch);
   };
@@ -210,7 +241,8 @@ export default function ProfileScreen({ navigation }) {
       refreshingProperties={{
         refreshing: false,
         tintColor: "white",
-        onRefresh: () => {
+        onRefresh: () =>
+        {
           retrieveComments();
         },
       }}
@@ -231,14 +263,14 @@ export default function ProfileScreen({ navigation }) {
             flex: 1,
             width: 100,
             height: 100,
-            backgroundColor: loading ? "#333" : null,
-            borderRadius: loading ? 50 : null,
+            backgroundColor: loading ? "#333" : "#3331",
+            borderRadius: 50,
             opacity: loading ? 0.3 : 1,
             margin: 10,
           }}
         >
           <TouchableOpacity onPress={getPhoto}>
-            <ProfilePicture source={{ uri: profilePictureURI }} onLoad={() => setLoading(false)} />
+            <ProfilePicture source={{ uri: profilePictureURI }} onLoadStart={() => setLoading(true)} onLoadEnd={() => setLoading(false)} />
           </TouchableOpacity>
         </View>
 
@@ -372,19 +404,25 @@ export default function ProfileScreen({ navigation }) {
 
       <JobCamera
         showCamera={showCamera}
-        onSuccess={async (res) => {
-          if (!res) {
+        onSuccess={async (res) =>
+        {
+          if (!res)
+          {
             return setShowCamera(false);
           }
           // console.log(res);
-          try {
-            if (!res.cancelled) {
+          try
+          {
+            if (!res.cancelled)
+            {
               handleProfilePictureUpload(res.uri);
             }
-          } catch (e) {
+          } catch (e)
+          {
             console.log(e);
             Alert.alert(e.message || "Failed to add photo");
-          } finally {
+          } finally
+          {
             setShowCamera(false);
           }
         }}
@@ -393,10 +431,13 @@ export default function ProfileScreen({ navigation }) {
   );
 }
 
-function RenderIndividualComments({ items }) {
-  if (items.length > 0) {
+function RenderIndividualComments({ items })
+{
+  if (items.length > 0)
+  {
     const final = [];
-    for (let i = 0; i < items.length; i++) {
+    for (let i = 0; i < items.length; i++)
+    {
       let { first_name, last_name, text, posted_by, id } = items[i];
       final.push(
         <CommentItem key={id}>
