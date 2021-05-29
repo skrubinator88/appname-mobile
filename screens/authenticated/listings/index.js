@@ -17,7 +17,8 @@ import JobsControllers from "../../../controllers/JobsControllers";
 import config from "../../../env";
 import { isCurrentJob, sendNotification } from "../../../functions";
 
-export default function JobListing({ navigation }) {
+export default function JobListing({ navigation })
+{
   const { authState } = useContext(GlobalContext);
 
   // Store
@@ -28,19 +29,23 @@ export default function JobListing({ navigation }) {
   const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (isMounted) {
+  useEffect(() =>
+  {
+    if (isMounted)
+    {
       setLoading(false);
     }
     setIsMounted(true);
   }, [listings]);
 
   // Fetch user jobs
-  useEffect(() => {
+  useEffect(() =>
+  {
     let unsubscribe;
     unsubscribe = JobsControllers.currentUserActiveJobs(authState.userID, dispatch);
 
-    return () => {
+    return () =>
+    {
       if (unsubscribe !== undefined) JobsControllers.clean("ListingsActions", unsubscribe, dispatch);
     };
   }, []);
@@ -191,11 +196,14 @@ export default function JobListing({ navigation }) {
   );
 }
 
-const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
+const ListItemDetail = ({ item, navigation, isCurrentJob: current }) =>
+{
   const [timeToShow, setTimeToShow] = useState(current ? unix(item.start_at / 1000).fromNow() : "");
   useFocusEffect(
-    useCallback(() => {
-      if (isCurrentJob) {
+    useCallback(() =>
+    {
+      if (isCurrentJob)
+      {
         setTimeToShow(unix(item.start_at / 1000).fromNow());
       }
     }, [navigation, item])
@@ -227,7 +235,7 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
             </Row>
             <Row style={{ marginBottom: 10 }}>
               <Text small>
-                ${item.salary}/{item.wage}
+                ${item.salary}/{item.wage ?? 'deployment'}
               </Text>
             </Row>
             {item.tasks.map((task) => (
@@ -250,13 +258,17 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
   );
 };
 
-const ListOfferItemDetail = ({ item }) => {
+const ListOfferItemDetail = ({ item }) =>
+{
   const { authState } = useContext(GlobalContext);
   const [state, setState] = useState({ loading: true, showCounterOffer: false });
 
-  useEffect(() => {
-    (async () => {
-      try {
+  useEffect(() =>
+  {
+    (async () =>
+    {
+      try
+      {
         const response = await fetch(`${config.API_URL}/users/${item.offer_received.deployee}`, {
           method: "GET",
           headers: {
@@ -275,15 +287,18 @@ const ListOfferItemDetail = ({ item }) => {
           occupation: deployee.occupation,
           starRate: Number(deployee.star_rate),
         });
-      } catch (e) {
+      } catch (e)
+      {
         console.log(e, "Load offer fail");
         setState({ ...state, loading: false });
       }
     })();
   }, [item]);
 
-  const onSelect = useCallback(() => {
-    if (!state.deployee) {
+  const onSelect = useCallback(() =>
+  {
+    if (!state.deployee)
+    {
       return;
     }
     setState({ ...state, showCounterOffer: true });
@@ -310,46 +325,47 @@ const ListOfferItemDetail = ({ item }) => {
               </Row>
             ))}
 
-            <Row style={{ marginTop: 8, marginBottom: 12 }}>
+            <Row style={{ marginVertical: 4, justifyContent: 'space-between' }}>
               <Text light small>
                 Initial Offer
               </Text>
               <Text small>
-                ${item.salary}/{item.wage}
+                ${item.salary}/{item.wage ?? 'deployment'}
               </Text>
             </Row>
 
             {state.deployee && state.deployee.id && state.deployee.id === item.executed_by ? (
               <>
-                <Row last style={{ marginTop: 4, justifyContent: "flex-start", paddingRight: 0 }}>
+                <Row style={{ marginVertical: 4, justifyContent: 'space-between' }}>
+                  <Text light small>
+                    Suggested Offer
+                      </Text>
+                  <Text small>
+                    ${item.offer_received.offer}/{item.offer_received.wage}
+                  </Text>
+                </Row>
+                {item.offer_received.counterOffer &&
+                  <Row style={{ marginVertical: 4, justifyContent: 'space-between' }}>
+                    <Text color="teal" small>
+                      Counter Offer
+                        </Text>
+                    <Text color="teal" small>
+                      ${item.offer_received.counterOffer}/{item.offer_received.counterWage}
+                    </Text>
+                  </Row>
+                }
+
+                <Row last style={{ marginTop: 8, justifyContent: "flex-start" }}>
                   <Image
                     source={{
                       uri: `${config.API_URL}/images/${state.deployee.id}.jpg`,
                     }}
-                    style={{ height: 70, width: 70, borderRadius: 45 }}
+                    style={{ height: 48, width: 48, borderRadius: 24 }}
                   />
                   <Column>
-                    <Text small bold>
+                    <Text small bold style={{ marginLeft: 8 }}>
                       {state.name}
                     </Text>
-                    <Row style={{ marginVertical: 4, paddingLeft: 0 }}>
-                      <Text light small>
-                        Suggested Offer
-                      </Text>
-                      <Text small>
-                        ${item.offer_received.offer}/{item.offer_received.wage}
-                      </Text>
-                    </Row>
-                    {item.offer_received.counterOffer ? (
-                      <Row style={{ marginVertical: 4, paddingLeft: 0 }}>
-                        <Text color="teal" small>
-                          Counter Offer
-                        </Text>
-                        <Text color="teal" small>
-                          ${item.offer_received.counterOffer}/{item.offer_received.counterWage}
-                        </Text>
-                      </Row>
-                    ) : null}
                   </Column>
                 </Row>
               </>
@@ -369,26 +385,33 @@ const ListOfferItemDetail = ({ item }) => {
   );
 };
 
-const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
+const CounterOfferView = ({ job_data, authState, deployee, onComplete }) =>
+{
   const [loading, setLoading] = useState(false);
   const [salary, setSalary] = useState(job_data.offer_received?.offer);
-  const [wage, setUnit] = useState(job_data.offer_received.wage || "hr");
+  const [wage, setUnit] = useState(job_data.offer_received.wage || "deployment");
 
   const { showActionSheetWithOptions } = useActionSheet();
 
-  const onRejectOffer = useCallback(async () => {
-    if (salary) {
-      await new Promise(async (res) => {
+  const onRejectOffer = useCallback(async () =>
+  {
+    if (salary)
+    {
+      await new Promise(async (res) =>
+      {
         Confirm({
           options: ["Reject", "Cancel"],
           cancelButtonIndex: 1,
           title: `Reject Offer From ${deployee.first_name}`,
           message: `If you reject, the job will be available in the job pool`,
-          onPress: async (index) => {
-            try {
+          onPress: async (index) =>
+          {
+            try
+            {
               setLoading(true);
 
-              if (index === 0) {
+              if (index === 0)
+              {
                 await JobsControllers.cancelOffer(job_data.id);
                 sendNotification(authState.userToken, deployee.id, {
                   title: `GigChasers - ${job_data.job_title}`,
@@ -398,10 +421,12 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
               }
               setLoading(false);
               onComplete();
-            } catch (e) {
+            } catch (e)
+            {
               console.log(e, "offer rejection");
               setLoading(false);
-            } finally {
+            } finally
+            {
               res();
             }
           },
@@ -411,14 +436,18 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
     }
   }, [loading, deployee, job_data, salary]);
 
-  const onSubmitOffer = useCallback(async () => {
-    if (salary) {
+  const onSubmitOffer = useCallback(async () =>
+  {
+    if (salary)
+    {
       const offer = parseFloat(salary).toFixed(2);
-      if (Number.isNaN(offer) || isNaN(offer)) {
+      if (Number.isNaN(offer) || isNaN(offer))
+      {
         console.log(offer, ": is not a number?");
         return;
       }
-      await new Promise(async (res) => {
+      await new Promise(async (res) =>
+      {
         const isCounterOffer = offer !== parseFloat(job_data.offer_received.offer).toFixed(2) || job_data.offer_received.wage !== wage;
         Confirm({
           options: [isCounterOffer ? "Send" : "Approve", "Cancel"],
@@ -427,19 +456,24 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
           message: !isCounterOffer
             ? `If you approve, the job will be accepted by this deployee`
             : `Offer will be sent to ${deployee.first_name} for confirmation`,
-          onPress: async (index) => {
-            try {
+          onPress: async (index) =>
+          {
+            try
+            {
               setLoading(true);
 
-              if (index === 0) {
-                if (isCounterOffer) {
+              if (index === 0)
+              {
+                if (isCounterOffer)
+                {
                   await JobsControllers.counterOffer(job_data.id, offer, wage);
                   sendNotification(authState.userToken, deployee.id, {
                     title: `GigChasers - ${job_data.job_title}`,
                     body: `Counter offer received`,
                     data: { type: "offerreceive", id: job_data.id, sender: authState.userID },
                   });
-                } else {
+                } else
+                {
                   await JobsControllers.approveOffer(job_data.id, deployee.id, authState);
                   sendNotification(authState.userToken, deployee.id, {
                     title: `GigChasers - ${job_data.job_title}`,
@@ -450,10 +484,12 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
               }
               setLoading(false);
               onComplete();
-            } catch (e) {
+            } catch (e)
+            {
               setLoading(false);
               console.log(e, "offer acceptance");
-            } finally {
+            } finally
+            {
               res();
             }
           },
@@ -515,7 +551,7 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                       Current Offer
                     </Text>
                     <Text small marginBottom="5px">
-                      ${job_data.salary}/{job_data.wage}
+                      ${job_data.salary}/{job_data.wage ?? 'deployment'}
                     </Text>
                   </View>
 
@@ -531,40 +567,12 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                           placeholder="0.00"
                           labelTextStyle={{ color: "grey", fontWeight: "700" }}
                           keyboardType="numeric"
-                          onChangeText={(text) => {
+                          onChangeText={(text) =>
+                          {
                             setSalary(text);
                           }}
                           value={salary}
                           onSubmitEditing={onSubmitOffer}
-                          renderRightAccessory={() => (
-                            <RateTouchable
-                              onPress={() => {
-                                showActionSheetWithOptions(
-                                  {
-                                    options: ["Per Day", "Per Deployment", "Per Hour", "Cancel"],
-                                    cancelButtonIndex: 3,
-                                    title: "Select  Rate",
-                                    showSeparators: true,
-                                  },
-                                  async (num) => {
-                                    switch (num) {
-                                      case 0:
-                                        setUnit("day");
-                                        break;
-                                      case 1:
-                                        setUnit("deployment");
-                                        break;
-                                      case 2:
-                                        setUnit("hr");
-                                        break;
-                                    }
-                                  }
-                                );
-                              }}
-                            >
-                              <Text color="#4a89f2">/{wage}</Text>
-                            </RateTouchable>
-                          )}
                         />
                       </SalaryField>
                     </WageInput>
@@ -666,8 +674,10 @@ const WageInput = styled.View`
 `;
 
 const Button = styled.TouchableOpacity`
-  ${({ decline, accept, negotiate, negotiationSent, row }) => {
-    switch (true) {
+  ${({ decline, accept, negotiate, negotiationSent, row }) =>
+  {
+    switch (true)
+    {
       case accept:
         return `
         background: #228b22; 
@@ -705,8 +715,10 @@ const Button = styled.TouchableOpacity`
 
 const CounterRow = styled.View`
   flex-direction: row;
-  justify-content: ${({ first, last }) => {
-    switch (true) {
+  justify-content: ${({ first, last }) =>
+  {
+    switch (true)
+    {
       case first:
         return "space-between";
       case last:
@@ -715,8 +727,10 @@ const CounterRow = styled.View`
         return "flex-start";
     }
   }};
-  ${({ first }) => {
-    switch (true) {
+  ${({ first }) =>
+  {
+    switch (true)
+    {
       case first:
         return `
         margin: 4% 0 0 0;

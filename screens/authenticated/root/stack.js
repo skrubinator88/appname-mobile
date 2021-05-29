@@ -6,15 +6,19 @@ export const HomeStack = createStackNavigator();
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 
 import { Drawer } from "./drawer";
+import { UserLocationContextProvider } from "../../../contexts/userLocation";
 
 // BODY
 
-export function AuthenticatedStackScreen() {
+export function AuthenticatedStackScreen()
+{
   return (
     <NavigationContainer independent={true}>
-      <HomeStack.Navigator headerMode="none">
-        <HomeStack.Screen name="Root" component={Drawer} />
-      </HomeStack.Navigator>
+      <UserLocationContextProvider>
+        <HomeStack.Navigator headerMode="none">
+          <HomeStack.Screen name="Root" component={Drawer} />
+        </HomeStack.Navigator>
+      </UserLocationContextProvider>
     </NavigationContainer>
   );
 }

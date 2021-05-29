@@ -63,12 +63,6 @@ export const priorityMap = {
   low0: "Low (1 hour 30 mins)",
 };
 
-// export const wageMap = {
-//   hour: "Per Hour",
-//   day: "Per Day",
-//   deployment: "Per Deployment",
-// };
-
 export default function ListingItem({ navigation })
 {
   // - - Constructor - -
@@ -84,7 +78,6 @@ export default function ListingItem({ navigation })
   const [job_title, setJobTitle] = useState(""); // Input Field
   const [location, setLocation] = useState(""); // Input Field
   const [salary, setSalary] = useState(""); // Input Field
-  const [wage, setWageRate] = useState("deployment"); // Not longer needed
   const [tasks, setTasks] = useState([]); // Input Field (With Modal)
 
   const [loading, setLoading] = useState(false);
@@ -346,33 +339,8 @@ export default function ListingItem({ navigation })
     );
   }, [priority]);
 
-  // const onSetWageRate = useCallback(async () => {
-  //   showActionSheetWithOptions(
-  //     {
-  //       options: ["Per Hour", "Per Day", "Per Deployment", "Cancel"],
-  //       cancelButtonIndex: 3,
-  //       // destructiveButtonIndex: 2,
-  //       title: "Set Wage Rate",
-  //       message: "Specify payments calculator cycle",
-  //     },
-  //     (i) => {
-  //       switch (i) {
-  //         case 0:
-  //           setWageRate("hour");
-  //           break;
-  //         case 1:
-  //           setWageRate("day");
-  //           break;
-  //         case 2:
-  //           setWageRate("deployment");
-  //           break;
-  //       }
-  //     }
-  //   );
-  // }, [priority]);
-
   // - - Extra Setup - -
-  const form = { job_type: selected_job_type, job_title, tasks, location, salary, /* wage, */ date, priority };
+  const form = { job_type: selected_job_type, job_title, tasks, location, salary, wage: 'deployment', date, priority };
 
   // - - Life Cycles - -
   // Create session for google suggestions (This will reduce billing expenses)
@@ -728,7 +696,7 @@ export default function ListingItem({ navigation })
                   <TextField
                     {...commonInputProps(salary, setSalary)}
                     prefix="$"
-                    suffix={`/${wage}`}
+                    suffix={`/deployment`}
                     // label="PAY"
                     labelFontSize={14}
                     placeholder="0.00"
@@ -737,20 +705,6 @@ export default function ListingItem({ navigation })
                   />
                 </SalaryField>
               </WageInput>
-              {/* <TouchableOpacity onPress={onSetWageRate}>
-                <ScheduleButton
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    paddingVertical: 2,
-                    backgroundColor: "#fafafa",
-                  }}
-                >
-                  <Text light={!priority} textTransform="uppercase">
-                    Choose cycle (/hr, /day, per deployment)
-                  </Text>
-                </ScheduleButton>
-              </TouchableOpacity> */}
             </Item>
 
             <Item style={{ marginVertical: 4 }}>
@@ -1048,16 +1002,6 @@ const Task = styled.View`
   margin-bottom: 10px;
 `;
 
-const WageTimeField = styled.View`
-  flex: 2;
-  flex-direction: column;
-  overflow: hidden;
-`;
-
-const WageTimeFieldInput = styled.Picker`
-  margin: ${Platform.OS == "ios" ? "-60px 0" : "0px"};
-`;
-
 const SearchTitleSuggestionsField = styled.View`
   flex: 2;
   flex-direction: column;
@@ -1120,10 +1064,4 @@ const SuggestedItem = styled.View`
 
 const PoweredByGoogleImage = styled.Image`
   align-self: flex-end;
-`;
-
-const WageTitles = styled.View`
-  flex: 1;
-  flex-direction: row;
-  justify-content: space-between;
 `;

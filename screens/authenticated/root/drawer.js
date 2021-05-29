@@ -42,7 +42,7 @@ function DrawerContent({ navigation }) {
         >
           <Row>
             <Column>
-              <ProfilePicture source={{ uri: `${env.API_URL}${authState.userData.profile_picture}` }} />
+              <ProfilePicture style={{backgroundColor: '#3332'}} source={{ uri: `${env.API_URL}${authState.userData.profile_picture}` }} />
             </Column>
             <Column>
               <DrawerText title>
