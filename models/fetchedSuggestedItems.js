@@ -54,7 +54,6 @@ module.exports = [
   "Lawn care",
   "IT Tech Support",
   "Tow Truck and Roadside Assistance",
-  // "Random (w/ disclaimer)",
   "Event Planner",
   "Caterers",
   "Hot Shot Delivery & Courier Services",
@@ -85,4 +84,5 @@ module.exports = [
   "Window Blinds, Shades, Drapes, Curtains and Shutters",
   "Seamstress/Tailor",
   "Beautician",
+  "Other (No Skill Required)",
 ].sort();

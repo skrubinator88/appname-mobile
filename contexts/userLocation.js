@@ -15,7 +15,7 @@ export const UserLocationContextProvider = (props) =>
 
 	const getCurrentLocation = () =>
 	{
-		PermissionsControllers.getLocation().then((position) => setLocation(position));
+		return PermissionsControllers.getLocation().then((position) => setLocation(position));
 	}
 
 	// Get app necessary permissions

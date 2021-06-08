@@ -7,6 +7,7 @@ import styled from "styled-components/native";
 import Card from "../../../../components/card_animated";
 import { GlobalContext, UIOverlayContext } from "../../../../components/context";
 import Text from "../../../../components/text";
+import { USER_LOCATION_CONTEXT } from "../../../../contexts/userLocation";
 import { clearTemporalCirclesAndTags } from "../../../../controllers/MapController";
 import fetchedSuggestedItems from "../../../../models/fetchedSuggestedItems"; // Simulating an API
 
@@ -23,6 +24,7 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
   const { authState } = useContext(GlobalContext);
   const { userData } = authState;
   const { changeRoute } = useContext(UIOverlayContext);
+  const { getCurrentLocation } = useContext(USER_LOCATION_CONTEXT)
   const [searchBarValue, setSearchBarValue] = useState("");
   const [searchBarFocus, setSearchBarFocus] = useState(false);
   let searchBar; // Search Bar Reference
@@ -152,7 +154,19 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
           <Card>
             <OverlayMenu>
               <OverlayMenuItem>
-                <Item onPress={() => clearTemporalCirclesAndTags(dispatch)}>
+                <Item onPress={async () =>
+                {
+                  try
+                  {
+                    await getCurrentLocation()
+                  } catch (e)
+                  {
+                    console.log(e)
+                  }
+                  finally{
+                  clearTemporalCirclesAndTags(dispatch)
+                  }
+                }}>
                   <MaterialIcons backgroundColor="white" color="#444" name="gps-fixed" size={30} />
                 </Item>
               </OverlayMenuItem>
@@ -160,7 +174,7 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
               {userData.role == "project_manager" && (
                 <OverlayMenuItem size={70}>
                   <Item
-                    onPress={() => navigation.navigate("Job Listings", { screen: "Listing Item", params: { edit: false, quickAdd: true } })}
+                    onPress={() => navigation.navigate("Listing Item", { edit: false, quickAdd: true })}
                     color="#39c64e"
                     size={70}
                   >

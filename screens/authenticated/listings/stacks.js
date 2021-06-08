@@ -13,8 +13,6 @@ export default function PaymentStackScreen() {
   return (
     <JobListingsStack.Navigator headerMode="none">
       <JobListingsStack.Screen name="Root" component={JobListingsScreen} />
-
-      <JobListingsStack.Screen name="Listing Item" component={ListingItem} />
     </JobListingsStack.Navigator>
   );
 }

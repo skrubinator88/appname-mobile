@@ -1,6 +1,7 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import React, { useCallback, useContext, useState } from "react";
+import { useIsFocused } from "@react-navigation/core";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Dimensions, Platform, RefreshControl, SafeAreaView, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import Modal from 'react-native-modal';
@@ -27,6 +28,7 @@ export default function PaymentScreen({ navigation }) {
   const dispatch = useDispatch();
   const payments = useSelector((state) => state.payment)
   const actionSheet = useActionSheet();
+  const isNavFocused = useIsFocused();
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
@@ -159,6 +161,12 @@ export default function PaymentScreen({ navigation }) {
     })
 
   }, [uri, authState, payments])
+
+  useEffect(()=>{
+    if(isNavFocused){
+      refresh()
+    }
+  }, [isNavFocused])
 
   return (
     <Container

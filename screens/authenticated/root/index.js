@@ -43,16 +43,18 @@ export function RootScreen({ navigation, })
   useEffect(() =>
   {
     let unsubscribe;
-    // TODO: great point to decide whether to display an active job instead of spoolng all jobs.
-    // Logic would eb to fetch job from storage and is job is invalid, delete from storage and fetch from server.
-    // Subscribe and return a function for unsubscribe
-    if (location) unsubscribe = JobsControllers.getJobsAndSubscribeJobsChannel(thisComponentState, dispatch);
-
+    if (authState.userData.role === 'contractor')
+    {
+      // TODO: great point to decide whether to display an active job instead of spoolng all jobs.
+      // Logic would eb to fetch job from storage and is job is invalid, delete from storage and fetch from server.
+      // Subscribe and return a function for unsubscribe
+      if (location) unsubscribe = JobsControllers.getJobsAndSubscribeJobsChannel(thisComponentState, dispatch);
+    }
     return () =>
     {
       if (unsubscribe !== undefined) JobsControllers.clean("JobsStoreActions", unsubscribe, dispatch);
     };
-  }, [location]);
+  }, [location, authState?.userData?.role]);
 
   // Move Camera
   useEffect(() =>

@@ -1,28 +1,26 @@
-// Dependencies React
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { AntDesign, FontAwesome, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRoute } from "@react-navigation/core";
-import { CommonActions } from "@react-navigation/routers";
-// Styling Dependencies
 import { TextField } from "@ubaids/react-native-material-textfield";
 import { Camera, requestPermissionsAsync } from "expo-camera";
 import Constants from "expo-constants";
 import { launchImageLibraryAsync, MediaTypeOptions, requestMediaLibraryPermissionsAsync } from "expo-image-picker";
 import moment from "moment";
 import React, { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { TextInput } from "react-native";
 import
-  {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    FlatList,
-    KeyboardAvoidingView, Modal,
-    Platform,
-    SafeAreaView, TouchableOpacity,
-    TouchableWithoutFeedback,
-    View
-  } from "react-native";
+{
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  FlatList,
+  KeyboardAvoidingView, Modal,
+  Platform,
+  SafeAreaView, TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
+} from "react-native";
 import { useSelector } from "react-redux";
 import styled from "styled-components/native";
 import GigChaserJobWord from "../../../assets/gig-logo";
@@ -39,8 +37,6 @@ import env from "../../../env";
 import JobSuggestions from "../../../models/fetchedSuggestedItems";
 import PhotoItem from "./listItemImage";
 import TaskModal from "./taskModal";
-
-
 // Miscellaneous
 const width = Dimensions.get("window").width;
 export const getPriorityColor = (priority) =>
@@ -97,10 +93,13 @@ export default function ListingItem({ navigation })
   const { showActionSheetWithOptions } = useActionSheet();
   const [showCamera, setShowCamera] = useState(false);
 
+
+  const [searchBarFocus, setSearchBarFocus] = useState(false);
+
   // - - Refs - -
-  const job_type_ref = useRef(null);
   const scroll = useRef(null);
   const location_address_ref = useRef(null);
+  const searchBarRef = useRef(null)
 
   let suggestedItems = JobSuggestions.filter((item) =>
   {
@@ -151,8 +150,6 @@ export default function ListingItem({ navigation })
       }
     }
   }, []);
-
-  // useEffect(() => console.log(photos), [photos]);
 
   const updateDate = async (e, dateParam) =>
   {
@@ -369,6 +366,14 @@ export default function ListingItem({ navigation })
     })();
   }, [location]);
 
+  useEffect(() =>
+  {
+    return () =>
+    {
+      setJobType('')
+      setSearchBarFocus(false)
+    }
+  }, [])
   // Get location
   // useEffect(() => {
   //   PermissionsControllers.getLocation().then((position) => setLocation(position));
@@ -459,7 +464,7 @@ export default function ListingItem({ navigation })
         success = (await JobsController.updateUserJob(authState.userID, formattedForm, authState.userToken, photos)).success;
       }
 
-      if (success) return params?.quickAdd ? navigation.navigate() : navigation.goBack();
+      if (success) return navigation.goBack();
     } catch (e)
     {
       console.log(e);
@@ -479,91 +484,115 @@ export default function ListingItem({ navigation })
     );
 
   return (
-    <>
-      <KeyboardAvoidingView enabled behavior="height" style={{ flex: 1 }}>
-        <Container
-          bounces={false}
-          showsVerticalScrollIndicator={false}
-          ref={scroll}
-          keyboardShouldPersistTaps="always">
-          <TaskModal
-            showModal={showModal}
-            onHandleModalClose={(tasks) =>
+    <KeyboardAvoidingView enabled behavior="height" style={{ flex: 1 }}>
+      <Container
+        bounces={false}
+        showsVerticalScrollIndicator={false}
+        ref={scroll}
+        keyboardShouldPersistTaps="always">
+        <TaskModal
+          showModal={showModal}
+          onHandleModalClose={(tasks) =>
+          {
+            if (tasks == undefined)
             {
-              if (tasks == undefined)
+              setShowModal(false);
+              return;
+            }
+            handleSaveTasks(tasks);
+          }}
+          items={tasks}
+        />
+
+        <Header
+          disableContainer={true}
+          navigation={navigation}
+          backTitle="Cancel"
+          backColor="black"
+          title={() => (
+            <>
+              <Text style={{ color: "black", fontWeight: "300", fontSize: 23 }}>Add</Text>
+              <GigChaserJobWord color="black" width="60px" height="30px" style={{ marginHorizontal: 10 }} />
+            </>
+          )}
+          backAction={() =>
+          {
+            setJobType('')
+            navigation.goBack()
+          }}
+        />
+
+        <Fields>
+          <Item>
+            <InputTitle
+              style={{ marginBottom: 12 }}>
+              <GigChaserJobWord color="#444" width="60px" height="20px" />
+              <Text small bold color="#444">
+                TYPE
+                </Text>
+            </InputTitle>
+            <SuggestionContainer>
+              <SearchBar activeOpacity={0.8} onPress={() =>
               {
-                setShowModal(false);
-                return;
+                searchBarRef.current?.focus()
+                setSearchBarFocus(true)
+              }}>
+                <Ionicons name="ios-search" size={16} />
+                <TextInput underlineColorAndroid='transparent'
+                  placeholder="Search Job types"
+                  placeholderTextColor="#777"
+                  style={{ fontSize: 16, marginLeft: 4 }}
+                  value={job_type}
+                  onChangeText={(text) => setJobType(text)}
+                  ref={searchBarRef}
+                  onFocus={() =>
+                  {
+                    setSearchBarFocus(true);
+                  }}
+                  onSubmitEditing={() =>
+                  {
+                    setSearchBarFocus(false);
+                    searchBarRef.current?.blur()
+                    // handleSubmit(nativeEvent.text);
+                  }}
+                />
+              </SearchBar>
+
+              {!!selected_job_type &&
+                <Text style={{ paddingVertical: 18, marginHorizontal: 8 }}>
+                  Selected:{" "}
+                  <Text bold color="#548ff7">
+                    {selected_job_type}
+                  </Text>
+                </Text>
               }
-              handleSaveTasks(tasks);
-            }}
-            items={tasks}
-          />
-
-          <Header
-            disableContainer={true}
-            navigation={navigation}
-            backTitle="Cancel"
-            backColor="black"
-            title={() => (
-              <>
-                <Text style={{ color: "black", fontWeight: "300", fontSize: 23 }}>Add</Text>
-                <GigChaserJobWord color="black" width="60px" height="30px" style={{ marginHorizontal: 10 }} />
-              </>
-            )}
-            backAction={() => route.params?.quickAdd ?
-              navigation.dispatch(
-                CommonActions.reset({
-                  routes: [
-                    {name:'Root'}
-                  ],
-                  index: 0
-                })
-              )
-              : navigation.goBack()}
-          />
-
-          <Fields>
-            <Item>
-              <InputTitle>
-                <GigChaserJobWord color="#444" width="60px" height="20px" />
-                <Text small bold color="#444">
-                  TYPE
-                </Text>
-              </InputTitle>
-              <TextField
-                {...commonInputProps(job_type, setJobType)}
-                // labelOffset={{ x0: 0, y0: 0, x1: -40, y1: -6 }}
-                // contentInset={{ top: 16, left: 0, right: 0, label: 4, input: 8 }}
-                // label="JOB TYPE"
-                // labelFontSize={14}
-                // labelTextStyle={{ color: "black", fontWeight: "700" }}
-                // containerStyle={{ borderWidth: 1 }}
-                placeholder="Search Job Types"
-                ref={job_type_ref}
-                renderLeftAccessory={() => (
-                  <View style={{ width: 30 }}>
-                    <Ionicons name="ios-search" size={24} />
-                  </View>
-                )}
-                renderRightAccessory={() => (
-                  <TouchableWithoutFeedback onPress={() => job_type_ref.current.clear()}>
-                    <View style={{ width: 40, marginHorizontal: 10 }}>
-                      <Text color="#4a89f2" bold>
-                        Clear
-                      </Text>
-                    </View>
-                  </TouchableWithoutFeedback>
-                )}
-              />
-              <Text style={{ marginBottom: 5 }}>
-                Selected:{" "}
-                <Text bold color="#548ff7">
-                  {selected_job_type}
-                </Text>
-              </Text>
-
-              <SearchTitleSuggestionsField>
+              {searchBarFocus &&
+                <SuggestionScrollView
+                  // style={{ma}}
+                  keyboardShouldPersistTaps="always"
+                  data={suggestedItems}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({ item }) =>
+                  {
+                    return (
+                      <SearchSuggestedItem
+                        activeOpacity={0.9}
+                        onPress={() =>
+                        {
+                          setSelectedJobType(item)
+                          setSearchBarFocus(false);
+                          searchBarRef.current?.blur();
+                          searchBarRef.current?.clear();
+                          setJobType('')
+                        }}
+                      >
+                        <Text>{item}</Text>
+                      </SearchSuggestedItem>
+                    );
+                  }} />
+              }
+            </SuggestionContainer>
+            {/* <SearchTitleSuggestionsField>
                 <SearchTitleSuggestionsFieldInput
                   selectedValue={selected_job_type}
                   onValueChange={(value) => setSelectedJobType(value)}
@@ -574,288 +603,287 @@ export default function ListingItem({ navigation })
                     <SearchTitleSuggestionsFieldInput.Item label={JobSuggestion} value={JobSuggestion} key={index + 1} />
                   ))}
                 </SearchTitleSuggestionsFieldInput>
-              </SearchTitleSuggestionsField>
-            </Item>
+              </SearchTitleSuggestionsField> */}
+          </Item>
 
-            <Item>
-              <InputTitle>
-                <GigChaserJobWord color="#444" width="60px" height="20px" />
-                <Text small bold color="#444">
-                  TITLE
-                </Text>
-              </InputTitle>
-              <TextField
-                // label="JOB TITLE"
-                placeholder="Job Title"
-                labelFontSize={14}
-                labelTextStyle={{ color: "grey", fontWeight: "700" }}
-                {...commonInputProps(job_title, setJobTitle)}
-              />
-            </Item>
-
-            <Item>
-              <Text style={{ fontWeight: "bold", color: "grey" }}>TASKS</Text>
-              <TouchableWithoutFeedback onPress={() => setShowModal(true)}>
-                <Tasks>
-                  <FlatList
-                    style={{ marginVertical: 10, paddingVertical: 10 }}
-                    data={tasks}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                      <Task>
-                        <Text style={{ flex: 2, padding: 5 }} color="#636363" small>
-                          {item.text}
-                        </Text>
-                      </Task>
-                    )}
-                    ListEmptyComponent={() => <Text style={{ textAlign: "center", color: "#888" }}>Tap on this section to add tasks</Text>}
-                  />
-                </Tasks>
-              </TouchableWithoutFeedback>
-            </Item>
-
-            <Item>
+          <Item>
+            <InputTitle>
+              <GigChaserJobWord color="#444" width="60px" height="20px" />
               <Text small bold color="#444">
-                LOCATION ADDRESS
-              </Text>
-              <TextField
-                {...commonInputProps(location.address, setLocation)}
-                textContentType="addressCityAndState"
-                onChangeText={(text) =>
-                {
-                  if (text.length == 0) setTimeout(() => scroll && scroll.current.scrollTo({ y: 350, animated: true, duration: 500 }), 200);
-                  setLocation({ address: text });
-                }}
-                onFocus={() =>
-                {
-                  setSuggestionsEditing(true);
-                  setTimeout(() => scroll && scroll.current.scrollTo({ y: 350, animated: true, duration: 500 }), 200);
-                }}
-                onBlur={() => setSuggestionsEditing(false)}
-                labelOffset={{ x0: 0, y0: 0, x1: -40, y1: -6 }}
-                // contentInset={{ top: 16, left: 0, right: 0, label: 4, input: 8 }}
-                // label="LOCATION ADDRESS"
-                placeholder="Type the first line of the address"
-                value={location.address}
-                ref={location_address_ref}
-                labelFontSize={14}
-                labelTextStyle={{ color: "grey", fontWeight: "700" }}
-                renderRightAccessory={() => (
-                  <TouchableWithoutFeedback onPress={() => location_address_ref.current.clear()}>
-                    <View style={{ width: 40, marginHorizontal: 10 }}>
-                      <Text color="#4a89f2" bold>
-                        Clear
+                TITLE
+                </Text>
+            </InputTitle>
+            <TextField
+              // label="JOB TITLE"
+              placeholder="Job Title"
+              labelFontSize={14}
+              labelTextStyle={{ color: "grey", fontWeight: "700" }}
+              {...commonInputProps(job_title, setJobTitle)}
+            />
+          </Item>
+
+          <Item>
+            <Text style={{ fontWeight: "bold", color: "grey" }}>TASKS</Text>
+            <TouchableWithoutFeedback onPress={() => setShowModal(true)}>
+              <Tasks>
+                <FlatList
+                  style={{ marginVertical: 10, paddingVertical: 10 }}
+                  data={tasks}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <Task>
+                      <Text style={{ flex: 2, padding: 5 }} color="#636363" small>
+                        {item.text}
                       </Text>
-                    </View>
-                  </TouchableWithoutFeedback>
-                )}
-                renderLeftAccessory={() => (
-                  <View style={{ width: 30 }}>
-                    <Ionicons name="ios-search" size={24} />
-                  </View>
-                )}
-              />
+                    </Task>
+                  )}
+                  ListEmptyComponent={() => <Text style={{ textAlign: "center", color: "#888" }}>Tap on this section to add tasks</Text>}
+                />
+              </Tasks>
+            </TouchableWithoutFeedback>
+          </Item>
 
-              {/* {googleSuggestions.length != 0 && location?.address != undefined && suggestionsEditing === true && ( */}
-              {suggestionsEditing === true && (
-                <Suggestions>
-                  <TouchableWithoutFeedback onPress={() => handleSuggestionEditing("Current Location")}>
-                    <SuggestedItem>
-                      <MaterialIcons name="gps-fixed" size={15} />
-                      <Text style={{ marginLeft: 10 }}>Pick Your Location</Text>
-                    </SuggestedItem>
-                  </TouchableWithoutFeedback>
-                  <FlatList
-                    keyboardShouldPersistTaps="always"
-                    data={googleSuggestions}
-                    renderItem={({ item }) => (
-                      <TouchableWithoutFeedback onPress={() => handleSuggestionEditing(item)}>
-                        <SuggestedItem>
-                          <Text>{item.address}</Text>
-                        </SuggestedItem>
-                      </TouchableWithoutFeedback>
-                    )}
-                  />
-                  <PoweredByGoogleImage
-                    source={require("../../../assets/powered_by_google_on_white.png")}
-                    style={{
-                      width: 432 * 0.3,
-                      height: 54 * 0.3,
-                    }}
-                  />
-                </Suggestions>
-              )}
-            </Item>
-
-            <Item style={{ marginVertical: 20 }}>
-              <WageInput>
-                <SalaryField style={{ alignSelf: "stretch" }}>
-                  <Text small bold color="#444">
-                    PAY
-                  </Text>
-                  <TextField
-                    {...commonInputProps(salary, setSalary)}
-                    prefix="$"
-                    suffix={`/deployment`}
-                    // label="PAY"
-                    labelFontSize={14}
-                    placeholder="0.00"
-                    labelTextStyle={{ color: "grey", fontWeight: "700" }}
-                    keyboardType="numeric"
-                  />
-                </SalaryField>
-              </WageInput>
-            </Item>
-
-            <Item style={{ marginVertical: 4 }}>
-              <View style={{ flexDirection: "row", justifyContent: "flex-start" }}>
-                <Text style={{ fontWeight: "bold", color: "grey", alignItems: "center" }}>PRIORITY</Text>
-                {!!priority && <FontAwesome name="circle" color={getPriorityColor(priority)} style={{ marginStart: 12, fontSize: 16 }} />}
-              </View>
-              <TouchableOpacity style={{ alignSelf: "stretch", flex: 1 }} onPress={onSetPriority}>
-                <ScheduleButton
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    paddingVertical: 2,
-                    backgroundColor: "#fafafa",
-                  }}
-                >
-                  <Text light={!priority} textTransform="uppercase">
-                    {priorityMap?.[priority] || "none"}
-                  </Text>
-                </ScheduleButton>
-              </TouchableOpacity>
-            </Item>
-
-            <Item style={{ marginVertical: 4 }}>
-              <InputTitle style={{ justifyContent: "center" }}>
-                <Text small bold color="#444">
-                  ADD
-                </Text>
-                <GigChaserJobWord color="#444" width="60px" height="20px" />
-                <Text small bold color="#444">
-                  PHOTOS (OPTIONAL)
-                </Text>
-              </InputTitle>
-
-              <FlatList
-                data={photos}
-                keyExtractor={(v) => v.uri}
-                centerContent
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingVertical: 40, justifyContent: "center", paddingTop: 12, flexGrow: 1 }}
-                ListHeaderComponent={() => (
-                  <TouchableOpacity
-                    disabled={loadingMedia}
-                    style={{
-                      alignSelf: "center",
-                      justifyContent: "center",
-                      backgroundColor: "#fff",
-                      height: 150,
-                      marginHorizontal: 4,
-                      width: 150,
-                      borderRadius: 4,
-                    }}
-                    onPress={getPhoto}
-                  >
-                    <ScheduleButton style={{ justifyContent: "center", flex: 1, backgroundColor: "transparent", alignItems: "center" }}>
-                      {loadingMedia ? (
-                        <ActivityIndicator color="black" size="small" />
-                      ) : (
-                        <Ionicons name="ios-add" style={{ fontSize: 40 }} />
-                      )}
-                    </ScheduleButton>
-                  </TouchableOpacity>
-                )}
-                renderItem={({ item }) => <PhotoItem item={item} onRemove={() => setPhotos(photos.filter((v) => v.uri !== item.uri))} />}
-              />
-              <JobCamera
-                showCamera={showCamera}
-                onSuccess={async (res) =>
-                {
-                  if (!res)
-                  {
-                    return setShowCamera(false);
-                  }
-                  try
-                  {
-                    if (!res.cancelled && !photos.find((v) => v.uri === res.uri))
-                    {
-                      setPhotos([{ uri: res.uri, type: "image/png", height: res.height, width: res.width }, ...photos]);
-                    }
-                  } catch (e)
-                  {
-                    console.log(e);
-                    Alert.alert(e.message || "Failed to add photo");
-                  } finally
-                  {
-                    setShowCamera(false);
-                  }
-                }}
-              />
-            </Item>
-
-            <Item>
-              <InputTitle style={{ justifyContent: "center" }}>
-                <Text style={{ color: "#444", textAlign: "center", marginTop: 8, textTransform: "uppercase" }}>
-                  <GigChaserJobWord color="#444" width="60px" height="20px" /> will be started{" "}
-                  {date.getTime() <= Date.now() + 5000 ? "immediately" : moment(date).calendar()}
-                </Text>
-              </InputTitle>
-              <Text light small style={{ textAlign: "center", marginTop: 4, fontSize: 10, textTransform: "uppercase" }}>
-                (You can only schedule up to 6 days from now)
+          <Item>
+            <Text small bold color="#444">
+              LOCATION ADDRESS
               </Text>
-            </Item>
-            <TouchableOpacity
-              style={{ alignSelf: "center", width: width * 0.7, marginBottom: 12 }}
-              onPress={() =>
+            <TextField
+              {...commonInputProps(location.address, setLocation)}
+              textContentType="addressCityAndState"
+              onChangeText={(text) =>
               {
-                if (showDate && Platform.OS === "ios")
-                {
-                  setShowDate(false);
-                } else
-                {
-                  onShowDate();
-                }
+                if (text.length == 0) setTimeout(() => scroll && scroll.current.scrollTo({ y: 350, animated: true, duration: 500 }), 200);
+                setLocation({ address: text });
               }}
-            >
+              onFocus={() =>
+              {
+                setSuggestionsEditing(true);
+                setTimeout(() => scroll && scroll.current.scrollTo({ y: 350, animated: true, duration: 500 }), 200);
+              }}
+              onBlur={() => setSuggestionsEditing(false)}
+              labelOffset={{ x0: 0, y0: 0, x1: -40, y1: -6 }}
+              // contentInset={{ top: 16, left: 0, right: 0, label: 4, input: 8 }}
+              // label="LOCATION ADDRESS"
+              placeholder="Type the first line of the address"
+              value={location.address}
+              ref={location_address_ref}
+              labelFontSize={14}
+              labelTextStyle={{ color: "grey", fontWeight: "700" }}
+              renderRightAccessory={() => (
+                <TouchableWithoutFeedback onPress={() => location_address_ref.current.clear()}>
+                  <View style={{ width: 40, marginHorizontal: 10 }}>
+                    <Text color="#4a89f2" bold>
+                      Clear
+                      </Text>
+                  </View>
+                </TouchableWithoutFeedback>
+              )}
+              renderLeftAccessory={() => (
+                <View style={{ width: 30 }}>
+                  <Ionicons name="ios-search" size={24} />
+                </View>
+              )}
+            />
+
+            {/* {googleSuggestions.length != 0 && location?.address != undefined && suggestionsEditing === true && ( */}
+            {suggestionsEditing === true && (
+              <Suggestions>
+                <TouchableWithoutFeedback onPress={() => handleSuggestionEditing("Current Location")}>
+                  <SuggestedItem>
+                    <MaterialIcons name="gps-fixed" size={15} />
+                    <Text style={{ marginLeft: 10 }}>Pick Your Location</Text>
+                  </SuggestedItem>
+                </TouchableWithoutFeedback>
+                <FlatList
+                  keyboardShouldPersistTaps="always"
+                  data={googleSuggestions}
+                  renderItem={({ item }) => (
+                    <TouchableWithoutFeedback onPress={() => handleSuggestionEditing(item)}>
+                      <SuggestedItem>
+                        <Text>{item.address}</Text>
+                      </SuggestedItem>
+                    </TouchableWithoutFeedback>
+                  )}
+                />
+                <PoweredByGoogleImage
+                  source={require("../../../assets/powered_by_google_on_white.png")}
+                  style={{
+                    width: 432 * 0.3,
+                    height: 54 * 0.3,
+                  }}
+                />
+              </Suggestions>
+            )}
+          </Item>
+
+          <Item style={{ marginVertical: 20 }}>
+            <WageInput>
+              <SalaryField style={{ alignSelf: "stretch" }}>
+                <Text small bold color="#444">
+                  PAY
+                  </Text>
+                <TextField
+                  {...commonInputProps(salary, setSalary)}
+                  prefix="$"
+                  suffix={`/deployment`}
+                  // label="PAY"
+                  labelFontSize={14}
+                  placeholder="0.00"
+                  labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                  keyboardType="numeric"
+                />
+              </SalaryField>
+            </WageInput>
+          </Item>
+
+          <Item style={{ marginVertical: 4 }}>
+            <View style={{ flexDirection: "row", justifyContent: "flex-start" }}>
+              <Text style={{ fontWeight: "bold", color: "grey", alignItems: "center" }}>PRIORITY</Text>
+              {!!priority && <FontAwesome name="circle" color={getPriorityColor(priority)} style={{ marginStart: 12, fontSize: 16 }} />}
+            </View>
+            <TouchableOpacity style={{ alignSelf: "stretch", flex: 1 }} onPress={onSetPriority}>
               <ScheduleButton
                 style={{
                   justifyContent: "center",
                   alignItems: "center",
-                  backgroundColor: showDate && Platform.OS === "ios" ? "red" : "#fff",
+                  paddingVertical: 2,
+                  backgroundColor: "#fafafa",
                 }}
               >
-                <Text bold color={showDate && Platform.OS === "ios" ? "white" : "black"}>
-                  {showDate && Platform.OS === "ios" ? "Close Date Picker" : "Schedule"}
+                <Text light={!priority} textTransform="uppercase">
+                  {priorityMap?.[priority] || "none"}
                 </Text>
               </ScheduleButton>
             </TouchableOpacity>
-            {showDate ? (
-              <DateTimePicker
-                display={Platform.OS === "ios" ? "spinner" : undefined}
-                style={{ marginBottom: 20 }}
-                minimumDate={new Date()}
-                mode={mode}
-                maximumDate={moment().add(6, "days").toDate()}
-                onChange={updateDate}
-                value={date}
-              />
-            ) : null}
+          </Item>
 
-            <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7, marginBottom: 100 }} onPress={() => handleSubmit(form)}>
-              <SaveButton style={{ justifyContent: "center", alignItems: "center" }}>
-                <Text bold color="white">
-                  Save
+          <Item style={{ marginVertical: 4 }}>
+            <InputTitle style={{ justifyContent: "center" }}>
+              <Text small bold color="#444">
+                ADD
                 </Text>
-              </SaveButton>
-            </TouchableOpacity>
-          </Fields>
-        </Container>
-      </KeyboardAvoidingView>
-    </>
+              <GigChaserJobWord color="#444" width="60px" height="20px" />
+              <Text small bold color="#444">
+                PHOTOS (OPTIONAL)
+                </Text>
+            </InputTitle>
+
+            <FlatList
+              data={photos}
+              keyExtractor={(v) => v.uri}
+              centerContent
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingVertical: 40, justifyContent: "center", paddingTop: 12, flexGrow: 1 }}
+              ListHeaderComponent={() => (
+                <TouchableOpacity
+                  disabled={loadingMedia}
+                  style={{
+                    alignSelf: "center",
+                    justifyContent: "center",
+                    backgroundColor: "#fff",
+                    height: 150,
+                    marginHorizontal: 4,
+                    width: 150,
+                    borderRadius: 4,
+                  }}
+                  onPress={getPhoto}
+                >
+                  <ScheduleButton style={{ justifyContent: "center", flex: 1, backgroundColor: "transparent", alignItems: "center" }}>
+                    {loadingMedia ? (
+                      <ActivityIndicator color="black" size="small" />
+                    ) : (
+                      <Ionicons name="ios-add" style={{ fontSize: 40 }} />
+                    )}
+                  </ScheduleButton>
+                </TouchableOpacity>
+              )}
+              renderItem={({ item }) => <PhotoItem item={item} onRemove={() => setPhotos(photos.filter((v) => v.uri !== item.uri))} />}
+            />
+            <JobCamera
+              showCamera={showCamera}
+              onSuccess={async (res) =>
+              {
+                if (!res)
+                {
+                  return setShowCamera(false);
+                }
+                try
+                {
+                  if (!res.cancelled && !photos.find((v) => v.uri === res.uri))
+                  {
+                    setPhotos([{ uri: res.uri, type: "image/png", height: res.height, width: res.width }, ...photos]);
+                  }
+                } catch (e)
+                {
+                  console.log(e);
+                  Alert.alert(e.message || "Failed to add photo");
+                } finally
+                {
+                  setShowCamera(false);
+                }
+              }}
+            />
+          </Item>
+
+          <Item>
+            <InputTitle style={{ justifyContent: "center" }}>
+              <Text style={{ color: "#444", textAlign: "center", marginTop: 8, textTransform: "uppercase" }}>
+                <GigChaserJobWord color="#444" width="60px" height="20px" /> will be started{" "}
+                {date.getTime() <= Date.now() + 5000 ? "immediately" : moment(date).calendar()}
+              </Text>
+            </InputTitle>
+            <Text light small style={{ textAlign: "center", marginTop: 4, fontSize: 10, textTransform: "uppercase" }}>
+              (You can only schedule up to 6 days from now)
+              </Text>
+          </Item>
+          <TouchableOpacity
+            style={{ alignSelf: "center", width: width * 0.7, marginBottom: 12 }}
+            onPress={() =>
+            {
+              if (showDate && Platform.OS === "ios")
+              {
+                setShowDate(false);
+              } else
+              {
+                onShowDate();
+              }
+            }}
+          >
+            <ScheduleButton
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: showDate && Platform.OS === "ios" ? "red" : "#fff",
+              }}
+            >
+              <Text bold color={showDate && Platform.OS === "ios" ? "white" : "black"}>
+                {showDate && Platform.OS === "ios" ? "Close Date Picker" : "Schedule"}
+              </Text>
+            </ScheduleButton>
+          </TouchableOpacity>
+          {showDate ? (
+            <DateTimePicker
+              display={Platform.OS === "ios" ? "spinner" : undefined}
+              style={{ marginBottom: 20 }}
+              minimumDate={new Date()}
+              mode={mode}
+              maximumDate={moment().add(6, "days").toDate()}
+              onChange={updateDate}
+              value={date}
+            />
+          ) : null}
+
+          <TouchableOpacity style={{ alignSelf: "center", width: width * 0.7, marginBottom: 100 }} onPress={() => handleSubmit(form)}>
+            <SaveButton style={{ justifyContent: "center", alignItems: "center" }}>
+              <Text bold color="white">
+                Save
+                </Text>
+            </SaveButton>
+          </TouchableOpacity>
+        </Fields>
+      </Container>
+    </KeyboardAvoidingView >
   );
 }
 
@@ -977,11 +1005,6 @@ export const JobCamera = ({ showCamera, onSuccess }) =>
   );
 };
 
-const ModalBackground = styled.View`
-  background: white;
-  flex: 1;
-`;
-
 const WageInput = styled.View`
   flex-direction: row;
   /* justify-content: center; */
@@ -1002,14 +1025,13 @@ const Task = styled.View`
   margin-bottom: 10px;
 `;
 
-const SearchTitleSuggestionsField = styled.View`
-  flex: 2;
-  flex-direction: column;
-  overflow: hidden;
-`;
-
-const SearchTitleSuggestionsFieldInput = styled.Picker`
-  margin: ${Platform.OS == "ios" ? "-60px 0px" : "0px"};
+const SearchBar = styled.TouchableOpacity`
+  font-size: 16px;
+  border: 2px solid #ededed;
+  border-radius: 10px;
+  background: white;
+  padding: 12px 8px;
+  flex-direction: row;
 `;
 
 const Fields = styled.View`
@@ -1052,16 +1074,34 @@ const Tasks = styled.View`
   padding: 0 20px;
 `;
 
+const PoweredByGoogleImage = styled.Image`
+  align-self: flex-end;
+`;
+
+
+const SuggestionContainer = styled.KeyboardAvoidingView`
+  background: white;
+  width: 100%;
+  opacity: 1;
+  z-index: 2;
+  border-radius: 10px;
+`;
+
+const SuggestionScrollView = styled.FlatList`
+`;
+
+const SearchSuggestedItem = styled.TouchableOpacity`
+  border-top-color: #dadada;
+  border-top-width: 1px;
+  padding: 10px 30px;
+  width: 100%;
+`;
+
 const SuggestedItem = styled.View`
   border: 1px solid #cccccc;
   border-radius: 6px;
   margin: 0 0 3px 0;
   padding: 10px 15px;
-
   flex-direction: row;
   align-items: center;
-`;
-
-const PoweredByGoogleImage = styled.Image`
-  align-self: flex-end;
 `;

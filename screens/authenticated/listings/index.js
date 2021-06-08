@@ -4,9 +4,10 @@ import { useFocusEffect } from "@react-navigation/native";
 import { TextField } from "@ubaids/react-native-material-textfield";
 import { unix } from "moment";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { ActivityIndicator, Image, KeyboardAvoidingView, Modal, SafeAreaView, ScrollView, View } from "react-native";
+import { ActivityIndicator, Image, KeyboardAvoidingView, SafeAreaView, ScrollView, View } from "react-native";
 import StarRating from "react-native-star-rating";
 import { useDispatch, useSelector } from "react-redux";
+import Modal from 'react-native-modal';
 import styled from "styled-components/native";
 import GigChaserJobWord from "../../../assets/gig-logo";
 import Confirm from "../../../components/confirm";
@@ -71,6 +72,7 @@ export default function JobListing({ navigation })
     <>
       <Container
         navigation={navigation}
+        flexible={false}
         titleColor="white"
         title={() => (
           <>
@@ -162,16 +164,15 @@ export default function JobListing({ navigation })
                         <Text small weight="700" color="#1b5cce">
                           {item.job_type}
                         </Text>
-                        <Text small>Active</Text>
                       </Row>
-                      <Row>
+                      <Row style={{ marginTop: 4, marginBottom: 8 }}>
                         <Text small>
-                          ${item.salary}/{item.wage}
+                          ${item.salary}/{item.wage ?? 'deployment'}
                         </Text>
                       </Row>
                       {item.tasks.map((task) => (
                         <Row key={task.id}>
-                          <Text>{task.text}</Text>
+                          <Text small light>- {task.text}</Text>
                         </Row>
                       ))}
                     </Column>
@@ -240,7 +241,7 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) =>
             </Row>
             {item.tasks.map((task) => (
               <Row key={task.id}>
-                <Text>- {task.text}</Text>
+                <Text small light>- {task.text}</Text>
               </Row>
             ))}
             {!current ? (
@@ -321,7 +322,7 @@ const ListOfferItemDetail = ({ item }) =>
 
             {item.tasks.map((task) => (
               <Row key={task.id}>
-                <Text>- {task.text}</Text>
+                <Text small light>- {task.text}</Text>
               </Row>
             ))}
 
@@ -341,7 +342,7 @@ const ListOfferItemDetail = ({ item }) =>
                     Suggested Offer
                       </Text>
                   <Text small>
-                    ${item.offer_received.offer}/{item.offer_received.wage}
+                    ${item.offer_received.offer}
                   </Text>
                 </Row>
                 {item.offer_received.counterOffer &&
@@ -350,7 +351,7 @@ const ListOfferItemDetail = ({ item }) =>
                       Counter Offer
                         </Text>
                     <Text color="teal" small>
-                      ${item.offer_received.counterOffer}/{item.offer_received.counterWage}
+                      ${item.offer_received.counterOffer}
                     </Text>
                   </Row>
                 }
@@ -389,9 +390,7 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) =>
 {
   const [loading, setLoading] = useState(false);
   const [salary, setSalary] = useState(job_data.offer_received?.offer);
-  const [wage, setUnit] = useState(job_data.offer_received.wage || "deployment");
-
-  const { showActionSheetWithOptions } = useActionSheet();
+  const [wage] = useState(job_data.offer_received.wage || "deployment");
 
   const onRejectOffer = useCallback(async () =>
   {
@@ -501,122 +500,106 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) =>
 
   return (
     <Modal
-      animationType="fade"
-      transparent
-      visible
-      onRequestClose={onComplete}
-      onDismiss={onComplete}
-      style={{ height: "100%", backgroundColor: "#0004", justifyContent: "center" }}
-    >
-      <ScrollView bounces={false} contentContainerStyle={{ justifyContent: "center", flexGrow: 1, backgroundColor: "#0004" }}>
-        <SafeAreaView>
-          <KeyboardAvoidingView behavior="padding" style={{ justifyContent: "flex-end", margin: 8 }}>
-            <Item style={{ justifyContent: "space-between", borderRadius: 8, paddingVertical: 8, flex: 1 }}>
-              <Button onPress={onComplete} style={{ position: "absolute", top: 4, left: 4 }}>
-                <MaterialCommunityIcons size={24} color="red" name="close-circle" />
-              </Button>
-              <CounterRow style={{ justifyContent: "center", flex: 1 }} first>
-                <Column>
-                  <View last style={{ marginBottom: 20, justifyContent: "flex-start", flexDirection: "row", paddingRight: 0 }}>
-                    <Image
-                      source={{
-                        uri: `${config.API_URL}/images/${deployee.id}.jpg`,
-                      }}
-                      style={{ height: 70, width: 70, borderRadius: 45 }}
-                    />
-                    <Column>
-                      <Text medium>
-                        {deployee.first_name} {deployee.last_name}
-                      </Text>
-                      <StarRating
-                        disabled={true}
-                        containerStyle={{ justifyContent: "flex-start", marginVertical: 4 }}
-                        starStyle={{ marginHorizontal: 2 }}
-                        maxStars={5}
-                        rating={deployee.star_rate}
-                        starSize={16}
-                      />
-                      <Text small light>
-                        {deployee.occupation}
-                      </Text>
-                    </Column>
-                  </View>
+      isVisible
+      coverScreen
+      onBackdropPress={loading ? null : onComplete}
+      onBackButtonPress={onComplete}
+      onSwipeComplete={loading ? null : onComplete}
+      swipeDirection='down'
+      avoidKeyboard>
+      <SafeAreaView style={{ justifyContent: "center" }}>
+        <View style={{ justifyContent: "space-between", backgroundColor: 'white', borderRadius: 8, paddingVertical: 8, margin: 8, flex: 'unset' }}>
+          <CounterRow style={{ justifyContent: "center" }} first>
+            <Column>
+              <View last style={{ marginBottom: 20, justifyContent: "flex-start", flexDirection: "row", paddingRight: 0 }}>
+                <Image
+                  source={{
+                    uri: `${config.API_URL}/images/${deployee.id}.jpg`,
+                  }}
+                  style={{ height: 70, width: 70, borderRadius: 45 }}
+                />
+                <Column style={{ marginLeft: 12 }}>
+                  <Text medium>
+                    {deployee.first_name} {deployee.last_name}
+                  </Text>
+                  <StarRating
+                    disabled={true}
+                    containerStyle={{ justifyContent: "flex-start", marginVertical: 4 }}
+                    starStyle={{ marginHorizontal: 2 }}
+                    maxStars={5}
+                    rating={deployee.star_rate}
+                    starSize={16}
+                  />
+                  <Text small light>
+                    {deployee.occupation}
+                  </Text>
+                </Column>
+              </View>
 
-                  <Text small style={{ textTransform: "uppercase", marginVertical: 30, textAlign: "center" }} bold>
-                    Approve suggested offer or Send a counter offer to deployee
+              <Text small style={{ textTransform: "uppercase", marginVertical: 30, textAlign: "center" }} bold>
+                Approve suggested offer or Send a counter offer to deployee
                   </Text>
 
-                  <View style={{ flexDirection: "row", marginTop: 24, justifyContent: "space-between" }}>
-                    <Text small light marginBottom="5px">
-                      Current Offer
+              <View style={{ flexDirection: "row", marginTop: 24, justifyContent: "space-between" }}>
+                <Text small light marginBottom="5px">
+                  Current Offer
                     </Text>
-                    <Text small marginBottom="5px">
-                      ${job_data.salary}/{job_data.wage ?? 'deployment'}
-                    </Text>
-                  </View>
+                <Text small marginBottom="5px">
+                  ${job_data.salary}/{job_data.wage ?? 'deployment'}
+                </Text>
+              </View>
 
-                  <View style={{ marginVertical: 16 }}>
-                    <WageInput>
-                      <SalaryField style={{ justifyContent: "center" }}>
-                        <TextField
-                          disabled={loading}
-                          label="SUGGESTED OFFER"
-                          prefix="$"
-                          suffix={`/${wage}`}
-                          labelFontSize={14}
-                          placeholder="0.00"
-                          labelTextStyle={{ color: "grey", fontWeight: "700" }}
-                          keyboardType="numeric"
-                          onChangeText={(text) =>
-                          {
-                            setSalary(text);
-                          }}
-                          value={salary}
-                          onSubmitEditing={onSubmitOffer}
-                        />
-                      </SalaryField>
-                    </WageInput>
-                  </View>
-                </Column>
-              </CounterRow>
+              {!loading && (
+                <View style={{ marginVertical: 16 }}>
+                  <WageInput>
+                    <SalaryField style={{ justifyContent: "center" }}>
+                      <TextField
+                        autoFocus
+                        disabled={loading}
+                        label="SUGGESTED OFFER"
+                        prefix="$"
+                        suffix={`/${wage}`}
+                        labelFontSize={14}
+                        placeholder="0.00"
+                        labelTextStyle={{ color: "grey", fontWeight: "700" }}
+                        keyboardType="numeric"
+                        onChangeText={(text) =>
+                        {
+                          setSalary(text);
+                        }}
+                        value={salary}
+                        onSubmitEditing={onSubmitOffer}
+                      />
+                    </SalaryField>
+                  </WageInput>
+                </View>
+              )}
+            </Column>
+          </CounterRow>
 
-              <CounterRow last>
-                {loading ? (
-                  <ActivityIndicator animating style={{ marginEnd: 4, marginVertical: 8 }} color="darkgrey" />
-                ) : (
-                  <>
-                    <Column style={{ alignItems: "center" }}>
-                      <Button disabled={loading} decline onPress={onRejectOffer}>
-                        <Text style={{ color: "red" }} medium>
-                          Reject
-                        </Text>
-                      </Button>
-                    </Column>
-                    <Column>
-                      <Button disabled={loading} style={{ flexDirection: "row" }} accept onPress={onSubmitOffer}>
-                        <Text style={{ color: "white" }} medium>
-                          Approve
-                        </Text>
-                      </Button>
-                    </Column>
-                  </>
-                )}
-              </CounterRow>
-            </Item>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      </ScrollView>
+          <CounterRow last>
+            {loading ? (
+              <ActivityIndicator animating style={{ marginEnd: 4, marginVertical: 8 }} color="darkgrey" />
+            ) : (
+              <View style={{ flexDirection: 'row', flex: 1, alignItems: 'stretch', justifyContent: 'space-around' }}>
+                <Button disabled={loading} decline onPress={onRejectOffer}>
+                  <Text style={{ color: "red" }} medium>Reject</Text>
+                </Button>
+                <Button disabled={loading} style={{ flexDirection: "row" }} accept onPress={onSubmitOffer}>
+                  <Text style={{ color: "white" }} medium>Approve</Text>
+                </Button>
+              </View>
+            )}
+          </CounterRow>
+
+          <Button onPress={onComplete} style={{ position: "absolute", top: 4, left: 4 }}>
+            <MaterialCommunityIcons size={24} color="red" name="close-circle" />
+          </Button>
+        </View>
+      </SafeAreaView>
     </Modal>
   );
 };
-
-// Payments Section
-
-const RateTouchable = styled.TouchableOpacity`
-  padding: 4px 12px;
-  background-color: #fafafa;
-  margin: 0 2px;
-`;
 
 const Item = styled.View`
   flex: 1;
@@ -681,7 +664,7 @@ const Button = styled.TouchableOpacity`
       case accept:
         return `
         background: #228b22; 
-        padding: 10px 40px; 
+        padding: 10px 20px; 
         border-radius: 8px;
         `;
 
@@ -689,7 +672,7 @@ const Button = styled.TouchableOpacity`
         return `
         border: 1px solid red; 
         background: white; 
-        padding: 10px 40px; 
+        padding: 10px 20px; 
         border-radius: 8px;
         `;
 
@@ -738,6 +721,4 @@ const CounterRow = styled.View`
     }
   }}
   padding: 3% 30px;
-  border-bottom-color: #eaeaea;
-  border-bottom-width: ${(props) => (props.last ? "0px" : "1px")};
 `;

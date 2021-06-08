@@ -22,7 +22,8 @@ import env from "../../../env";
 
 export const AuthenticatedDrawer = createDrawerNavigator();
 
-function DrawerContent({ navigation }) {
+function DrawerContent({ navigation })
+{
   const { authActions, authState } = useContext(GlobalContext);
   const { signOut } = authActions;
 
@@ -36,13 +37,14 @@ function DrawerContent({ navigation }) {
         }
       >
         <TouchableWithoutFeedback
-          onPress={() => {
+          onPress={() =>
+          {
             navigation.navigate("Profile");
           }}
         >
           <Row>
             <Column>
-              <ProfilePicture style={{backgroundColor: '#3332'}} source={{ uri: `${env.API_URL}${authState.userData.profile_picture}` }} />
+              <ProfilePicture style={{ backgroundColor: '#3332' }} source={{ uri: `${env.API_URL}${authState.userData.profile_picture}` }} />
             </Column>
             <Column>
               <DrawerText title>
@@ -181,8 +183,10 @@ const DrawerText = styled.Text`
   width: 100%;
   color: white;
   padding: 0 0 0 10px;
-  ${({ title, medium }) => {
-    switch (true) {
+  ${({ title, medium }) =>
+  {
+    switch (true)
+    {
       case title:
         return "font-size: 20px;";
       case medium:
@@ -190,8 +194,10 @@ const DrawerText = styled.Text`
     }
   }}
 
-  ${({ bold }) => {
-    switch (true) {
+  ${({ bold }) =>
+  {
+    switch (true)
+    {
       case bold:
         return "font-weight: 900;";
     }
@@ -215,8 +221,10 @@ import WorkHistory from "../work-history/";
 import SettingsScreen from "../settings";
 import QRCode from "./UIOverlay/jobFound/qr_code";
 import CompleteJob from "./UIOverlay/jobFound/completeJob";
+import ListingItem from "../listings/listingItem";
 
-export function Drawer({ navigation }) {
+export function Drawer({ navigation })
+{
   return (
     <NavigationContainer independent={true}>
       <AuthenticatedDrawer.Navigator
@@ -235,6 +243,7 @@ export function Drawer({ navigation }) {
         <AuthenticatedDrawer.Screen name="Payments" component={PaymentScreen} />
         <AuthenticatedDrawer.Screen name="Help Center" component={RootScreen} />
         <AuthenticatedDrawer.Screen name="Settings" component={SettingsScreen} />
+        <AuthenticatedDrawer.Screen name="Listing Item" component={ListingItem} options={{ unmountOnBlur: true }} />
 
         <AuthenticatedDrawer.Screen name="Chat" component={Chat} />
         <AuthenticatedDrawer.Screen name="QR Code" component={QRCode} />
