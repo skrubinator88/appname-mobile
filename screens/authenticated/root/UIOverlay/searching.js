@@ -1,29 +1,24 @@
-// Dependencies
-import React, { useState, useEffect, useContext, useRef, useLayoutEffect } from "react";
-import { SafeAreaView, TouchableWithoutFeedback } from "react-native";
-import styled from "styled-components/native";
+import React, { useContext, useLayoutEffect, useRef, useState } from "react";
+import { TouchableWithoutFeedback } from "react-native";
 import * as Progress from "react-native-progress";
-
-// Components
-import Text from "../../../../components/text";
-// import Card from "../../../../components/card";
+import { useDispatch, useSelector } from "react-redux";
+import styled from "styled-components/native";
 import Card from "../../../../components/card_animated";
-
-// Context Store
-import { UIOverlayContext, GlobalContext } from "../../../../components/context";
-
-// Controllers
+import { GlobalContext, UIOverlayContext } from "../../../../components/context";
+import Text from "../../../../components/text";
+import { JOB_CONTEXT } from "../../../../contexts/JobContext";
+import AnimationsController from "../../../../controllers/AnimationsControllers";
 import JobsController from "../../../../controllers/JobsControllers";
 import MapController from "../../../../controllers/MapController";
-import AnimationsController from "../../../../controllers/AnimationsControllers";
 
-// Redux
-import { useSelector, useDispatch } from "react-redux";
+
+
+
 
 export default function Searching({ keyword }) {
-  // Constructor
   const { authActions, authState, errorActions } = useContext(GlobalContext);
   const { userToken, userID, userData } = authState;
+  const { viewed, setViewed, findFirstJobWithKeyword } = useContext(JOB_CONTEXT);
   const { changeRoute } = useContext(UIOverlayContext); // Overlay routing
 
   // State
@@ -34,7 +29,7 @@ export default function Searching({ keyword }) {
   const jobFoundProcessRef = useRef();
 
   useLayoutEffect(() => {
-    const job_found = JobsController.findFirstJobWithKeyword(keyword, jobs, authState.userID);
+    const job_found = findFirstJobWithKeyword(keyword, jobs, authState.userID);
 
     if (job_found && jobSelected === false && CardUI.current != null) {
       setJobSelected(true);
@@ -54,7 +49,7 @@ export default function Searching({ keyword }) {
 
           changeRoute({ name: "job_found", props: { job_data: job_found, keyword } });
         },
-        false
+        false,
       );
       jobFoundProcessRef.current = jobFoundProcess;
     }
@@ -72,9 +67,9 @@ export default function Searching({ keyword }) {
             MapController.clearTemporalCirclesAndTags(dispatch);
             changeRoute({ name: "dashboard" });
           },
-          true
+          true,
         ),
-      100
+      100,
     );
     // MapController.clearTemporalCirclesAndTags(dispatch);
     // changeRoute({ name: "dashboard" });
@@ -83,7 +78,7 @@ export default function Searching({ keyword }) {
   return (
     <Card ref={CardUI}>
       <Row>
-        <Text medium>{userData.role == "contractor" ? "Searching for nearby jobs" : "Searching for workers"}</Text>
+        <Text medium>{userData.role === "contractor" ? "Searching for nearby jobs" : "Searching for workers"}</Text>
       </Row>
       <Row>
         <Text small>{keyword}</Text>

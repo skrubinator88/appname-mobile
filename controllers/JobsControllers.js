@@ -1,10 +1,10 @@
 // Dependencies
 import * as firebase from "firebase";
-import { GeoFirestore, firestore } from "../config/firebase";
+import { firestore, GeoFirestore } from "../config/firebase";
 // Config
 import config from "../env";
 // Functions
-import { distanceBetweenTwoCoordinates, isCurrentJobCreatedByUser, sortJobsByProximity } from "../functions";
+import { distanceBetweenTwoCoordinates, isCurrentJobCreatedByUser } from "../functions";
 // Redux Actions
 import JobsStoreActions from "../rdx-actions/jobs.action";
 import ListingsActions from "../rdx-actions/listings.action";
@@ -105,14 +105,6 @@ exports.clean = (ProviderName, unsubscribe, dispatch) => {
   }
 
   if (dispatch) dispatch(Actions[ProviderName].clear()); // Clear state
-};
-
-exports.findFirstJobWithKeyword = (searched_Keywords = "", jobs, userID = "") => {
-  if (!searched_Keywords) {
-    return;
-  }
-  const jobsFound = jobs.filter((job) => job?.job_type?.toLowerCase().startsWith(searched_Keywords.trim().toLowerCase()));
-  return sortJobsByProximity(jobsFound, (a, b) => a.distance - b.distance)[0];
 };
 
 exports.changeJobStatus = async (documentID, status, userID = "") => {

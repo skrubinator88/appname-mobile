@@ -7,17 +7,19 @@ import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 
 import { Drawer } from "./drawer";
 import { UserLocationContextProvider } from "../../../contexts/userLocation";
+import { JobContextProvider } from "../../../contexts/JobContext";
 
 // BODY
 
-export function AuthenticatedStackScreen()
-{
+export function AuthenticatedStackScreen() {
   return (
     <NavigationContainer independent={true}>
       <UserLocationContextProvider>
-        <HomeStack.Navigator headerMode="none">
-          <HomeStack.Screen name="Root" component={Drawer} />
-        </HomeStack.Navigator>
+        <JobContextProvider>
+          <HomeStack.Navigator headerMode="none">
+            <HomeStack.Screen name="Root" component={Drawer} />
+          </HomeStack.Navigator>
+        </JobContextProvider>
       </UserLocationContextProvider>
     </NavigationContainer>
   );
