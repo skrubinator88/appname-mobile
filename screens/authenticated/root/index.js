@@ -4,6 +4,7 @@ import MapView, { Circle, Marker } from "react-native-maps";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
 import { GlobalContext } from "../../../components/context";
+import { JOB_CONTEXT } from "../../../contexts/JobContext";
 import { USER_LOCATION_CONTEXT } from "../../../contexts/userLocation";
 import JobsControllers from "../../../controllers/JobsControllers";
 import { getPaymentInfo } from "../../../controllers/PaymentController";
@@ -17,6 +18,7 @@ export function RootScreen({ navigation, })
 {
   // Constructor
   const { location, setLocation } = useContext(USER_LOCATION_CONTEXT)
+  const { preferredSkills } = useContext(JOB_CONTEXT)
   const { authState, errorActions } = useContext(GlobalContext);
   const { setError } = errorActions;
 
@@ -37,7 +39,7 @@ export function RootScreen({ navigation, })
   const dispatch = useDispatch();
 
   // State object for use in imported (external) modules. Modules will have control over this (actual module) component state
-  const thisComponentState = { location, setLocation, setError, authState };
+  const thisComponentState = { location, setLocation, preferredSkills, setError, authState };
 
   // Get jobs and subscribe to jobs pipeline
   useEffect(() =>

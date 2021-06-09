@@ -15,7 +15,8 @@ import MapController from "../../../../controllers/MapController";
 
 
 
-export default function Searching({ keyword }) {
+export default function Searching({ keyword })
+{
   const { authActions, authState, errorActions } = useContext(GlobalContext);
   const { userToken, userID, userData } = authState;
   const { viewed, setViewed, findFirstJobWithKeyword } = useContext(JOB_CONTEXT);
@@ -28,25 +29,27 @@ export default function Searching({ keyword }) {
   const [jobSelected, setJobSelected] = useState(false);
   const jobFoundProcessRef = useRef();
 
-  useLayoutEffect(() => {
+  useLayoutEffect(() =>
+  {
     const job_found = findFirstJobWithKeyword(keyword, jobs, authState.userID);
 
-    if (job_found && jobSelected === false && CardUI.current != null) {
+    if (job_found && jobSelected === false && CardUI.current != null)
+    {
       setJobSelected(true);
 
       const jobFoundProcess = AnimationsController.CardUISlideOut(
         CardUI,
-        () => {
+         () =>
+        {
           /**
            * Update job status to "In Review" (This will pop the job out from
            * local store since is going to update in the backend)
            **/
           JobsController.changeJobStatus(job_found._id, "in review", authState.userID);
-
           // Move Camera
           // console.log(job_found.location.coords);
           MapController.handleCameraCoordinates(job_found.coordinates, dispatch);
-
+          setViewed(job_found._id)
           changeRoute({ name: "job_found", props: { job_data: job_found, keyword } });
         },
         false,
@@ -55,7 +58,8 @@ export default function Searching({ keyword }) {
     }
   }, [jobs, CardUI]);
 
-  function cancel() {
+  function cancel()
+  {
     // Kill searching process
     clearTimeout(jobFoundProcessRef.current);
 
@@ -63,7 +67,8 @@ export default function Searching({ keyword }) {
       () =>
         AnimationsController.CardUISlideOut(
           CardUI,
-          () => {
+          () =>
+          {
             MapController.clearTemporalCirclesAndTags(dispatch);
             changeRoute({ name: "dashboard" });
           },

@@ -21,7 +21,7 @@ import Text from "../../../components/text";
 // Context
 import { RegistrationContext } from "../../../components/context";
 
-export default function workModal({ navigation, onHandleCancel, onHandleSave, workModalVisible, state }) {
+export default function WorkModal({ navigation, onHandleCancel, onHandleSave, workModalVisible, state }) {
   // External
   const statusBarHeight = getStatusBarHeight();
   // Context
@@ -332,11 +332,7 @@ export default function workModal({ navigation, onHandleCancel, onHandleSave, wo
                   labelFontSize={14}
                   labelTextStyle={{ color: "black", fontWeight: "700" }}
                   placeholder="Type your supervisor's name"
-                  renderLeftAccessory={() => (
-                    <View style={{ width: 30 }}>
-                      <Foundation name="torso-business" size={24} />
-                    </View>
-                  )}
+                 
                 />
 
                 <TextField

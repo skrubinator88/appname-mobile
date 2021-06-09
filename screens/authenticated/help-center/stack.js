@@ -1,13 +1,9 @@
-// IMPORT
-import React, { useState, useEffect, useContext } from "react";
-import { View, Text } from "react-native";
-import styled from "styled-components/native";
-
 import { createStackNavigator } from "@react-navigation/stack";
+import React from "react";
+import HelpScreen from ".";
+
 export const HelpStack = createStackNavigator();
 
-// import pages
-import HelpScreen from ".";
 
 export function HelpStackScreen() {
   return (

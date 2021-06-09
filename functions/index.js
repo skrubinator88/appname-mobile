@@ -1,7 +1,8 @@
 import env from "../env";
 import moment, { duration, unix } from "moment";
 
-exports.distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2, unit = "miles") => {
+exports.distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2, unit = "miles") =>
+{
   // generally used geo measurement function
   let radius = 6378.137; // Radius of earth in KM
   let distanceLatitude = (lat2 * Math.PI) / 180 - (lat1 * Math.PI) / 180;
@@ -22,11 +23,14 @@ exports.distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2, unit = "miles")
  *
  * @author eikcalb
  */
-exports.isCurrentJob = (job) => {
-  if (!job) {
+exports.isCurrentJob = (job) =>
+{
+  if (!job)
+  {
     return false;
   }
-  if (job.start_at && job.start_at > Date.now()) {
+  if (job.start_at && job.start_at > Date.now())
+  {
     return false;
   }
   return true;
@@ -40,9 +44,12 @@ exports.isCurrentJob = (job) => {
  *
  * @author eikcalb
  */
-exports.sendNotification = async (userToken, recipient, { title, body, data }) => {
-  try {
-    if (!userToken || !recipient || !(title && data) || !(title && body)) {
+exports.sendNotification = async (userToken, recipient, { title, body, data }) =>
+{
+  try
+  {
+    if (!userToken || !recipient || !(title && data) || !(title && body))
+    {
       throw new Error("Required details are omitted");
     }
 
@@ -54,15 +61,18 @@ exports.sendNotification = async (userToken, recipient, { title, body, data }) =
       },
       body: JSON.stringify({ recipient, message: { title, body, data } }),
     });
-    if (!response.ok) {
+    if (!response.ok)
+    {
       throw new Error((await response.json()).message || "Failed to send");
     }
-  } catch (e) {
+  } catch (e)
+  {
     console.error(e);
   }
 };
 
-exports.getActualDateFormatted = (date) => {
+exports.getActualDateFormatted = (date) =>
+{
   const month_names = [
     "January",
     "February",
@@ -85,13 +95,16 @@ exports.getActualDateFormatted = (date) => {
   return `${month_names[month]} ${day}, ${year}`;
 };
 
-exports.convertFirestoreTimestamp = (date) => {
+exports.convertFirestoreTimestamp = (date) =>
+{
   return date.toDate().toLocaleTimeString().replace(/:\d+ /, " ");
 };
 
 // This needs to be replaced to another code / Use UUID Instead
-exports.createToken = () => {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+exports.createToken = () =>
+{
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c)
+  {
     var r = (Math.random() * 16) | 0,
       v = c == "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
@@ -104,6 +117,27 @@ exports.sortJobsByProximity = (arr, compare) =>
     .sort((a, b) => compare(a.item, b.item) || a.index - b.index)
     .map(({ item }) => item);
 
-exports.isCurrentJobCreatedByUser = (job, userID) => {
-  return job.posted_by == userID ? true : false;
+exports.isCurrentJobCreatedByUser = (job, preferredSkills, userID) =>
+{
+  const byUser = job.posted_by == userID ? true : false;
+  if (byUser)
+  {
+    return true
+  } else
+  {
+    if (preferredSkills?.find(skill =>
+    {
+      if (skill === "Other (No Skill Required)" || skill === job.job_type)
+      {
+        return true
+      } else
+      {
+        return false
+      }
+    }))
+    {
+      return false
+    }
+  }
+  return true
 };

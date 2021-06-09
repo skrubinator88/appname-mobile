@@ -8,36 +8,32 @@ import Constants from "expo-constants";
 import { launchImageLibraryAsync, MediaTypeOptions, requestMediaLibraryPermissionsAsync } from "expo-image-picker";
 import moment from "moment";
 import React, { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { TextInput } from "react-native";
 import
-{
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  FlatList,
-  KeyboardAvoidingView, Modal,
-  Platform,
-  SafeAreaView, TouchableOpacity,
-  TouchableWithoutFeedback,
-  View
-} from "react-native";
+  {
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    FlatList,
+    KeyboardAvoidingView, Modal,
+    Platform,
+    SafeAreaView, TextInput, TouchableOpacity,
+    TouchableWithoutFeedback,
+    View
+  } from "react-native";
 import { useSelector } from "react-redux";
 import styled from "styled-components/native";
 import GigChaserJobWord from "../../../assets/gig-logo";
-// Context
 import { GlobalContext } from "../../../components/context";
-// Components
 import Header from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
 import GoogleServicesController from "../../../controllers/GoogleServicesController";
-// Controllers
 import JobsController from "../../../controllers/JobsControllers";
 import PermissionsControllers from "../../../controllers/PermissionsControllers";
 import env from "../../../env";
 import JobSuggestions from "../../../models/fetchedSuggestedItems";
 import PhotoItem from "./listItemImage";
 import TaskModal from "./taskModal";
-// Miscellaneous
+
 const width = Dimensions.get("window").width;
 export const getPriorityColor = (priority) =>
 {

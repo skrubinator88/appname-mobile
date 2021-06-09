@@ -1,30 +1,22 @@
-import React, { Component, useContext, useState, useEffect, useRef, useCallback } from "react";
-
-import { Image, Button, Alert, TextInput, View, Animated, Easing, ActivityIndicator, TouchableWithoutFeedback } from "react-native";
-import { StackActions } from "@react-navigation/native";
-import { Camera, requestPermissionsAsync } from "expo-camera";
-import { launchImageLibraryAsync, MediaTypeOptions, requestMediaLibraryPermissionsAsync } from "expo-image-picker";
 import { useActionSheet } from "@expo/react-native-action-sheet";
-
-// Styling
-import { Platform, Dimensions } from "react-native";
-import styled from "styled-components/native";
 import { FontAwesome, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import theme from "../../../theme.json";
-
-// Components
+import { requestPermissionsAsync } from "expo-camera";
+import { launchImageLibraryAsync, MediaTypeOptions, requestMediaLibraryPermissionsAsync } from "expo-image-picker";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Animated, Dimensions, Easing, Platform, TouchableWithoutFeedback, View } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import styled from "styled-components/native";
+import { GlobalContext } from "../../../components/context";
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
-import { GlobalContext } from "../../../components/context";
+import JobController from "../../../controllers/JobsControllers";
 import env from "../../../env";
+import theme from "../../../theme.json";
 import { JobCamera } from "../listings/listingItem";
 
-// Controller
-import JobController from "../../../controllers/JobsControllers";
-import { TouchableOpacity } from "react-native-gesture-handler";
 
-const isIos = Platform.OS === "ios";
-const SPACER_SIZE = Dimensions.get("window").height / 2; //arbitrary size
+
+
 const width = Dimensions.get("window").width; //arbitrary size
 
 export default function ProfileScreen({ navigation })
@@ -358,6 +350,15 @@ export default function ProfileScreen({ navigation })
           </DetailItemRowLink>
         </DetailItemRow>
 
+        <DetailItemRow>
+          <DetailItemRowLink>
+            <Text small weight="700" color="#4a4a4a">
+              PREFERRED SKILLS
+            </Text>
+            <Ionicons name="ios-arrow-forward" size={20} />
+          </DetailItemRowLink>
+        </DetailItemRow>
+
         <DetailItemRow onPress={() => navigation.navigate("Background Check")}>
           <DetailItemRowLink>
             <Text small weight="700" color="#4a4a4a">
@@ -438,7 +439,7 @@ function RenderIndividualComments({ items })
     const final = [];
     for (let i = 0; i < items.length; i++)
     {
-      let { first_name, last_name, text, posted_by, id } = items[i];
+      let { first_name, last_name, text, id } = items[i];
       final.push(
         <CommentItem key={id}>
           <Text small bold>
@@ -537,13 +538,6 @@ const CommentSection = styled.View`
   margin: 20px 0 0 0;
 `;
 
-const CommentSectionRow = styled.View`
-  flex-direction: row;
-  width: 100%;
-  justify-content: space-around;
-  border: 1px solid #f5f5f5;
-  padding: 15px 0px;
-`;
 
 const CommentSectionColumn = styled.View`
   flex-direction: column;
@@ -553,12 +547,6 @@ const CommentSectionColumn = styled.View`
   padding: 15px 0px;
 `;
 
-const CommentItemColumn = styled.View`
-  width: 100%;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-`;
 
 const CommentTitleRowAndLink = styled.View`
   width: 100%;
@@ -568,21 +556,7 @@ const CommentTitleRowAndLink = styled.View`
   align-items: center;
 `;
 
-const Compliments = styled.ScrollView`
-  width: 100%;
-  flex-direction: row;
-`;
 
-const ComplimentItem = styled.View`
-  margin: 40px 10px;
-  background: #0070a0;
-  border-radius: 7px;
-  width: 150px;
-  padding: 20px 0;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-`;
 
 const Comments = styled.View`
   width: 100%;

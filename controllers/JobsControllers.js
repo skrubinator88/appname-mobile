@@ -13,7 +13,7 @@ const Actions = { JobsStoreActions, ListingsActions };
 
 exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
   // State
-  const { location, setLocation } = state;
+  const { location, preferredSkills } = state;
   const { setError } = state;
   const { authState } = state; // Client/User information
   let { radius } = state; // in Miles
@@ -38,7 +38,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
           case "added": {
             const data = document.data();
 
-            if (isCurrentJobCreatedByUser(data, authState.userID)) {
+            if (isCurrentJobCreatedByUser(data, preferredSkills, authState.userID)) {
               return;
             }
             data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);

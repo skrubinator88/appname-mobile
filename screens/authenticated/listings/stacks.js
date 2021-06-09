@@ -1,13 +1,9 @@
-// IMPORT
-import React, { useState, useEffect, useContext } from "react";
-import styled from "styled-components/native";
-
 import { createStackNavigator } from "@react-navigation/stack";
+import React from "react";
+import JobListingsScreen from ".";
+
 export const JobListingsStack = createStackNavigator();
 
-// import pages
-import JobListingsScreen from ".";
-import ListingItem from "./listingItem";
 
 export default function PaymentStackScreen() {
   return (
