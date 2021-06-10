@@ -84,5 +84,5 @@ module.exports = [
   "Window Blinds, Shades, Drapes, Curtains and Shutters",
   "Seamstress/Tailor",
   "Beautician",
-  "Other (No Skill Required)",
+  "Random (No Skill Required)",
 ].sort();
