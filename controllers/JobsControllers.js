@@ -19,7 +19,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
   let { radius } = state; // in Miles
   const { latitude, longitude } = location.coords; // User Location
 
-  radius = 10; // "Miles". Replace this with the value from user settings
+  radius = 100; // "Miles". Replace this with the value from user settings
 
   if (location != null) {
     const geoCollection = GeoFirestore.collection("jobs"); // Create a GeoCollection reference
