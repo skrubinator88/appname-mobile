@@ -41,6 +41,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
             if (isCurrentJobCreatedByUser(data, preferredSkills, authState.userID)) {
               return;
             }
+
             data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
             return dispatch(JobsStoreActions.add(document.id, data));
           }

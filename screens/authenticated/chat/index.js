@@ -105,7 +105,7 @@ export default function Chat({ route, navigation }) {
           }}
           renderChatEmpty={() => (
             <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white' }}>
-              <ActivityIndicator size='large' color='black' />
+              <Text light small>No Message sent yet</Text>
             </View>
           )}
         />

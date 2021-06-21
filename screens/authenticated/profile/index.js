@@ -13,14 +13,14 @@ import JobController from "../../../controllers/JobsControllers";
 import env from "../../../env";
 import theme from "../../../theme.json";
 import { JobCamera } from "../listings/listingItem";
+import PreferredSkill from "./preferredSkill";
 
 
 
 
 const width = Dimensions.get("window").width; //arbitrary size
 
-export default function ProfileScreen({ navigation })
-{
+export default function ProfileScreen({ navigation }) {
   const global = useContext(GlobalContext);
   const { authActions, authState, } = useContext(GlobalContext);
   const { userData, userID } = authState;
@@ -29,6 +29,7 @@ export default function ProfileScreen({ navigation })
   const [roleSwitch, setRoleSwitch] = useState(role == "contractor" ? false : true);
   const [loading, setLoading] = useState(false);
   const [comments, setComments] = useState([]);
+  const [showPreferredSkills, setShowPreferredSkills] = useState(false)
 
   // Setup Profile Picture Selection
   const [profilePictureURI, setProfilePictureURI] = useState(`${env.API_URL}${userData.profile_picture}`);
@@ -39,56 +40,44 @@ export default function ProfileScreen({ navigation })
   const slide = useRef(new Animated.Value(role == "contractor" ? width / 4 : 0)).current;
 
   const ANIMATION_DURATION = 200;
-  const ANIMATION_EASING = () =>
-  {
+  const ANIMATION_EASING = () => {
     return Easing.inOut(Easing.exp);
   };
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     setRole(global.authState.userData.role);
   }, [global]);
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     retrieveComments();
   }, []);
 
-  async function retrieveComments()
-  {
+  async function retrieveComments() {
     setLoading(true)
     setComments([]);
-    try
-    {
+    try {
       await JobController.getUserJobComments(userID, { setComments, limit: 3 });
-    } catch (e)
-    {
+    } catch (e) {
       console.log(e)
       Alert.alert('Failed to retrieve user comments', e.message)
-    } finally
-    {
+    } finally {
       setLoading(false)
     }
   }
 
   // Functions
-  const handleProfilePictureUpload = useCallback(async () =>
-  {
-    try
-    {
+  const handleProfilePictureUpload = useCallback(async () => {
+    try {
       // Send picture to server
       // Set picture in Redux
       // setProfilePictureURI(res.uri);
     } catch {
-    } finally
-    {
+    } finally {
     }
   }, [profilePictureURI]);
 
-  const getPhoto = useCallback(async () =>
-  {
-    try
-    {
+  const getPhoto = useCallback(async () => {
+    try {
       showActionSheetWithOptions(
         {
           options: ["Capture Photo", "Select From Library", "Cancel"],
@@ -97,10 +86,8 @@ export default function ProfileScreen({ navigation })
           cancelButtonIndex: 2,
           useModal: true,
         },
-        async (i) =>
-        {
-          switch (i)
-          {
+        async (i) => {
+          switch (i) {
             case 0:
               getPhotoFromCamera();
               break;
@@ -110,23 +97,18 @@ export default function ProfileScreen({ navigation })
           }
         }
       );
-    } catch (e)
-    {
+    } catch (e) {
       console.log(e);
       Alert.alert("Failed To Select Photo", e.message);
     }
   }, [profilePictureURI]);
 
-  const getPhotoFromLibrary = useCallback(async () =>
-  {
-    try
-    {
+  const getPhotoFromLibrary = useCallback(async () => {
+    try {
       setloadingMedia(true);
-      if (Platform.OS === "ios")
-      {
+      if (Platform.OS === "ios") {
         let perms = await requestMediaLibraryPermissionsAsync();
-        if (!perms.granted)
-        {
+        if (!perms.granted) {
           Alert.alert("Access to media library denied", "You need to grant access to image library to continue");
           setloadingMedia(false);
           return;
@@ -139,57 +121,46 @@ export default function ProfileScreen({ navigation })
         allowsMultipleSelection: false,
       });
 
-      if (!res.cancelled)
-      {
+      if (!res.cancelled) {
         setProfilePictureURI(res.uri);
       }
-    } catch (e)
-    {
+    } catch (e) {
       console.log(e);
       Alert.alert(e.message);
-    } finally
-    {
+    } finally {
       setloadingMedia(false);
     }
   }, [profilePictureURI]);
 
-  const getPhotoFromCamera = useCallback(async () =>
-  {
-    try
-    {
+  const getPhotoFromCamera = useCallback(async () => {
+    try {
       setloadingMedia(true);
 
       let hasPermission = false;
-      await (async () =>
-      {
+      await (async () => {
         const { status } = await requestPermissionsAsync();
         hasPermission = status === "granted";
       })();
 
-      if (hasPermission !== true)
-      {
+      if (hasPermission !== true) {
         Alert.alert("Camera Access Required", "The application requires permission to use your camera");
         return;
       }
 
       setShowCamera(true);
-    } catch (e)
-    {
+    } catch (e) {
       console.log(e);
       Alert.alert("Failed To Capture Photo", e.message);
-    } finally
-    {
+    } finally {
       setloadingMedia(false);
     }
   }, [profilePictureURI]);
 
-  const changeRoleCallback = (role) =>
-  {
+  const changeRoleCallback = (role) => {
     authActions.changeRole(authState, role);
   };
 
-  const slideRight = () =>
-  {
+  const slideRight = () => {
     // appActions.setLoading(true);
     // Will change fadeAnim value to 1 in 5 seconds
     Animated.timing(slide, {
@@ -200,8 +171,7 @@ export default function ProfileScreen({ navigation })
     }).start(changeRoleCallback("contractor"));
   };
 
-  const slideLeft = () =>
-  {
+  const slideLeft = () => {
     // Will change fadeAnim value to 1 in 5 seconds
     Animated.timing(slide, {
       toValue: 0,
@@ -211,8 +181,7 @@ export default function ProfileScreen({ navigation })
     }).start(changeRoleCallback("project_manager"));
   };
 
-  const handleChangeRole = () =>
-  {
+  const handleChangeRole = () => {
     roleSwitch ? slideRight() : slideLeft();
     setRoleSwitch(!roleSwitch);
   };
@@ -233,8 +202,7 @@ export default function ProfileScreen({ navigation })
       refreshingProperties={{
         refreshing: false,
         tintColor: "white",
-        onRefresh: () =>
-        {
+        onRefresh: () => {
           retrieveComments();
         },
       }}
@@ -319,7 +287,7 @@ export default function ProfileScreen({ navigation })
       {/* Details Section */}
 
       <DetailSection>
-        <DetailItemRow>
+        <DetailItemRow activeOpacity={1}>
           <DetailItemColumn>
             <Text small weight="700" color="#4a4a4a">
               PHONE
@@ -330,7 +298,7 @@ export default function ProfileScreen({ navigation })
           </DetailItemColumn>
         </DetailItemRow>
 
-        <DetailItemRow>
+        <DetailItemRow activeOpacity={1}>
           <DetailItemColumn>
             <Text small weight="700" color="#4a4a4a">
               EMAIL
@@ -341,7 +309,7 @@ export default function ProfileScreen({ navigation })
           </DetailItemColumn>
         </DetailItemRow>
 
-        <DetailItemRow>
+        <DetailItemRow activeOpacity={1}>
           <DetailItemRowLink>
             <Text small weight="700" color="#4a4a4a">
               SKILLS & LICENSES
@@ -350,7 +318,7 @@ export default function ProfileScreen({ navigation })
           </DetailItemRowLink>
         </DetailItemRow>
 
-        <DetailItemRow>
+        <DetailItemRow onPress={() => setShowPreferredSkills(true)}>
           <DetailItemRowLink>
             <Text small weight="700" color="#4a4a4a">
               PREFERRED SKILLS
@@ -405,40 +373,32 @@ export default function ProfileScreen({ navigation })
 
       <JobCamera
         showCamera={showCamera}
-        onSuccess={async (res) =>
-        {
-          if (!res)
-          {
+        onSuccess={async (res) => {
+          if (!res) {
             return setShowCamera(false);
           }
-          // console.log(res);
-          try
-          {
-            if (!res.cancelled)
-            {
+          try {
+            if (!res.cancelled) {
               handleProfilePictureUpload(res.uri);
             }
-          } catch (e)
-          {
+          } catch (e) {
             console.log(e);
             Alert.alert(e.message || "Failed to add photo");
-          } finally
-          {
+          } finally {
             setShowCamera(false);
           }
         }}
       />
+
+      <PreferredSkill onComplete={() => setShowPreferredSkills(false)} visible={showPreferredSkills} />
     </Container>
   );
 }
 
-function RenderIndividualComments({ items })
-{
-  if (items.length > 0)
-  {
+function RenderIndividualComments({ items }) {
+  if (items.length > 0) {
     const final = [];
-    for (let i = 0; i < items.length; i++)
-    {
+    for (let i = 0; i < items.length; i++) {
       let { first_name, last_name, text, id } = items[i];
       final.push(
         <CommentItem key={id}>
