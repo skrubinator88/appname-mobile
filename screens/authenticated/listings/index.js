@@ -105,6 +105,44 @@ export default function JobListing({ navigation }) {
           </Item>
 
           <JobSection style={{ marginBottom: 12 }}>
+            {inProgressList.length > 0 && (
+              <>
+                <SectionTitle>
+                  <View style={{ margin: 10 }}>
+                    <Text small bold color="#474747">
+                      IN PROGRESS
+                    </Text>
+                  </View>
+                </SectionTitle>
+
+                {inProgressList.map((item) => (
+                  <Item key={item.id}>
+                    <JobItemLink activeOpacity={1}>
+                      <JobItemRow>
+                        <Column>
+                          <Row style={{ justifyContent: "space-between" }}>
+                            <Text small weight="700" color="#1b5cce">
+                              {item.job_type}
+                            </Text>
+                          </Row>
+                          <Row style={{ marginTop: 4, marginBottom: 8 }}>
+                            <Text small>
+                              ${item.salary}/{item.wage ?? 'deployment'}
+                            </Text>
+                          </Row>
+                          {item.tasks.map((task) => (
+                            <Row key={task.id}>
+                              <Text small light>- {task.text}</Text>
+                            </Row>
+                          ))}
+                        </Column>
+                      </JobItemRow>
+                    </JobItemLink>
+                  </Item>
+                ))}
+              </>
+            )}
+
             <SectionTitle>
               <View style={{ margin: 10 }}>
                 <Text small bold color="#474747">
@@ -129,72 +167,19 @@ export default function JobListing({ navigation }) {
               </Item>
             )}
 
-            <SectionTitle>
-              <View style={{ margin: 10 }}>
-                <Text small bold color="#474747">
-                  OFFERS FOR REVIEW
-                </Text>
-              </View>
-            </SectionTitle>
+            {offersList.length > 0 && (
+              <>
+                <SectionTitle>
+                  <View style={{ margin: 10 }}>
+                    <Text small bold color="#474747">
+                      OFFERS FOR REVIEW
+                    </Text>
+                  </View>
+                </SectionTitle>
 
-            {offersList.length > 0 ? (
-              offersList.map((item) => <ListOfferItemDetail item={item} key={item.id || item._id} />)
-            ) : (
-              <Item style={{ padding: 20, alignSelf: "stretch", justifyContent: "center" }}>
-                <MaterialCommunityIcons
-                  name="alert-octagon"
-                  style={{ textAlign: "center", fontSize: 32, marginBottom: 8, color: "darkgrey" }}
-                />
-                <Text small light style={{ textAlign: "center", textTransform: "uppercase" }}>
-                  No offer available for review
-                </Text>
-              </Item>
-            )}
 
-            <SectionTitle>
-              <View style={{ margin: 10 }}>
-                <Text small bold color="#474747">
-                  IN PROGRESS
-                </Text>
-              </View>
-            </SectionTitle>
-
-            {inProgressList.length > 0 ? (
-              inProgressList.map((item) => (
-                <Item key={item.id}>
-                  <JobItemLink activeOpacity={1}>
-                    <JobItemRow>
-                      <Column>
-                        <Row style={{ justifyContent: "space-between" }}>
-                          <Text small weight="700" color="#1b5cce">
-                            {item.job_type}
-                          </Text>
-                        </Row>
-                        <Row style={{ marginTop: 4, marginBottom: 8 }}>
-                          <Text small>
-                            ${item.salary}/{item.wage ?? 'deployment'}
-                          </Text>
-                        </Row>
-                        {item.tasks.map((task) => (
-                          <Row key={task.id}>
-                            <Text small light>- {task.text}</Text>
-                          </Row>
-                        ))}
-                      </Column>
-                    </JobItemRow>
-                  </JobItemLink>
-                </Item>
-              ))
-            ) : (
-              <Item style={{ padding: 20, alignSelf: "stretch", justifyContent: "center" }}>
-                <MaterialCommunityIcons
-                  name="alert-octagon"
-                  style={{ textAlign: "center", fontSize: 32, marginBottom: 8, color: "darkgrey" }}
-                />
-                <Text small light style={{ textAlign: "center", textTransform: "uppercase" }}>
-                  No job is currently in progress
-                </Text>
-              </Item>
+                {offersList.map((item) => <ListOfferItemDetail item={item} key={item.id || item._id} />)}
+              </>
             )}
           </JobSection>
         </ScrollView>
@@ -219,11 +204,14 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
         Confirm({
           title: item.job_type,
           message: item.job_title,
-          options: ['Edit', 'Cancel'],
-          cancelButtonIndex: 1,
+          options: ['Edit', 'Delete', 'Cancel'],
+          cancelButtonIndex: 2,
+          destructiveButtonIndex: 1,
           onPress: async (index) => {
             if (index === 0) {
               navigation.navigate("Listing Item", { edit: true, data: item })
+            } else if (index === 1) {
+
             }
           }
         })

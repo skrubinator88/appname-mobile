@@ -11,61 +11,6 @@ import ListingsActions from "../rdx-actions/listings.action";
 
 const Actions = { JobsStoreActions, ListingsActions };
 
-exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
-  // State
-  const { location, preferredSkills } = state;
-  const { setError } = state;
-  const { authState } = state; // Client/User information
-  let { radius } = state; // in Miles
-  const { latitude, longitude } = location.coords; // User Location
-
-  radius = 100; // "Miles". Replace this with the value from user settings
-
-  if (location != null) {
-    const geoCollection = GeoFirestore.collection("jobs"); // Create a GeoCollection reference
-
-    // Queries
-    const query = geoCollection
-      .near({ center: new firebase.firestore.GeoPoint(latitude, longitude), radius: radius })
-      .where("status", "==", "available");
-
-    // ** Subscribe, add jobs into store and listen for changes **
-    // This function returns an unsubscribe function to close this listener
-    const unsubscribe = query.onSnapshot((res) => {
-      res.docChanges().forEach((change) => {
-        const { doc: document } = change;
-        switch (change.type) {
-          case "added": {
-            const data = document.data();
-
-            if (isCurrentJobCreatedByUser(data, preferredSkills, authState.userID)) {
-              return;
-            }
-
-            data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
-            return dispatch(JobsStoreActions.add(document.id, data));
-          }
-          case "modified": {
-            const data = document.data();
-            if (isCurrentJobCreatedByUser(data, authState.userID)) {
-              return;
-            }
-            data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
-            return dispatch(JobsStoreActions.update(document.id, data));
-          }
-          case "removed": {
-            return dispatch(JobsStoreActions.remove(document.id));
-          }
-          default:
-            break;
-        }
-      });
-    });
-
-    return unsubscribe;
-  }
-};
-
 exports.currentUserActiveJobs = (userID, dispatch) => {
   const query = GeoFirestore.collection("jobs")
     .where("posted_by", "==", userID)

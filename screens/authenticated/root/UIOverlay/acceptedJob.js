@@ -1,45 +1,56 @@
-// IMPORT
-import React, { useState, useEffect, useContext, useCallback } from "react";
-import { View, Platform, Dimensions, Alert } from "react-native";
-import styled from "styled-components/native";
-
-// Expo
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { watchPositionAsync } from "expo-location";
-import env from "../../../../env";
-
-// Components
-// import Card from "../../../../components/card";
-import Text from "../../../../components/text";
-
-// Styling
-const deviceHeight = Dimensions.get("window").height;
-import { UIOverlayContext, GlobalContext } from "../../../../components/context";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { ActivityIndicator, Alert, Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
 import { colors } from "react-native-elements";
-
-// Miscellaneous
-import { distanceBetweenTwoCoordinates } from "../../../../functions/";
-
-// Controllers
-import PermissionsControllers from "../../../../controllers/PermissionsControllers";
-import { PaymentMethodSelector } from "../../payment/components";
-import { TouchableOpacity } from "react-native";
-import JobsController from "../../../../controllers/JobsControllers";
-import { sendNotification } from "../../../../functions";
-import Confirm from "../../../../components/confirm";
-import { ActivityIndicator } from "react-native";
+import StarRating from "react-native-star-rating";
+import styled from "styled-components/native";
 import GigChaserJobWord from "../../../../assets/gig-logo";
+import Confirm from "../../../../components/confirm";
+import { GlobalContext, UIOverlayContext } from "../../../../components/context";
+import Text from "../../../../components/text";
+import { JOB_CONTEXT } from "../../../../contexts/JobContext";
+import JobsController from "../../../../controllers/JobsControllers";
+import env, { default as config } from "../../../../env";
+import { sendNotification } from "../../../../functions";
+import { distanceBetweenTwoCoordinates } from "../../../../functions/";
 import ReportJob from "./reportJob";
 
+
+const deviceHeight = Dimensions.get("window").height;
+
+
+
 // BODY
-export default function Screen45({ navigation, projectManagerInfo, job_data }) {
+export default function Screen45({ navigation }) {
   const { authState } = useContext(GlobalContext);
+  const { current: job_data } = useContext(JOB_CONTEXT)
   const { changeRoute } = useContext(UIOverlayContext);
   const [isCanceling, setIsCanceling] = useState(false);
-
+  const [projectManagerInfo, setProjectManager] = useState({});
   const [onSite, setOnSite] = useState(false);
   const [location, setLocation] = useState(null);
   const [showReport, setShowReport] = useState(false)
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      if (job_data) {
+        const response = await fetch(`${config.API_URL}/users/${job_data.posted_by}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${authState.userToken}`,
+            "Content-type": "application/json",
+          },
+        });
+        const project_manager = await response.json();
+        project_manager._id = job_data.posted_by;
+
+        setProjectManager(project_manager);
+        setLoading(false);
+      }
+    })();
+  }, [job_data?.id]);
 
   // get location real time
   useEffect(() => {
@@ -104,128 +115,121 @@ export default function Screen45({ navigation, projectManagerInfo, job_data }) {
 
   return (
     <Card>
-      <View>
-        <ProfilePicture
-          source={{
-            uri: `${env.API_URL}${job_data.posted_by_profile_picture}`,
-          }}
-        ></ProfilePicture>
-
-        <Row first>
-          <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            <Text title bold marginBottom="5px">
-              {projectManagerInfo.first_name} {projectManagerInfo.last_name}
-            </Text>
-            <Text small light marginBottom="5px">
-              Domestic Worker
-            </Text>
-          </Column>
-
-          <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            <TouchableOpacity disabled={isCanceling} activeOpacity={0.8} onPress={cancelJob}>
-              {isCanceling ?
-                <ActivityIndicator size='small' color='888' />
-                :
-                <Text style={{ paddingBottom: 10 }} color="#999">Cancel Job</Text>
+      {!loading && job_data ?
+        <>
+          <View>
+            <View style={{
+              shadowColor: "black",
+              shadowOpacity: 0.4,
+              shadowRadius: 7,
+              shadowOffset: {
+                width: 5,
+                height: 5,
               }
-            </TouchableOpacity>
+            }} >
+              <ProfilePicture
+                source={{
+                  uri: `${env.API_URL}${job_data.posted_by_profile_picture}`,
+                }}
+                style={{ backgroundColor: '#dadada' }}
+              ></ProfilePicture>
+            </View>
+            <Row first>
+              <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <Text title align='center' bold marginBottom="5px">
+                  {projectManagerInfo.first_name} {projectManagerInfo.last_name}
+                </Text>
+                <Text small light marginBottom="5px">
+                  {projectManagerInfo.occupation}
+                </Text>
+              </Column>
 
-            <Column>
-              <View style={{ flexDirection: "row" }}>
-                <Column
+              <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <TouchableOpacity style={{
+                  borderRadius: 8, padding: 8, marginBottom: 8,
+                  borderWidth: StyleSheet.hairlineWidth,
+                  justifyContent: 'center', alignItems: 'center',
+                  borderColor: '##888'
+                }} disabled={isCanceling} activeOpacity={0.8} onPress={cancelJob} >
+                  {isCanceling ?
+                    <ActivityIndicator size='small' color='#888' />
+                    :
+                    <Text color="#999">Cancel Job</Text>
+                  }
+                </TouchableOpacity>
+
+                <View style={{ flexDirection: "row", justifyContent: 'center' }}>
+                  <FontAwesome name="map-marker" size={24} color="red" />
+
+                  <Column style={{ paddingLeft: 2, justifyContent: "center" }}>
+                    <Text bold>15 min.</Text>
+                  </Column>
+                </View>
+              </Column>
+            </Row>
+
+            <Row>
+              <Column style={{ flex: 1 }}>
+                <View
                   style={{
+                    flexDirection: "row",
+                    flex: 1,
                     justifyContent: "center",
-                    alignItems: "center",
-                    width: 24,
-                    height: 24,
                   }}
                 >
-                  <FontAwesome name="star" size={24} color="black" />
-                </Column>
-
-                <Column style={{ paddingLeft: 5, justifyContent: "center" }}>
-                  <Text bold>{projectManagerInfo.star_rate}</Text>
-                </Column>
-              </View>
-
-              <View style={{ flexDirection: "row" }}>
-                <Column
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: 24,
-                    height: 24,
-                  }}
-                >
-                  <FontAwesome name="map-marker" size={24} color="black" />
-                </Column>
-
-                <Column style={{ paddingLeft: 5, justifyContent: "center" }}>
-                  <Text bold>15 min.</Text>
-                </Column>
-              </View>
-            </Column>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column style={{ flex: 1 }}>
-            <View
-              style={{
-                flexDirection: "row",
-                flex: 1,
-                justifyContent: "center",
-              }}
-            >
-              {/* <Column location>
+                  {/* <Column location>
                 <Text small light marginBottom="5px">
                   Location
                 </Text>
                 <Text small>{job_data.location.address}</Text>
               </Column> */}
 
-              <Column style={{ justifyContent: "center" }}>
-                <Button disabled={isCanceling} accept onPress={() => navigation.navigate("Chat", { receiver: job_data.posted_by })}>
-                  <Text style={{ color: "white" }} medium>
-                    Message
-                  </Text>
-                </Button>
+                  <Column style={{ justifyContent: "center" }}>
+                    <Button disabled={isCanceling} accept onPress={() => navigation.navigate("Chat", { receiver: job_data.posted_by })}>
+                      <Text style={{ color: "white" }} medium>
+                        Message
+                      </Text>
+                    </Button>
+                  </Column>
+                </View>
               </Column>
-            </View>
-          </Column>
-        </Row>
-        <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("QR Code", { job_data })}>
-          <Text small bold color={onSite ? colors.primary : "grey"}>
-            QR Code {onSite && " - Proceed"}
-          </Text>
-          <Ionicons name="ios-arrow-forward" size={24} />
-        </CardOptionItem>
+            </Row>
+            <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("QR Code", { job_data })}>
+              <Text small bold color={onSite ? colors.primary : "grey"}>
+                QR Code {onSite && " - Proceed"}
+              </Text>
+              <Ionicons name="ios-arrow-forward" size={24} />
+            </CardOptionItem>
 
-        <CardOptionItem disabled={isCanceling} row>
-          <Text small>View Job Description</Text>
-          <Ionicons name="ios-arrow-forward" size={24} />
-        </CardOptionItem>
+            <CardOptionItem disabled={isCanceling} row>
+              <Text small>View Job Description</Text>
+              <Ionicons name="ios-arrow-forward" size={24} />
+            </CardOptionItem>
 
-        {/* <CardOptionItem row>
+            {/* <CardOptionItem row>
           <Text small>View Profile</Text>
           <Ionicons name="ios-arrow-forward" size={24} />
         </CardOptionItem> */}
 
-        <CardOptionItem onPress={() => setShowReport(true)} disabled={isCanceling} row>
-          <Text small>Report Job</Text>
-          <Ionicons name="ios-arrow-forward" size={24} />
-        </CardOptionItem>
+            <CardOptionItem onPress={() => setShowReport(true)} disabled={isCanceling} row>
+              <Text small>Report Job</Text>
+              <Ionicons name="ios-arrow-forward" size={24} />
+            </CardOptionItem>
 
-        <CardOptionComplete activeOpacity={0.6} onPress={() => {
-          navigation.navigate('Complete Job', { job_data })
-        }} disabled={isCanceling}>
-          <>
-            <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>Complete</Text>
-            <GigChaserJobWord color="white" width="60px" height="18" style={{ marginHorizontal: 0 }} />
-          </>
-        </CardOptionComplete>
-      </View>
-      <ReportJob onReportSuccess={() => changeRoute({ name: 'dashboard' })} job_data={job_data} isVisible={showReport} onCancel={() => setShowReport(false)} />
+            <CardOptionComplete activeOpacity={0.6} onPress={() => {
+              navigation.navigate('Complete Job', { job_data })
+            }} disabled={isCanceling}>
+              <>
+                <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>Complete</Text>
+                <GigChaserJobWord color="white" width="60px" height="18" style={{ marginHorizontal: 0 }} />
+              </>
+            </CardOptionComplete>
+          </View>
+          <ReportJob onReportSuccess={() => changeRoute({ name: 'dashboard' })} job_data={job_data} isVisible={showReport} onCancel={() => setShowReport(false)} />
+        </>
+        :
+        <ActivityIndicator style={{ margin: 8, marginTop: 12 }} size='large' />
+      }
     </Card>
   );
 }
@@ -241,13 +245,17 @@ const Card = styled.SafeAreaView`
   box-shadow: -10px 0px 20px #999;
   background: white;
   width: 100%;
+  padding-top: 2px;
 `;
 
 const ProfilePicture = styled.Image`
-  margin: -35px auto;
-  height: 70px;
-  width: 70px;
-  border-radius: 50px;
+  margin: -60px auto;
+  margin-bottom: -20px;
+  height: 96px;
+  width: 96px;
+  border-radius: 48px;
+  border-color: white;
+  border-width: 2px;
 `;
 
 const Row = styled.View`

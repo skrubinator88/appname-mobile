@@ -116,13 +116,16 @@ exports.isCurrentJobCreatedByUser = (job, preferredSkills, userID) => {
   if (byUser) {
     return true
   } else {
-    if (job.job_type === "Random (No Skill Required)") {
-      return false
-    }
-    if (preferredSkills?.find(skill => skill === job.job_type)) {
-      return false
-    } else {
-      return true
-    }
+    // Comment this out until the preferred skill logic is perfected
+
+    // if (job.job_type === "Random (No Skill Required)") {
+    //   return false
+    // }
+    // if (preferredSkills?.find(skill => skill === job.job_type)) {
+    //   return false
+    // } else {
+    //   return true
+    // }
+    return false
   }
 };

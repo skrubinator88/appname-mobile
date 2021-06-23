@@ -1,17 +1,15 @@
 // IMPORT
 // Expo
-import { useActionSheet } from "@expo/react-native-action-sheet";
 import { FontAwesome } from "@expo/vector-icons";
 import { TextField } from "@ubaids/react-native-material-textfield";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { SafeAreaView } from "react-native";
-import { ActivityIndicator, Alert, Dimensions, FlatList, Platform, View, StyleSheet } from "react-native";
+import { ActivityIndicator, Alert, Dimensions, FlatList, SafeAreaView, View } from "react-native";
 import Modal from "react-native-modal";
 import StarRating from "react-native-star-rating";
 import styled from "styled-components/native";
 import Card from "../../../../components/card_animated";
 import Confirm from "../../../../components/confirm";
-import { GlobalContext, UIOverlayContext } from "../../../../components/context";
+import { GlobalContext } from "../../../../components/context";
 import Text from "../../../../components/text";
 import { JOB_CONTEXT } from "../../../../contexts/JobContext";
 // Controllers
@@ -27,8 +25,7 @@ const deviceHeight = Dimensions.get("window").height;
 // BODY
 export default function JobFound({ keyword, navigation }) {
   const { authState } = useContext(GlobalContext);
-  const { current: job_data } = useContext(JOB_CONTEXT)
-  const { changeRoute } = useContext(UIOverlayContext);
+  const { current: job_data, setCurrent } = useContext(JOB_CONTEXT)
 
   // Constructor
   const [projectManager, setProjectManager] = useState({});
@@ -45,22 +42,24 @@ export default function JobFound({ keyword, navigation }) {
 
   useEffect(() => {
     (async () => {
-      const response = await fetch(`${config.API_URL}/users/${job_data.posted_by}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${authState.userToken}`,
-          "Content-type": "application/json",
-        },
-      });
-      const project_manager = await response.json();
-      project_manager._id = job_data.posted_by;
+      if (job_data) {
+        const response = await fetch(`${config.API_URL}/users/${job_data.posted_by}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${authState.userToken}`,
+            "Content-type": "application/json",
+          },
+        });
+        const project_manager = await response.json();
+        project_manager._id = job_data.posted_by;
 
-      setProjectManager(project_manager);
-      setName(`${project_manager.first_name} ${project_manager.last_name}`);
-      setOccupation(project_manager.occupation);
-      setStarRate(Number(project_manager.star_rate));
-      setDescription(job_data.tasks);
-      setLoading(false);
+        setProjectManager(project_manager);
+        setName(`${project_manager.first_name} ${project_manager.last_name}`);
+        setOccupation(project_manager.occupation);
+        setStarRate(Number(project_manager.star_rate));
+        setDescription(job_data.tasks);
+        setLoading(false);
+      }
     })();
   }, [job_data?.id]);
 
@@ -124,7 +123,6 @@ export default function JobFound({ keyword, navigation }) {
     clearTimeout(decisionTimer.current)
     decisionTimer.current = setTimeout(async () => {
       await JobsController.changeJobStatus(job_data._id, "available");
-      changeRoute({ name: "searching", props: { keyword } });
     }, 5 * 60 * 1000)
     return () => {
       clearTimeout(decisionTimer.current)
@@ -152,7 +150,6 @@ export default function JobFound({ keyword, navigation }) {
                     body: `Offer declined`,
                     data: { type: "offerdecline", id: job_data._id, sender: authState.userID },
                   });
-                  changeRoute({ name: "searching", props: { keyword } });
                 } catch (e) {
                   console.log(e);
                 } finally {
@@ -171,8 +168,6 @@ export default function JobFound({ keyword, navigation }) {
           data: { type: "jobdecline", id: job_data._id, sender: authState.userID },
         });
         await JobsController.changeJobStatus(job_data._id, "available");
-        // Add job to "already"
-        changeRoute({ name: "searching", props: { keyword } });
       }
     } catch (e) {
       console.log(e);
@@ -192,9 +187,6 @@ export default function JobFound({ keyword, navigation }) {
             body: `Job accepted`,
             data: { type: "jobaccept", id: job_data._id, sender: authState.userID },
           });
-
-          //TODO: Save job ID in local storage to retrieve it later on.
-          changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
         } catch (e) {
           console.log(e, "job approve");
           Alert.alert("Please Try Again", e.message || "Failed to accept job", [{ style: "cancel", onPress: cardRef?.current?.slideIn }]);
@@ -219,9 +211,6 @@ export default function JobFound({ keyword, navigation }) {
             body: `Offer accepted`,
             data: { type: "offeraccept", id: job_data._id, sender: authState.userID },
           });
-
-          //TODO: Save job ID in local storage to retrieve it later on.
-          changeRoute({ name: "acceptedJob", props: { projectManagerInfo: projectManager, job_data } });
         } catch (e) {
           console.log(e, "counter offer approve");
           Alert.alert("Please Try Again", e.message || "Failed to accept counter offer", [{ style: "cancel", onPress: cardRef?.current?.slideIn }]);
@@ -237,32 +226,42 @@ export default function JobFound({ keyword, navigation }) {
     setEnableNegotiation(true);
   }, []);
 
-  if (!loading) {
-    return enableNegotiation ? (
-      <NegotiationView
-        deployee={authState.userID}
-        onCancel={() => setEnableNegotiation(false)}
-        onSubmit={(job) => {
-          setEnableNegotiation(false);
-          sendNotification(authState.userToken, projectManager._id, {
-            title: `GigChasers - ${job_data.job_title}`,
-            body: `Offer received`,
-            data: { type: "offerreceive", id: job_data._id, sender: authState.userID },
-          });
-        }}
-        job_data={job_data}
-      />
-    ) : (
+  return (
+    <>
+      {(!loading && enableNegotiation) && (
+        <NegotiationView
+          deployee={authState.userID}
+          onCancel={() => setEnableNegotiation(false)}
+          onSubmit={() => {
+            setEnableNegotiation(false);
+            sendNotification(authState.userToken, projectManager._id, {
+              title: `GigChasers - ${job_data.job_title}`,
+              body: `Offer received`,
+              data: { type: "offerreceive", id: job_data._id, sender: authState.userID },
+            });
+          }}
+          job_data={job_data}
+        />
+      )}
       <Card ref={cardRef}>
-        {job_data ?
+        {!loading && job_data ?
           <View>
-            <ProfilePicture
-              source={{
-                uri: `${config.API_URL}${job_data.posted_by_profile_picture}`,
-              }}
-              style={{ backgroundColor: '#dadada' }}
-            ></ProfilePicture>
-
+            <View style={{
+              shadowColor: "black",
+              shadowOpacity: 0.4,
+              shadowRadius: 7,
+              shadowOffset: {
+                width: 5,
+                height: 5,
+              }
+            }}>
+              <ProfilePicture
+                source={{
+                  uri: `${config.API_URL}${job_data.posted_by_profile_picture}`,
+                }}
+                style={{ backgroundColor: '#dadada' }}
+              ></ProfilePicture>
+            </View>
             <Row first style={{ alignItems: 'center', justifyContent: 'center' }}>
               <Column>
                 <Text title bold marginBottom="5px">
@@ -337,7 +336,7 @@ export default function JobFound({ keyword, navigation }) {
 
               {/* Iterate from array of data pulled from server and render as stars */}
               <View style={{ flexDirection: "row" }}>
-                <StarRating disabled={true} maxStars={5} rating={starRate} starSize={25} />
+                <StarRating disabled={true} fullStarColor={'black'} maxStars={5} rating={starRate} starSize={25} />
               </View>
             </CardOptionItem>
 
@@ -402,17 +401,11 @@ export default function JobFound({ keyword, navigation }) {
             </Row>
           </View>
           :
-          <ActivityIndicator size='large' />
+          <ActivityIndicator style={{ margin: 8, marginTop: 12 }} size='large' />
         }
       </Card>
-    );
-  } else {
-    return (
-      <View>
-        <ActivityIndicator />
-      </View>
-    );
-  }
+    </>
+  )
 }
 
 const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
@@ -539,12 +532,11 @@ const WageInput = styled.View`
 const ProfilePicture = styled.Image`
   margin: -60px auto;
   margin-bottom: -20px;
-  elevation: 2;
   height: 96px;
   width: 96px;
   border-radius: 48px;
   border-color: white;
-  border-width: 6px;
+  border-width: 2px;
 `;
 
 const SalaryField = styled.View`

@@ -121,7 +121,7 @@ const CaptureScreen = ({ capture, onCapture, image }) => {
 
       {image ?
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'stretch' }}>
-          <Image source={{ uri: image.uri }} style={{ backgroundColor: "tranredsparent", flex: 1 }} />
+          <Image source={{ uri: image.uri }} style={{ backgroundColor: "transparent", flex: 1 }} />
         </View>
         :
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'stretch' }}>

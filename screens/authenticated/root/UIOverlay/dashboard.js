@@ -194,10 +194,6 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
                 }}
               />
             </Row>
-
-            <Row style={{ justifyContent: "center" }}>
-              <Text small>1.0.0.0</Text>
-            </Row>
           </Card>
         </>
       )}

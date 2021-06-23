@@ -14,13 +14,11 @@ import HandleUIComponents from "./UIOverlay/handleUIComponents";
 // Miscellaneous
 const { height } = Dimensions.get("screen");
 
-export function RootScreen({ navigation, })
-{
+export function RootScreen({ navigation, }) {
   // Constructor
-  const { location, setLocation } = useContext(USER_LOCATION_CONTEXT)
-  const { preferredSkills } = useContext(JOB_CONTEXT)
-  const { authState, errorActions } = useContext(GlobalContext);
-  const { setError } = errorActions;
+  const { location } = useContext(USER_LOCATION_CONTEXT)
+  const { jobs } = useContext(JOB_CONTEXT)
+  const { authState } = useContext(GlobalContext);
 
   // State
   const [atJobLocation, setAtJobLocation] = useState(false);
@@ -35,44 +33,19 @@ export function RootScreen({ navigation, })
   // Store
   // const mapsEvent
   const camera = useSelector((state) => state.camera);
-  const jobs = useSelector((state) => state.jobs);
   const dispatch = useDispatch();
 
-  // State object for use in imported (external) modules. Modules will have control over this (actual module) component state
-  const thisComponentState = { location, setLocation, preferredSkills, setError, authState };
-
-  // Get jobs and subscribe to jobs pipeline
-  useEffect(() =>
-  {
-    let unsubscribe;
-    if (authState.userData.role === 'contractor')
-    {
-      // TODO: great point to decide whether to display an active job instead of spoolng all jobs.
-      // Logic would eb to fetch job from storage and is job is invalid, delete from storage and fetch from server.
-      // Subscribe and return a function for unsubscribe
-      if (location) unsubscribe = JobsControllers.getJobsAndSubscribeJobsChannel(thisComponentState, dispatch);
-    }
-    return () =>
-    {
-      if (unsubscribe !== undefined) JobsControllers.clean("JobsStoreActions", unsubscribe, dispatch);
-    };
-  }, [location, authState?.userData?.role]);
-
   // Move Camera
-  useEffect(() =>
-  {
-    if (!_map.current)
-    {
+  useEffect(() => {
+    if (!_map.current) {
       // If there is no map object, do not proceed!
       return
     }
-    if (camera != null && camera.reset == false)
-    {
+    if (camera != null && camera.reset == false) {
       setCircleCoordinates({ latitude: camera.coordinates[0], longitude: camera.coordinates[1] });
       setShowCircle(true);
       _map.current.animateCamera(camera.settings, { duration: 2000 });
-    } else if (camera != null && camera.reset == true)
-    {
+    } else if (camera != null && camera.reset == true) {
       setShowCircle(false);
       const verticalAlignment = 80;
       const zoom = 16;
@@ -87,10 +60,8 @@ export function RootScreen({ navigation, })
   }, [camera]);
 
   // Check if user contractor got closer to job
-  useEffect(() =>
-  {
-    if (location != null)
-    {
+  useEffect(() => {
+    if (location != null) {
       const zoom = 15; // Change the zoom between 2 and 20
       const verticalAlignment = 80; // Change this number to set the position of the GPS Icon (Vertically only) between -200 and 200 Default: -100
       setCameraSettings(new CameraInterface({
@@ -104,17 +75,14 @@ export function RootScreen({ navigation, })
     }
   }, [location])
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     getPaymentInfo(authState, dispatch)
-    return () =>
-    {
+    return () => {
       setShowCircle(false);
     };
   }, [])
 
-  if (location != null && jobs != undefined)
-  {
+  if (location != null && jobs != undefined) {
     return (
       <Container>
         <MapView
@@ -134,13 +102,7 @@ export function RootScreen({ navigation, })
           minZoomLevel={9} // recommended 9 / min: 1, max: 19
         // customMapStyle={mapStyle}
         >
-          {jobs.map(({ coordinates, _id }) => (
-            <Marker
-              key={_id}
-              coordinate={{ latitude: coordinates.latitude, longitude: coordinates.longitude }}
-              icon={JobsControllers.getJobTagType("user")}
-            />
-          ))}
+          {jobs.map(({ coordinates, _id }) => <CustomMarker key={_id} coordinates={coordinates} id={_id} />)}
           {showCircle && (
             <>
               <Circle
@@ -172,10 +134,19 @@ export function RootScreen({ navigation, })
         <HandleUIComponents navigation={navigation} />
       </Container>
     );
-  } else
-  {
+  } else {
     return <View></View>;
   }
+}
+
+const CustomMarker = ({ coordinates, id }) => {
+  return (
+    <Marker
+      key={id}
+      coordinate={{ latitude: coordinates.latitude, longitude: coordinates.longitude }}
+      icon={JobsControllers.getJobTagType("user")}
+    />
+  )
 }
 
 // STYLES

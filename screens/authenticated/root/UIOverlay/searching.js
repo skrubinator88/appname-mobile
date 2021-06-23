@@ -1,5 +1,5 @@
 import React, { useContext, useLayoutEffect, useRef, useState } from "react";
-import { TouchableWithoutFeedback } from "react-native";
+import { Alert, TouchableWithoutFeedback } from "react-native";
 import * as Progress from "react-native-progress";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
@@ -16,64 +16,68 @@ import MapController from "../../../../controllers/MapController";
 
 
 export default function Searching({ keyword }) {
-  const { authActions, authState, errorActions } = useContext(GlobalContext);
-  const { userToken, userID, userData } = authState;
-  const { viewed, setViewed, setCurrent, findFirstJobWithKeyword } = useContext(JOB_CONTEXT);
-  const { changeRoute } = useContext(UIOverlayContext); // Overlay routing
+  const { authState } = useContext(GlobalContext);
+  const { changeRoute } = useContext(UIOverlayContext)
+  const { userData } = authState;
+  const { setCurrent, findFirstJobWithKeyword } = useContext(JOB_CONTEXT);
+  const { jobs } = useContext(JOB_CONTEXT);
 
   // State
-  const jobs = useSelector((store) => store.jobs);
   const dispatch = useDispatch();
   const CardUI = useRef();
   const [jobSelected, setJobSelected] = useState(false);
   const jobFoundProcessRef = useRef();
 
   useLayoutEffect(() => {
-    setCurrent(null)
-    const job_found = findFirstJobWithKeyword(keyword, jobs, authState.userID);
+    const job_found = findFirstJobWithKeyword(keyword, authState.userID);
 
     if (job_found && jobSelected === false && CardUI.current != null) {
       setJobSelected(true);
-
-      const jobFoundProcess = AnimationsController.CardUISlideOut(
-        CardUI,
-        () => {
+      (async () => {
+        try {
           /**
-           * Update job status to "In Review" (This will pop the job out from
-           * local store since is going to update in the backend)
-           **/
-          JobsController.changeJobStatus(job_found._id, "in review", authState.userID);
-          // Move Camera
-          // console.log(job_found.location.coords);
-          MapController.handleCameraCoordinates(job_found.coordinates, dispatch);
-          setViewed(job_found._id)
-          setCurrent(job_found)
-          changeRoute({ name: "job_found", props: { keyword } });
-        },
-        false,
-      );
-      jobFoundProcessRef.current = jobFoundProcess;
+         * Update job status to "In Review" (This will pop the job out from
+         * local store since is going to update in the backend)
+         **/
+          await JobsController.changeJobStatus(job_found._id, "in review", authState.userID);
+
+          const jobFoundProcess = AnimationsController.CardUISlideOut(
+            CardUI,
+            () => {
+              // Move Camera
+              // console.log(job_found.location.coords);
+              MapController.handleCameraCoordinates(job_found.coordinates, dispatch);
+              setCurrent(job_found)
+
+            },
+            false,
+          );
+          jobFoundProcessRef.current = jobFoundProcess;
+        } catch (e) {
+          console.log(e)
+          Alert.alert('Failed to process request', 'Please try again')
+          setJobSelected(false);
+        }
+      })()
     }
   }, [jobs, CardUI]);
 
   function cancel() {
     // Kill searching process
     clearTimeout(jobFoundProcessRef.current);
-    setCurrent(null)
     setTimeout(
       () =>
         AnimationsController.CardUISlideOut(
           CardUI,
           () => {
             MapController.clearTemporalCirclesAndTags(dispatch);
-            changeRoute({ name: "dashboard" });
           },
           true,
         ),
       100,
     );
     // MapController.clearTemporalCirclesAndTags(dispatch);
-    // changeRoute({ name: "dashboard" });
+    changeRoute({ name: 'dashboard' })
   }
 
   return (

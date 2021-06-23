@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 // Actions
 import OverlayActions from "../../../../actions/OverlayActions";
 import { GlobalContext, UIOverlayContext } from "../../../../components/context";
+import { JOB_CONTEXT } from "../../../../contexts/JobContext";
 import AcceptedJob from "./acceptedJob";
 // Card UI Components
 import Dashboard from "./dashboard";
@@ -40,6 +41,7 @@ function HandleOverlayUIProjectManagerComponents({ route, navigation, willUnmoun
 }
 
 export default function UIComponents({ navigation }) {
+  const { current, setCurrent } = useContext(JOB_CONTEXT)
   // Initial Route also as Example
   const [route, setRoute] = useState({
     name: "dashboard",
@@ -63,6 +65,33 @@ export default function UIComponents({ navigation }) {
     }
   }, [screen, data])
 
+  useEffect(() => {
+    if (current) {
+      switch (current.status) {
+        case 'available':
+        case 'in review':
+          setRoute({ name: 'job_found', props: { keyword: current.job_type } })
+          break
+        case 'in progress':
+        case 'accepted':
+          setRoute({ name: 'acceptedJob' })
+          break
+        default:
+          if (route?.props?.keyword) {
+            setRoute({ name: 'searching', props: route.props })
+          } else {
+            setRoute({ name: 'dashboard' })
+          }
+          break
+      }
+    } else {
+      if (route?.props?.keyword) {
+        setRoute({ name: 'searching', props: route.props })
+      } else {
+        setRoute({ name: 'dashboard' })
+      }
+    }
+  }, [current?.status, route?.props?.keyword])
   // Authentication Context
   const { authActions, authState, errorActions } = useContext(GlobalContext);
   const { userToken, userID, userData } = authState;
@@ -75,8 +104,8 @@ export default function UIComponents({ navigation }) {
       {userData.role == "contractor" ? (
         <HandleOverlayUIContractorComponents route={route} navigation={navigation} />
       ) : (
-          <HandleOverlayUIProjectManagerComponents route={route} navigation={navigation} />
-        )}
+        <HandleOverlayUIProjectManagerComponents route={route} navigation={navigation} />
+      )}
     </UIOverlayContext.Provider>
   );
 }

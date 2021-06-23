@@ -1,7 +1,7 @@
 exports.CardUISlideOut = (cardRef, callBack, fast = false) => {
   return setTimeout(
     () => {
-      cardRef.current.slideOut();
+      cardRef?.current?.slideOut();
 
       setTimeout(callBack, 700);
     },
