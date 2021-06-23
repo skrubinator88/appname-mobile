@@ -84,7 +84,6 @@ export default function UIComponents({ navigation }) {
   });
   const routeParams = useRoute().params || {}
   const { screen, data } = routeParams;
-  console.log('papa', screen)
   useEffect(() => {
     switch (data) {
       case 'completedJob':
