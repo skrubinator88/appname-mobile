@@ -14,7 +14,7 @@ import HandleUIComponents from "./UIOverlay/handleUIComponents";
 // Miscellaneous
 const { height } = Dimensions.get("screen");
 
-export function RootScreen({ navigation, }) {
+export function RootScreen({ navigation }) {
   // Constructor
   const { location } = useContext(USER_LOCATION_CONTEXT)
   const { jobs } = useContext(JOB_CONTEXT)

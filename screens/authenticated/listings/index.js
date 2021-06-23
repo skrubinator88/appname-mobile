@@ -4,25 +4,28 @@ import { useFocusEffect } from "@react-navigation/native";
 import { TextField } from "@ubaids/react-native-material-textfield";
 import { unix } from "moment";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, Image, KeyboardAvoidingView, SafeAreaView, ScrollView, View } from "react-native";
+import { ActivityIndicator, Alert, Dimensions, Image, KeyboardAvoidingView, SafeAreaView, ScrollView, View } from "react-native";
 import StarRating from "react-native-star-rating";
 import { useDispatch, useSelector } from "react-redux";
 import Modal from 'react-native-modal';
 import styled from "styled-components/native";
 import GigChaserJobWord from "../../../assets/gig-logo";
 import Confirm from "../../../components/confirm";
-import { GlobalContext } from "../../../components/context";
+import { GlobalContext, UIOverlayContext } from "../../../components/context";
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
 import JobsControllers from "../../../controllers/JobsControllers";
+import ListingsActions from "../../../rdx-actions/listings.action";
+
 import config from "../../../env";
 import { isCurrentJob, sendNotification } from "../../../functions";
+import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
 
 const height = Dimensions.get("window").height;
 
 export default function JobListing({ navigation }) {
   const { authState } = useContext(GlobalContext);
-
+  const { setListing } = useContext(LISTING_CONTEXT);
   // Store
   const listings = useSelector((state) => state.listings);
   const dispatch = useDispatch();
@@ -53,17 +56,6 @@ export default function JobListing({ navigation }) {
   );
   const offersList = listings.filter((item) => item.status == "in review" && item?.offer_received && item?.offer_received?.deployee);
   const inProgressList = listings.filter((item) => item.status == "in progress" || item.status == "accepted");
-
-  // useEffect(() => {
-  //   console.log(listings);
-  // }, [listings]);
-
-  // if (loading)
-  //   return (
-  //     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-  //       <ActivityIndicator color="#4a89f2" animating={true} size="large" />
-  //     </View>
-  //   );
 
   return (
     <>
@@ -117,7 +109,10 @@ export default function JobListing({ navigation }) {
 
                 {inProgressList.map((item) => (
                   <Item key={item.id}>
-                    <JobItemLink activeOpacity={1}>
+                    <JobItemLink activeOpacity={0.6} onPress={() => {
+                      setListing(item)
+                      navigation.navigate('Root', { screen: 'dashboard', data: 'selected', item })
+                    }}>
                       <JobItemRow>
                         <Column>
                           <Row style={{ justifyContent: "space-between" }}>
@@ -153,7 +148,7 @@ export default function JobListing({ navigation }) {
 
             {unassignedList.length > 0 ? (
               unassignedList.map((item) => (
-                <ListItemDetail key={item.id} isCurrentJob={isCurrentJob(item)} navigation={navigation} item={item} />
+                <ListItemDetail key={item.id} dispatch={dispatch} isCurrentJob={isCurrentJob(item)} navigation={navigation} item={item} />
               ))
             ) : (
               <Item style={{ padding: 20, alignSelf: "stretch", justifyContent: "center" }}>
@@ -188,11 +183,13 @@ export default function JobListing({ navigation }) {
   );
 }
 
-const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
+const ListItemDetail = ({ item, navigation, isCurrentJob: current, dispatch }) => {
   const [timeToShow, setTimeToShow] = useState(current ? unix(item.start_at / 1000).fromNow() : "");
+  const [loading, setLoading] = useState(false)
+
   useFocusEffect(
     useCallback(() => {
-      if (isCurrentJob) {
+      if (current) {
         setTimeToShow(unix(item.start_at / 1000).fromNow());
       }
     }, [navigation, item])
@@ -211,51 +208,70 @@ const ListItemDetail = ({ item, navigation, isCurrentJob: current }) => {
             if (index === 0) {
               navigation.navigate("Listing Item", { edit: true, data: item })
             } else if (index === 1) {
-
+              setLoading(true)
+              try {
+                await JobsControllers.deleteJob(item.id)
+                Alert.alert('Successfully Deleted Gig', undefined, [{
+                  onPress: () => {
+                    dispatch(ListingsActions.remove(item.id))
+                  },
+                  style: 'default'
+                }])
+              } catch (e) {
+                Alert.alert('Failed To Delete', 'An error occurred while trying to delete gig')
+              } finally {
+                setLoading(false)
+              }
             }
           }
         })
       }}>
         <JobItemRow>
-          <Column>
-            <Row style={{ justifyContent: "space-between" }}>
-              <Text small weight="700">
-                {item.job_title}
-              </Text>
-              {current ? (
-                <Text textTransform="uppercase" small>
-                  Active
+          {loading ?
+            <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1, paddingVertical: 20 }}>
+              <ActivityIndicator size='small' style={{ alignSelf: 'center' }} />
+            </View>
+            :
+            <Column>
+              <Row style={{ justifyContent: "space-between" }}>
+                <Text small weight="700">
+                  {item.job_title}
                 </Text>
-              ) : (
-                <Text textTransform="uppercase" color="#a44" small>
-                  Scheduled
-                </Text>
-              )}
-            </Row>
-            <Row>
-              <Text small weight="700" color="#1b5cce">
-                {item.job_type}
-              </Text>
-            </Row>
-            <Row style={{ marginBottom: 10 }}>
-              <Text small>
-                ${item.salary}/{item.wage ?? 'deployment'}
-              </Text>
-            </Row>
-            {item.tasks.map((task) => (
-              <Row key={task.id}>
-                <Text small light>- {task.text}</Text>
+                {current ? (
+                  <Text textTransform="uppercase" small>
+                    Active
+                  </Text>
+                ) : (
+                  <Text textTransform="uppercase" color="#a44" small>
+                    Scheduled
+                  </Text>
+                )}
               </Row>
-            ))}
-            {!current ? (
-              <Row style={{ marginTop: 10, justifyContent: "flex-start", alignItems: "center" }}>
-                <FontAwesome style={{ marginEnd: 4, color: "#444" }} name="clock-o" />
-                <Text color="#888" small>
-                  Available {timeToShow}
+              <Row>
+                <Text small weight="700" color="#1b5cce">
+                  {item.job_type}
                 </Text>
               </Row>
-            ) : null}
-          </Column>
+              <Row style={{ marginBottom: 10 }}>
+                <Text small>
+                  ${item.salary}/{item.wage ?? 'deployment'}
+                </Text>
+              </Row>
+              {item.tasks.map((task) => (
+                <Row key={task.id}>
+                  <Text small light>- {task.text}</Text>
+                </Row>
+              ))}
+              {!current ? (
+                <Row style={{ marginTop: 10, justifyContent: "flex-start", alignItems: "center" }}>
+                  <FontAwesome style={{ marginEnd: 4, color: "#444" }} name="clock-o" />
+                  <Text color="#888" small>
+                    Available {timeToShow}
+                  </Text>
+                </Row>
+              ) : null}
+            </Column>
+          }
         </JobItemRow>
       </JobItemLink>
     </Item>
@@ -298,7 +314,7 @@ const ListOfferItemDetail = ({ item }) => {
     Confirm({
       title: item.job_type,
       message: item.job_title,
-      options: ['Edit', 'Cancel'],
+      options: ['View Offer', 'Cancel'],
       cancelButtonIndex: 1,
       onPress: async (index) => {
         if (!state.deployee) {
@@ -317,7 +333,7 @@ const ListOfferItemDetail = ({ item }) => {
     </Item>
   ) : (
     <Item key={item.id}>
-      <JobItemLink onPress={onSelect}>
+      <JobItemLink activeOpacity={0.6} onPress={onSelect}>
         <JobItemRow>
           <Column>
             <Row style={{ marginBottom: 8 }}>
@@ -367,7 +383,7 @@ const ListOfferItemDetail = ({ item }) => {
                     source={{
                       uri: `${config.API_URL}/images/${state.deployee.id}.jpg`,
                     }}
-                    style={{ height: 48, width: 48, borderRadius: 24 }}
+                    style={{ height: 48, width: 48, borderRadius: 24, backgroundColor: '#cacaca' }}
                   />
                   <Column>
                     <Text small bold style={{ marginLeft: 8 }}>
@@ -486,7 +502,6 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
 
   return (
     <Modal
-      isVisible
       coverScreen
       onBackdropPress={loading ? null : onComplete}
       onBackButtonPress={onComplete}
@@ -540,7 +555,6 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                   <WageInput>
                     <SalaryField style={{ justifyContent: "center" }}>
                       <TextField
-                        autoFocus
                         disabled={loading}
                         label="SUGGESTED OFFER"
                         prefix="$"

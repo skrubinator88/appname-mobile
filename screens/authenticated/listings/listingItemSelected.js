@@ -5,16 +5,16 @@ import { ActivityIndicator, Alert, Dimensions, StyleSheet, TouchableOpacity, Vie
 import { colors } from "react-native-elements";
 import StarRating from "react-native-star-rating";
 import styled from "styled-components/native";
-import GigChaserJobWord from "../../../../assets/gig-logo";
-import Confirm from "../../../../components/confirm";
-import { GlobalContext, UIOverlayContext } from "../../../../components/context";
-import Text from "../../../../components/text";
-import { JOB_CONTEXT } from "../../../../contexts/JobContext";
-import JobsController from "../../../../controllers/JobsControllers";
-import env, { default as config } from "../../../../env";
-import { sendNotification } from "../../../../functions";
-import { distanceBetweenTwoCoordinates } from "../../../../functions/";
-import ReportJob from "./reportJob";
+import GigChaserJobWord from "../../../assets/gig-logo";
+import Confirm from "../../../components/confirm";
+import { GlobalContext, UIOverlayContext } from "../../../components/context";
+import Text from "../../../components/text";
+import JobsController from "../../../controllers/JobsControllers";
+import env, { default as config } from "../../../env";
+import { sendNotification } from "../../../functions";
+import { distanceBetweenTwoCoordinates } from "../../../functions/";
+import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
+import ReportJob from "../root/UIOverlay/reportJob";
 
 
 const deviceHeight = Dimensions.get("window").height;
@@ -22,92 +22,72 @@ const deviceHeight = Dimensions.get("window").height;
 
 
 // BODY
-export default function Screen45({ navigation }) {
+export default function ListingItemSelected({ navigation }) {
   const { authState } = useContext(GlobalContext);
-  const { current: job_data } = useContext(JOB_CONTEXT)
+  const { listing: job_data, setListing } = useContext(LISTING_CONTEXT)
   const { changeRoute } = useContext(UIOverlayContext);
   const [isCanceling, setIsCanceling] = useState(false);
-  const [projectManagerInfo, setProjectManager] = useState({});
-  const [onSite, setOnSite] = useState(false);
-  const [location, setLocation] = useState(null);
+  const [deployeeInfo, setDeployeeInfo] = useState({});
   const [showReport, setShowReport] = useState(false)
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
-      if (job_data) {
-        const response = await fetch(`${config.API_URL}/users/${job_data.posted_by}`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${authState.userToken}`,
-            "Content-type": "application/json",
-          },
-        });
-        const project_manager = await response.json();
-        project_manager._id = job_data.posted_by;
-
-        setProjectManager(project_manager);
-        setLoading(false);
-      }
-    })();
-  }, [job_data?.id]);
-
-  // get location real time
-  useEffect(() => {
-    const subscription = watchPositionAsync({ distanceInterval: 2, timeInterval: 1000 }, (position) => {
-      setLocation(position);
-    });
-
-    return () => {
-      if (subscription) {
-        // console.log("removed");
-        subscription.then(({ remove }) => remove());
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (location) {
-      const userLocation = location.coords;
-      const jobLocation = job_data.coordinates;
-
-      // console.log("user", userLocation);
-      // console.log("job", jobLocation);
-
-      // get distance between points in miles
-      const distance = distanceBetweenTwoCoordinates(userLocation.latitude, userLocation.longitude, jobLocation["U"], jobLocation["k"]);
-
-      // console.log("distance", `${distance} in miles`);
-
-      //  0.251866 is the sum of the radius of the 2 points in miles
-      if (distance < 0.2499363724) {
-        setOnSite(true); // Inside
-      } else {
-        setOnSite(false); // Outside
-      }
+    if (!job_data?.id) {
+      changeRoute({ name: "dashboard" })
+    } else {
+      (async () => {
+        if (job_data) {
+          const response = await fetch(`${config.API_URL}/users/${job_data.executed_by}`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${authState.userToken}`,
+              "Content-type": "application/json",
+            },
+          });
+          const deployee = await response.json();
+          deployee._id = job_data.executed_by;
+          setDeployeeInfo(deployee);
+          setLoading(false);
+        }
+      })();
     }
-  }, [location]);
+  }, [job_data?.id]);
 
   const cancelJob = useCallback(() => {
     Confirm({
-      title: "Cancel Job?",
-      message: `Cancelling a job outside the cancellation window will attract a penalty`,
-      options: ["Yes", "No"],
-      cancelButtonIndex: 1,
+      title: "Cancel",
+      message: 'Do you want to cancel this gig or go back to the application?',
+      options: ["Cancel Job", "Go Back", "Cancel"],
+      cancelButtonIndex: 2,
       destructiveButtonIndex: 0,
       onPress: async (i) => {
         if (i === 0) {
-          try {
-            setIsCanceling(true)
-            await JobsController.cancelAcceptedJob(job_data._id, authState)
-            await sendNotification(authState.userToken, job_data.posted_by, { title: `GigChasers - ${job_data.job_title}`, body: `Job canceled`, data: { type: 'jobcancel', id: job_data._id, sender: authState.userID } })
-            setIsCanceling(false)
-            changeRoute({ name: "dashboard" })
-          } catch (e) {
-            console.log(e)
-            setIsCanceling(false)
-            Alert.alert('Failed To Cancel Job', e.message)
-          }
+          Confirm({
+            title: "Cancel Job?",
+            message: `Cancelling a job outside the cancellation window will attract a penalty`,
+            options: ["Yes", "No"],
+            cancelButtonIndex: 1,
+            destructiveButtonIndex: 0,
+            onPress: async (i) => {
+              if (i === 0) {
+                try {
+                  setIsCanceling(true)
+                  await JobsController.cancelAcceptedJob(job_data._id, authState)
+                  await sendNotification(authState.userToken, job_data.executed_by, { title: `GigChasers - ${job_data.job_title}`, body: `Job canceled`, data: { type: 'jobcancel', id: job_data._id, sender: authState.userID } })
+                  setIsCanceling(false)
+                  setListing(null)
+                  changeRoute({ name: "dashboard" })
+                } catch (e) {
+                  console.log(e)
+                  setIsCanceling(false)
+                  Alert.alert('Failed To Cancel Job', e.message)
+                }
+              }
+            },
+          });
+        } else if (i === 1) {
+          navigation.navigate("Job Listings")
+          setListing(null)
         }
       },
     });
@@ -129,35 +109,19 @@ export default function Screen45({ navigation }) {
             }} >
               <ProfilePicture
                 source={{
-                  uri: `${env.API_URL}${job_data.posted_by_profile_picture}`,
+                  uri: `${env.API_URL}/images/${job_data.executed_by}.jpg`,
                 }}
                 style={{ backgroundColor: '#dadada' }}
               ></ProfilePicture>
             </View>
-            <Row first>
-              <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <Row style={{ flex: 1, justifyContent: 'center', alignItems: 'stretch' }} first>
+              <Column style={{ justifyContent: "center", alignItems: "center" }}>
                 <Text title align='center' bold marginBottom="5px">
-                  {projectManagerInfo.first_name} {projectManagerInfo.last_name}
+                  {deployeeInfo.first_name} {deployeeInfo.last_name}
                 </Text>
                 <Text small light marginBottom="5px">
-                  {projectManagerInfo.occupation}
+                  {deployeeInfo.occupation}
                 </Text>
-              </Column>
-
-              <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                <TouchableOpacity style={{
-                  borderRadius: 8, padding: 8, marginBottom: 8,
-                  borderWidth: StyleSheet.hairlineWidth,
-                  justifyContent: 'center', alignItems: 'center',
-                  borderColor: '#888'
-                }} disabled={isCanceling} activeOpacity={0.8} onPress={cancelJob} >
-                  {isCanceling ?
-                    <ActivityIndicator size='small' color='#888' />
-                    :
-                    <Text color="#999">Cancel Job</Text>
-                  }
-                </TouchableOpacity>
-
                 <View style={{ flexDirection: "row", justifyContent: 'center' }}>
                   <FontAwesome name="map-marker" size={24} color="red" />
 
@@ -185,7 +149,7 @@ export default function Screen45({ navigation }) {
               </Column> */}
 
                   <Column style={{ justifyContent: "center" }}>
-                    <Button disabled={isCanceling} accept onPress={() => navigation.navigate("Chat", { receiver: job_data.posted_by })}>
+                    <Button disabled={isCanceling} accept onPress={() => navigation.navigate("Chat", { receiver: job_data.executed_by })}>
                       <Text style={{ color: "white" }} medium>
                         Message
                       </Text>
@@ -194,9 +158,9 @@ export default function Screen45({ navigation }) {
                 </View>
               </Column>
             </Row>
-            <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("QR Code", { job_data })}>
-              <Text small bold color={onSite ? colors.primary : "grey"}>
-                QR Code {onSite && " - Proceed"}
+            <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("Scanner", { job_data })}>
+              <Text small bold color={colors.primary}>
+                Scan QR Code
               </Text>
               <Ionicons name="ios-arrow-forward" size={24} />
             </CardOptionItem>
@@ -212,18 +176,20 @@ export default function Screen45({ navigation }) {
         </CardOptionItem> */}
 
             <CardOptionItem onPress={() => setShowReport(true)} disabled={isCanceling} row>
-              <Text small>Report Job</Text>
+              <Text small>Report {deployeeInfo.first_name} {deployeeInfo.last_name}</Text>
               <Ionicons name="ios-arrow-forward" size={24} />
             </CardOptionItem>
 
-            <CardOptionComplete activeOpacity={0.6} onPress={() => {
-              navigation.navigate('Complete Job', { job_data })
-            }} disabled={isCanceling}>
-              <>
-                <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>Complete</Text>
-                <GigChaserJobWord color="white" width="60px" height="18" style={{ marginHorizontal: 0 }} />
-              </>
-            </CardOptionComplete>
+            <TouchableOpacity style={{
+              paddingVertical: 24, marginTop: 8,
+              justifyContent: 'center', alignItems: 'center',
+            }} disabled={isCanceling} activeOpacity={0.8} onPress={cancelJob} >
+              {isCanceling ?
+                <ActivityIndicator size='small' color='#222' />
+                :
+                <Text color="#222">Cancel</Text>
+              }
+            </TouchableOpacity>
           </View>
           <ReportJob onReportSuccess={() => changeRoute({ name: 'dashboard' })} job_data={job_data} isVisible={showReport} onCancel={() => setShowReport(false)} />
         </>

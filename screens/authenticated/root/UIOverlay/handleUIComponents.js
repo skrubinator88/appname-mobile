@@ -4,6 +4,7 @@ import React, { useContext, useEffect, useState } from "react";
 import OverlayActions from "../../../../actions/OverlayActions";
 import { GlobalContext, UIOverlayContext } from "../../../../components/context";
 import { JOB_CONTEXT } from "../../../../contexts/JobContext";
+import ListingItemSelected from "../../listings/listingItemSelected";
 import AcceptedJob from "./acceptedJob";
 // Card UI Components
 import Dashboard from "./dashboard";
@@ -14,21 +15,48 @@ import Searching from "./searching";
 
 
 function HandleOverlayUIContractorComponents({ route, navigation, location }) {
+  const { current } = useContext(JOB_CONTEXT)
+  const { changeRoute } = useContext(UIOverlayContext);
+
+  useEffect(() => {
+    if (current) {
+      switch (current.status) {
+        case 'available':
+        case 'in review':
+          changeRoute({ name: 'job_found', props: { keyword: current.job_type } })
+          break
+        case 'in progress':
+        case 'accepted':
+          changeRoute({ name: 'acceptedJob' })
+          break
+        default:
+          if (route?.props?.keyword) {
+            changeRoute({ name: 'searching', props: route.props })
+          } else {
+            changeRoute({ name: 'dashboard' })
+          }
+          break
+      }
+    } else {
+      if (route?.props?.keyword) {
+        setRoute({ name: 'searching', props: route.props })
+      } else {
+        setRoute({ name: 'dashboard' })
+      }
+    }
+  }, [current?.status, route?.props?.keyword])
+
   switch (route.name) {
     case "dashboard":
       return <Dashboard navigation={navigation} {...route.props} />;
-      break;
     case "searching":
       return <Searching navigation={navigation} {...route.props} />;
-      break;
     case "job_found":
       return <JobFound navigation={navigation} {...route.props} />;
-      break;
     case "acceptedJob":
       return <AcceptedJob navigation={navigation} {...route.props} />;
     case "example":
       return <Example navigation={navigation} {...route.props} />;
-      break;
   }
 }
 
@@ -36,12 +64,12 @@ function HandleOverlayUIProjectManagerComponents({ route, navigation, willUnmoun
   switch (route.name) {
     case "dashboard":
       return <Dashboard navigation={navigation} {...route.props} />;
-      break;
+    case 'selected':
+      return <ListingItemSelected navigation={navigation} {...route.props} />;
   }
 }
 
 export default function UIComponents({ navigation }) {
-  const { current, setCurrent } = useContext(JOB_CONTEXT)
   // Initial Route also as Example
   const [route, setRoute] = useState({
     name: "dashboard",
@@ -54,44 +82,22 @@ export default function UIComponents({ navigation }) {
       // data: "Some Data" or {name: "Some Data"} or ["Some Data"]
     },
   });
-
-  const { screen, data } = useRoute().params || {}
+  const routeParams = useRoute().params || {}
+  const { screen, data } = routeParams;
+  console.log('papa', screen)
   useEffect(() => {
     switch (data) {
       case 'completedJob':
         setRoute({ name: 'dashboard' })
-        navigation.setParams({ screen: undefined, data: undefined })
+        navigation.setParams({ screen: undefined, data: undefined, item: undefined })
+        break;
+      case 'selected':
+        setRoute({ name: 'selected' })
+        navigation.setParams({ screen: undefined, data: undefined, item: undefined })
         break
     }
   }, [screen, data])
 
-  useEffect(() => {
-    if (current) {
-      switch (current.status) {
-        case 'available':
-        case 'in review':
-          setRoute({ name: 'job_found', props: { keyword: current.job_type } })
-          break
-        case 'in progress':
-        case 'accepted':
-          setRoute({ name: 'acceptedJob' })
-          break
-        default:
-          if (route?.props?.keyword) {
-            setRoute({ name: 'searching', props: route.props })
-          } else {
-            setRoute({ name: 'dashboard' })
-          }
-          break
-      }
-    } else {
-      if (route?.props?.keyword) {
-        setRoute({ name: 'searching', props: route.props })
-      } else {
-        setRoute({ name: 'dashboard' })
-      }
-    }
-  }, [current?.status, route?.props?.keyword])
   // Authentication Context
   const { authActions, authState, errorActions } = useContext(GlobalContext);
   const { userToken, userID, userData } = authState;

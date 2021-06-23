@@ -82,12 +82,12 @@ export default function Chat({ route, navigation }) {
         <GiftedChat
           listViewProps={{
             style: { flex: 1, marginBottom: 20, flexShrink: 0 },
-            contentContainerStyle: { flexGrow: 1, },
+            contentContainerStyle: { flexGrow: 1, justifyContent: 'center' },
             bounces: false
           }}
           placeholder='Type a message'
           alwaysShowSend
-          inverted={false}
+          inverted={true}
           messages={Object.values(chats[chatID] || {})}
           // showAvatarForEveryMessage
           showUserAvatar
@@ -105,7 +105,7 @@ export default function Chat({ route, navigation }) {
           }}
           renderChatEmpty={() => (
             <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white' }}>
-              <Text light small>No Message sent yet</Text>
+              <Text align='center' light small>No Message sent yet</Text>
             </View>
           )}
         />

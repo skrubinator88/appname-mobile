@@ -3,6 +3,7 @@ export const ListingsReducer = (prevState = [], action) => {
     case "ADD_LISTING": {
       const data = action.listing;
       data.id = action.id;
+      data._id = action.id;
       return [...prevState, data];
     }
     case "UPDATE_LISTING": {
@@ -13,10 +14,7 @@ export const ListingsReducer = (prevState = [], action) => {
       return state;
     }
     case "DELETE_LISTING": {
-      const index = [...prevState].findIndex((item) => item._id == action.id);
-      const state = [...prevState];
-      state.splice(index, 1);
-      return state;
+      return [...prevState.filter(i => i._id !== action.id)]
     }
     case "CLEAR_LISTING": {
       // console.log("LISTINGS STATE CLEARED \n");

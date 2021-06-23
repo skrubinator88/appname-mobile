@@ -1,11 +1,6 @@
-// Dependencies
 import * as firebase from "firebase";
 import { firestore, GeoFirestore } from "../config/firebase";
-// Config
 import config from "../env";
-// Functions
-import { distanceBetweenTwoCoordinates, isCurrentJobCreatedByUser } from "../functions";
-// Redux Actions
 import JobsStoreActions from "../rdx-actions/jobs.action";
 import ListingsActions from "../rdx-actions/listings.action";
 
@@ -51,6 +46,12 @@ exports.clean = (ProviderName, unsubscribe, dispatch) => {
   }
 
   if (dispatch) dispatch(Actions[ProviderName].clear()); // Clear state
+};
+
+exports.deleteJob = async (documentID) => {
+  const geoCollection = GeoFirestore.collection("jobs").doc(documentID);
+  // Ideally, there should be checks here in order to prevent jobs that are in progress from being deleted
+  await geoCollection.delete();
 };
 
 exports.changeJobStatus = async (documentID, status, userID = "") => {
