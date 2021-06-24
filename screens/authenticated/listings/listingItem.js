@@ -394,10 +394,10 @@ export default function ListingItem({ navigation }) {
       }
 
       if (success) return navigation.goBack();
+      else setLoading(false)
     } catch (e) {
       console.log(e);
       Alert.alert("Failed to create job", e.code === 418 ? e.message : undefined);
-    } finally {
       setLoading(false);
     }
   }
@@ -417,7 +417,7 @@ export default function ListingItem({ navigation }) {
         showsVerticalScrollIndicator={false}
         ref={scroll}
         keyboardDismissMode='on-drag'
-        keyboardShouldPersistTaps="never">
+        keyboardShouldPersistTaps="always">
         <TaskModal
           showModal={showModal}
           onHandleModalClose={(tasks) => {
