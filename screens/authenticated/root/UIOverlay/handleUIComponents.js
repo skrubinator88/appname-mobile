@@ -39,9 +39,9 @@ function HandleOverlayUIContractorComponents({ route, navigation, location }) {
       }
     } else {
       if (route?.props?.keyword) {
-        setRoute({ name: 'searching', props: route.props })
+        changeRoute({ name: 'searching', props: route.props })
       } else {
-        setRoute({ name: 'dashboard' })
+        changeRoute({ name: 'dashboard' })
       }
     }
   }, [current?.status, route?.props?.keyword])
