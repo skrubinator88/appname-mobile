@@ -21,9 +21,7 @@ export default function PaymentScreen({ navigation }) {
   const { authState } = useContext(GlobalContext)
   const [refreshing, setRefreshing] = useState(false)
   const [addPaymentMethod, setAddPaymentMethod] = useState(false)
-  const [setupAccount, setSetupAccount] = useState(false)
-  const [showSetup, setShowSetup] = useState(false)
-  const [uri, setURI] = useState('')
+
 
   const dispatch = useDispatch();
   const payments = useSelector((state) => state.payment)
@@ -106,64 +104,8 @@ export default function PaymentScreen({ navigation }) {
     );
   }, []);
 
-  const setup = useCallback(async () => {
-    setShowSetup(true)
-    try {
-      if (payments.hasActiveAccount) {
-        await Promise.reject({ messsage: 'You already have an account', code: 418 })
-      }
-
-      const uri = await initiateAccount(authState)
-      setURI(uri)
-    } catch (e) {
-      console.log(e)
-      Alert.alert('Account Setup Failed', e.code === 418 ? e.message : 'Failed to setup your account', [{
-        onPress: () => setShowSetup(false), style: 'cancel'
-      }])
-    }
-  }, [uri, authState, payments])
-
-  const onSuccessfulSession = useCallback(() => {
-    if (!payments.hasActiveAccount) {
-      Alert.alert('Acount Setup Complete', 'You account will be available after verification is complete', [{
-        onPress: () => setShowSetup(false), style: 'cancel'
-      }])
-    } else {
-      setShowSetup(false)
-    }
-  }, [payments])
-
-  const getDashboardLink = useCallback(async () => {
-    Confirm({
-      title: 'Open Stripe Dashboard',
-      message: 'You can open your Stripe dashboard to manage settings on your account',
-      options: ['Open', 'Cancel'],
-      cancelButtonIndex: 1,
-      onPress: async (i) => {
-        if (i === 0) {
-          setShowSetup(true)
-          setSetupAccount(false)
-          try {
-            if (!payments.hasActiveAccount) {
-              await Promise.reject({ messsage: 'Your account must be setup to continue', code: 418 })
-            }
-
-            const uri = await fetchDashboardLink(authState)
-            setURI(uri)
-          } catch (e) {
-            console.log(e)
-            Alert.alert('Manage Account Failed', e.code === 418 ? e.message : 'There was an error displaying your dashboard', [{
-              onPress: () => setShowSetup(false), style: 'cancel'
-            }])
-          }
-        }
-      },
-    })
-
-  }, [uri, authState, payments])
-
-  useEffect(()=>{
-    if(isNavFocused){
+  useEffect(() => {
+    if (isNavFocused) {
       refresh()
     }
   }, [isNavFocused])
@@ -195,50 +137,13 @@ export default function PaymentScreen({ navigation }) {
       >
         {/* Payments Section */}
         {authState.userData.role === "contractor" && (
-          <>
-            <AccountView
-              getDashboardLink={getDashboardLink}
-              setup={setup}
-              refreshing={refreshing}
-              hasAccount={payments.hasAccount}
-              hasActiveAccount={payments.hasActiveAccount}
-              balance={payments.balance}
-            />
-            {showSetup &&
-              <Modal
-                isVisible
-                avoidKeyboard
-                propagateSwipe
-                onBackButtonPress={() => setShowSetup(false)}
-                style={{ justifyContent: "center" }}
-              >
-                <SafeAreaView style={{ marginHorizontal: 8, marginVertical: 20, flexGrow: 1 }}>
-                  <View style={{ flexGrow: 1, padding: 8, backgroundColor: '#fff', borderRadius: 8, paddingTop: 28, alignItems: "stretch", }}>
-                    {!setupAccount ?
-                      <View style={{ height: '100%', justifyContent: 'center', padding: 20 }}>
-                        <ActivityIndicator />
-                      </View>
-                      : null}
-                    <MyWebView forAccount
-                      style={{ flex: 1, paddingVertical: 12, display: setupAccount && uri ? 'flex' : 'none' }}
-                      options={{
-                        uri,
-                        successUrl: CALLBACK_URL.SUCCESS,
-                        cancelUrl: CALLBACK_URL.CANCELLED,
-                      }}
-                      onLoadingComplete={() => { if (!setupAccount) setSetupAccount(true) }}
-                      onLoadingFail={() => setShowSetup(false)}
-                      onSuccess={onSuccessfulSession}
-                      onCancel={() => setShowSetup(false)}
-                    />
-                    <TouchableOpacity activeOpacity={0.8} onPress={() => setShowSetup(false)} style={{ position: "absolute", top: 4, left: 4 }}>
-                      <MaterialCommunityIcons size={24} color="red" name="close-circle" />
-                    </TouchableOpacity>
-                  </View>
-                </SafeAreaView>
-              </Modal>
-            }
-          </>
+          <AccountView
+            refreshing={refreshing}
+            hasAccount={payments.hasAccount}
+            hasActiveAccount={payments.hasActiveAccount}
+            balance={payments.balance}
+            payment={payments}
+          />
         )}
 
         <PaymentSection>
