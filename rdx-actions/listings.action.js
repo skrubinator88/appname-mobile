@@ -1,6 +1,6 @@
 // Store
-exports.add = (id, listing) => {
-  return { type: "ADD_LISTING", id, listing };
+exports.add = (listing) => {
+  return { type: "ADD_LISTING", listing };
 };
 
 exports.update = (id, listing) => {

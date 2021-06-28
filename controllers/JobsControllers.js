@@ -6,62 +6,61 @@ import ListingsActions from "../rdx-actions/listings.action";
 
 const Actions = { JobsStoreActions, ListingsActions };
 
-exports.currentUserActiveJobs = (userID, dispatch) => {
+exports.currentUserCompletedJobs = (userID, dispatch) =>
+{
   const query = GeoFirestore.collection("jobs")
     .where("posted_by", "==", userID)
-    .where("status", "in", ["available", "in review", "accepted", "in progress"]);
+    .where("status", "==", "complete");
 
-  const unsubscribe = query.onSnapshot((res) => {
-    res.docChanges().forEach((change) => {
-      const { doc: document } = change;
-      switch (change.type) {
-        case "added": {
-          return dispatch(ListingsActions.add(document.id, document.data()));
-        }
-        case "modified": {
-          return dispatch(ListingsActions.update(document.id, document.data()));
-        }
-        case "removed": {
-          return dispatch(ListingsActions.remove(document.id));
-        }
-        default:
-          break;
-      }
+  const unsubscribe = query.onSnapshot((res) =>
+  {
+    const jobs = [];
+    res.forEach((snap) =>
+    {
+      jobs.push(snap.id, snap.data());
     });
+    return dispatch(ListingsActions.add(jobs));
   });
 
   return unsubscribe;
 };
 
-exports.getJobTagType = (imageType) => {
-  switch (imageType) {
+exports.getJobTagType = (imageType) =>
+{
+  switch (imageType)
+  {
     case "user":
       return require("../assets/map-marker.png");
   }
 };
 
-exports.clean = (ProviderName, unsubscribe, dispatch) => {
-  if (unsubscribe) {
+exports.clean = (ProviderName, unsubscribe, dispatch) =>
+{
+  if (unsubscribe)
+  {
     unsubscribe(); // Unsubscribe from firebase
   }
 
   if (dispatch) dispatch(Actions[ProviderName].clear()); // Clear state
 };
 
-exports.deleteJob = async (documentID) => {
+exports.deleteJob = async (documentID) =>
+{
   const geoCollection = GeoFirestore.collection("jobs").doc(documentID);
   // Ideally, there should be checks here in order to prevent jobs that are in progress from being deleted
   await geoCollection.delete();
 };
 
-exports.changeJobStatus = async (documentID, status, userID = "") => {
+exports.changeJobStatus = async (documentID, status, userID = "") =>
+{
   const geoCollection = GeoFirestore.collection("jobs").doc(documentID);
 
   // Update job status
   await geoCollection.update({ status, executed_by: userID });
 };
 
-exports.acceptJob = async (jobID, authState) => {
+exports.acceptJob = async (jobID, authState) =>
+{
   const apiResponse = await fetch(`${config.API_URL}/users/acceptJob`, {
     method: "POST",
     headers: {
@@ -70,14 +69,16 @@ exports.acceptJob = async (jobID, authState) => {
     },
     body: JSON.stringify({ jobID }),
   });
-  if (!apiResponse.ok) {
+  if (!apiResponse.ok)
+  {
     throw new Error((await apiResponse.json()).message || "Failed to accept job");
   }
 
   return true;
 };
 
-exports.cancelAcceptedJob = async (jobID, authState) => {
+exports.cancelAcceptedJob = async (jobID, authState) =>
+{
   const {
     userData: { role },
   } = authState;
@@ -90,7 +91,8 @@ exports.cancelAcceptedJob = async (jobID, authState) => {
     },
     body: JSON.stringify({ jobID, role }),
   });
-  if (!apiResponse.ok) {
+  if (!apiResponse.ok)
+  {
     throw new Error((await apiResponse.json()).message || "Failed to cancel job");
   }
 
@@ -98,16 +100,19 @@ exports.cancelAcceptedJob = async (jobID, authState) => {
 };
 
 // TODO: upon cancellation, either suspend or bill the deployee or deployer
-exports.cancelAcceptedJob = async (documentID, authState) => {
+exports.cancelAcceptedJob = async (documentID, authState) =>
+{
   const {
     userData: { role },
   } = authState;
   const geoCollection = GeoFirestore.collection("jobs").doc(documentID);
 
-  if (role === "contractor") {
+  if (role === "contractor")
+  {
     // Handle logic when a deployee cancels a job.
     // The deployee should receive a penalty.
-  } else {
+  } else
+  {
     // Penalty for cancellation as a deployer
   }
 
@@ -124,11 +129,14 @@ exports.cancelAcceptedJob = async (documentID, authState) => {
  * @param {*} deployee
  * @param {*} offer
  */
-exports.sendOffer = async (documentID, deployee, offer, wage = "deployment") => {
-  if (!deployee) {
+exports.sendOffer = async (documentID, deployee, offer, wage = "deployment") =>
+{
+  if (!deployee)
+  {
     throw new Error("User identity must be provided");
   }
-  if (!offer || typeof offer == "number" || offer <= 0) {
+  if (!offer || typeof offer == "number" || offer <= 0)
+  {
     throw new Error("You must provide a valid offer");
   }
   const doc = GeoFirestore.collection("jobs").doc(documentID);
@@ -150,7 +158,8 @@ exports.sendOffer = async (documentID, deployee, offer, wage = "deployment") => 
  *
  * @param {*} documentID
  */
-exports.cancelOffer = async (documentID) => {
+exports.cancelOffer = async (documentID) =>
+{
   const doc = GeoFirestore.collection("jobs").doc(documentID);
   await doc.update({
     offer_received: firebase.firestore.FieldValue.delete(),
@@ -159,8 +168,10 @@ exports.cancelOffer = async (documentID) => {
   });
 };
 
-exports.approveOffer = async (jobID, deployee, authState) => {
-  if (!deployee) {
+exports.approveOffer = async (jobID, deployee, authState) =>
+{
+  if (!deployee)
+  {
     throw new Error("Deployee identity must be provided");
   }
 
@@ -172,15 +183,18 @@ exports.approveOffer = async (jobID, deployee, authState) => {
     },
     body: JSON.stringify({ jobID, deployee }),
   });
-  if (!apiResponse.ok) {
+  if (!apiResponse.ok)
+  {
     throw new Error((await apiResponse.json()).message || "Failed to accept job");
   }
 
   return true;
 };
 
-exports.counterOffer = async (documentID, offer, wage) => {
-  if (!offer) {
+exports.counterOffer = async (documentID, offer, wage) =>
+{
+  if (!offer)
+  {
     throw new Error("Offer must be provided");
   }
   const doc = GeoFirestore.collection("jobs").doc(documentID);
@@ -190,8 +204,10 @@ exports.counterOffer = async (documentID, offer, wage) => {
   });
 };
 
-exports.counterApprove = async (jobID, offer, authState) => {
-  if (!offer) {
+exports.counterApprove = async (jobID, offer, authState) =>
+{
+  if (!offer)
+  {
     throw new Error("Offer must be provided");
   }
 
@@ -203,22 +219,27 @@ exports.counterApprove = async (jobID, offer, authState) => {
     },
     body: JSON.stringify({ jobID }),
   });
-  if (!apiResponse.ok) {
+  if (!apiResponse.ok)
+  {
     throw new Error((await apiResponse.json()).message || "Failed to accept job");
   }
 
   return true;
 };
 
-exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
+exports.validateQrCode = (project_manager_id, contractor_id, qr_code) =>
+{
   firestore.collection("jobs")
     .doc(qr_code)
     .get()
-    .then((doc) => {
-      if (doc.exists) {
+    .then((doc) =>
+    {
+      if (doc.exists)
+      {
         const data = doc.data();
 
-        if (data.executed_by == contractor_id) {
+        if (data.executed_by == contractor_id)
+        {
           module.changeJobStatus(doc.id, "in progress", contractor_id);
         }
       }
@@ -227,7 +248,8 @@ exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
 
 exports.currentUserJobsHistory = (user) => { };
 
-exports.completeJob = async (jobID, authState, image) => {
+exports.completeJob = async (jobID, authState, image) =>
+{
   const body = new FormData();
   const uriSplit = image.uri.split("/");
   body.append('photo', {
@@ -244,14 +266,16 @@ exports.completeJob = async (jobID, authState, image) => {
     },
     body,
   });
-  if (!apiResponse.ok) {
+  if (!apiResponse.ok)
+  {
     throw new Error((await apiResponse.json()).message || "Failed to complete job");
   }
 
   return true;
 };
 
-exports.reportJob = async (job_data, topic, details, authState) => {
+exports.reportJob = async (job_data, topic, details, authState) =>
+{
   const apiResponse = await fetch(`${config.API_URL}/job/report`, {
     method: "POST",
     headers: {
@@ -265,14 +289,16 @@ exports.reportJob = async (job_data, topic, details, authState) => {
       details
     }),
   });
-  if (!apiResponse.ok) {
+  if (!apiResponse.ok)
+  {
     throw new Error((await apiResponse.json()).message || "Failed to report job");
   }
 
   return true;
 };
 
-exports.postUserJob = async (userID, job, token, photos = []) => {
+exports.postUserJob = async (userID, job, token, photos = []) =>
+{
   if (!userID) throw new Error("User ID is required");
   if (!job) throw new Error("A job is required");
 
@@ -292,11 +318,14 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
 
   let newJobDoc;
   let filenames = null;
-  try {
+  try
+  {
     newJobDoc = geoCollection.doc();
-    if (photos && photos.length > 0) {
+    if (photos && photos.length > 0)
+    {
       const body = new FormData();
-      photos.map((photo) => {
+      photos.map((photo) =>
+      {
         const uriSplit = photo.uri.split("/");
         body.append("photo", {
           uri: photo.uri,
@@ -313,7 +342,8 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
         },
         body,
       });
-      if (!apiResponse.ok) {
+      if (!apiResponse.ok)
+      {
         throw new Error((await apiResponse.json()).message || "Failed to upload job");
       }
 
@@ -322,19 +352,25 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
 
     return newJobDoc
       .set({ ...newJob, coordinates: GeoPoint, photo_files: filenames })
-      .then(() => {
-        return new Promise((resolution, rejection) => {
+      .then(() =>
+      {
+        return new Promise((resolution, rejection) =>
+        {
           resolution({ success: true });
         });
       })
-      .catch((error) => {
-        return new Promise((resolution, rejection) => {
+      .catch((error) =>
+      {
+        return new Promise((resolution, rejection) =>
+        {
           rejection({ success: false, error: error.message });
         });
       });
-  } catch (e) {
+  } catch (e)
+  {
     console.log(e);
-    if (newJobDoc) {
+    if (newJobDoc)
+    {
       newJobDoc.delete();
     }
     throw e;
@@ -342,7 +378,8 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
   // Test
 };
 
-exports.updateUserJob = async (userID, job, token, photos = []) => {
+exports.updateUserJob = async (userID, job, token, photos = []) =>
+{
   if (!userID) throw new Error("User ID is required");
   if (!job) throw new Error("A job is required");
 
@@ -358,12 +395,15 @@ exports.updateUserJob = async (userID, job, token, photos = []) => {
   let newJobDoc;
   let filenames = null;
 
-  try {
+  try
+  {
     newJobDoc = geoCollection.doc(job.id);
-    if (photos && photos.length > 0) {
+    if (photos && photos.length > 0)
+    {
       const body = new FormData();
 
-      photos.map((photo) => {
+      photos.map((photo) =>
+      {
         const uriSplit = photo.uri.split("/");
         body.append("photo", {
           uri: photo.uri,
@@ -381,7 +421,8 @@ exports.updateUserJob = async (userID, job, token, photos = []) => {
         body,
       });
 
-      if (!apiResponse.ok) {
+      if (!apiResponse.ok)
+      {
         throw new Error((await apiResponse.json()).message || "Failed to upload job");
       }
 
@@ -390,26 +431,33 @@ exports.updateUserJob = async (userID, job, token, photos = []) => {
 
     return newJobDoc
       .set({ ...newJob, coordinates: GeoPoint, photo_files: filenames }, { merge: true })
-      .then(() => {
-        return new Promise((resolution, rejection) => {
+      .then(() =>
+      {
+        return new Promise((resolution, rejection) =>
+        {
           resolution({ success: true });
         });
       })
-      .catch((error) => {
-        return new Promise((resolution, rejection) => {
+      .catch((error) =>
+      {
+        return new Promise((resolution, rejection) =>
+        {
           rejection({ success: false, error: error.message });
         });
       });
-  } catch (e) {
+  } catch (e)
+  {
     console.log(e);
-    if (newJobDoc) {
+    if (newJobDoc)
+    {
       newJobDoc.delete();
     }
     throw e;
   }
 };
 
-exports.getUserJobComments = async (userID, state) => {
+exports.getUserJobComments = async (userID, state) =>
+{
   // Screen State
   const { setComments, limit } = state;
 
@@ -421,7 +469,8 @@ exports.getUserJobComments = async (userID, state) => {
   let comments = [];
 
   const querySnapshot = await query.get();
-  querySnapshot.forEach((doc) => {
+  querySnapshot.forEach((doc) =>
+  {
     const comment = doc.data();
     comment.id = doc.id;
     comments.push(comment);

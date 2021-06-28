@@ -2,29 +2,28 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Dimensions, Platform, RefreshControl, SafeAreaView, TouchableOpacity, View } from "react-native";
+import { Alert, Dimensions, Platform, RefreshControl, SafeAreaView, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import Modal from 'react-native-modal';
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
-import Confirm from "../../../components/confirm";
 import { GlobalContext } from "../../../components/context";
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
-import { fetchDashboardLink, getPaymentInfo, initiateAccount, removeMethod, setDefaultMethod } from "../../../controllers/PaymentController";
+import { getPaymentInfo, removeMethod, setDefaultMethod } from "../../../controllers/PaymentController";
 import { AccountView, MethodView, PreferredMethodView, TransactionRecord } from "./components";
-import StripeCheckoutScreen, { CALLBACK_URL, MyWebView } from "./stripe";
+import StripeCheckoutScreen from "./stripe";
 
 const height = Dimensions.get("window").height;
 
 export default function PaymentScreen({ navigation }) {
-  const { authState } = useContext(GlobalContext)
-  const [refreshing, setRefreshing] = useState(false)
-  const [addPaymentMethod, setAddPaymentMethod] = useState(false)
+  const { authState } = useContext(GlobalContext);
+  const [refreshing, setRefreshing] = useState(false);
+  const [addPaymentMethod, setAddPaymentMethod] = useState(false);
 
 
   const dispatch = useDispatch();
-  const payments = useSelector((state) => state.payment)
+  const payments = useSelector((state) => state.payment);
   const actionSheet = useActionSheet();
   const isNavFocused = useIsFocused();
 
@@ -36,7 +35,7 @@ export default function PaymentScreen({ navigation }) {
     } catch (e) {
       console.log(e);
       Alert.alert("Load Failed", "Failed to fetch payment details", [{
-        onPress: () => setRefreshing(false), style: 'cancel'
+        onPress: () => setRefreshing(false), style: 'cancel',
       }]);
     }
   }, [authState]);
@@ -74,6 +73,7 @@ export default function PaymentScreen({ navigation }) {
               );
               if (confirmDefault) {
                 await setDefaultMethod(item, authState, dispatch);
+                refresh();
               }
               break;
             case 1: {
@@ -106,9 +106,9 @@ export default function PaymentScreen({ navigation }) {
 
   useEffect(() => {
     if (isNavFocused) {
-      refresh()
+      refresh();
     }
-  }, [isNavFocused])
+  }, [isNavFocused]);
 
   return (
     <Container
@@ -122,7 +122,7 @@ export default function PaymentScreen({ navigation }) {
       nextIcon={Platform.OS === 'android' ? "refresh" : ""}
       nextAction={() => {
         if (Platform.OS === 'android') {
-          refresh()
+          refresh();
         }
       }}
     >
@@ -139,10 +139,7 @@ export default function PaymentScreen({ navigation }) {
         {authState.userData.role === "contractor" && (
           <AccountView
             refreshing={refreshing}
-            hasAccount={payments.hasAccount}
-            hasActiveAccount={payments.hasActiveAccount}
-            balance={payments.balance}
-            payment={payments}
+            payments={payments}
           />
         )}
 

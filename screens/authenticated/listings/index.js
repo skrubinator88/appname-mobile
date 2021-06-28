@@ -1,17 +1,16 @@
-import { useActionSheet } from "@expo/react-native-action-sheet";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { TextField } from "@ubaids/react-native-material-textfield";
 import { unix } from "moment";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Dimensions, Image, KeyboardAvoidingView, SafeAreaView, ScrollView, View } from "react-native";
+import { ActivityIndicator, Alert, Dimensions, Image, SafeAreaView, ScrollView, View } from "react-native";
 import StarRating from "react-native-star-rating";
 import { useDispatch, useSelector } from "react-redux";
 import Modal from 'react-native-modal';
 import styled from "styled-components/native";
 import GigChaserJobWord from "../../../assets/gig-logo";
 import Confirm from "../../../components/confirm";
-import { GlobalContext, UIOverlayContext } from "../../../components/context";
+import { GlobalContext } from "../../../components/context";
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
 import JobsControllers from "../../../controllers/JobsControllers";
@@ -23,9 +22,9 @@ import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
 
 const height = Dimensions.get("window").height;
 
-export default function JobListing({ navigation }) {
+export default function JobListing({ navigation })
+{
   const { authState } = useContext(GlobalContext);
-  const { setListing } = useContext(LISTING_CONTEXT);
   // Store
   const listings = useSelector((state) => state.listings);
   const dispatch = useDispatch();
@@ -34,28 +33,26 @@ export default function JobListing({ navigation }) {
   const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (isMounted) {
+  useEffect(() =>
+  {
+    if (isMounted)
+    {
       setLoading(false);
     }
     setIsMounted(true);
   }, [listings]);
 
-  // Fetch user jobs
-  useEffect(() => {
+  // Fetch user jobs, there should only be 1 active job at any given time
+  useEffect(() =>
+  {
     let unsubscribe;
-    unsubscribe = JobsControllers.currentUserActiveJobs(authState.userID, dispatch);
+    unsubscribe = JobsControllers.currentUserCompletedJobs(authState.userID, dispatch);
 
-    return () => {
-      if (unsubscribe !== undefined) JobsControllers.clean("ListingsActions", unsubscribe, dispatch);
+    return () =>
+    {
+      if (unsubscribe !== undefined) { JobsControllers.clean("ListingsActions", unsubscribe, dispatch); }
     };
   }, []);
-
-  const unassignedList = listings.filter(
-    (item) => item.status == "available" || (item.status == "in review" && !item?.offer_received && !item?.offer_received?.deployee)
-  );
-  const offersList = listings.filter((item) => item.status == "in review" && item?.offer_received && item?.offer_received?.deployee);
-  const inProgressList = listings.filter((item) => item.status == "in progress" || item.status == "accepted");
 
   return (
     <>
@@ -97,84 +94,32 @@ export default function JobListing({ navigation }) {
           </Item>
 
           <JobSection style={{ marginBottom: 12 }}>
-            {inProgressList.length > 0 && (
+            {listings.length > 0 && (
               <>
                 <SectionTitle>
                   <View style={{ margin: 10 }}>
                     <Text small bold color="#474747">
-                      IN PROGRESS
+                      COMPLETED
                     </Text>
                   </View>
                 </SectionTitle>
 
-                {inProgressList.map((item) => (
-                  <Item key={item.id}>
-                    <JobItemLink activeOpacity={0.6} onPress={() => {
-                      setListing(item)
-                      navigation.navigate('Root', { screen: 'dashboard', data: 'selected', item })
-                    }}>
-                      <JobItemRow>
-                        <Column>
-                          <Row style={{ justifyContent: "space-between" }}>
-                            <Text small weight="700" color="#1b5cce">
-                              {item.job_type}
-                            </Text>
-                          </Row>
-                          <Row style={{ marginTop: 4, marginBottom: 8 }}>
-                            <Text small>
-                              ${item.salary}/{item.wage ?? 'deployment'}
-                            </Text>
-                          </Row>
-                          {item.tasks.map((task) => (
-                            <Row key={task.id}>
-                              <Text small light>- {task.text}</Text>
-                            </Row>
-                          ))}
-                        </Column>
-                      </JobItemRow>
-                    </JobItemLink>
-                  </Item>
+                {listings.map((item) => (
+                  <ListItemCompleteDetail item={item} key={item.id} />
                 ))}
               </>
             )}
 
-            <SectionTitle>
-              <View style={{ margin: 10 }}>
-                <Text small bold color="#474747">
-                  UNASSIGNED
-                </Text>
-              </View>
-            </SectionTitle>
-
-            {unassignedList.length > 0 ? (
-              unassignedList.map((item) => (
-                <ListItemDetail key={item.id} dispatch={dispatch} isCurrentJob={isCurrentJob(item)} navigation={navigation} item={item} />
-              ))
-            ) : (
-              <Item style={{ padding: 20, alignSelf: "stretch", justifyContent: "center" }}>
+            {listings.length <= 0 && (
+              <Item style={{ padding: 20, paddingVertical: 40, alignSelf: "stretch", justifyContent: "center" }}>
                 <MaterialCommunityIcons
                   name="alert-octagon"
                   style={{ textAlign: "center", fontSize: 32, marginBottom: 8, color: "darkgrey" }}
                 />
                 <Text small light style={{ textAlign: "center", textTransform: "uppercase" }}>
-                  No job available
+                  No job completed yet
                 </Text>
               </Item>
-            )}
-
-            {offersList.length > 0 && (
-              <>
-                <SectionTitle>
-                  <View style={{ margin: 10 }}>
-                    <Text small bold color="#474747">
-                      OFFERS FOR REVIEW
-                    </Text>
-                  </View>
-                </SectionTitle>
-
-
-                {offersList.map((item) => <ListOfferItemDetail item={item} key={item.id || item._id} />)}
-              </>
             )}
           </JobSection>
         </ScrollView>
@@ -183,108 +128,108 @@ export default function JobListing({ navigation }) {
   );
 }
 
-const ListItemDetail = ({ item, navigation, isCurrentJob: current, dispatch }) => {
-  const [timeToShow, setTimeToShow] = useState(current ? unix(item.start_at / 1000).fromNow() : "");
-  const [loading, setLoading] = useState(false)
+const ListItemCompleteDetail = ({ item }) =>
+{
+  const { authState } = useContext(GlobalContext);
+  const [state, setState] = useState({ loading: true, showCounterOffer: false });
+  console.log(item)
+  useEffect(() =>
+  {
+    (async () =>
+    {
+      try
+      {
+        const response = await fetch(`${config.API_URL}/users/${item.executed_by}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${authState.userToken}`,
+            "Content-type": "application/json",
+          },
+        });
 
-  useFocusEffect(
-    useCallback(() => {
-      if (current) {
-        setTimeToShow(unix(item.start_at / 1000).fromNow());
+        const deployee = await response.json();
+        deployee.id = item.executed_by;
+        setState({
+          ...state,
+          loading: false,
+          deployee,
+          name: `${deployee.first_name} ${deployee.last_name}`,
+          occupation: deployee.occupation,
+          starRate: Number(deployee.star_rate),
+        });
+      } catch (e)
+      {
+        console.log(e, "Load job fail");
+        setState({ ...state, loading: false });
       }
-    }, [navigation, item])
-  );
+    })();
+  }, [item]);
 
-  return (
-    <Item key={item}>
-      <JobItemLink activeOpacity={0.6} onPress={() => {
-        Confirm({
-          title: item.job_type,
-          message: item.job_title,
-          options: ['Edit', 'Delete', 'Cancel'],
-          cancelButtonIndex: 2,
-          destructiveButtonIndex: 1,
-          onPress: async (index) => {
-            if (index === 0) {
-              navigation.navigate("Listing Item", { edit: true, data: item })
-            } else if (index === 1) {
-              setLoading(true)
-              try {
-                await JobsControllers.deleteJob(item.id)
-                Alert.alert('Successfully Deleted Gig', undefined, [{
-                  onPress: () => {
-                    dispatch(ListingsActions.remove(item.id))
-                  },
-                  style: 'default'
-                }])
-              } catch (e) {
-                Alert.alert('Failed To Delete', 'An error occurred while trying to delete gig')
-              } finally {
-                setLoading(false)
-              }
-            }
-          }
-        })
-      }}>
+  const onSelect = useCallback(() =>
+  {
+  }, [state, item]);
+
+  return state.loading ? (
+    <Item key={item.id} style={{ padding: 20, paddingVertical: 48, alignSelf: "stretch", justifyContent: "center" }}>
+      <ActivityIndicator color="darkgrey" />
+    </Item>
+  ) : (
+    <Item key={item.id}>
+      <JobItemLink activeOpacity={0.6} onPress={onSelect}>
         <JobItemRow>
-          {loading ?
-            <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1, paddingVertical: 20 }}>
-              <ActivityIndicator size='small' style={{ alignSelf: 'center' }} />
-            </View>
-            :
-            <Column>
-              <Row style={{ justifyContent: "space-between" }}>
-                <Text small weight="700">
-                  {item.job_title}
-                </Text>
-                {current ? (
-                  <Text textTransform="uppercase" small>
-                    Active
-                  </Text>
-                ) : (
-                  <Text textTransform="uppercase" color="#a44" small>
-                    Scheduled
-                  </Text>
-                )}
+          <Column>
+            <Row style={{ marginBottom: 8 }}>
+              <Text small weight="700" color="#1b5cce">
+                {item.job_type}
+              </Text>
+            </Row>
+
+            {item.tasks.map((task) => (
+              <Row key={task.id}>
+                <Text small light>- {task.text}</Text>
               </Row>
-              <Row>
-                <Text small weight="700" color="#1b5cce">
-                  {item.job_type}
+            ))}
+
+            <Row style={{ marginVertical: 4, justifyContent: 'space-between' }}>
+              <Text light small>
+                Cost
+              </Text>
+              <Text small>
+                ${item.salary}/{item.wage ?? 'deployment'}
+              </Text>
+            </Row>
+
+            <Row last style={{ marginTop: 8, justifyContent: "flex-start" }}>
+              <Image
+                source={{
+                  uri: `${config.API_URL}/images/${state.deployee.id}.jpg`,
+                }}
+                style={{ height: 48, width: 48, borderRadius: 24, backgroundColor: '#cacaca' }}
+              />
+              <Column>
+                <Text small bold style={{ marginLeft: 8 }}>
+                  {state.name}
                 </Text>
-              </Row>
-              <Row style={{ marginBottom: 10 }}>
-                <Text small>
-                  ${item.salary}/{item.wage ?? 'deployment'}
-                </Text>
-              </Row>
-              {item.tasks.map((task) => (
-                <Row key={task.id}>
-                  <Text small light>- {task.text}</Text>
-                </Row>
-              ))}
-              {!current ? (
-                <Row style={{ marginTop: 10, justifyContent: "flex-start", alignItems: "center" }}>
-                  <FontAwesome style={{ marginEnd: 4, color: "#444" }} name="clock-o" />
-                  <Text color="#888" small>
-                    Available {timeToShow}
-                  </Text>
-                </Row>
-              ) : null}
-            </Column>
-          }
+              </Column>
+            </Row>
+          </Column>
         </JobItemRow>
       </JobItemLink>
     </Item>
   );
 };
 
-const ListOfferItemDetail = ({ item }) => {
+const ListOfferItemDetail = ({ item }) =>
+{
   const { authState } = useContext(GlobalContext);
   const [state, setState] = useState({ loading: true, showCounterOffer: false });
 
-  useEffect(() => {
-    (async () => {
-      try {
+  useEffect(() =>
+  {
+    (async () =>
+    {
+      try
+      {
         const response = await fetch(`${config.API_URL}/users/${item.offer_received.deployee}`, {
           method: "GET",
           headers: {
@@ -303,28 +248,33 @@ const ListOfferItemDetail = ({ item }) => {
           occupation: deployee.occupation,
           starRate: Number(deployee.star_rate),
         });
-      } catch (e) {
+      } catch (e)
+      {
         console.log(e, "Load offer fail");
         setState({ ...state, loading: false });
       }
     })();
   }, [item]);
 
-  const onSelect = useCallback(() => {
+  const onSelect = useCallback(() =>
+  {
     Confirm({
       title: item.job_type,
       message: item.job_title,
       options: ['View Offer', 'Cancel'],
       cancelButtonIndex: 1,
-      onPress: async (index) => {
-        if (!state.deployee) {
+      onPress: async (index) =>
+      {
+        if (!state.deployee)
+        {
           return;
         }
-        if (index === 0) {
+        if (index === 0)
+        {
           setState({ ...state, showCounterOffer: true });
         }
       },
-    })
+    });
   }, [state, item]);
 
   return state.loading ? (
@@ -408,24 +358,31 @@ const ListOfferItemDetail = ({ item }) => {
   );
 };
 
-const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
+const CounterOfferView = ({ job_data, authState, deployee, onComplete }) =>
+{
   const [loading, setLoading] = useState(false);
   const [salary, setSalary] = useState(job_data.offer_received?.offer);
   const [wage] = useState(job_data.offer_received.wage || "deployment");
 
-  const onRejectOffer = useCallback(async () => {
-    if (salary) {
-      await new Promise(async (res) => {
+  const onRejectOffer = useCallback(async () =>
+  {
+    if (salary)
+    {
+      await new Promise(async (res) =>
+      {
         Confirm({
           options: ["Reject", "Cancel"],
           cancelButtonIndex: 1,
           title: `Reject Offer From ${deployee.first_name}`,
           message: `If you reject, the job will be available in the job pool`,
-          onPress: async (index) => {
-            try {
+          onPress: async (index) =>
+          {
+            try
+            {
               setLoading(true);
 
-              if (index === 0) {
+              if (index === 0)
+              {
                 await JobsControllers.cancelOffer(job_data.id);
                 sendNotification(authState.userToken, deployee.id, {
                   title: `GigChasers - ${job_data.job_title}`,
@@ -435,10 +392,12 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
               }
               setLoading(false);
               onComplete();
-            } catch (e) {
+            } catch (e)
+            {
               console.log(e, "offer rejection");
               setLoading(false);
-            } finally {
+            } finally
+            {
               res();
             }
           },
@@ -448,14 +407,18 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
     }
   }, [loading, deployee, job_data, salary]);
 
-  const onSubmitOffer = useCallback(async () => {
-    if (salary) {
+  const onSubmitOffer = useCallback(async () =>
+  {
+    if (salary)
+    {
       const offer = parseFloat(salary).toFixed(2);
-      if (Number.isNaN(offer) || isNaN(offer)) {
+      if (Number.isNaN(offer) || isNaN(offer))
+      {
         console.log(offer, ": is not a number?");
         return;
       }
-      await new Promise(async (res) => {
+      await new Promise(async (res) =>
+      {
         const isCounterOffer = offer !== parseFloat(job_data.offer_received.offer).toFixed(2) || job_data.offer_received.wage !== wage;
         Confirm({
           options: [isCounterOffer ? "Send" : "Approve", "Cancel"],
@@ -464,19 +427,24 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
           message: !isCounterOffer
             ? `If you approve, the job will be accepted by this deployee`
             : `Offer will be sent to ${deployee.first_name} for confirmation`,
-          onPress: async (index) => {
-            try {
+          onPress: async (index) =>
+          {
+            try
+            {
               setLoading(true);
 
-              if (index === 0) {
-                if (isCounterOffer) {
+              if (index === 0)
+              {
+                if (isCounterOffer)
+                {
                   await JobsControllers.counterOffer(job_data.id, offer, wage);
                   sendNotification(authState.userToken, deployee.id, {
                     title: `GigChasers - ${job_data.job_title}`,
                     body: `Counter offer received`,
                     data: { type: "offerreceive", id: job_data.id, sender: authState.userID },
                   });
-                } else {
+                } else
+                {
                   await JobsControllers.approveOffer(job_data.id, deployee.id, authState);
                   sendNotification(authState.userToken, deployee.id, {
                     title: `GigChasers - ${job_data.job_title}`,
@@ -487,10 +455,12 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
               }
               setLoading(false);
               onComplete();
-            } catch (e) {
+            } catch (e)
+            {
               setLoading(false);
               console.log(e, "offer acceptance");
-            } finally {
+            } finally
+            {
               res();
             }
           },
@@ -506,7 +476,7 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
       onBackdropPress={loading ? null : onComplete}
       onBackButtonPress={onComplete}
       onSwipeComplete={loading ? null : onComplete}
-      swipeDirection='down'
+      swipeDirection="down"
       avoidKeyboard>
       <SafeAreaView style={{ justifyContent: "center" }}>
         <View style={{ justifyContent: "space-between", backgroundColor: 'white', borderRadius: 8, paddingVertical: 8, margin: 8, flex: 'unset' }}>
@@ -563,7 +533,8 @@ const CounterOfferView = ({ job_data, authState, deployee, onComplete }) => {
                         placeholder="0.00"
                         labelTextStyle={{ color: "grey", fontWeight: "700" }}
                         keyboardType="numeric"
-                        onChangeText={(text) => {
+                        onChangeText={(text) =>
+                        {
                           setSalary(text);
                         }}
                         value={salary}
@@ -656,8 +627,10 @@ const WageInput = styled.View`
 `;
 
 const Button = styled.TouchableOpacity`
-  ${({ decline, accept, negotiate, negotiationSent, row }) => {
-    switch (true) {
+  ${({ decline, accept, negotiate, negotiationSent, row }) =>
+  {
+    switch (true)
+    {
       case accept:
         return `
         background: #228b22; 
@@ -695,8 +668,10 @@ const Button = styled.TouchableOpacity`
 
 const CounterRow = styled.View`
   flex-direction: row;
-  justify-content: ${({ first, last }) => {
-    switch (true) {
+  justify-content: ${({ first, last }) =>
+  {
+    switch (true)
+    {
       case first:
         return "space-between";
       case last:
@@ -705,8 +680,10 @@ const CounterRow = styled.View`
         return "flex-start";
     }
   }};
-  ${({ first }) => {
-    switch (true) {
+  ${({ first }) =>
+  {
+    switch (true)
+    {
       case first:
         return `
         margin: 4% 0 0 0;
