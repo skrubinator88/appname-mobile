@@ -90,9 +90,9 @@ export default function Screen45({ navigation }) {
 
   const cancelJob = useCallback(() => {
     Confirm({
-      title: "Cancel Job?",
+      title: "Are you sure you want to cancel the job ?",
       message: `Cancelling a job outside the cancellation window will attract a penalty`,
-      options: ["Yes", "No"],
+      options: ["Cancel Job", "Never Mind"],
       cancelButtonIndex: 1,
       destructiveButtonIndex: 0,
       onPress: async (i) => {

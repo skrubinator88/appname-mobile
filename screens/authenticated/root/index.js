@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Dimensions, Keyboard, View } from "react-native";
+import { Dimensions, Keyboard, Image, View } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
@@ -76,7 +76,7 @@ export function RootScreen({ navigation }) {
   }, [location])
 
   useEffect(() => {
-    getPaymentInfo(authState, dispatch)
+    getPaymentInfo(authState, dispatch).catch(e => console.log(e))
     return () => {
       setShowCircle(false);
     };
@@ -140,12 +140,20 @@ export function RootScreen({ navigation }) {
 }
 
 const CustomMarker = ({ coordinates, id }) => {
+  const [trackView, setTrackView] = useState(true)
+
   return (
     <Marker
       key={id}
       coordinate={{ latitude: coordinates.latitude, longitude: coordinates.longitude }}
-      icon={JobsControllers.getJobTagType("user")}
-    />
+      tracksViewChanges={trackView}
+    >
+      <Image
+        source={JobsControllers.getJobTagType("user")}
+        onLoad={() => setTrackView(false)}
+        fadeDuration={0}
+        style={{ height: 50, width: 50, }} />
+    </Marker>
   )
 }
 

@@ -1,10 +1,9 @@
-import React, { useCallback, useState, useEffect } from "react";
-import { getStatusBarHeight } from "react-native-status-bar-height";
-
-import { Platform, SafeAreaView, Dimensions, View, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
-import styled from "styled-components/native";
 import * as VectorIcons from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect } from "react";
+import { ActivityIndicator, Dimensions, Platform, RefreshControl, SafeAreaView, ScrollView, View } from "react-native";
+import { getStatusBarHeight } from "react-native-status-bar-height";
+import styled from "styled-components/native";
+
 
 const isIos = Platform.OS === "ios";
 const height = Dimensions.get("window").height;

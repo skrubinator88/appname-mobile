@@ -1,6 +1,14 @@
-# CONFIG & ENVIRONMENT FILE
+# Changelog
 
-## Development
+- June/2021
+  - Updated map icons
+  - Configured job review to timeout and return a job to pool after 15 minutes idle
+  - Added link to payments page before accepting a job if account is inactive
+  - ~Added link to payments page before accepting a job if account is inactive~
+
+## CONFIG & ENVIRONMENT FILE
+
+### Development
 
 SETTINGS (Contains the settings for the app):
 

@@ -6,6 +6,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import { ActivityIndicator, Alert, Dimensions, FlatList, SafeAreaView, View } from "react-native";
 import Modal from "react-native-modal";
 import StarRating from "react-native-star-rating";
+import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
 import Card from "../../../../components/card_animated";
 import Confirm from "../../../../components/confirm";
@@ -15,21 +16,17 @@ import { JOB_CONTEXT } from "../../../../contexts/JobContext";
 // Controllers
 import AnimationsController from "../../../../controllers/AnimationsControllers";
 import JobsController from "../../../../controllers/JobsControllers";
+import { getPaymentInfo } from "../../../../controllers/PaymentController";
 import { default as config } from "../../../../env";
 import { sendNotification } from "../../../../functions";
 import { getPriorityColor, priorityMap } from "../../listings/listingItem";
 import PhotoItem from "../../listings/listItemImage";
 
-const deviceHeight = Dimensions.get("window").height;
-
-// BODY
-export default function JobFound({ keyword, navigation }) {
+export default function JobFound({ navigation }) {
   const { authState } = useContext(GlobalContext);
-  const { current: job_data, setCurrent } = useContext(JOB_CONTEXT)
+  const { current: job_data } = useContext(JOB_CONTEXT)
 
-  // Constructor
   const [projectManager, setProjectManager] = useState({});
-  const [occupation, setOccupation] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState([]);
   const [starRate, setStarRate] = useState(0);
@@ -39,8 +36,13 @@ export default function JobFound({ keyword, navigation }) {
   const decisionTimer = useRef(undefined);
   // Tracks when the job is accepted
   let data = useMemo(() => ({ accepted: false }), [navigation]);
+  const dispatch = useDispatch();
+  const { hasActiveAccount } = useSelector((state) => state.payment)
 
   useEffect(() => {
+    getPaymentInfo(authState, dispatch).catch(e => {
+      console.log(e);
+    });
     (async () => {
       if (job_data) {
         const response = await fetch(`${config.API_URL}/users/${job_data.posted_by}`, {
@@ -55,7 +57,6 @@ export default function JobFound({ keyword, navigation }) {
 
         setProjectManager(project_manager);
         setName(`${project_manager.first_name} ${project_manager.last_name}`);
-        setOccupation(project_manager.occupation);
         setStarRate(Number(project_manager.star_rate));
         setDescription(job_data.tasks);
         setLoading(false);
@@ -118,16 +119,28 @@ export default function JobFound({ keyword, navigation }) {
     };
   }, [navigation]);
 
-  // Used to exit page if in review state after 5 minutes
+  // Used to exit page if in review state after 15 minutes
   useEffect(() => {
     clearTimeout(decisionTimer.current)
-    decisionTimer.current = setTimeout(async () => {
-      await JobsController.changeJobStatus(job_data._id, "available");
-    }, 5 * 60 * 1000)
+    // This resets the timer each time an action happens, preventing an exit while loading
+    if (!loading) {
+      decisionTimer.current = setTimeout(() => {
+        if (job_data.offer_received && job_data.offer_received.deployee === authState.userID) {
+          return
+        }
+        Alert.alert("Session Timeout", "Review session has timed out and this Gig has returned to the pool",
+          [{
+            onPress: async () => {
+              await JobsController.changeJobStatus(job_data._id, "available");
+            },
+            style: 'default'
+          }])
+      }, 15 * 60 * 1000)
+    }
     return () => {
       clearTimeout(decisionTimer.current)
     }
-  }, [decisionTimer])
+  }, [decisionTimer, loading])
 
   const handleJobDecline = async () => {
     try {
@@ -179,6 +192,24 @@ export default function JobFound({ keyword, navigation }) {
       cardRef,
       async () => {
         try {
+          if (!hasActiveAccount) {
+            Alert.alert("Setup Account", "You need to setup your accont to continue", [
+              {
+                onPress: () => {
+                  cardRef?.current?.slideIn();
+                  navigation.navigate('Payments')
+                },
+                style: 'default',
+                text: 'Manage Payments',
+              },
+              {
+                text: 'Cancel',
+                style: 'cancel',
+                onPress: cardRef?.current?.slideIn
+              }
+            ])
+            return
+          }
           setLoading(true);
           data.accepted = true;
           await JobsController.acceptJob(job_data._id, authState);
@@ -203,6 +234,24 @@ export default function JobFound({ keyword, navigation }) {
       cardRef,
       async () => {
         try {
+          if (!hasActiveAccount) {
+            Alert.alert("Setup Account", "You need to setup your accont to continue", [
+              {
+                onPress: () => {
+                  cardRef?.current?.slideIn();
+                  navigation.navigate('Payments')
+                },
+                style: 'default',
+                text: 'Manage Payments',
+              },
+              {
+                text: 'Cancel',
+                style: 'cancel',
+                onPress: cardRef?.current?.slideIn
+              }
+            ])
+            return
+          }
           setLoading(true);
           await JobsController.counterApprove(job_data._id, job_data.offer_received.counterOffer, authState);
           data.accepted = true;
@@ -260,7 +309,7 @@ export default function JobFound({ keyword, navigation }) {
                   uri: `${config.API_URL}${job_data.posted_by_profile_picture}`,
                 }}
                 style={{ backgroundColor: '#dadada' }}
-              ></ProfilePicture>
+              />
             </View>
             <Row first style={{ alignItems: 'center', justifyContent: 'center' }}>
               <Column>

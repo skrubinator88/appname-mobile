@@ -57,7 +57,7 @@ function DrawerContent({ navigation })
           </Row>
         </TouchableWithoutFeedback>
       </DrawerHeader>
-      <DrawerContentScrollView contentInset={{ top: -50 }}>
+      <DrawerContentScrollView bounces={false} contentInset={{ top: -50 }}>
         {authState.userData.role == "contractor" ? (
           <DrawerItem
             labelStyle={{ fontSize: 20 }}

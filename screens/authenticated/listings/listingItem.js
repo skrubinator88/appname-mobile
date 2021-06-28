@@ -377,12 +377,26 @@ export default function ListingItem({ navigation }) {
 
   async function handleSubmit(form) {
     try {
+      if (!payments.defaultMethod) {
+        Alert.alert("No default payment method", "You must set your default payment method before creating a job", [
+          {
+            onPress: () => {
+              // Todo add a modal for this
+              navigation.navigate('Payments')
+            },
+            style: 'default',
+            text: 'Manage Payments',
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          }
+        ])
+        return
+      }
+
       setLoading(true);
       let success;
-
-      if (!payments.defaultMethod) {
-        await Promise.reject({ message: "You must set your default payment method before creating a job", code: 418 });
-      }
 
       const formattedForm = await formatForm(form);
 

@@ -12,7 +12,8 @@ import styled from "styled-components/native";
 import Confirm from "../../../components/confirm";
 import { GlobalContext } from "../../../components/context";
 import Text from "../../../components/text";
-import { makePayment, payout } from "../../../controllers/PaymentController";
+import { fetchDashboardLink, makePayment, payout } from "../../../controllers/PaymentController";
+import AccountModal from "./accountModal";
 
 
 export const CARD_ICON = {
@@ -161,10 +162,72 @@ export function PreferredMethodView({ method }) {
 
 export function AccountView({
     refreshing, balance = 0,
-    hasActiveAccount, getDashboardLink,
-    setup,
+    hasActiveAccount, payments
 }) {
+    const { authState } = useContext(GlobalContext)
+
     const [showPayout, setShowPayout] = useState(false)
+    const [showSetup, setShowSetup] = useState(false)
+    const [uri, setURI] = useState('')
+
+    const getDashboardLink = useCallback(async () => {
+        Confirm({
+            title: 'Open Stripe Dashboard',
+            message: 'You can open your Stripe dashboard to manage settings on your account',
+            options: ['Open', 'Cancel'],
+            cancelButtonIndex: 1,
+            onPress: async (i) => {
+                if (i === 0) {
+                    setShowSetup(true)
+                    setSetupAccount(false)
+                    try {
+                        if (!payments.hasActiveAccount) {
+                            await Promise.reject({ messsage: 'Your account must be setup to continue', code: 418 })
+                        }
+
+                        const uri = await fetchDashboardLink(authState)
+                        setURI(uri)
+                    } catch (e) {
+                        console.log(e)
+                        Alert.alert('Manage Account Failed', e.code === 418 ? e.message : 'There was an error displaying your dashboard', [{
+                            onPress: () => setShowSetup(false), style: 'cancel'
+                        }])
+                    }
+                }
+            },
+        })
+
+    }, [uri, authState, payments])
+
+    const onSuccessfulSession = useCallback(() => {
+        if (!payments.hasActiveAccount) {
+            // This will check if the account was not configured earlier, indicating it has been successfully set
+            Alert.alert('Acount Setup Complete', 'You account will be available after verification is complete', [{
+                onPress: () => setShowSetup(false), style: 'cancel'
+            }])
+        } else {
+            setShowSetup(false)
+        }
+    }, [payments])
+
+    const setup = useCallback(async () => {
+        setShowSetup(true)
+        try {
+            if (payments.hasActiveAccount) {
+                // An account already exists. This option should not be available to users.
+                await Promise.reject({ messsage: 'You already have an account', code: 418 })
+            }
+
+            const uri = await initiateAccount(authState)
+            setURI(uri)
+        } catch (e) {
+            console.log(e)
+            Alert.alert('Account Setup Failed', e.code === 418 ? e.message : 'Failed to setup your account', [{
+                onPress: () => setShowSetup(false), style: 'cancel'
+            }])
+        }
+    }, [uri, authState, payments])
+
 
     return (
         <AccountSection>
@@ -197,6 +260,7 @@ export function AccountView({
                 </TouchableOpacity>
             }
             <PayoutSelector show={showPayout} onSubmit={() => setShowPayout(false)} onCancel={() => setShowPayout(false)} />
+            <AccountModal showSetup={showSetup} setShowSetup={setShowSetup} onSuccessfulSession={onSuccessfulSession} uri={uri} />
         </AccountSection>
     )
 }

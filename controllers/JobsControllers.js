@@ -36,7 +36,7 @@ exports.currentUserActiveJobs = (userID, dispatch) => {
 exports.getJobTagType = (imageType) => {
   switch (imageType) {
     case "user":
-      return require("../assets/user-icon2.png");
+      return require("../assets/map-marker.png");
   }
 };
 
