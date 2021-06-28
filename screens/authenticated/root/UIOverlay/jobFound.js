@@ -54,7 +54,7 @@ export default function JobFound({ navigation }) {
         });
         const project_manager = await response.json();
         project_manager._id = job_data.posted_by;
-
+        project_manager.id = job_data.posted_by;
         setProjectManager(project_manager);
         setName(`${project_manager.first_name} ${project_manager.last_name}`);
         setStarRate(Number(project_manager.star_rate));
@@ -279,6 +279,8 @@ export default function JobFound({ navigation }) {
     <>
       {(!loading && enableNegotiation) && (
         <NegotiationView
+          navigation={navigation}
+          hasActiveAccount={hasActiveAccount}
           deployee={authState.userID}
           onCancel={() => setEnableNegotiation(false)}
           onSubmit={() => {
@@ -480,6 +482,24 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
             if (number === 0) {
               // Save offer
               try {
+                if (!hasActiveAccount) {
+                  Alert.alert("Setup Account", "You need to setup your accont to continue", [
+                    {
+                      onPress: () => {
+                        cardRef?.current?.slideIn();
+                        navigation.navigate('Payments')
+                      },
+                      style: 'default',
+                      text: 'Manage Payments',
+                    },
+                    {
+                      text: 'Cancel',
+                      style: 'cancel',
+                      onPress: cardRef?.current?.slideIn
+                    }
+                  ])
+                  return
+                }
                 const offer_received = await JobsController.sendOffer(job_data._id, deployee, offer, unit);
                 job_data.offer_received = offer_received;
                 onSubmit(job_data);

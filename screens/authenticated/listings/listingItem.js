@@ -8,8 +8,7 @@ import Constants from "expo-constants";
 import { launchImageLibraryAsync, MediaTypeOptions, requestMediaLibraryPermissionsAsync } from "expo-image-picker";
 import moment from "moment";
 import React, { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
-import
-{
+import {
   ActivityIndicator,
   Alert,
   Dimensions,
@@ -36,10 +35,8 @@ import PhotoItem from "./listItemImage";
 import TaskModal from "./taskModal";
 
 const width = Dimensions.get("window").width;
-export const getPriorityColor = (priority) =>
-{
-  switch (priority)
-  {
+export const getPriorityColor = (priority) => {
+  switch (priority) {
     case "high0":
       return "firebrick";
     case "medium0":
@@ -56,8 +53,7 @@ export const priorityMap = {
   low0: "Low (1 hour 30 mins)",
 };
 
-export default function ListingItem({ navigation })
-{
+export default function ListingItem({ navigation }) {
   // - - Constructor - -
   const { authState } = useContext(GlobalContext);
   const { setListing } = useContext(LISTING_CONTEXT);
@@ -99,10 +95,8 @@ export default function ListingItem({ navigation })
   const location_address_ref = useRef(null);
   const searchBarRef = useRef(null);
 
-  let suggestedItems = JobSuggestions.filter((item) =>
-  {
-    if (item === "Random (No Skill Required)")
-    {
+  let suggestedItems = JobSuggestions.filter((item) => {
+    if (item === "Random (No Skill Required)") {
       return true;
     }
     const title = item.toLowerCase();
@@ -112,10 +106,8 @@ export default function ListingItem({ navigation })
 
   let placeHolderForEditedAddress = "Original GPS Location";
 
-  useState(() =>
-  {
-    if (params.edit)
-    {
+  useState(() => {
+    if (params.edit) {
       setSelectedJobType(params.data.job_type);
       setJobTitle(params.data.job_title);
       setLocation(params.data.location);
@@ -125,22 +117,18 @@ export default function ListingItem({ navigation })
       setPriority(params.data.priority);
       setLocation(params.data.location);
 
-      if (params.data.start_at)
-      {
+      if (params.data.start_at) {
         setDate(new Date(params.data.start_at));
         // setShowDate(true);
       }
     }
   });
 
-  useLayoutEffect(() =>
-  {
-    if (!payments.defaultMethod)
-    {
+  useLayoutEffect(() => {
+    if (!payments.defaultMethod) {
       Alert.alert("No default payment method", "You must set your default payment method before creating a job", [
         {
-          onPress: () =>
-          {
+          onPress: () => {
             // Todo add a modal for this
             navigation.navigate('Payments');
           },
@@ -155,17 +143,13 @@ export default function ListingItem({ navigation })
       ]);
       return;
     }
-    if (params.edit)
-    {
-      if (params.data.location.coords && params.data.location.address == undefined)
-      {
+    if (params.edit) {
+      if (params.data.location.coords && params.data.location.address == undefined) {
         location_address_ref.current.setValue(placeHolderForEditedAddress);
       }
 
-      if (params.data.photo_files != null)
-      {
-        const formattedPhotos = params.data.photo_files.map((item) =>
-        {
+      if (params.data.photo_files != null) {
+        const formattedPhotos = params.data.photo_files.map((item) => {
           return { type: "image/png", uri: `${env.API_URL}/job/${params.data.id}/${item}` };
         });
         setPhotos(formattedPhotos);
@@ -173,27 +157,21 @@ export default function ListingItem({ navigation })
     }
   }, []);
 
-  const updateDate = async (e, dateParam) =>
-  {
-    if (dateParam)
-    {
+  const updateDate = async (e, dateParam) => {
+    if (dateParam) {
       // Set the date picker mode based on platform
-      switch (mode)
-      {
+      switch (mode) {
         case "datetime":
-          if (Platform.OS === "ios")
-          {
+          if (Platform.OS === "ios") {
             setDate(dateParam);
           }
           // This is called for only iOS, so set debouncer to delay removing the time modal.
           // TODO: Test how to add a button instead of this
           break;
         case "date":
-          setShowDate(() =>
-          {
+          setShowDate(() => {
             // After collecting date data, get the time
-            if (Platform.OS !== "ios")
-            {
+            if (Platform.OS !== "ios") {
               setMode("time");
               setDate(dateParam);
             }
@@ -202,39 +180,31 @@ export default function ListingItem({ navigation })
           break;
         case "time":
           // Todo: test on Android
-          setShowDate(() =>
-          {
+          setShowDate(() => {
             setDate(dateParam);
             return false;
           });
           break;
       }
-    } else
-    {
+    } else {
       setShowDate(false);
     }
   };
 
-  const onShowDate = useCallback(() =>
-  {
-    setShowDate(() =>
-    {
+  const onShowDate = useCallback(() => {
+    setShowDate(() => {
       // Set the date picker mode based on platform
-      if (Platform.OS === "ios")
-      {
+      if (Platform.OS === "ios") {
         setMode("datetime");
-      } else
-      {
+      } else {
         setMode("date");
       }
       return true;
     });
   }, [showDate]);
 
-  const getPhoto = useCallback(async () =>
-  {
-    try
-    {
+  const getPhoto = useCallback(async () => {
+    try {
       showActionSheetWithOptions(
         {
           options: ["Capture Photo", "Select From Library", "Cancel"],
@@ -243,10 +213,8 @@ export default function ListingItem({ navigation })
           cancelButtonIndex: 2,
           useModal: true,
         },
-        async (i) =>
-        {
-          switch (i)
-          {
+        async (i) => {
+          switch (i) {
             case 0:
               getPhotoFromCamera();
               break;
@@ -256,23 +224,18 @@ export default function ListingItem({ navigation })
           }
         },
       );
-    } catch (e)
-    {
+    } catch (e) {
       console.log(e);
       Alert.alert("Failed To Select Photo", e.message);
     }
   }, [photos]);
 
-  const getPhotoFromLibrary = useCallback(async () =>
-  {
-    try
-    {
+  const getPhotoFromLibrary = useCallback(async () => {
+    try {
       setloadingMedia(true);
-      if (Platform.OS === "ios")
-      {
+      if (Platform.OS === "ios") {
         let perms = await requestMediaLibraryPermissionsAsync();
-        if (!perms.granted)
-        {
+        if (!perms.granted) {
           Alert.alert("Access to media library denied", "You need to grant access to image library to continue");
           setloadingMedia(false);
           return;
@@ -284,52 +247,42 @@ export default function ListingItem({ navigation })
         mediaTypes: MediaTypeOptions.Images,
       });
 
-      if (!res.cancelled && !photos.find((v) => v.uri === res.uri))
-      {
+      if (!res.cancelled && !photos.find((v) => v.uri === res.uri)) {
         setPhotos([{ uri: res.uri, type: "image/png", height: res.height, width: res.width }, ...photos]);
       }
-    } catch (e)
-    {
+    } catch (e) {
       console.log(e);
       Alert.alert(e.message);
-    } finally
-    {
+    } finally {
       setloadingMedia(false);
     }
   }, [photos]);
 
-  const getPhotoFromCamera = useCallback(async () =>
-  {
-    try
-    {
+  const getPhotoFromCamera = useCallback(async () => {
+    try {
       setloadingMedia(true);
 
       let hasPermission = false;
-      await (async () =>
-      {
+      await (async () => {
         const { status } = await requestPermissionsAsync();
         hasPermission = status === "granted";
       })();
 
-      if (hasPermission !== true)
-      {
+      if (hasPermission !== true) {
         Alert.alert("Camera Access Required", "The application requires permission to use your camera");
         return;
       }
 
       setShowCamera(true);
-    } catch (e)
-    {
+    } catch (e) {
       console.log(e);
       Alert.alert("Failed To Capture Photo", e.message);
-    } finally
-    {
+    } finally {
       setloadingMedia(false);
     }
   }, [photos]);
 
-  const onSetPriority = useCallback(async () =>
-  {
+  const onSetPriority = useCallback(async () => {
     showActionSheetWithOptions(
       {
         options: ["High (15 mins)", "Medium (15 mins)", "Low (15 mins)", "None", "Cancel"],
@@ -338,10 +291,8 @@ export default function ListingItem({ navigation })
         title: "Set Priority",
         message: "Specify how long after accepting a job the deployee is allowed to cancel",
       },
-      (i) =>
-      {
-        switch (i)
-        {
+      (i) => {
+        switch (i) {
           case 0:
             setPriority("high0");
             break;
@@ -363,36 +314,28 @@ export default function ListingItem({ navigation })
 
   // - - Life Cycles - -
   // Create session for google suggestions (This will reduce billing expenses)
-  useEffect(() =>
-  {
+  useEffect(() => {
     GoogleServicesController.createSession();
-    return () =>
-    {
+    return () => {
       GoogleServicesController.clean();
       setShowModal(false);
     };
   }, []);
 
   // Fetch suggestions
-  useEffect(() =>
-  {
-    (async () =>
-    {
-      if (location?.address != undefined)
-      {
+  useEffect(() => {
+    (async () => {
+      if (location?.address != undefined) {
         setGoogleSuggestions(await GoogleServicesController.getPlacesSuggestions(location.address));
-      } else
-      {
+      } else {
         setGoogleSuggestions([]);
       }
     })();
   }, [location]);
 
-  useEffect(() =>
-  {
+  useEffect(() => {
 
-    return () =>
-    {
+    return () => {
       setJobType('');
       setSearchBarFocus(false);
     };
@@ -404,11 +347,9 @@ export default function ListingItem({ navigation })
   // }, []);
 
   // - - Functions (Handler, Events, more) - -
-  function commonInputProps(elementValue, setElementValue)
-  {
+  function commonInputProps(elementValue, setElementValue) {
     return {
-      onChangeText: (text) =>
-      {
+      onChangeText: (text) => {
         setElementValue(text);
       },
       contentInset: { top: -10 },
@@ -416,14 +357,11 @@ export default function ListingItem({ navigation })
     };
   }
 
-  function handleSuggestionEditing(item)
-  {
-    if (item == "Current Location")
-    {
+  function handleSuggestionEditing(item) {
+    if (item == "Current Location") {
       PermissionsControllers.getLocation().then((position) => setLocation({ ...position, address: null, id: null, place_id: null }));
       location_address_ref.current.setValue(item);
-    } else
-    {
+    } else {
       setLocation({ ...item, coords: null, timestamp: null });
 
       location_address_ref.current.setValue(item.address);
@@ -432,32 +370,26 @@ export default function ListingItem({ navigation })
     setSuggestionsEditing(false);
   }
 
-  function handleSaveTasks(tasks)
-  {
+  function handleSaveTasks(tasks) {
     setShowModal(false);
     setTasks(tasks);
   }
 
-  async function formatForm(data)
-  {
+  async function formatForm(data) {
     const form = { ...data };
     form.date = null;
 
-    if (params.edit == true)
-    {
+    if (params.edit == true) {
       form.id = params.data.id;
-    } else
-    {
+    } else {
       form.start_at = form.date?.getTime() || Date.now();
     }
 
-    if (form.location.coords == undefined)
-    {
+    if (form.location.coords == undefined) {
       // Formats form when job location was pulled from Google Location API
       const place_data = await GoogleServicesController.getCoordinatesFromPlaceID(form.location.place_id);
       form.coordinates = [place_data.geometry.location.lat, place_data.geometry.location.lng];
-    } else
-    {
+    } else {
       // Formats form when job location was pulled from client GPS
       form.coordinates = [form.location.coords.latitude, form.location.coords.longitude];
     }
@@ -465,28 +397,26 @@ export default function ListingItem({ navigation })
     return form;
   }
 
-  async function handleSubmit(form)
-  {
-    try
-    {
+  async function handleSubmit(form) {
+    try {
       setLoading(true);
-      let success;
+      let result;
 
       const formattedForm = await formatForm(form);
 
       // Sends the job details and associated photos for upload and job creation
-      if (params.edit === false)
-      {
-        success = (await JobsController.postUserJob(authState.userID, formattedForm, authState.userToken, photos)).success;
-      } else
-      {
-        success = (await JobsController.updateUserJob(authState.userID, formattedForm, authState.userToken, photos)).success;
+      if (params.edit === false) {
+        result = await JobsController.postUserJob(authState.userID, formattedForm, authState.userToken, photos);
+      } else {
+        result = await JobsController.updateUserJob(authState.userID, formattedForm, authState.userToken, photos);
       }
 
-      if (success) {return navigation.goBack();}
-      else {setLoading(false);}
-    } catch (e)
-    {
+      if (result.success) {
+        setListing(result.job)
+        return navigation.navigate('Root');
+      }
+      else { setLoading(false); }
+    } catch (e) {
       console.log(e);
       Alert.alert("Failed to create job", e.code === 418 ? e.message : undefined);
       setLoading(false);
@@ -494,12 +424,13 @@ export default function ListingItem({ navigation })
   }
 
   // - - Render - -
-  if (loading)
-    {return (
+  if (loading) {
+    return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />
       </View>
-    );}
+    );
+  }
 
   return (
     <KeyboardAvoidingView enabled behavior="padding" style={{ flex: 1 }}>
@@ -511,10 +442,8 @@ export default function ListingItem({ navigation })
         keyboardShouldPersistTaps="always">
         <TaskModal
           showModal={showModal}
-          onHandleModalClose={(tasks) =>
-          {
-            if (tasks == undefined)
-            {
+          onHandleModalClose={(tasks) => {
+            if (tasks == undefined) {
               setShowModal(false);
               return;
             }
@@ -534,8 +463,7 @@ export default function ListingItem({ navigation })
               <GigChaserJobWord color="black" width="60px" height="30px" style={{ marginHorizontal: 10 }} />
             </>
           )}
-          backAction={() =>
-          {
+          backAction={() => {
             setJobType('');
             navigation.goBack();
           }}
@@ -551,8 +479,7 @@ export default function ListingItem({ navigation })
               </Text>
             </InputTitle>
             <SuggestionContainer>
-              <SearchBar activeOpacity={0.8} onPress={() =>
-              {
+              <SearchBar activeOpacity={0.8} onPress={() => {
                 searchBarRef.current?.focus();
                 setSearchBarFocus(true);
               }}>
@@ -564,12 +491,10 @@ export default function ListingItem({ navigation })
                   value={job_type}
                   onChangeText={(text) => setJobType(text)}
                   ref={searchBarRef}
-                  onFocus={() =>
-                  {
+                  onFocus={() => {
                     setSearchBarFocus(true);
                   }}
-                  onSubmitEditing={() =>
-                  {
+                  onSubmitEditing={() => {
                     setSearchBarFocus(false);
                     searchBarRef.current?.blur();
                     // handleSubmit(nativeEvent.text);
@@ -591,13 +516,11 @@ export default function ListingItem({ navigation })
                   keyboardShouldPersistTaps="always"
                   data={suggestedItems}
                   keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item }) =>
-                  {
+                  renderItem={({ item }) => {
                     return (
                       <SearchSuggestedItem
                         activeOpacity={0.9}
-                        onPress={() =>
-                        {
+                        onPress={() => {
                           setSelectedJobType(item);
                           setSearchBarFocus(false);
                           searchBarRef.current?.blur();
@@ -669,13 +592,11 @@ export default function ListingItem({ navigation })
             <TextField
               {...commonInputProps(location.address, setLocation)}
               textContentType="addressCityAndState"
-              onChangeText={(text) =>
-              {
-                if (text.length == 0) {setTimeout(() => scroll && scroll.current.scrollTo({ y: 350, animated: true, duration: 500 }), 200);}
+              onChangeText={(text) => {
+                if (text.length == 0) { setTimeout(() => scroll && scroll.current.scrollTo({ y: 350, animated: true, duration: 500 }), 200); }
                 setLocation({ address: text });
               }}
-              onFocus={() =>
-              {
+              onFocus={() => {
                 setSuggestionsEditing(true);
                 setTimeout(() => scroll && scroll.current.scrollTo({ y: 350, animated: true, duration: 500 }), 200);
               }}
@@ -821,24 +742,18 @@ export default function ListingItem({ navigation })
             />
             <JobCamera
               showCamera={showCamera}
-              onSuccess={async (res) =>
-              {
-                if (!res)
-                {
+              onSuccess={async (res) => {
+                if (!res) {
                   return setShowCamera(false);
                 }
-                try
-                {
-                  if (!res.cancelled && !photos.find((v) => v.uri === res.uri))
-                  {
+                try {
+                  if (!res.cancelled && !photos.find((v) => v.uri === res.uri)) {
                     setPhotos([{ uri: res.uri, type: "image/png", height: res.height, width: res.width }, ...photos]);
                   }
-                } catch (e)
-                {
+                } catch (e) {
                   console.log(e);
                   Alert.alert(e.message || "Failed to add photo");
-                } finally
-                {
+                } finally {
                   setShowCamera(false);
                 }
               }}
@@ -858,13 +773,10 @@ export default function ListingItem({ navigation })
           </Item>
           <TouchableOpacity
             style={{ alignSelf: "center", width: width * 0.7, marginBottom: 12 }}
-            onPress={() =>
-            {
-              if (showDate && Platform.OS === "ios")
-              {
+            onPress={() => {
+              if (showDate && Platform.OS === "ios") {
                 setShowDate(false);
-              } else
-              {
+              } else {
                 onShowDate();
               }
             }}
@@ -906,17 +818,14 @@ export default function ListingItem({ navigation })
   );
 }
 
-export const JobCamera = ({ showCamera, onSuccess }) =>
-{
+export const JobCamera = ({ showCamera, onSuccess }) => {
   const [flash, setFlash] = useState({ icon: "flash-auto", mode: "auto" });
   const [useBack, setUseBack] = useState(true);
   const cameraRef = useRef();
 
-  const toggleFlash = useCallback(() =>
-  {
+  const toggleFlash = useCallback(() => {
     const current = flash.mode;
-    switch (current)
-    {
+    switch (current) {
       case "off":
         setFlash({ icon: "flash-auto", mode: "auto" });
         break;
@@ -929,12 +838,9 @@ export const JobCamera = ({ showCamera, onSuccess }) =>
     }
   }, [flash]);
 
-  useEffect(() =>
-  {
-    return () =>
-    {
-      if (showCamera && cameraRef.current && Constants.isDevice)
-      {
+  useEffect(() => {
+    return () => {
+      if (showCamera && cameraRef.current && Constants.isDevice) {
         cameraRef.current.pausePreview();
       }
     };

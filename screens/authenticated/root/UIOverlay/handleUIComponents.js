@@ -4,6 +4,7 @@ import React, { useContext, useEffect, useState } from "react";
 import OverlayActions from "../../../../actions/OverlayActions";
 import { GlobalContext, UIOverlayContext } from "../../../../components/context";
 import { JOB_CONTEXT } from "../../../../contexts/JobContext";
+import { LISTING_CONTEXT } from "../../../../contexts/ListingContext";
 import ListingItemSelected from "../../listings/listingItemSelected";
 import AcceptedJob from "./acceptedJob";
 // Card UI Components
@@ -61,6 +62,27 @@ function HandleOverlayUIContractorComponents({ route, navigation, location }) {
 }
 
 function HandleOverlayUIProjectManagerComponents({ route, navigation, willUnmountSignal }) {
+  const { listing } = useContext(LISTING_CONTEXT)
+  const { changeRoute } = useContext(UIOverlayContext);
+
+  useEffect(() => {
+    if (listing) {
+      switch (listing.status) {
+        case 'available':
+        case 'in review':
+        case 'in progress':
+        case 'accepted':
+          changeRoute({ name: 'selected' })
+          break
+        default:
+          changeRoute({ name: 'dashboard' })
+          break
+      }
+    } else {
+      changeRoute({ name: 'dashboard' })
+    }
+  }, [listing?.status, route?.props?.keyword])
+
   switch (route.name) {
     case "dashboard":
       return <Dashboard navigation={navigation} {...route.props} />;
@@ -106,7 +128,7 @@ export default function UIComponents({ navigation }) {
 
   return (
     <UIOverlayContext.Provider value={uiOverlayContext}>
-      {userData.role == "contractor" ? (
+      {userData.role === "contractor" ? (
         <HandleOverlayUIContractorComponents route={route} navigation={navigation} />
       ) : (
         <HandleOverlayUIProjectManagerComponents route={route} navigation={navigation} />
