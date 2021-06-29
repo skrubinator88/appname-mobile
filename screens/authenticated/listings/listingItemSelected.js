@@ -241,7 +241,7 @@ export default function ListingItemSelected({ navigation }) {
             ) : (
               <View style={{ paddingVertical: 8 }}>
                 <Row style={{ borderBottomWidth: 0, justifyContent: 'center' }}>
-                  <Text textTransform='uppercase' light>Searching for available persons</Text>
+                  <Text textTransform='uppercase' light>Searching for available deployees</Text>
                 </Row>
                 <Row style={{ paddingTop: 28, paddingBottom: 28, alignItems: 'center', justifyContent: 'center', }}>
                   <Progress.Bar indeterminate indeterminateAnimationDuration={4000} width={250} borderWidth={0} unfilledColor={'#eee'} useNativeDriver={true} />
