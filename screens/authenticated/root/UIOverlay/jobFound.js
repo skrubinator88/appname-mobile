@@ -459,7 +459,7 @@ export default function JobFound({ navigation }) {
   )
 }
 
-const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
+const NegotiationView = ({ job_data, hasActiveAccount, navigation, deployee, onCancel, onSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [salary, setSalary] = useState("");
   const [unit, setUnit] = useState(job_data.wage || "deployment");
@@ -486,7 +486,7 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
                   Alert.alert("Setup Account", "You need to setup your accont to continue", [
                     {
                       onPress: () => {
-                        cardRef?.current?.slideIn();
+                        setLoading(false)
                         navigation.navigate('Payments')
                       },
                       style: 'default',
@@ -495,7 +495,7 @@ const NegotiationView = ({ job_data, deployee, onCancel, onSubmit }) => {
                     {
                       text: 'Cancel',
                       style: 'cancel',
-                      onPress: cardRef?.current?.slideIn
+                      onPress: onCancel
                     }
                   ])
                   return
