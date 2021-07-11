@@ -72,6 +72,7 @@ export default function PaymentScreen({ navigation }) {
                 )
               );
               if (confirmDefault) {
+                setRefreshing(true)
                 await setDefaultMethod(item, authState, dispatch);
                 refresh();
               }
@@ -92,13 +93,16 @@ export default function PaymentScreen({ navigation }) {
                 ])
               );
               if (confirmRemove) {
+                setRefreshing(true)
                 await removeMethod(item, authState, dispatch);
               }
             }
           }
         } catch (e) {
           console.log(e);
-          Alert.alert("Operation Failed", "Please try again");
+          Alert.alert("Operation Failed", e.message ?? "Please try again");
+        } finally {
+          setRefreshing(false)
         }
       },
     );
@@ -153,7 +157,7 @@ export default function PaymentScreen({ navigation }) {
           </SectionTitle>
 
           {payments.methods && payments.methods.length > 0 ? (
-            payments.methods.map((method) => <MethodView key={method.id} onPress={() => onMethodClick(method)} method={method} />)
+            payments.methods.map((method) => <MethodView disabled={refreshing} key={method.id} onPress={() => onMethodClick(method)} method={method} />)
           ) : (
             <View style={{ paddingVertical: 28 }}>
               <Text light small>
