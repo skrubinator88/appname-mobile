@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Button, SafeAreaView } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
 import { BarCodeScanner } from "expo-barcode-scanner";
-
-// components
-import Header from "../../../components/header";
-
+import React, { useEffect, useState } from "react";
+import { Alert, SafeAreaView, Button, Text, TouchableOpacity } from "react-native";
 // Controllers
 import JobsController from "../../../controllers/JobsControllers";
 
-export default function Scanner({ navigation, project_manager_id, contractor_id }) {
+
+export default function Scanner({ navigation, route }) {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
 
@@ -19,10 +17,14 @@ export default function Scanner({ navigation, project_manager_id, contractor_id 
     })();
   }, []);
 
-  const handleBarCodeScanned = ({ type, data }) => {
-    setScanned(true);
-    JobsController.validateQrCode(project_manager, contractor, data);
-    // navigation.goBack();
+  const handleBarCodeScanned = async ({ data }) => {
+    try {
+      setScanned(true);
+      await JobsController.validateQrCode(route.params?.deployee, data);
+      navigation.goBack();
+    } catch (e) {
+      Alert.alert("QR Code Scan Failed", e.message)
+    }
   };
 
   if (hasPermission === null) {
@@ -34,9 +36,28 @@ export default function Scanner({ navigation, project_manager_id, contractor_id 
   }
 
   return (
-    <>
-      <Header navigation={navigation} />
-      <BarCodeScanner onBarCodeScanned={scanned ? undefined : handleBarCodeScanned} style={{ flex: 1 }} />
-    </>
+    <BarCodeScanner onBarCodeScanned={scanned ? undefined : handleBarCodeScanned} style={{ flex: 1 }} >
+
+      <SafeAreaView
+        style={{ flex: 1, justifyContent: "space-between", alignItems: "stretch", margin: 12, backgroundColor: "transparent" }}
+      >
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={{
+            backgroundColor: "#fffa",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 28,
+            height: 56,
+            width: 56,
+          }}
+          onPress={() => navigation.goBack()}
+        >
+          <AntDesign name="arrowleft" size={28} color={"#000a"} />
+        </TouchableOpacity>
+
+        {scanned && <Button title="RESCAN" color='#fff' onPress={() => setScanned(false)} />}
+      </SafeAreaView>
+    </BarCodeScanner>
   );
 }

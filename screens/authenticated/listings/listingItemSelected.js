@@ -206,7 +206,7 @@ export default function ListingItemSelected({ navigation }) {
                         </Button>
                       </Column>
                     </Row>
-                    <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("Scanner", { job_data })}>
+                    <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("Scanner", { job_data, deployee: job_data.executed_by })}>
                       <Text small bold color={colors.primary}>
                         Scan QR Code
                       </Text>

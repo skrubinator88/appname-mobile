@@ -20,6 +20,12 @@ export default function CompleteJob({ navigation }) {
 
   const { job_data } = useRoute().params
 
+  useEffect(() => {
+    if (job_data.status !== 'in progress' && job_data.scanQR) {
+      Alert.alert("QR Code Scann Required", "QR Code must be scanned at least once before job can be completed", [{ style: 'default', onPress: () => navigation.goBack() }])
+    }
+  }, [])
+
   const onCapture = useCallback((res) => {
     if (!res) {
       return setCapturing(false);

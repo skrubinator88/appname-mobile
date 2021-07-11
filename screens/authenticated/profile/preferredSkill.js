@@ -57,7 +57,7 @@ export default function ({ visible, onComplete = () => { } }) {
 					contentContainerStyle={{ marginHorizontal: 8 }}
 					style={{ flexGrow: 1, marginVertical: 8 }}
 					ListFooterComponent={() => (
-						<CloseButton activeOpacity={0.8} disabled={false} onPress={onComplete} >
+						<CloseButton activeOpacity={0.8} disabled={saving} onPress={onComplete} >
 							<Text textTransform="uppercase" color="black">Close</Text>
 						</CloseButton>
 					)}

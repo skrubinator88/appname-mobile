@@ -30,11 +30,7 @@ export default function QRCodeScreen({ navigation, route }) {
         </ButtonStyled>
         <Text style={{ fontSize: 30 }}>QR Code</Text>
       </View>
-
-      {/* <Image source={require("../../../assets/submitProfilePhoto.png")} style={{ borderRadius: 1000, width: 240, height: 240 }} /> */}
       <QRCode value={`${route.params._id}`} />
-      {/* <SimpleLineIcons name="check" size={width * 0.5} color={colors.primary} /> */}
-
       <Text medium>Show the QR code to the client to register your presence at the work site</Text>
     </Container>
   );

@@ -22,8 +22,7 @@ import env from "../../../env";
 
 export const AuthenticatedDrawer = createDrawerNavigator();
 
-function DrawerContent({ navigation })
-{
+function DrawerContent({ navigation }) {
   const { authActions, authState } = useContext(GlobalContext);
   const { signOut } = authActions;
 
@@ -37,8 +36,7 @@ function DrawerContent({ navigation })
         }
       >
         <TouchableWithoutFeedback
-          onPress={() =>
-          {
+          onPress={() => {
             navigation.navigate("Profile");
           }}
         >
@@ -89,12 +87,12 @@ function DrawerContent({ navigation })
               onPress={() => navigation.navigate("Messages")}
               icon={() => <MaterialIcons name="chat" size={24} color="black" />}
             />
-            <DrawerItem
+            {/* <DrawerItem
               labelStyle={{ fontSize: 20 }}
               label="Scan QR Code"
               onPress={() => navigation.navigate("Scanner")}
               icon={() => <MaterialCommunityIcons name="qrcode-scan" size={24} color="black" />}
-            />
+            /> */}
             <TouchableOpacity onPress={() => navigation.navigate("Work History")}>
               <DrawerItemAlternative>
                 <DrawerIcon>
@@ -183,10 +181,8 @@ const DrawerText = styled.Text`
   width: 100%;
   color: white;
   padding: 0 0 0 10px;
-  ${({ title, medium }) =>
-  {
-    switch (true)
-    {
+  ${({ title, medium }) => {
+    switch (true) {
       case title:
         return "font-size: 20px;";
       case medium:
@@ -194,10 +190,8 @@ const DrawerText = styled.Text`
     }
   }}
 
-  ${({ bold }) =>
-  {
-    switch (true)
-    {
+  ${({ bold }) => {
+    switch (true) {
       case bold:
         return "font-weight: 900;";
     }
@@ -223,8 +217,7 @@ import QRCode from "./UIOverlay/jobFound/qr_code";
 import CompleteJob from "./UIOverlay/jobFound/completeJob";
 import ListingItem from "../listings/listingItem";
 
-export function Drawer({ navigation })
-{
+export function Drawer({ navigation }) {
   return (
     <NavigationContainer independent={true}>
       <AuthenticatedDrawer.Navigator
@@ -238,7 +231,7 @@ export function Drawer({ navigation })
 
         <AuthenticatedDrawer.Screen name="Job Listings" component={JobListings} />
         <AuthenticatedDrawer.Screen name="Messages" component={MessagesScreen} />
-        <AuthenticatedDrawer.Screen name="Scanner" component={Scanner} />
+        <AuthenticatedDrawer.Screen options={{ unmountOnBlur: true }} name="Scanner" component={Scanner} />
         <AuthenticatedDrawer.Screen name="Work History" component={WorkHistory} />
         <AuthenticatedDrawer.Screen name="Payments" component={PaymentScreen} />
         <AuthenticatedDrawer.Screen name="Help Center" component={RootScreen} />

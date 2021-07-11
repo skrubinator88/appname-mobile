@@ -192,7 +192,7 @@ export default function JobFound({ navigation }) {
       cardRef,
       async () => {
         try {
-          if (!hasActiveAccount) {
+          if (job_data.inAppPayment && !hasActiveAccount) {
             Alert.alert("Setup Account", "You need to setup your accont to continue", [
               {
                 onPress: () => {
@@ -234,7 +234,7 @@ export default function JobFound({ navigation }) {
       cardRef,
       async () => {
         try {
-          if (!hasActiveAccount) {
+          if (job_data.inAppPayment && !hasActiveAccount) {
             Alert.alert("Setup Account", "You need to setup your accont to continue", [
               {
                 onPress: () => {
@@ -291,8 +291,7 @@ export default function JobFound({ navigation }) {
               data: { type: "offerreceive", id: job_data._id, sender: authState.userID },
             });
           }}
-          job_data={job_data}
-        />
+          job_data={job_data} />
       )}
       <Card ref={cardRef}>
         {!loading && job_data ?
@@ -482,11 +481,12 @@ const NegotiationView = ({ job_data, hasActiveAccount, navigation, deployee, onC
             if (number === 0) {
               // Save offer
               try {
-                if (!hasActiveAccount) {
+                if (job_data.inAppPayment && !hasActiveAccount) {
                   Alert.alert("Setup Account", "You need to setup your accont to continue", [
                     {
                       onPress: () => {
                         setLoading(false)
+                        onCancel()
                         navigation.navigate('Payments')
                       },
                       style: 'default',

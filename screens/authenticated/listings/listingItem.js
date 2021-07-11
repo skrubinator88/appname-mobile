@@ -18,6 +18,8 @@ import {
   SafeAreaView, TextInput, TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  Switch,
+  StatusBar,
 } from "react-native";
 import { useSelector } from "react-redux";
 import styled from "styled-components/native";
@@ -33,6 +35,7 @@ import env from "../../../env";
 import JobSuggestions from "../../../models/fetchedSuggestedItems";
 import PhotoItem from "./listItemImage";
 import TaskModal from "./taskModal";
+import { ListingItemType } from './listingItemType'
 
 const width = Dimensions.get("window").width;
 export const getPriorityColor = (priority) => {
@@ -63,7 +66,6 @@ export default function ListingItem({ navigation }) {
   const payments = useSelector((state) => state.payment);
 
   // - - State - -
-  const [job_type, setJobType] = useState(""); // Input Field
   const [selected_job_type, setSelectedJobType] = useState(""); // Input Field
   const [job_title, setJobTitle] = useState(""); // Input Field
   const [location, setLocation] = useState(""); // Input Field
@@ -86,6 +88,8 @@ export default function ListingItem({ navigation }) {
   const [loadingMedia, setloadingMedia] = useState(false);
   const { showActionSheetWithOptions } = useActionSheet();
   const [showCamera, setShowCamera] = useState(false);
+  const [inAppPayment, setInAppPayment] = useState(true);
+  const [scanQRCodeRequired, setScanQRCodeRequired] = useState(true);
 
 
   const [searchBarFocus, setSearchBarFocus] = useState(false);
@@ -93,16 +97,6 @@ export default function ListingItem({ navigation }) {
   // - - Refs - -
   const scroll = useRef(null);
   const location_address_ref = useRef(null);
-  const searchBarRef = useRef(null);
-
-  let suggestedItems = JobSuggestions.filter((item) => {
-    if (item === "Random (No Skill Required)") {
-      return true;
-    }
-    const title = item.toLowerCase();
-    const input = job_type.toLowerCase().trim();
-    return title.indexOf(input) !== -1;
-  });
 
   let placeHolderForEditedAddress = "Original GPS Location";
 
@@ -116,6 +110,8 @@ export default function ListingItem({ navigation }) {
       setShowDate(params.data.showDate);
       setPriority(params.data.priority);
       setLocation(params.data.location);
+      setScanQRCodeRequired(params.data.scanQR);
+      setInAppPayment(params.data.inAppPayment);
 
       if (params.data.start_at) {
         setDate(new Date(params.data.start_at));
@@ -125,24 +121,6 @@ export default function ListingItem({ navigation }) {
   });
 
   useLayoutEffect(() => {
-    if (!payments.defaultMethod) {
-      Alert.alert("No default payment method", "You must set your default payment method before creating a job", [
-        {
-          onPress: () => {
-            // Todo add a modal for this
-            navigation.navigate('Payments');
-          },
-          style: 'default',
-          text: 'Manage Payments',
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
-      return;
-    }
     if (params.edit) {
       if (params.data.location.coords && params.data.location.address == undefined) {
         location_address_ref.current.setValue(placeHolderForEditedAddress);
@@ -310,7 +288,7 @@ export default function ListingItem({ navigation }) {
   }, [priority]);
 
   // - - Extra Setup - -
-  const form = { job_type: selected_job_type, job_title, tasks, location, salary, wage: 'deployment', date, priority };
+  const form = { job_type: selected_job_type, job_title, tasks, location, salary, wage: 'deployment', date, priority, scanQR: scanQRCodeRequired, inAppPayment };
 
   // - - Life Cycles - -
   // Create session for google suggestions (This will reduce billing expenses)
@@ -332,19 +310,6 @@ export default function ListingItem({ navigation }) {
       }
     })();
   }, [location]);
-
-  useEffect(() => {
-
-    return () => {
-      setJobType('');
-      setSearchBarFocus(false);
-    };
-  }, []);
-
-  // Get location
-  // useEffect(() => {
-  //   PermissionsControllers.getLocation().then((position) => setLocation(position));
-  // }, []);
 
   // - - Functions (Handler, Events, more) - -
   function commonInputProps(elementValue, setElementValue) {
@@ -399,6 +364,24 @@ export default function ListingItem({ navigation }) {
 
   async function handleSubmit(form) {
     try {
+      if (inAppPayment && !payments.defaultMethod) {
+        Alert.alert("No default payment method", "You must set your default payment method before creating a job", [
+          {
+            onPress: () => {
+              // Todo add a modal for this
+              navigation.navigate('Payments');
+            },
+            style: 'default',
+            text: 'Manage Payments',
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => navigation.goBack(),
+          },
+        ]);
+        return;
+      }
       setLoading(true);
       let result;
 
@@ -434,6 +417,7 @@ export default function ListingItem({ navigation }) {
 
   return (
     <KeyboardAvoidingView enabled behavior="padding" style={{ flex: 1 }}>
+      <StatusBar barStyle='dark-content' />
       <Container
         bounces={false}
         showsVerticalScrollIndicator={false}
@@ -451,7 +435,12 @@ export default function ListingItem({ navigation }) {
           }}
           items={tasks}
         />
-
+        <ListingItemType onCancel={() => {
+          setSearchBarFocus(false)
+        }} onSelect={(item) => {
+          setSelectedJobType(item)
+          setSearchBarFocus(false)
+        }} visible={searchBarFocus} />
         <Header
           disableContainer={true}
           navigation={navigation}
@@ -464,13 +453,12 @@ export default function ListingItem({ navigation }) {
             </>
           )}
           backAction={() => {
-            setJobType('');
             navigation.goBack();
           }}
         />
 
         <Fields>
-          <Item>
+          <Item style={{ zIndex: 1 }}>
             <InputTitle
               style={{ marginBottom: 12 }}>
               <GigChaserJobWord color="#444" width="60px" height="20px" />
@@ -480,26 +468,10 @@ export default function ListingItem({ navigation }) {
             </InputTitle>
             <SuggestionContainer>
               <SearchBar activeOpacity={0.8} onPress={() => {
-                searchBarRef.current?.focus();
                 setSearchBarFocus(true);
               }}>
                 <Ionicons name="ios-search" size={16} />
-                <TextInput underlineColorAndroid="transparent"
-                  placeholder="Search Job types"
-                  placeholderTextColor="#777"
-                  style={{ fontSize: 16, marginLeft: 4 }}
-                  value={job_type}
-                  onChangeText={(text) => setJobType(text)}
-                  ref={searchBarRef}
-                  onFocus={() => {
-                    setSearchBarFocus(true);
-                  }}
-                  onSubmitEditing={() => {
-                    setSearchBarFocus(false);
-                    searchBarRef.current?.blur();
-                    // handleSubmit(nativeEvent.text);
-                  }}
-                />
+                <Text color={'#777'} style={{ fontSize: 16, marginLeft: 4 }}>Search Job types</Text>
               </SearchBar>
 
               {!!selected_job_type &&
@@ -510,42 +482,7 @@ export default function ListingItem({ navigation }) {
                   </Text>
                 </Text>
               }
-              {searchBarFocus &&
-                <SuggestionScrollView
-                  // style={{ma}}
-                  keyboardShouldPersistTaps="always"
-                  data={suggestedItems}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item }) => {
-                    return (
-                      <SearchSuggestedItem
-                        activeOpacity={0.9}
-                        onPress={() => {
-                          setSelectedJobType(item);
-                          setSearchBarFocus(false);
-                          searchBarRef.current?.blur();
-                          searchBarRef.current?.clear();
-                          setJobType('');
-                        }}
-                      >
-                        <Text>{item}</Text>
-                      </SearchSuggestedItem>
-                    );
-                  }} />
-              }
             </SuggestionContainer>
-            {/* <SearchTitleSuggestionsField>
-                <SearchTitleSuggestionsFieldInput
-                  selectedValue={selected_job_type}
-                  onValueChange={(value) => setSelectedJobType(value)}
-                  itemStyle={{ fontSize: 19 }}
-                >
-                  <SearchTitleSuggestionsFieldInput.Item label={"Select a type"} value={""} key={0} />
-                  {suggestedItems.map((JobSuggestion, index) => (
-                    <SearchTitleSuggestionsFieldInput.Item label={JobSuggestion} value={JobSuggestion} key={index + 1} />
-                  ))}
-                </SearchTitleSuggestionsFieldInput>
-              </SearchTitleSuggestionsField> */}
           </Item>
 
           <Item>
@@ -676,7 +613,7 @@ export default function ListingItem({ navigation }) {
             </WageInput>
           </Item>
 
-          <Item style={{ marginVertical: 4 }}>
+          <Item style={{ marginVertical: 20 }}>
             <View style={{ flexDirection: "row", justifyContent: "flex-start" }}>
               <Text style={{ fontWeight: "bold", color: "grey", alignItems: "center" }}>PRIORITY</Text>
               {!!priority && <FontAwesome name="circle" color={getPriorityColor(priority)} style={{ marginStart: 12, fontSize: 16 }} />}
@@ -696,6 +633,49 @@ export default function ListingItem({ navigation }) {
               </ScheduleButton>
             </TouchableOpacity>
           </Item>
+
+          <View style={{ justifyContent: 'space-between', marginVertical: 4, marginVertical: 4, alignItems: 'center', flexDirection: 'row' }}>
+            <Text textTransform='uppercase' style={{ marginBottom: 4, fontWeight: "bold", color: "grey" }}>QR Code Scan Required</Text>
+            <Switch value={scanQRCodeRequired} trackColor={{ true: '#4a89f2' }} onValueChange={(scanQR) => {
+              showActionSheetWithOptions(
+                {
+                  options: ["Continue", "Cancel"],
+                  cancelButtonIndex: 1,
+                  destructiveButtonIndex: !scanQR ? 0 : undefined,
+                  title: "Confirm QR Code Scan Verification",
+                  message: scanQR ? "If you turn this on, you can only conplete jobs after at least one QR Code scan" : "Turning this off will allow jobs to be completed without scanning any QR Code",
+                },
+                (i) => {
+                  switch (i) {
+                    case 0:
+                      setScanQRCodeRequired(scanQR);
+                      break;
+                  }
+                },
+              );
+            }} />
+          </View>
+          <View style={{ justifyContent: 'space-between', marginVertical: 4, alignItems: 'center', flexDirection: 'row' }}>
+            <Text textTransform='uppercase' style={{ marginBottom: 4, fontWeight: "bold", color: "grey" }}>in-app payment</Text>
+            <Switch value={inAppPayment} trackColor={{ true: '#4a89f2' }} onValueChange={(inApp) => {
+              showActionSheetWithOptions(
+                {
+                  options: ["Continue", "Cancel"],
+                  cancelButtonIndex: 1,
+                  destructiveButtonIndex: !inApp ? 0 : undefined,
+                  title: "Confirm Payment Option",
+                  message: inApp ? "If you continue payment will be processed using your default card" : "If you continue payment will be handled offline",
+                },
+                (i) => {
+                  switch (i) {
+                    case 0:
+                      setInAppPayment(inApp);
+                      break;
+                  }
+                },
+              );
+            }} />
+          </View>
 
           <Item style={{ marginVertical: 4 }}>
             <InputTitle style={{ justifyContent: "center" }}>
@@ -931,102 +911,102 @@ export const JobCamera = ({ showCamera, onSuccess }) => {
 };
 
 const WageInput = styled.View`
-  flex-direction: row;
-  /* justify-content: center; */
-  /* align-items: center; */
-`;
+      flex-direction: row;
+      /* justify-content: center; */
+      /* align-items: center; */
+      `;
 
 const SalaryField = styled.View`
-  flex: 1;
-  flex-direction: column;
-`;
+      flex: 1;
+      flex-direction: column;
+      `;
 
 const Task = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 2px 10px;
-  background-color: #efefef;
-  border-radius: 3px;
-  margin-bottom: 10px;
-`;
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 2px 10px;
+      background-color: #efefef;
+      border-radius: 3px;
+      margin-bottom: 10px;
+      `;
 
 const SearchBar = styled.TouchableOpacity`
-  font-size: 16px;
-  border: 2px solid #ededed;
-  border-radius: 10px;
-  background: white;
-  padding: 12px 8px;
-  flex-direction: row;
-`;
+      font-size: 16px;
+      border: 2px solid #ededed;
+      border-radius: 10px;
+      background: white;
+      padding: 12px 8px;
+      flex-direction: row;
+      `;
 
 const Fields = styled.View`
-  flex: 1;
-  margin: 0 20px 20px 20px;
-`;
+      flex: 1;
+      margin: 0 20px 20px 20px;
+      `;
 
 const Item = styled.View`
-  margin: 10px 0;
-`;
+      margin: 10px 0;
+      `;
 
 const InputTitle = styled.View`
-  flex-direction: row;
-  align-items: center;
-`;
+      flex-direction: row;
+      align-items: center;
+      `;
 
 const ScheduleButton = styled.View`
-  padding: 10px;
-  background: #fff;
-  border-radius: 6px;
-`;
+      padding: 10px;
+      background: #fff;
+      border-radius: 6px;
+      `;
 
 const SaveButton = styled.View`
-  padding: 10px;
-  background: #255cf0;
-  border-radius: 6px;
-`;
+      padding: 10px;
+      background: #255cf0;
+      border-radius: 6px;
+      `;
 
 const Container = styled.ScrollView`
-  flex: 1;
-`;
+      flex: 1;
+      `;
 
 const Suggestions = styled.View``;
 
 const Tasks = styled.View`
-  background-color: white;
-  min-height: 100px;
-  border-radius: 6px;
-  border: #548ff7;
-  padding: 0 20px;
-`;
+      background-color: white;
+      min-height: 100px;
+      border-radius: 6px;
+      border: #548ff7;
+      padding: 0 20px;
+      `;
 
 const PoweredByGoogleImage = styled.Image`
-  align-self: flex-end;
-`;
+      align-self: flex-end;
+      `;
 
 
 const SuggestionContainer = styled.KeyboardAvoidingView`
-  background: white;
-  width: 100%;
-  opacity: 1;
-  z-index: 2;
-  border-radius: 10px;
-`;
+      background: white;
+      width: 100%;
+      opacity: 1;
+      z-index: 2;
+      border-radius: 10px;
+      `;
 
 const SuggestionScrollView = styled.FlatList`
-`;
+      `;
 
 const SearchSuggestedItem = styled.TouchableOpacity`
-  border-top-color: #dadada;
-  border-top-width: 1px;
-  padding: 10px 30px;
-  width: 100%;
-`;
+      border-top-color: #dadada;
+      border-top-width: 1px;
+      padding: 10px 30px;
+      width: 100%;
+      `;
 
 const SuggestedItem = styled.View`
-  border: 1px solid #cccccc;
-  border-radius: 6px;
-  margin: 0 0 3px 0;
-  padding: 10px 15px;
-  flex-direction: row;
-  align-items: center;
-`;
+      border: 1px solid #cccccc;
+      border-radius: 6px;
+      margin: 0 0 3px 0;
+      padding: 10px 15px;
+      flex-direction: row;
+      align-items: center;
+      `;

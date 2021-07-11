@@ -199,16 +199,22 @@ exports.counterApprove = async (jobID, offer, authState) => {
   return true;
 };
 
-exports.validateQrCode = (project_manager_id, contractor_id, qr_code) => {
-  firestore.collection("jobs")
-    .doc(qr_code)
-    .get()
+exports.validateQrCode = async (contractor_id, qr_code) => {
+  if (!contractor_id || !qr_code) {
+    throw new Error('Invalid data provided')
+  }
+  const document = firestore.collection("jobs").doc(qr_code)
+
+  return await document.get()
     .then((doc) => {
       if (doc.exists) {
         const data = doc.data();
 
-        if (data.executed_by == contractor_id) {
-          module.changeJobStatus(doc.id, "in progress", contractor_id);
+        if (data.executed_by === contractor_id) {
+          document.update({
+            status: "in progress",
+            executed_by: contractor_id,
+          })
         }
       }
     });
@@ -328,7 +334,6 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
     }
     throw e;
   }
-  // Test
 };
 
 exports.updateUserJob = async (userID, job, token, photos = []) => {
