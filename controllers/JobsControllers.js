@@ -246,7 +246,7 @@ exports.completeJob = async (jobID, authState, image) => {
   return true;
 };
 
-exports.reportJob = async (job_data, topic, details, authState) => {
+exports.reportJob = async (id, user, topic, details, authState) => {
   const apiResponse = await fetch(`${config.API_URL}/job/report`, {
     method: "POST",
     headers: {
@@ -254,8 +254,8 @@ exports.reportJob = async (job_data, topic, details, authState) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      jobID: job_data._id,
-      deployer: job_data.posted_by,
+      jobID: id,
+      reportedUser: user,
       topic,
       details
     }),

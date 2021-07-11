@@ -32,7 +32,7 @@ export default function ReportJob({ job_data, onCancel: onCancelProp, isVisible,
         throw new Error('Your report details must have at least 5 words')
       }
 
-      await reportJob(job_data, topic.text, details, authState)
+      await reportJob(job_data._id, authState.userID === job_data.posted_by ? job_data.executed_by : job_data.posted_by, topic.text, details, authState)
       setSuccess(true)
     } catch (e) {
       Alert.alert('Report Failed', e.message || 'There was an error while sending your report')
