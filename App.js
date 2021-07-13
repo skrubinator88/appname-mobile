@@ -49,7 +49,7 @@ let appState = AppState.currentState;
 ExpoNotif.setNotificationHandler({
   handleNotification: (n) => {
     if (n.request.trigger.type === "push" && appState === "active") {
-      console.log("discarding notification when app is active ======>");
+      console.log("not discarding notification when app is active ======>");
       const behavior =   {
         shouldPlaySound: false,
         shouldSetBadge: true,

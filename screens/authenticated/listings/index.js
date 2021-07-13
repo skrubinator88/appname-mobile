@@ -126,7 +126,7 @@ export default function JobListing({ navigation }) {
 const ListItemCompleteDetail = ({ item }) => {
   const { authState } = useContext(GlobalContext);
   const [state, setState] = useState({ loading: true, showCounterOffer: false });
-  console.log(item)
+
   useEffect(() => {
     (async () => {
       try {

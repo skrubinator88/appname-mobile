@@ -88,37 +88,6 @@ export default function signUp6({ navigation }) {
             We ask for this to enhance your experience with finding work that matches your abilities and permit.
           </Text>
 
-          {/* <WorkHistorySection>
-            <Text small>SKILLS</Text>
-            <AddButton
-              onPress={() => {
-                setWorkModalVisible(true);
-              }}
-            >
-              <Text small color="grey">
-                Add a skill
-              </Text>
-              <MaterialIcons color={colors.primary} name="add-circle" size={30} />
-            </AddButton>
-
-            {work_history_items.map((item, index) => (
-              <TouchableWithoutFeedback
-                key={index}
-                onPress={() => {
-                  setWorkModalState({ ...item, edit: true });
-                  setWorkModalVisible(true);
-                }}
-              >
-                <WorkHistoryItem>
-                  <Row>
-                    <Text small>{item.employer_name}</Text>
-                    <Entypo color="black" name="pencil" size={16} />
-                  </Row>
-                </WorkHistoryItem>
-              </TouchableWithoutFeedback>
-            ))}
-          </WorkHistorySection> */}
-
           <WorkHistorySection>
             <Text small>LICENSES</Text>
             <AddButton

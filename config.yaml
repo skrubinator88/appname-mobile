@@ -1,5 +1,6 @@
 Development:
   # IN DEVELOPMENT ------------
+  SERVER_KEY: abcd
   SETTINGS:
     PROJECT_MANAGER:
       LIMIT_ONLINE: 100
@@ -27,6 +28,7 @@ Development:
     PUBLIC_KEY: pk_test_51HdfqZD7hKWg06ZYtjRqJCPDqw0l8HmR5BZMRbEzqwbOnGmWXz2iYR9tpjhbxmrZI3txHvHNl11sRxFYy3ckmzxl00jAFNd5I8
 
 Production:
+  SERVER_KEY: abcd
   SETTINGS:
     PROJECT_MANAGER:
       LIMIT_ONLINE: 100
