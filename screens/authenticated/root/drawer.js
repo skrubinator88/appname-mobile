@@ -216,8 +216,26 @@ import SettingsScreen from "../settings";
 import QRCode from "./UIOverlay/jobFound/qr_code";
 import CompleteJob from "./UIOverlay/jobFound/completeJob";
 import ListingItem from "../listings/listingItem";
+import { JOB_CONTEXT } from "../../../contexts/JobContext";
+import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
+import { ActivityIndicator } from "react-native";
+import { JobDetails } from "../../../components/JobDetails";
 
-export function Drawer({ navigation }) {
+export function Drawer() {
+  const { authState } = useContext(GlobalContext)
+  const { ready: deployeeReady } = useContext(JOB_CONTEXT)
+  const { ready: deployerReady } = useContext(LISTING_CONTEXT)
+
+  let ready = authState.userData.role === 'contractor' ? deployeeReady : deployerReady
+
+  if (!ready) {
+    return (
+      <View style={{ justifyContent: "center", alignItems: "center", flex: 1 }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer independent={true}>
       <AuthenticatedDrawer.Navigator
@@ -236,11 +254,12 @@ export function Drawer({ navigation }) {
         <AuthenticatedDrawer.Screen name="Payments" component={PaymentScreen} />
         <AuthenticatedDrawer.Screen name="Help Center" component={RootScreen} />
         <AuthenticatedDrawer.Screen name="Settings" component={SettingsScreen} />
-        <AuthenticatedDrawer.Screen name="Listing Item" component={ListingItem} options={{ unmountOnBlur: true }} />
+        <AuthenticatedDrawer.Screen options={{ unmountOnBlur: true }} name="Listing Item" component={ListingItem} />
 
         <AuthenticatedDrawer.Screen name="Chat" component={Chat} />
         <AuthenticatedDrawer.Screen name="QR Code" component={QRCode} />
         <AuthenticatedDrawer.Screen options={{ unmountOnBlur: true }} name="Complete Job" component={CompleteJob} />
+        <AuthenticatedDrawer.Screen name="Job Details" component={JobDetails} />
       </AuthenticatedDrawer.Navigator>
     </NavigationContainer>
   );

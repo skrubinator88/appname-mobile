@@ -22,7 +22,7 @@ export default function CompleteJob({ navigation }) {
 
   useEffect(() => {
     if (job_data.status !== 'in progress' && job_data.scanQR) {
-      Alert.alert("QR Code Scann Required", "QR Code must be scanned at least once before job can be completed", [{ style: 'default', onPress: () => navigation.goBack() }])
+      Alert.alert("QR Code Scan Required", "QR Code must be scanned at least once before job can be completed", [{ style: 'default', onPress: () => navigation.goBack() }])
     }
   }, [])
 

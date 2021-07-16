@@ -10,10 +10,7 @@ import { JOB_CONTEXT } from "../../../../contexts/JobContext";
 import AnimationsController from "../../../../controllers/AnimationsControllers";
 import JobsController from "../../../../controllers/JobsControllers";
 import MapController from "../../../../controllers/MapController";
-
-
-
-
+import GigChaserJobWord from "../../../../assets/gig-logo";
 
 export default function Searching({ keyword }) {
   const { authState } = useContext(GlobalContext);
@@ -36,19 +33,14 @@ export default function Searching({ keyword }) {
       (async () => {
         try {
           /**
-         * Update job status to "In Review" (This will pop the job out from
-         * local store since is going to update in the backend)
+         * Update job status to "in Review" 
          **/
           await JobsController.changeJobStatus(job_found._id, "in review", authState.userID);
-
           const jobFoundProcess = AnimationsController.CardUISlideOut(
             CardUI,
             () => {
               // Move Camera
-              // console.log(job_found.location.coords);
               MapController.handleCameraCoordinates(job_found.coordinates, dispatch);
-              setCurrent(job_found)
-
             },
             false,
           );
@@ -82,8 +74,13 @@ export default function Searching({ keyword }) {
 
   return (
     <Card ref={CardUI}>
-      <Row>
-        <Text medium>{userData.role === "contractor" ? "Searching for nearby jobs" : "Searching for workers"}</Text>
+      <Row style={{ marginVertical: 4 }}>
+        {userData.role === "contractor" ? (
+          <>
+            <Text medium>Searching for nearby</Text>
+            <GigChaserJobWord color="black" width="60px" height="100%" style={{ marginHorizontal: 4 }} />
+          </>
+        ) : <Text medium>"Searching for workers"</Text>}
       </Row>
       <Row>
         <Text small>{keyword}</Text>

@@ -50,7 +50,7 @@ ExpoNotif.setNotificationHandler({
   handleNotification: (n) => {
     if (n.request.trigger.type === "push" && appState === "active") {
       console.log("not discarding notification when app is active ======>");
-      const behavior =   {
+      const behavior = {
         shouldPlaySound: false,
         shouldSetBadge: true,
         shouldShowAlert: true,
@@ -66,9 +66,7 @@ ExpoNotif.setNotificationHandler({
   },
 });
 
-export default function App({ navigation }) {
-  // return <Example />;
-
+export default function App() {
   // Store
   const [authState, auth_dispatch] = useReducer(AuthReducer, { isLoading: true });
   const [appState, app_dispatch] = useReducer(AppReducer, {});
@@ -163,10 +161,10 @@ export default function App({ navigation }) {
                 </Provider>
               </>
             ) : (
-                <>
-                  <NotAuthenticatedStackScreen />
-                </>
-              )}
+              <>
+                <NotAuthenticatedStackScreen />
+              </>
+            )}
           </NavigationContainer>
         </GlobalContext.Provider>
       </ActionSheetProvider>

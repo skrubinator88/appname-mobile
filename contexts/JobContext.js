@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-community/async-storage";
 import firebase from 'firebase';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { GlobalContext } from '../components/context';
@@ -8,6 +7,8 @@ import { USER_LOCATION_CONTEXT } from './userLocation';
 
 
 export const JOB_CONTEXT = createContext({ preferredSkills: [] });
+
+const JOBS_DB = firestore.collection('jobs');
 
 export const JobContextProvider = (props) => {
     const { authState } = useContext(GlobalContext)
@@ -20,6 +21,7 @@ export const JobContextProvider = (props) => {
     const [current, setCurrent] = useState()
     const [jobs, setJobs] = useState([])
     const [viewed, setViewed] = useState([])
+    const [ready, setReady] = useState(false);
     const radius = 100; // "Miles". Replace this with the value from user settings
 
     useEffect(() => {
@@ -34,10 +36,52 @@ export const JobContextProvider = (props) => {
         }).catch(e => console.log(e));
     }, [])
 
+    /**
+     * Upon app load, check if there is any active job.
+     * If there is a job, set the current job, else fetch all available jobs.
+     * 
+     * Set this context as ready when done.
+     */
     useEffect(() => {
-        let unsubscribe
+        let unsubscribe;
 
-        if (authState.userData.role === 'contractor' && location) {
+        if (!authState.userID || authState?.userData?.role !== "contractor") return;
+
+        try {
+            unsubscribe = JOBS_DB.where("status", "in", ["in progress", "in review", "accepted"])
+                .where("executed_by", "==", authState.userID)
+                .limit(1).onSnapshot((snap) => {
+                    if (!snap.empty) {
+                        snap.docs.forEach(doc => {
+                            const data = doc.data()
+                            data._id = doc.id
+                            data.id = doc.id
+                            setCurrent(data)
+                            setViewed([...viewed, data._id])
+                        })
+                    } else {
+                        setCurrent(null)
+                    }
+                    setReady(true)
+                })
+        } catch (e) {
+            console.log(e.message)
+        }
+        return () => {
+            if (unsubscribe) unsubscribe()
+            setCurrent(null)
+        }
+    }, [authState?.userData?.role])
+
+    useEffect(() => {
+        let unsubscribe;
+        /**
+         * If the logged in user is a contractor and active jobs have already been fetched,
+         * subscribe to list of available jobs.
+         * 
+         * Before subscription, check if there is any current job.
+         */
+        if (authState.userData.role === 'contractor' && location && (ready && !current)) {
             const { latitude, longitude } = location.coords;
             const geoCollection = GeoFirestore.collection("jobs"); // Create a GeoCollection reference
 
@@ -66,54 +110,9 @@ export const JobContextProvider = (props) => {
             if (unsubscribe) unsubscribe()
             setJobs([])
         }
-    }, [location, authState?.userData?.role])
+    }, [location, authState?.userData?.role, ready, current])
 
-    useEffect(() => {
-        (async () => {
-            try {
-                const existingJob = JSON.parse(await AsyncStorage.getItem(`app.job.current.${authState.userID}`))
-                if (existingJob) {
-                    setViewed([...viewed, existingJob._id])
-                    setCurrent(existingJob)
-                }
-            } catch (e) {
-                console.log(e.message)
-            }
-        })()
-    }, [location, authState?.userData?.role])
-
-    useEffect(() => {
-        let unsubscribe
-        if (current) {
-            unsubscribe = firestore.collection('jobs').doc(current._id).onSnapshot(async (snap) => {
-                if (snap.exists) {
-                    const data = snap.data()
-                    data._id = snap.id
-                    data.id = snap.id
-                    if (data.executed_by && authState.userID !== data.executed_by) {
-                        AsyncStorage.removeItem(`app.job.current.${authState.userID}`)
-                        setCurrent(null)
-                    }
-                    if (data.status === 'complete' || data.status === 'available') {
-                        AsyncStorage.removeItem(`app.job.current.${authState.userID}`)
-                        setCurrent(null)
-                        return
-                    }
-                    setCurrent(data)
-                } else {
-                    if (unsubscribe) unsubscribe()
-                    AsyncStorage.removeItem(`app.job.current.${authState.userID}`)
-                    setCurrent(null)
-                }
-            })
-        }
-        return () => {
-            if (unsubscribe) unsubscribe()
-        }
-    }, [current?._id])
-
-
-    const findFirstJobWithKeyword = (searched_Keywords = "", userID = "") => {
+    const findFirstJobWithKeyword = (searched_Keywords = "") => {
         if (!searched_Keywords) {
             return;
         }
@@ -121,8 +120,6 @@ export const JobContextProvider = (props) => {
         const sortedJob = sortJobsByProximity(filteredJobs, (a, b) => a.distance - b.distance)[0];
         if (sortedJob) {
             setViewed([...viewed, sortedJob._id])
-            // Set the current job for later retrieval
-            AsyncStorage.setItem(`app.job.current.${authState.userID}`, JSON.stringify(sortedJob))
         }
         return sortedJob;
     };
@@ -141,7 +138,7 @@ export const JobContextProvider = (props) => {
 
     return (
         <JOB_CONTEXT.Provider value={{
-            current, setCurrent,
+            current, setCurrent, ready,
             preferredSkills, findFirstJobWithKeyword,
             setPreferredSkills, jobs, setJobs,
         }}>

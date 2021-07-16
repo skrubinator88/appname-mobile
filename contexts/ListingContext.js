@@ -7,61 +7,45 @@ import { firestore } from "../config/firebase";
 
 export const LISTING_CONTEXT = createContext({ job: null });
 
+const JOBS_DB = firestore.collection('jobs');
+
 export const ListingContextProvider = (props) => {
     const { authState } = useContext(GlobalContext)
-    const [listing, _setListing] = useState(null)
+    const [listing, setListing] = useState(null)
+    const [ready, setReady] = useState(false);
 
     useEffect(() => {
-        (async () => {
-            try {
-                const existingJob = JSON.parse(await AsyncStorage.getItem(`app.listing.current.${authState.userID}`))
-                if (existingJob) {
-                    _setListing(existingJob)
-                }
-            } catch (e) {
-                console.log(e.message)
-            }
-        })()
-    }, [authState?.userData?.role])
+        let unsubscribe;
 
-    useEffect(() => {
-        let unsubscribe
-        if (listing) {
-            unsubscribe = firestore.collection('jobs').doc(listing._id).onSnapshot(async (snap) => {
-                if (snap.exists) {
-                    const data = snap.data()
-                    data._id = snap.id
-                    data.id = snap.id
-                    if (data.posted_by && authState.userID !== data.posted_by) {
-                        AsyncStorage.removeItem(`app.listing.current.${authState.userID}`)
-                        _setListing(null)
+        if (!authState.userID || authState?.userData?.role === "contractor") return;
+
+        try {
+            unsubscribe = JOBS_DB.where("status", "in", ["available", "in progress", "in review", "accepted"])
+                .where("posted_by", "==", authState.userID)
+                .limit(1).onSnapshot((snap) => {
+                    if (!snap.empty) {
+                        snap.docs.forEach(doc => {
+                            const data = doc.data()
+                            data._id = doc.id
+                            data.id = doc.id
+                            setListing(data)
+                        })
+                    } else {
+                        setListing(null)
                     }
-                    if (data.status === 'complete') {
-                        AsyncStorage.removeItem(`app.listing.current.${authState.userID}`)
-                        _setListing(null)
-                        return
-                    }
-                    _setListing(data)
-                } else {
-                    if (unsubscribe) unsubscribe()
-                    AsyncStorage.removeItem(`app.listing.current.${authState.userID}`)
-                    _setListing(null)
-                }
-            })
+                    setReady(true)
+                })
+        } catch (e) {
+            console.log(e.message)
         }
         return () => {
             if (unsubscribe) unsubscribe()
+            setListing(null)
         }
-    }, [listing?._id])
-
+    }, [authState?.userData?.role])
 
     return (
-        <LISTING_CONTEXT.Provider value={{
-            listing, setListing: (data) => {
-                AsyncStorage.setItem(`app.listing.current.${authState.userID}`, JSON.stringify(data))
-                _setListing(data)
-            }
-        }}>
+        <LISTING_CONTEXT.Provider value={{ listing, setListing, ready }}>
             {props.children}
         </LISTING_CONTEXT.Provider>
     );

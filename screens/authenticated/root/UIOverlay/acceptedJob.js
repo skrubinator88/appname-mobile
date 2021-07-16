@@ -201,7 +201,7 @@ export default function Screen45({ navigation }) {
               <Ionicons name="ios-arrow-forward" size={24} />
             </CardOptionItem>
 
-            <CardOptionItem disabled={isCanceling} row>
+            <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("Job Details", { data: job_data })}>
               <Text small>View Job Description</Text>
               <Ionicons name="ios-arrow-forward" size={24} />
             </CardOptionItem>

@@ -44,8 +44,11 @@ exports.sendMessage = (chat_id, message, dispatch) => {
 
   // Send to firebase
   const document = firestore.collection("chats").doc(chat_id);
-  document.set({ last_message: { text: message.text, createdAt: message.createdAt, read: false }, initialized: true }, { merge: true });
-  document.collection("messages").add(cloudMessage);
+  const newMessageDoc = document.collection("messages").doc();
+  firestore.runTransaction(async (t) => {
+    t.set(document, { last_message: { text: message.text, createdAt: message.createdAt, read: false }, initialized: true }, { merge: true })
+      .set(newMessageDoc, cloudMessage)
+  })
 
   // Send push notification
 };
@@ -107,7 +110,7 @@ exports.getMessages = (chat_id, dispatch) => {
             // return dispatch(JobsStoreActions.update(document.id, data));
           }
           case "removed": {
-            // return dispatch(JobsStoreActions.remove(document.id));
+            return dispatch(ChatActions.delete(chat_id, document.id));
           }
           default:
             break;

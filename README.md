@@ -5,6 +5,14 @@
   - Configured job review to timeout and return a job to pool after 15 minutes idle
   - Added link to payments page before accepting a job if account is inactive
   - ~Added link to payments page before accepting a job if account is inactive~
+- July/2021
+  -  check for active jobs before changing role
+  - fetch active jobs from DB before starting application and set listener for active jobs on login
+  - Update searching string for deployee
+  - Fixed deployer completed job list
+  - Fixed messages
+  - Added view for job details
+
 
 ## CONFIG & ENVIRONMENT FILE
 

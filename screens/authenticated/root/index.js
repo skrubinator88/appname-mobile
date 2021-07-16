@@ -140,25 +140,22 @@ export function RootScreen({ navigation }) {
 }
 
 const CustomMarker = ({ coordinates, id }) => {
-  const [trackView, setTrackView] = useState(true)
 
   return (
     <Marker
       key={id}
       coordinate={{ latitude: coordinates.latitude, longitude: coordinates.longitude }}
-      tracksViewChanges={trackView}
+      tracksViewChanges={true}
     >
       <Image
         source={JobsControllers.getJobTagType("user")}
-        onLoad={() => setTrackView(false)}
         fadeDuration={0}
-        style={{ height: 50, width: 50, }} />
+        style={{ height: 50, width: 50 }} />
     </Marker>
   )
 }
 
 // STYLES
-
 const Container = styled.View`
   flex: 1;
 `;

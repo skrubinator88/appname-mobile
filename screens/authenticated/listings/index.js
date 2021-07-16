@@ -1,12 +1,10 @@
-import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { TextField } from "@ubaids/react-native-material-textfield";
-import { unix } from "moment";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Dimensions, Image, SafeAreaView, ScrollView, View } from "react-native";
+import Modal from 'react-native-modal';
 import StarRating from "react-native-star-rating";
 import { useDispatch, useSelector } from "react-redux";
-import Modal from 'react-native-modal';
 import styled from "styled-components/native";
 import GigChaserJobWord from "../../../assets/gig-logo";
 import Confirm from "../../../components/confirm";
@@ -14,11 +12,10 @@ import { GlobalContext } from "../../../components/context";
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
 import JobsControllers from "../../../controllers/JobsControllers";
-import ListingsActions from "../../../rdx-actions/listings.action";
-
 import config from "../../../env";
-import { isCurrentJob, sendNotification } from "../../../functions";
-import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
+import { sendNotification } from "../../../functions";
+import { CurrencyFormatter } from "../payment/components";
+
 
 const height = Dimensions.get("window").height;
 
@@ -28,16 +25,6 @@ export default function JobListing({ navigation }) {
   const listings = useSelector((state) => state.listings);
   const dispatch = useDispatch();
 
-  // State
-  const [isMounted, setIsMounted] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (isMounted) {
-      setLoading(false);
-    }
-    setIsMounted(true);
-  }, [listings]);
 
   // Fetch user jobs, there should only be 1 active job at any given time
   useEffect(() => {
@@ -100,7 +87,7 @@ export default function JobListing({ navigation }) {
                 </SectionTitle>
 
                 {listings.map((item) => (
-                  <ListItemCompleteDetail item={item} key={item.id} />
+                  <ListItemCompleteDetail item={item} key={item._id} />
                 ))}
               </>
             )}
@@ -173,7 +160,7 @@ const ListItemCompleteDetail = ({ item }) => {
               </Text>
             </Row>
 
-            {item.tasks.map((task) => (
+            {item.tasks?.map((task) => (
               <Row key={task.id}>
                 <Text small light>- {task.text}</Text>
               </Row>
@@ -184,7 +171,7 @@ const ListItemCompleteDetail = ({ item }) => {
                 Cost
               </Text>
               <Text small>
-                ${item.salary}/{item.wage ?? 'deployment'}
+                {CurrencyFormatter.format(item.salary ?? 0)}/{item.wage ?? 'deployment'}
               </Text>
             </Row>
 
@@ -302,6 +289,11 @@ export const CounterOfferView = ({ job_data, authState, deployee, onComplete }) 
     }
   }, [loading, deployee, job_data, salary, wage]);
 
+  if (!job_data) {
+    console.log('dsdsds')
+    return <></>
+  }
+
   return (
     <Modal
       isVisible
@@ -349,7 +341,7 @@ export const CounterOfferView = ({ job_data, authState, deployee, onComplete }) 
                   Current Offer
                 </Text>
                 <Text small marginBottom="5px">
-                  ${job_data.salary}/{job_data.wage ?? 'deployment'}
+                  {CurrencyFormatter.format(job_data.salary ?? 0)}/{job_data.wage ?? 'deployment'}
                 </Text>
               </View>
 

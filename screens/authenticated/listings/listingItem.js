@@ -15,11 +15,9 @@ import {
   FlatList,
   KeyboardAvoidingView, Modal,
   Platform,
-  SafeAreaView, TextInput, TouchableOpacity,
+  SafeAreaView, StatusBar, Switch, TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
-  Switch,
-  StatusBar,
+  View
 } from "react-native";
 import { useSelector } from "react-redux";
 import styled from "styled-components/native";
@@ -32,10 +30,9 @@ import GoogleServicesController from "../../../controllers/GoogleServicesControl
 import JobsController from "../../../controllers/JobsControllers";
 import PermissionsControllers from "../../../controllers/PermissionsControllers";
 import env from "../../../env";
-import JobSuggestions from "../../../models/fetchedSuggestedItems";
+import { ListingItemType } from './listingItemType';
 import PhotoItem from "./listItemImage";
 import TaskModal from "./taskModal";
-import { ListingItemType } from './listingItemType'
 
 const width = Dimensions.get("window").width;
 export const getPriorityColor = (priority) => {
@@ -377,7 +374,6 @@ export default function ListingItem({ navigation }) {
           {
             text: 'Cancel',
             style: 'cancel',
-            onPress: () => navigation.goBack(),
           },
         ]);
         return;
