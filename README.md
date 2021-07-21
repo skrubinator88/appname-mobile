@@ -12,6 +12,11 @@
   - Fixed deployer completed job list
   - Fixed messages
   - Added view for job details
+  - QR scan not working
+  - Indicate when a job is in progress
+  - Show payment account setup modal before viewing job
+  - Notification per message
+
 
 
 ## CONFIG & ENVIRONMENT FILE
