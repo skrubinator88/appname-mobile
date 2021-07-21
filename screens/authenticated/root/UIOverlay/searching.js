@@ -3,6 +3,7 @@ import { Alert, TouchableWithoutFeedback } from "react-native";
 import * as Progress from "react-native-progress";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
+import GigChaserJobWord from "../../../../assets/gig-logo";
 import Card from "../../../../components/card_animated";
 import { GlobalContext, UIOverlayContext } from "../../../../components/context";
 import Text from "../../../../components/text";
@@ -10,49 +11,68 @@ import { JOB_CONTEXT } from "../../../../contexts/JobContext";
 import AnimationsController from "../../../../controllers/AnimationsControllers";
 import JobsController from "../../../../controllers/JobsControllers";
 import MapController from "../../../../controllers/MapController";
-import GigChaserJobWord from "../../../../assets/gig-logo";
+import { AccountView } from "../../payment/components";
 
 export default function Searching({ keyword }) {
   const { authState } = useContext(GlobalContext);
   const { changeRoute } = useContext(UIOverlayContext)
   const { userData } = authState;
-  const { setCurrent, findFirstJobWithKeyword } = useContext(JOB_CONTEXT);
+  const { findFirstJobWithKeyword } = useContext(JOB_CONTEXT);
   const { jobs } = useContext(JOB_CONTEXT);
 
-  // State
   const dispatch = useDispatch();
+  const { hasActiveAccount } = useSelector((state) => state.payment)
+
   const CardUI = useRef();
   const [jobSelected, setJobSelected] = useState(false);
+  const [showPaymentsModal, setShowPaymentsModal] = useState(false)
   const jobFoundProcessRef = useRef();
 
   useLayoutEffect(() => {
     const job_found = findFirstJobWithKeyword(keyword, authState.userID);
 
-    if (job_found && jobSelected === false && CardUI.current != null) {
-      setJobSelected(true);
-      (async () => {
-        try {
-          /**
-         * Update job status to "in Review" 
-         **/
-          await JobsController.changeJobStatus(job_found._id, "in review", authState.userID);
-          const jobFoundProcess = AnimationsController.CardUISlideOut(
-            CardUI,
-            () => {
-              // Move Camera
-              MapController.handleCameraCoordinates(job_found.coordinates, dispatch);
-            },
-            false,
-          );
-          jobFoundProcessRef.current = jobFoundProcess;
-        } catch (e) {
-          console.log(e)
-          Alert.alert('Failed to process request', 'Please try again')
-          setJobSelected(false);
+    if (job_found?.inAppPayment && !hasActiveAccount) {
+      Alert.alert("Payment Account Required", "You must setup your account to view this job",
+        [{
+          onPress: () => {
+            setShowPaymentsModal(true)
+          },
+          style: 'default',
+          text: 'Manage Payments',
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: cancel
         }
-      })()
+        ])
     }
-  }, [jobs, CardUI]);
+
+    if (job_found && jobSelected === false && CardUI.current != null && ((job_found?.inAppPayment && hasActiveAccount) || !job_found?.inAppPayment) && !showPaymentsModal) {
+      setJobSelected(true)
+        (async () => {
+          try {
+            /**
+           * Update job status to "in Review" 
+           **/
+            await JobsController.changeJobStatus(job_found._id, "in review", authState.userID);
+            const jobFoundProcess = AnimationsController.CardUISlideOut(
+              CardUI,
+              () => {
+                // Move Camera
+                MapController.handleCameraCoordinates(job_found.coordinates, dispatch);
+              },
+              false,
+            );
+            jobFoundProcessRef.current = jobFoundProcess;
+          } catch (e) {
+            console.log(e)
+            Alert.alert('Failed to process request', 'Please try again')
+            setJobSelected(false);
+          }
+        })()
+    }
+  }, [jobs, CardUI, jobSelected]);
 
   function cancel() {
     // Kill searching process
@@ -95,6 +115,10 @@ export default function Searching({ keyword }) {
           </Text>
         </TouchableWithoutFeedback>
       </Row>
+      <AccountView refreshing={false} visible={showPaymentsModal} forPaymentsModal onSuccess={() => {
+        setJobSelected(true)
+        setShowPaymentsModal(false)
+      }} />
     </Card>
   );
 }

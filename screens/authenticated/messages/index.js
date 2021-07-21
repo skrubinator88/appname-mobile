@@ -30,7 +30,7 @@ const width = Dimensions.get("screen").width;
 const height = Dimensions.get("screen").height;
 
 export default function Messages({ navigation }) {
-  const { authActions, authState, errorActions } = useContext(GlobalContext);
+  const { authState } = useContext(GlobalContext);
 
   const { colors } = useTheme();
   const [chats, setChats] = useState([]);

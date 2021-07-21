@@ -141,10 +141,7 @@ export default function PaymentScreen({ navigation }) {
       >
         {/* Payments Section */}
         {authState.userData.role === "contractor" && (
-          <AccountView
-            refreshing={refreshing}
-            payments={payments}
-          />
+          <AccountView refreshing={refreshing} />
         )}
 
         <PaymentSection>

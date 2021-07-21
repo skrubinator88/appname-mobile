@@ -93,7 +93,7 @@ function DrawerContent({ navigation }) {
               onPress={() => navigation.navigate("Scanner")}
               icon={() => <MaterialCommunityIcons name="qrcode-scan" size={24} color="black" />}
             /> */}
-            <TouchableOpacity onPress={() => navigation.navigate("Work History")}>
+            {/* <TouchableOpacity onPress={() => navigation.navigate("Work History")}>
               <DrawerItemAlternative>
                 <DrawerIcon>
                   <MaterialIcons name="history" size={24} color="black" />
@@ -103,7 +103,7 @@ function DrawerContent({ navigation }) {
                   History
                 </Text>
               </DrawerItemAlternative>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             {/* <DrawerItem
               labelStyle={{ fontSize: 20 }}
               label="Work History"

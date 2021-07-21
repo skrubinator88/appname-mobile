@@ -198,23 +198,19 @@ exports.counterApprove = async (jobID, offer, authState) => {
 
 exports.validateQrCode = async (contractor_id, qr_code) => {
 	if (!contractor_id || !qr_code) {
-		throw new Error('Invalid data provided')
+		throw new Error("Invalid QR Code provided")
 	}
 	const document = firestore.collection("jobs").doc(qr_code)
 
-	return await document.get()
+	return await (document.get()
 		.then((doc) => {
-			if (doc.exists) {
-				const data = doc.data();
-
-				if (data.executed_by === contractor_id) {
-					document.update({
-						status: "in progress",
-						executed_by: contractor_id,
-					})
-				}
+			const data = doc.data();
+			if (doc.exists && data.executed_by === contractor_id) {
+				document.update({ status: "in progress" })
+			} else {
+				throw new Error("Invalid QR Code provided")
 			}
-		});
+		}));
 };
 
 exports.currentUserJobsHistory = (user) => { };

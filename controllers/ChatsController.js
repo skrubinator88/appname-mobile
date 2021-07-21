@@ -35,7 +35,7 @@ exports.getReceiverData = async (receiver, token) => {
   return data;
 };
 
-exports.sendMessage = (chat_id, message, dispatch) => {
+exports.sendMessage = async (chat_id, message, dispatch) => {
   const reduxMessage = { ...message, pending: true };
   const cloudMessage = { ...message, sent: true };
 
@@ -45,7 +45,7 @@ exports.sendMessage = (chat_id, message, dispatch) => {
   // Send to firebase
   const document = firestore.collection("chats").doc(chat_id);
   const newMessageDoc = document.collection("messages").doc();
-  firestore.runTransaction(async (t) => {
+  await firestore.runTransaction(async (t) => {
     t.set(document, { last_message: { text: message.text, createdAt: message.createdAt, read: false }, initialized: true }, { merge: true })
       .set(newMessageDoc, cloudMessage)
   })

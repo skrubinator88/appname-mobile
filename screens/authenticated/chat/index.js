@@ -1,40 +1,59 @@
-import React, { useState, useEffect, useContext } from "react";
-import { View, StatusBar, Platform, KeyboardAvoidingView, ActivityIndicator } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { KeyboardAvoidingView, Platform, View } from "react-native";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import { GiftedChat } from "react-native-gifted-chat";
-import env from "../../../env";
-
-// Styling
-import styled from "styled-components/native";
 import { getStatusBarHeight } from "react-native-status-bar-height";
+import { useDispatch, useSelector } from "react-redux";
+import styled from "styled-components/native";
+import { sendNotification } from "../../../functions";
+import { GlobalContext } from "../../../components/context";
+import Text from "../../../components/text";
+import ChatController from "../../../controllers/ChatsController";
+import env from "../../../env";
+import { InputToolbar, RenderComposer } from "./components";
+import { JOB_CONTEXT } from "../../../contexts/JobContext";
+import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
+import { Alert } from "react-native";
+
 
 const statusBarHeight = getStatusBarHeight();
 
-// Controllers
-import ChatController from "../../../controllers/ChatsController";
 
-// Context Store
-import { GlobalContext } from "../../../components/context";
 
-// Expo
-import { AntDesign } from "@expo/vector-icons";
 
-// Components
-import Text from "../../../components/text";
 
-// Redux
-import { useDispatch, useSelector } from "react-redux";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
-import { InputToolbar, RenderComposer } from "./components";
+
 
 export default function Chat({ route, navigation }) {
   const { authState } = useContext(GlobalContext);
+  const { current } = useContext(JOB_CONTEXT)
+  const { listing } = useContext(LISTING_CONTEXT)
   const { receiver } = route.params;
 
   const [chatID, setChatID] = useState("");
   const [receiverName, setReceiverName] = useState("");
+  const notificationTimer = useRef();
 
   const chats = useSelector((state) => state.chats);
   const dispatch = useDispatch();
+  const notifyRecipient = (message) => {
+    if (
+      (authState.userData.role === 'contractor' && current.posted_by === receiver)
+      ||
+      (authState.userData.role !== 'contractor' && listing.executed_by === receiver)) {
+      clearTimeout(notificationTimer.current)
+      notificationTimer.current = setTimeout(() => {
+        sendNotification(authState.userToken, receiver, {
+          title: `${receiverName}`,
+          body: message?.substring(0, 30),
+          data: { type: "newmessage", jobid: (current || listing)._id, sender: authState.userID },
+        }).catch(e => console.log("Failed to send notification", e))
+      },
+        // Debounce notifications by 30 seconds
+        30000)
+    }
+  }
 
   useEffect(() => {
     const retrievedChatID = ChatController.initializeChatBetween(authState.userID, receiver);
@@ -47,15 +66,24 @@ export default function Chat({ route, navigation }) {
   }, []);
 
   useEffect(() => {
-    (async () => {
-      const retrieveReceiverInfo = await ChatController.getReceiverData(receiver, authState.userToken);
-
-      setReceiverName(`${retrieveReceiverInfo.first_name} ${retrieveReceiverInfo.last_name}`);
-    })();
+    if (receiver) {
+      (async () => {
+        const retrieveReceiverInfo = await ChatController.getReceiverData(receiver, authState.userToken);
+        setReceiverName(`${retrieveReceiverInfo.first_name} ${retrieveReceiverInfo.last_name}`);
+      })();
+    }
   }, [receiver]);
 
-  const onSend = (message) => {
-    if (chatID.length !== 0) ChatController.sendMessage(chatID, message, dispatch);
+  const onSend = async (message) => {
+    if (chatID.length !== 0) {
+      try {
+        await ChatController.sendMessage(chatID, message, dispatch);
+        notifyRecipient(message[0])
+      } catch (e) {
+        console.log(e)
+        Alert.alert("Failed to send message", e.message)
+      }
+    }
   };
 
   return (

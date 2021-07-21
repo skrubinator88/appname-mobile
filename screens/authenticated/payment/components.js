@@ -4,7 +4,7 @@ import { TextField } from "@ubaids/react-native-material-textfield";
 import "intl";
 import 'intl/locale-data/jsonp/en';
 import moment from 'moment';
-import React, { useCallback, useContext, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import ModalImport from "react-native-modal";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,7 +12,7 @@ import styled from "styled-components/native";
 import Confirm from "../../../components/confirm";
 import { GlobalContext } from "../../../components/context";
 import Text from "../../../components/text";
-import { fetchDashboardLink, initiateAccount, makePayment, payout } from "../../../controllers/PaymentController";
+import { fetchDashboardLink, getPaymentInfo, initiateAccount, makePayment, payout } from "../../../controllers/PaymentController";
 import AccountModal from "./accountModal";
 
 
@@ -160,16 +160,22 @@ export function PreferredMethodView({ method }) {
     )
 }
 
-export function AccountView({
-    refreshing, payments,
-}) {
+export function AccountView({ refreshing, visible = true, onSuccess = () => { }, forPaymentsModal = false }) {
     const { authState } = useContext(GlobalContext);
 
     const [showPayout, setShowPayout] = useState(false);
     const [showSetup, setShowSetup] = useState(false);
     const [uri, setURI] = useState('');
 
+    const dispatch = useDispatch();
+    const payments = useSelector((state) => state.payment);
     const { balance, hasActiveAccount } = payments;
+    const refresh = async () => {
+        await getPaymentInfo(authState, dispatch).catch(e => {
+            // Silently log error
+            console.log("Load Failed", "Failed to fetch payment details", e)
+        })
+    }
 
     const getDashboardLink = useCallback(async () => {
         Confirm({
@@ -205,8 +211,9 @@ export function AccountView({
     const onSuccessfulSession = useCallback(() => {
         if (!payments.hasActiveAccount) {
             // This will check if the account was not configured earlier, indicating it has been successfully set
-            Alert.alert('Acount Setup Complete', 'You account will be available after verification is complete', [{
+            Alert.alert('Acount Setup Complete', 'You account will be available after verification is complete. This usually takes 5 minutes', [{
                 onPress: () => {
+                    refresh()
                     setShowSetup(false);
                 },
                 style: 'cancel',
@@ -238,6 +245,17 @@ export function AccountView({
         }
     }, [uri, authState, payments])
 
+    useEffect(() => {
+        if (forPaymentsModal) setup()
+    }, [forPaymentsModal])
+
+    if (forPaymentsModal) {
+        return <AccountModal setURI={setURI} showSetup={showSetup && visible} setShowSetup={setShowSetup} onSuccessfulSession={() => {
+            refresh();
+            setShowSetup(false);
+            onSuccess()
+        }} uri={uri} />
+    }
 
     return (
         <AccountSection>
@@ -283,7 +301,6 @@ export function PaymentMethodSelector({ jobID, recipient, description, onClose, 
 
     const dispatch = useDispatch();
     const payments = useSelector((state) => state.payment);
-    const actionSheet = useActionSheet();
 
     const onSubmit = useCallback(async () => {
         Confirm({
@@ -495,75 +512,7 @@ export const PayoutSelector = ({ show, onCancel: onCancelProp, onSubmit: onSubmi
         ) : null
 };
 
-const Button = styled.TouchableOpacity`
-  ${({ decline, accept, negotiate, negotiationSent, row }) => {
-        switch (true) {
-            case accept:
-                return `
-        background: #228b22; 
-        padding: 10px 40px; 
-        border-radius: 8px;
-        `;
-
-            case decline:
-                return `
-        border: 1px solid red; 
-        background: white; 
-        padding: 10px 40px; 
-        border-radius: 8px;
-        `;
-
-            case negotiate:
-                return `
-        border-color: #00bfff;
-        border-width: 1px;
-        text-align: center;
-        padding: 10px 40px; 
-        border-radius: 8px;
-        `;
-
-            case negotiationSent:
-                return `
-        background-color: slategray;
-        text-align: center;
-        padding: 10px 40px; 
-        border-radius: 8px;
-        `;
-        }
-    }};
-`;
-
-const Row = styled.View`
-  flex-direction: row;
-  justify-content: ${({ first, last }) => {
-        switch (true) {
-            case first:
-                return "space-between";
-            case last:
-                return "space-around";
-            default:
-                return "flex-start";
-        }
-    }};
-  ${({ first }) => {
-        switch (true) {
-            case first:
-                return `margin: 4% 0 0 0;`;
-        }
-    }}
-  padding: 3% 30px;
-  border-bottom-color: #eaeaea;
-  border-bottom-width: ${(props) => (props.last ? "0px" : "1px")};
-`;
-
 const SectionTitle = styled.View`
-  width: 100%;
-  padding: 0 5%;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-`;
-const AccountSectionTitle = styled.View`
   width: 100%;
   padding: 0 5%;
   flex-direction: row;

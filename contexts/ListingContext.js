@@ -5,7 +5,7 @@ import { GlobalContext } from '../components/context';
 import { firestore } from "../config/firebase";
 
 
-export const LISTING_CONTEXT = createContext({ job: null });
+export const LISTING_CONTEXT = createContext({ listing: null });
 
 const JOBS_DB = firestore.collection('jobs');
 

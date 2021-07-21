@@ -3,7 +3,7 @@
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { TextField } from "@ubaids/react-native-material-textfield";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Dimensions, FlatList, SafeAreaView, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, SafeAreaView, View } from "react-native";
 import Modal from "react-native-modal";
 import StarRating from "react-native-star-rating";
 import { useDispatch, useSelector } from "react-redux";
@@ -32,6 +32,7 @@ export default function JobFound({ navigation }) {
 	const [starRate, setStarRate] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [enableNegotiation, setEnableNegotiation] = useState(false);
+
 	const cardRef = useRef(null);
 	const decisionTimer = useRef(undefined);
 	// Tracks when the job is accepted
@@ -239,7 +240,7 @@ export default function JobFound({ navigation }) {
 			async () => {
 				try {
 					if (job_data.inAppPayment && !hasActiveAccount) {
-						Alert.alert("Setup Account", "You need to setup your accont to continue", [
+						Alert.alert("Payment Account Required", "You need to setup your accont to continue", [
 							{
 								onPress: () => {
 									cardRef?.current?.slideIn();
@@ -281,22 +282,6 @@ export default function JobFound({ navigation }) {
 
 	return (
 		<>
-			{(!loading && enableNegotiation && job_data) && (
-				<NegotiationView
-					navigation={navigation}
-					hasActiveAccount={hasActiveAccount}
-					deployee={authState.userID}
-					onCancel={() => setEnableNegotiation(false)}
-					onSubmit={() => {
-						setEnableNegotiation(false);
-						sendNotification(authState.userToken, projectManager._id, {
-							title: `GigChasers - ${job_data.job_title}`,
-							body: `Offer received`,
-							data: { type: "offerreceive", id: job_data._id, sender: authState.userID },
-						});
-					}}
-					job_data={job_data} />
-			)}
 			<Card ref={cardRef}>
 				{!loading && job_data ?
 					<View>
@@ -465,6 +450,22 @@ export default function JobFound({ navigation }) {
 					<ActivityIndicator style={{ margin: 8, marginTop: 12 }} size='large' />
 				}
 			</Card>
+			{(!loading && enableNegotiation && job_data) && (
+				<NegotiationView
+					navigation={navigation}
+					hasActiveAccount={hasActiveAccount}
+					deployee={authState.userID}
+					onCancel={() => setEnableNegotiation(false)}
+					onSubmit={() => {
+						setEnableNegotiation(false);
+						sendNotification(authState.userToken, projectManager._id, {
+							title: `GigChasers - ${job_data.job_title}`,
+							body: `Offer received`,
+							data: { type: "offerreceive", id: job_data._id, sender: authState.userID },
+						});
+					}}
+					job_data={job_data} />
+			)}
 		</>
 	)
 }
@@ -472,7 +473,7 @@ export default function JobFound({ navigation }) {
 const NegotiationView = ({ job_data, hasActiveAccount, navigation, deployee, onCancel, onSubmit }) => {
 	const [loading, setLoading] = useState(false);
 	const [salary, setSalary] = useState("");
-	const [unit, setUnit] = useState(job_data.wage || "deployment");
+	const [unit] = useState(job_data.wage || "deployment");
 
 	const onSubmitOffer = useCallback(async () => {
 		if (salary) {
@@ -493,7 +494,7 @@ const NegotiationView = ({ job_data, hasActiveAccount, navigation, deployee, onC
 							// Save offer
 							try {
 								if (job_data.inAppPayment && !hasActiveAccount) {
-									Alert.alert("Setup Account", "You need to setup your accont to continue", [
+									Alert.alert("Payment Account Required", "You need to setup your accont to continue", [
 										{
 											onPress: () => {
 												setLoading(false)

@@ -48,20 +48,19 @@ const Theme = {
 let appState = AppState.currentState;
 ExpoNotif.setNotificationHandler({
   handleNotification: (n) => {
+    const behavior = {
+      shouldPlaySound: false,
+      shouldSetBadge: true,
+      shouldShowAlert: true,
+    };
+
     if (n.request.trigger.type === "push" && appState === "active") {
-      console.log("not discarding notification when app is active ======>");
-      const behavior = {
-        shouldPlaySound: false,
-        shouldSetBadge: true,
-        shouldShowAlert: true,
-      };
-      return behavior;
+      if (n.request.content.data.type === "newmessage") {
+        console.log("not discarding notification when app is active ======>");
+        return null;
+      } else return behavior;
     } else {
-      return {
-        shouldPlaySound: false,
-        shouldSetBadge: true,
-        shouldShowAlert: true,
-      };
+      return behavior;
     }
   },
 });
@@ -69,8 +68,8 @@ ExpoNotif.setNotificationHandler({
 export default function App() {
   // Store
   const [authState, auth_dispatch] = useReducer(AuthReducer, { isLoading: true });
-  const [appState, app_dispatch] = useReducer(AppReducer, {});
-  const [errorState, error_dispatch] = useReducer(ErrorReducer, { errorMsg: "" });
+  const [app_dispatch] = useReducer(AppReducer, {});
+  const [error_dispatch] = useReducer(ErrorReducer, { errorMsg: "" });
 
   const thisComponentAuthState = { dispatch: auth_dispatch };
   const thisComponentAppState = { dispatch: app_dispatch };
@@ -126,7 +125,6 @@ export default function App() {
   }, []);
 
   // Retrieve token stored in local memory
-  // TODO: This is a great place to retrieve previously stored active job data for users
   useEffect(() => {
     // Retrieve token from local storage and fetch user data from database
     AuthActions.retrieve_user_info(thisComponentAuthState);
@@ -139,14 +137,6 @@ export default function App() {
       </View>
     );
   }
-
-  // if (errorState.message) {
-  //   return (
-  //     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-  //       <Text>{errorState.message}</Text>
-  //     </View>
-  //   );
-  // }
 
   return (
     <>

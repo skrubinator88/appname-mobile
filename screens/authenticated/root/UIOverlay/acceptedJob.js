@@ -1,9 +1,8 @@
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { watchPositionAsync } from "expo-location";
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Animated, StyleSheet, TouchableOpacity, View } from "react-native";
 import { colors } from "react-native-elements";
-import StarRating from "react-native-star-rating";
 import styled from "styled-components/native";
 import GigChaserJobWord from "../../../../assets/gig-logo";
 import Confirm from "../../../../components/confirm";
@@ -16,11 +15,6 @@ import { sendNotification } from "../../../../functions";
 import { distanceBetweenTwoCoordinates } from "../../../../functions/";
 import ReportJob from "./reportJob";
 
-
-const deviceHeight = Dimensions.get("window").height;
-
-
-
 // BODY
 export default function Screen45({ navigation }) {
   const { authState } = useContext(GlobalContext);
@@ -32,6 +26,37 @@ export default function Screen45({ navigation }) {
   const [location, setLocation] = useState(null);
   const [showReport, setShowReport] = useState(false)
   const [loading, setLoading] = useState(true);
+
+  const isInProgress = current?.status === 'in progress';
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const animation = Animated.loop(
+    Animated.sequence([
+      Animated.timing(pulseAnim, {
+        toValue: 3,
+        duration: 100
+      }),
+      Animated.timing(pulseAnim, {
+        toValue: 1,
+        duration: 100
+      }),
+      Animated.timing(pulseAnim, {
+        toValue: 4,
+        duration: 100
+      }),
+      Animated.timing(pulseAnim, {
+        toValue: 1,
+        duration: 2000
+      })
+    ])
+  );
+
+  useEffect(() => {
+    if (isInProgress) {
+      animation.start()
+    } else {
+      animation.stop()
+    }
+  }, [isInProgress])
 
   useEffect(() => {
     (async () => {
@@ -127,12 +152,22 @@ export default function Screen45({ navigation }) {
                 height: 5,
               }
             }} >
-              <ProfilePicture
+              <Animated.Image
                 source={{
                   uri: `${env.API_URL}${job_data.posted_by_profile_picture}`,
                 }}
-                style={{ backgroundColor: '#dadada' }}
-              ></ProfilePicture>
+                style={{
+                  backgroundColor: '#dadada',
+                  marginVertical: -60,
+                  marginHorizontal: "auto",
+                  marginBottom: -20,
+                  height: 96,
+                  width: 96,
+                  borderRadius: 48,
+                  borderColor: isInProgress ? `green` : "white",
+                  borderWidth: pulseAnim,
+                }}
+              ></Animated.Image>
             </View>
             <Row first>
               <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -246,16 +281,6 @@ const Card = styled.SafeAreaView`
   background: white;
   width: 100%;
   padding-top: 2px;
-`;
-
-const ProfilePicture = styled.Image`
-  margin: -60px auto;
-  margin-bottom: -20px;
-  height: 96px;
-  width: 96px;
-  border-radius: 48px;
-  border-color: white;
-  border-width: 2px;
 `;
 
 const Row = styled.View`
