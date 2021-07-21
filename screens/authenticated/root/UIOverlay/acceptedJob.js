@@ -27,27 +27,31 @@ export default function Screen45({ navigation }) {
   const [showReport, setShowReport] = useState(false)
   const [loading, setLoading] = useState(true);
 
-  const isInProgress = current?.status === 'in progress';
+  const isInProgress = job_data?.status === 'in progress';
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const animation = Animated.loop(
     Animated.sequence([
       Animated.timing(pulseAnim, {
         toValue: 3,
-        duration: 100
+        duration: 100,
+        useNativeDriver: false
       }),
       Animated.timing(pulseAnim, {
         toValue: 1,
-        duration: 100
+        duration: 400,
+        useNativeDriver: false
       }),
       Animated.timing(pulseAnim, {
-        toValue: 4,
-        duration: 100
+        toValue: 6,
+        duration: 400,
+        useNativeDriver: false
       }),
       Animated.timing(pulseAnim, {
         toValue: 1,
-        duration: 2000
+        duration: 2000,
+        useNativeDriver: false
       })
-    ])
+    ]),
   );
 
   useEffect(() => {
@@ -55,6 +59,7 @@ export default function Screen45({ navigation }) {
       animation.start()
     } else {
       animation.stop()
+      animation.reset()
     }
   }, [isInProgress])
 
@@ -159,12 +164,13 @@ export default function Screen45({ navigation }) {
                 style={{
                   backgroundColor: '#dadada',
                   marginVertical: -60,
-                  marginHorizontal: "auto",
+                  marginLeft: "auto",
+                  marginRight: "auto",
                   marginBottom: -20,
                   height: 96,
                   width: 96,
                   borderRadius: 48,
-                  borderColor: isInProgress ? `green` : "white",
+                  borderColor: isInProgress ? `#2f28` : "white",
                   borderWidth: pulseAnim,
                 }}
               ></Animated.Image>
@@ -229,12 +235,14 @@ export default function Screen45({ navigation }) {
                 </View>
               </Column>
             </Row>
-            <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("QR Code", { job_data })}>
-              <Text small bold color={onSite ? colors.primary : "grey"}>
-                QR Code {onSite && " - Proceed"}
-              </Text>
-              <Ionicons name="ios-arrow-forward" size={24} />
-            </CardOptionItem>
+            {!isInProgress &&
+              <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("QR Code", { job_data })}>
+                <Text small bold color={onSite ? colors.primary : "grey"}>
+                  QR Code {onSite && " - Proceed"}
+                </Text>
+                <Ionicons name="ios-arrow-forward" size={24} />
+              </CardOptionItem>
+            }
 
             <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("Job Details", { data: job_data })}>
               <Text small>View Job Description</Text>

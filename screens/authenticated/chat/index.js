@@ -39,19 +39,21 @@ export default function Chat({ route, navigation }) {
   const dispatch = useDispatch();
   const notifyRecipient = (message) => {
     if (
+      message &&
       (authState.userData.role === 'contractor' && current.posted_by === receiver)
       ||
       (authState.userData.role !== 'contractor' && listing.executed_by === receiver)) {
+
       clearTimeout(notificationTimer.current)
       notificationTimer.current = setTimeout(() => {
         sendNotification(authState.userToken, receiver, {
-          title: `${receiverName}`,
-          body: message?.substring(0, 30),
-          data: { type: "newmessage", jobid: (current || listing)._id, sender: authState.userID },
+          title: `${authState.userData.first_name} ${authState.userData.last_name}`,
+          body: message.text?.substr(0, 30) || "New Message",
+          data: { type: "newmessage", id: (current || listing)._id, sender: authState.userID },
         }).catch(e => console.log("Failed to send notification", e))
       },
-        // Debounce notifications by 30 seconds
-        30000)
+        // Debounce notifications by 10 seconds
+        10000)
     }
   }
 
@@ -78,7 +80,7 @@ export default function Chat({ route, navigation }) {
     if (chatID.length !== 0) {
       try {
         await ChatController.sendMessage(chatID, message, dispatch);
-        notifyRecipient(message[0])
+        notifyRecipient(message)
       } catch (e) {
         console.log(e)
         Alert.alert("Failed to send message", e.message)
