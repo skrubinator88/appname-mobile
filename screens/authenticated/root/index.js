@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
 import { GlobalContext } from "../../../components/context";
 import { JOB_CONTEXT } from "../../../contexts/JobContext";
+import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
 import { USER_LOCATION_CONTEXT } from "../../../contexts/userLocation";
 import JobsControllers from "../../../controllers/JobsControllers";
 import { getPaymentInfo } from "../../../controllers/PaymentController";
@@ -18,10 +19,10 @@ export function RootScreen({ navigation }) {
   // Constructor
   const { location } = useContext(USER_LOCATION_CONTEXT)
   const { jobs } = useContext(JOB_CONTEXT)
+  const { userLocation } = useContext(LISTING_CONTEXT)
   const { authState } = useContext(GlobalContext);
 
   // State
-  const [atJobLocation, setAtJobLocation] = useState(false);
   const [showCircle, setShowCircle] = useState(false);
   const [circleCoordinates, setCircleCoordinates] = useState(null);
   const [cameraSettings, setCameraSettings] = useState()
@@ -128,6 +129,9 @@ export function RootScreen({ navigation }) {
                 icon={JobsControllers.getJobTagType("user")}
               />
             </>
+          )}
+          {!userLocation && authState?.userData?.role === 'project_manager' && (
+            <CustomMarker coordinates={{ longitude: userLocation?.longitude, latitude: userLocation?.latitude }} id={userLocation?.id} />
           )}
         </MapView>
 

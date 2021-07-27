@@ -4,36 +4,44 @@ import { GlobalContext } from '../components/context';
 import { firestore, GeoFirestore } from '../config/firebase';
 import { distanceBetweenTwoCoordinates, isCurrentJobCreatedByUser, sortJobsByProximity } from "../functions";
 import { USER_LOCATION_CONTEXT } from './userLocation';
-
+import config from "../env";
 
 export const JOB_CONTEXT = createContext({ preferredSkills: [] });
 
 const JOBS_DB = firestore.collection('jobs');
+const ACTIVE_JOB_DB = firestore.collection('active_jobs');
 
 export const JobContextProvider = (props) => {
     const { authState } = useContext(GlobalContext)
     const { location } = useContext(USER_LOCATION_CONTEXT)
-    const [preferredSkills, _setPreferredSkills] = useState([
-        "Healthcare professionals",
-        "Snow and Ice Removal",
-        "HVAC (Heating & Air Conditioning)",
-    ]);
+    const [preferredSkills, _setPreferredSkills] = useState([]);
     const [current, setCurrent] = useState()
     const [jobs, setJobs] = useState([])
     const [viewed, setViewed] = useState([])
     const [ready, setReady] = useState(false);
     const radius = 100; // "Miles". Replace this with the value from user settings
 
-    useEffect(() => {
-        // Fetch preferred skills
-        firestore.collection("preferredSkills").doc(authState.userID).get().then(snap => {
-            if (!snap.exists) {
-                return
+    const fetchSkills = async () => {
+        try {
+            const apiResponse = await fetch(`${config.API_URL}/users/${authState.userID}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `bearer ${authState.userToken}`,
+                    'Content-Type': 'application/json',
+                }
+            });
+            if (!apiResponse.ok) {
+                throw new Error((await apiResponse.json()).message || "Failed to send new jobs");
             }
-            const data = snap.data()
-            if (data.preferredSkills.length < 1) { return }
-            _setPreferredSkills(data.preferredSkills)
-        }).catch(e => console.log(e));
+            const userData = await apiResponse.json()
+            _setPreferredSkills(userData.skills)
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    useEffect(() => {
+        fetchSkills()
     }, [])
 
     /**
@@ -46,7 +54,6 @@ export const JobContextProvider = (props) => {
         let unsubscribe;
 
         if (!authState.userID || authState?.userData?.role !== "contractor") return;
-
         try {
             unsubscribe = JOBS_DB.where("status", "in", ["in progress", "in review", "accepted"])
                 .where("executed_by", "==", authState.userID)
@@ -112,6 +119,22 @@ export const JobContextProvider = (props) => {
         }
     }, [location, authState?.userData?.role, ready, current])
 
+    const updateLiveLocation = async (longitude, latitude) => {
+        if (current && current.status === 'in progress') {
+            try {
+                const doc = ACTIVE_JOB_DB.doc(current.id)
+                await doc.update({
+                    user: authState.userID,
+                    id: current.id,
+                    longitude,
+                    latitude
+                })
+            } catch (e) {
+                console.log(e.message)
+            }
+        }
+    }
+
     const findFirstJobWithKeyword = (searched_Keywords = "") => {
         if (!searched_Keywords) {
             return;
@@ -124,23 +147,36 @@ export const JobContextProvider = (props) => {
         return sortedJob;
     };
 
-    const setPreferredSkills = async (preferredSkills) => {
+    const setPreferredSkills = async () => {
         if (!preferredSkills || preferredSkills.length !== 3) {
             throw new Error('You must select 3 preferred skills')
         }
         if (!authState.userID) {
             throw new Error('Failed to update preferred skills for user')
         }
-        await firestore.collection("preferredSkills").doc(authState.userID).set({ preferredSkills });
-        _setPreferredSkills(preferredSkills)
-    };
 
+        const apiResponse = await fetch(`${config.API_URL}/users/saveSkills`, {
+            method: "POST",
+            headers: {
+                Authorization: `bearer ${authState.userToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                skills: preferredSkills
+            }),
+        });
+        if (!apiResponse.ok) {
+            throw new Error((await apiResponse.json()).message || "Failed to send new jobs");
+        }
+        _setPreferredSkills(preferredSkills)
+        return true;
+    };
 
     return (
         <JOB_CONTEXT.Provider value={{
-            current, setCurrent, ready,
+            current, setCurrent, ready, updateLiveLocation,
             preferredSkills, findFirstJobWithKeyword,
-            setPreferredSkills, jobs, setJobs,
+            setPreferredSkills, jobs, setJobs, setViewed, viewed
         }}>
             {props.children}
         </JOB_CONTEXT.Provider>

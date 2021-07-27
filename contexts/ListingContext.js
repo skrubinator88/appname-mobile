@@ -1,18 +1,22 @@
-import AsyncStorage from "@react-native-community/async-storage";
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useSelector } from "react-redux";
 import { GlobalContext } from '../components/context';
 import { firestore } from "../config/firebase";
-
+import config from "../env";
+import { handleCameraCoordinates } from "../controllers/MapController";
+import { useDispatch } from 'react-redux';
 
 export const LISTING_CONTEXT = createContext({ listing: null });
 
 const JOBS_DB = firestore.collection('jobs');
+const ACTIVE_JOB_DB = firestore.collection('active_jobs');
 
 export const ListingContextProvider = (props) => {
     const { authState } = useContext(GlobalContext)
     const [listing, setListing] = useState(null)
     const [ready, setReady] = useState(false);
+    const [userLocation, setUserLocation] = useState()
+
+    const dispatch = useDispatch()
 
     useEffect(() => {
         let unsubscribe;
@@ -44,8 +48,56 @@ export const ListingContextProvider = (props) => {
         }
     }, [authState?.userData?.role])
 
+
+    useEffect(() => {
+        let unsubscribe;
+        if (listing && (listing.status === "accepted" || listing.status === "in progress")) {
+            try {
+                unsubscribe = ACTIVE_JOB_DB.where("id", "==", listing.id)
+                    .where("user", "==", listing.executed_by)
+                    .limit(1).onSnapshot((snap) => {
+                        if (!snap.empty) {
+                            snap.docs.forEach(doc => {
+                                const data = doc.data()
+                                setUserLocation(data)
+                                handleCameraCoordinates(data, dispatch);
+                            })
+                        } else {
+                            setUserLocation(null)
+                        }
+                    })
+            } catch (e) {
+                console.log(e.message)
+            }
+            return () => {
+                if (unsubscribe) unsubscribe()
+                setUserLocation(null)
+            }
+        }
+    }, [listing])
+
+    const broadcastAvailableJobs = async (location, jobID, jobType) => {
+        const apiResponse = await fetch(`${config.API_URL}/broadcastAvailableJobs`, {
+            method: "POST",
+            headers: {
+                Authorization: `bearer ${authState.userToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                longitude: location?.coords?.longitude,
+                latitude: location?.coords?.latitude,
+                jobID,
+                jobType
+            }),
+        });
+        if (!apiResponse.ok) {
+            throw new Error((await apiResponse.json()).message || "Failed to send new jobs");
+        }
+        return true;
+    }
+
     return (
-        <LISTING_CONTEXT.Provider value={{ listing, setListing, ready }}>
+        <LISTING_CONTEXT.Provider value={{ listing, setListing, ready, userLocation, broadcastAvailableJobs }}>
             {props.children}
         </LISTING_CONTEXT.Provider>
     );

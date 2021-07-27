@@ -1,7 +1,7 @@
 import env from "../env";
 import moment, { duration, unix } from "moment";
 
-exports.distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2, unit = "miles") => {
+export const distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2, unit = "miles") => {
   // generally used geo measurement function
   let radius = 6378.137; // Radius of earth in KM
   let distanceLatitude = (lat2 * Math.PI) / 180 - (lat1 * Math.PI) / 180;
@@ -22,7 +22,7 @@ exports.distanceBetweenTwoCoordinates = (lat1, lon1, lat2, lon2, unit = "miles")
  *
  * @author eikcalb
  */
-exports.isCurrentJob = (job) => {
+export const isCurrentJob = (job) => {
   if (!job) {
     return false;
   }
@@ -40,9 +40,9 @@ exports.isCurrentJob = (job) => {
  *
  * @author eikcalb
  */
-exports.sendNotification = async (userToken, recipient, { title, body, data }) => {
+export const sendNotification = async (userToken, recipient, { title, body, data }) => {
   try {
-    if (!userToken || !recipient || !(title && data) || !(title && body)) {
+    if (!userToken || !recipient || (!(title && data) && !(title && body))) {
       throw new Error("Required details are omitted");
     }
 
@@ -58,11 +58,12 @@ exports.sendNotification = async (userToken, recipient, { title, body, data }) =
       throw new Error((await response.json()).message || "Failed to send");
     }
   } catch (e) {
+    // Do not throw error on failure
     console.error(e);
   }
 };
 
-exports.getActualDateFormatted = (date) => {
+export const getActualDateFormatted = (date) => {
   const month_names = [
     "January",
     "February",
@@ -85,12 +86,12 @@ exports.getActualDateFormatted = (date) => {
   return `${month_names[month]} ${day}, ${year}`;
 };
 
-exports.convertFirestoreTimestamp = (date) => {
+export const convertFirestoreTimestamp = (date) => {
   return date.toDate().toLocaleTimeString().replace(/:\d+ /, " ");
 };
 
 // This needs to be replaced to another code / Use UUID Instead
-exports.createToken = () => {
+export const createToken = () => {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
     var r = (Math.random() * 16) | 0,
       v = c == "x" ? r : (r & 0x3) | 0x8;
@@ -98,7 +99,7 @@ exports.createToken = () => {
   });
 };
 
-exports.sortJobsByProximity = (arr, compare) =>
+export const sortJobsByProximity = (arr, compare) =>
   arr
     .map((item, index) => ({ item, index }))
     .sort((a, b) => compare(a.item, b.item) || a.index - b.index)
@@ -111,7 +112,7 @@ exports.sortJobsByProximity = (arr, compare) =>
  * @param {*} userID 
  * @returns true is job should be hidden
  */
-exports.isCurrentJobCreatedByUser = (job, preferredSkills, userID) => {
+export const isCurrentJobCreatedByUser = (job, preferredSkills, userID) => {
   const byUser = job.posted_by == userID ? true : false;
   if (byUser) {
     return true

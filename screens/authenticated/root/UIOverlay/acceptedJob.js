@@ -18,7 +18,7 @@ import ReportJob from "./reportJob";
 // BODY
 export default function Screen45({ navigation }) {
   const { authState } = useContext(GlobalContext);
-  const { current: job_data } = useContext(JOB_CONTEXT)
+  const { current: job_data, updateLiveLocation } = useContext(JOB_CONTEXT)
   const { changeRoute } = useContext(UIOverlayContext);
   const [isCanceling, setIsCanceling] = useState(false);
   const [projectManagerInfo, setProjectManager] = useState({});
@@ -84,8 +84,9 @@ export default function Screen45({ navigation }) {
 
   // get location real time
   useEffect(() => {
-    const subscription = watchPositionAsync({ distanceInterval: 2, timeInterval: 1000 }, (position) => {
+    const subscription = watchPositionAsync({ distanceInterval: 2, timeInterval: 4000 }, (position) => {
       setLocation(position);
+      updateLiveLocation(position.coords.longitude, position.coords.latitude)
     });
 
     return () => {
@@ -170,10 +171,10 @@ export default function Screen45({ navigation }) {
                   height: 96,
                   width: 96,
                   borderRadius: 48,
-                  borderColor: isInProgress ? `#2f28` : "white",
+                  borderColor: isInProgress ? `#2f2` : "white",
                   borderWidth: pulseAnim,
                 }}
-              ></Animated.Image>
+              />
             </View>
             <Row first>
               <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>

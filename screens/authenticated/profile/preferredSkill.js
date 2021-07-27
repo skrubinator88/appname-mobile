@@ -9,7 +9,6 @@ import JobSuggestions from "../../../models/fetchedSuggestedItems";
 
 
 const CheckBoxItem = ({ onPress, disabled, key, item, checked }) => {
-
 	return (
 		<CheckBox disabled={disabled} key={key} activeOpacity={0.8} title={item} onPress={() => onPress(item)} checked={checked} />
 	)
@@ -17,7 +16,7 @@ const CheckBoxItem = ({ onPress, disabled, key, item, checked }) => {
 
 export default function ({ visible, onComplete = () => { } }) {
 	const { preferredSkills, setPreferredSkills } = useContext(JOB_CONTEXT)
-	const [selected, setSelected] = useState(preferredSkills || [])
+	const [selected, setSelected] = useState(preferredSkills)
 	const [saving, setIsSaving] = useState(false)
 
 	return (

@@ -1,5 +1,6 @@
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { Animated } from "react-native";
 import { ActivityIndicator, Alert, Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
 import { colors } from "react-native-elements";
 import * as Progress from "react-native-progress";
@@ -26,11 +27,46 @@ export default function ListingItemSelected({ navigation }) {
 	const [loading, setLoading] = useState(false);
 	const [state, setState] = useState({ showCounterOffer: false, hasPendingOffer: false });
 
+	const { hasPendingOffer } = state
+	const isInProgress = job_data?.status === 'in progress';
+	const pulseAnim = useRef(new Animated.Value(1)).current;
+	const animation = Animated.loop(
+		Animated.sequence([
+			Animated.timing(pulseAnim, {
+				toValue: 3,
+				duration: 100,
+				useNativeDriver: false
+			}),
+			Animated.timing(pulseAnim, {
+				toValue: 1,
+				duration: 400,
+				useNativeDriver: false
+			}),
+			Animated.timing(pulseAnim, {
+				toValue: 6,
+				duration: 400,
+				useNativeDriver: false
+			}),
+			Animated.timing(pulseAnim, {
+				toValue: 1,
+				duration: 2000,
+				useNativeDriver: false
+			})
+		]),
+	);
+
+	useEffect(() => {
+		if (isInProgress) {
+			animation.start()
+		} else {
+			animation.stop()
+			animation.reset()
+		}
+	}, [isInProgress])
+
 	useEffect(() => {
 		setState({ ...state, hasPendingOffer: job_data?.status === 'in review' && job_data?.offer_received?.offer && job_data?.offer_received?.deployee && !job_data?.offer_received?.approved })
 	}, [job_data?.offer_received])
-
-	const { hasPendingOffer } = state
 
 	useEffect(() => {
 		if (!job_data?.id) {
@@ -185,8 +221,6 @@ export default function ListingItemSelected({ navigation }) {
 		});
 	}, [loading, deployeeInfo, job_data]);
 
-
-
 	return (
 		<Card>
 			{!loading && job_data ?
@@ -203,8 +237,23 @@ export default function ListingItemSelected({ navigation }) {
 										height: 5,
 									}
 								}} >
-
-									<ProfilePicture source={{ uri: `${env.API_URL}/images/${job_data.executed_by}.jpg` }} style={{ backgroundColor: '#dadada' }} />
+									<Animated.Image
+										source={{
+											uri: `${env.API_URL}/images/${job_data.executed_by}.jpg`,
+										}}
+										style={{
+											backgroundColor: '#dadada',
+											marginVertical: -60,
+											marginLeft: "auto",
+											marginRight: "auto",
+											marginBottom: -20,
+											height: 96,
+											width: 96,
+											borderRadius: 48,
+											borderColor: isInProgress ? `#2f2` : "white",
+											borderWidth: pulseAnim,
+										}}
+									/>
 								</View>
 								<Row style={{ flex: 1, justifyContent: 'center', alignItems: 'stretch', borderBottomWidth: 0 }} first>
 									<Column style={{ justifyContent: "center", alignItems: "center" }}>
@@ -236,13 +285,13 @@ export default function ListingItemSelected({ navigation }) {
 												</Button>
 											</Column>
 										</Row>
-										<CardOptionItem disabled={isCanceling || loading} row onPress={() => navigation.navigate("Scanner", { job_data, deployee: job_data.executed_by })}>
+										{!isInProgress && <CardOptionItem disabled={isCanceling || loading} row onPress={() => navigation.navigate("Scanner", { job_data, deployee: job_data.executed_by })}>
 											<Text small bold color={colors.primary}>
 												Scan QR Code
 											</Text>
 											<Ionicons name="ios-arrow-forward" size={24} />
 										</CardOptionItem>
-
+										}
 									</>
 								}
 								<CardOptionItem disabled={isCanceling || loading} activeOpacity={1} style={{ justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center' }} row>

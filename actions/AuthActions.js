@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-community/async-storage";
 import PermissionsControllers from "../controllers/PermissionsControllers";
 import env from "../env";
 import axios from "axios";
+import { Alert } from "react-native";
 
 function handleError(e) {
   console.log(e);
@@ -84,7 +85,8 @@ exports.memo = ({ dispatch }) => {
 
       changeRole: async (prevData, newRole) => {
         // Update role in back end database
-        const res = await axios.put(`${Platform.OS == "ios" ? env.API_URL : env.API_URL_AVD}/users/change_role`, {
+       try{
+          const res = await axios.put(`${Platform.OS == "ios" ? env.API_URL : env.API_URL_AVD}/users/change_role`, {
           phone_number: prevData.userData.phone_number,
           role: newRole,
         });
@@ -97,6 +99,9 @@ exports.memo = ({ dispatch }) => {
           // Update role in local storage
           await AsyncStorage.setItem("userData", JSON.stringify({ ...prevData, userData: { ...prevData.userData, role: newRole } }));
         }
+      }catch(e){
+        Alert.alert("Failed To Change Role", e.message||"An error occurred while trying to change your role")
+      }
       },
 
       setLoading: (boolean) => {

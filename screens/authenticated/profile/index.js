@@ -9,6 +9,7 @@ import styled from "styled-components/native";
 import { GlobalContext } from "../../../components/context";
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
+import { JOB_CONTEXT } from "../../../contexts/JobContext";
 import JobController from "../../../controllers/JobsControllers";
 import env from "../../../env";
 import theme from "../../../theme.json";
@@ -24,7 +25,7 @@ export default function ProfileScreen({ navigation }) {
   const global = useContext(GlobalContext);
   const { authActions, authState, } = useContext(GlobalContext);
   const { userData, userID } = authState;
-
+  
   const [role, setRole] = useState(userData.role);
   const [roleSwitch, setRoleSwitch] = useState(role == "contractor" ? false : true);
   const [loading, setLoading] = useState(false);
@@ -36,6 +37,7 @@ export default function ProfileScreen({ navigation }) {
   const [loadingMedia, setloadingMedia] = useState(false);
   const { showActionSheetWithOptions } = useActionSheet();
   const [showCamera, setShowCamera] = useState(false);
+  const [changingRole, setChangingRole] = useState(false)
 
   const slide = useRef(new Animated.Value(role == "contractor" ? width / 4 : 0)).current;
 
@@ -156,8 +158,13 @@ export default function ProfileScreen({ navigation }) {
     }
   }, [profilePictureURI]);
 
-  const changeRoleCallback = (role) => {
-    authActions.changeRole(authState, role);
+  const changeRoleCallback = async (role) => {
+    setChangingRole(true)
+    try {
+      await authActions.changeRole(authState, role);
+    } finally {
+      setChangingRole(false)
+    }
   };
 
   const slideRight = () => {
@@ -168,7 +175,7 @@ export default function ProfileScreen({ navigation }) {
       duration: ANIMATION_DURATION,
       easing: ANIMATION_EASING(),
       useNativeDriver: false,
-    }).start(changeRoleCallback("contractor"));
+    }).start(() => changeRoleCallback("contractor"));
   };
 
   const slideLeft = () => {
@@ -178,7 +185,7 @@ export default function ProfileScreen({ navigation }) {
       duration: ANIMATION_DURATION,
       easing: ANIMATION_EASING(),
       useNativeDriver: false,
-    }).start(changeRoleCallback("project_manager"));
+    }).start(() => changeRoleCallback("project_manager"));
   };
 
   const handleChangeRole = () => {
@@ -241,7 +248,7 @@ export default function ProfileScreen({ navigation }) {
           {userData.occupation}
         </Text>
 
-        <TouchableWithoutFeedback onPress={() => handleChangeRole()}>
+        <TouchableWithoutFeedback disabled={changingRole} onPress={() => handleChangeRole()}>
           <ChangeRoleSlider
             style={
               authState.userData.role == "contractor"

@@ -16,7 +16,7 @@ import { AccountView } from "../../payment/components";
 export default function Searching({ keyword }) {
   const { authState } = useContext(GlobalContext);
   const { changeRoute } = useContext(UIOverlayContext)
-  const { findFirstJobWithKeyword } = useContext(JOB_CONTEXT);
+  const { findFirstJobWithKeyword, viewed, setViewed } = useContext(JOB_CONTEXT);
   const { jobs } = useContext(JOB_CONTEXT);
 
   const [jobSelected, setJobSelected] = useState(false);
@@ -34,6 +34,7 @@ export default function Searching({ keyword }) {
     const job_found = findFirstJobWithKeyword(keyword, authState.userID);
 
     if (job_found?.inAppPayment && !hasActiveAccount) {
+      setViewed(viewed.filter(id => id !== job_found._id))
       Alert.alert("Payment Account Required", "You must setup your account to view this job",
         [{
           onPress: () => {
@@ -118,10 +119,12 @@ export default function Searching({ keyword }) {
           </Text>
         </TouchableWithoutFeedback>
       </Row>
-      <AccountView refreshing={false} visible={showPaymentsModal} forPaymentsModal onSuccess={() => {
-        // setJobSelected(true)
-        setShowPaymentsModal(false)
-      }} />
+      {showPaymentsModal && (
+        <AccountView refreshing={false} visible={showPaymentsModal} forPaymentsModal onSuccess={() => {
+          // setJobSelected(true)
+          setShowPaymentsModal(false)
+        }} />)
+      }
     </Card>
   );
 }

@@ -56,7 +56,7 @@ export const priorityMap = {
 export default function ListingItem({ navigation }) {
   // - - Constructor - -
   const { authState } = useContext(GlobalContext);
-  const { setListing } = useContext(LISTING_CONTEXT);
+  const { setListing, broadcastAvailableJobs } = useContext(LISTING_CONTEXT);
 
   const route = useRoute();
   const { params } = route;
@@ -260,7 +260,7 @@ export default function ListingItem({ navigation }) {
   const onSetPriority = useCallback(async () => {
     showActionSheetWithOptions(
       {
-        options: ["High (15 mins)", "Medium (15 mins)", "Low (15 mins)", "None", "Cancel"],
+        options: [priorityMap.high0, priorityMap.medium0, priorityMap.low0, "None", "Cancel"],
         cancelButtonIndex: 4,
         destructiveButtonIndex: 3,
         title: "Set Priority",
@@ -392,6 +392,8 @@ export default function ListingItem({ navigation }) {
 
       if (result.success) {
         setListing(result.job)
+        broadcastAvailableJobs(formattedForm.coordinates, result.job.id, selected_job_type)
+          .catch(e => console.log(e))
         return navigation.navigate('Root');
       }
       else { setLoading(false); }
