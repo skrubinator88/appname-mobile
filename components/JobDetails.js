@@ -56,7 +56,7 @@ export function JobDetails() {
     setSelectedJobType(params.data.job_type);
     setJobTitle(params.data.job_title);
     setLocation(params.data.location);
-    setSalary(params.data.salary);
+    setSalary(params.data.offer_received?.approved ? params.data.offer_received.offer : params.data.salary);
     setTasks(params.data.tasks);
     setPriority(params.data.priority);
     setLocation(params.data.location);
@@ -64,7 +64,7 @@ export function JobDetails() {
     setInAppPayment(params.data.inAppPayment);
 
     if (params.data.start_at) {
-      setDate(new Date(params.data.start_at));
+      setDate(moment.unix(parseInt(params.data.start_at) / 1000).toDate());
     }
     if (params.data.photo_files != null) {
       const formattedPhotos = params.data.photo_files.map((item) => {
@@ -100,54 +100,48 @@ export function JobDetails() {
           <Item>
             <InputTitle style={{ marginBottom: 12 }}>
               <GigChaserJobWord color="#444" width="60px" height="20px" />
-              <Text small bold color="#444">
-                TYPE
-              </Text>
+              <Text small bold color="#444">TYPE</Text>
             </InputTitle>
-            <Text medium>{selected_job_type}</Text>
+            <Text small>{selected_job_type}</Text>
           </Item>
 
           <Item>
             <InputTitle>
               <GigChaserJobWord color="#444" width="60px" height="20px" />
-              <Text small light color="#444">
-                TITLE
-              </Text>
+              <Text small bold color="#444">TITLE</Text>
             </InputTitle>
-            <Text medium>{job_title}</Text>
+            <Text small>{job_title}</Text>
+          </Item>
+
+          <Item>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <FontAwesome color='grey' name='money' size={20} />
+              <Text style={{ fontWeight: "bold", color: "#444", marginStart: 8 }} small bold>SALARY</Text>
+            </View>
+            <Text>{CurrencyFormatter.format(salary ?? 0)}/deployment</Text>
           </Item>
 
           {(!!tasks && tasks.length > 0) && (
             <Item>
-              <Text style={{ fontWeight: "bold", color: "grey" }}>TASKS</Text>
+              <Text style={{ fontWeight: "bold", color: "#444" }} small>TASKS</Text>
               <Tasks>
                 <FlatList
                   style={{ marginVertical: 10, paddingVertical: 10 }}
                   data={tasks}
                   bounces={false}
                   keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <Task>
-                      <Text style={{ flex: 2, padding: 5 }} color="#636363" small>
-                        {item.text}
-                      </Text>
-                    </Task>
-                  )}
+                  renderItem={({ item }) => <Text small>- {item.text}</Text>}
                 />
               </Tasks>
             </Item>
           )}
 
           {!!location.address &&
-            <Item>
-              <FontAwesome name='map-marker' />
-              <Text>{location.address}</Text>
+            <Item style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <FontAwesome color='grey' name='map-marker' size={20} />
+              <Text style={{ marginStart: 8 }} small bold>{location?.address}</Text>
             </Item>
           }
-
-          <Item style={{ marginVertical: 20 }}>
-            <Text small>{CurrencyFormatter.format(salary ?? 0)}/deployment</Text>
-          </Item>
 
           {
             !!priority && (
@@ -159,17 +153,6 @@ export function JobDetails() {
                     {priorityMap?.[priority] || "none"}
                   </Text>
                 </View>
-                <TouchableOpacity style={{ alignSelf: "stretch", flex: 1 }} onPress={onSetPriority}>
-                  <ScheduleButton
-                    style={{
-                      justifyContent: "center",
-                      alignItems: "center",
-                      paddingVertical: 2,
-                      backgroundColor: "#fafafa",
-                    }}
-                  >
-                  </ScheduleButton>
-                </TouchableOpacity>
               </Item>
             )
           }
@@ -226,7 +209,6 @@ const Task = styled.View`
       flex-direction: row;
       justify-content: space-between;
       padding: 2px 10px;
-      background-color: #efefef;
       border-radius: 3px;
       margin-bottom: 10px;
       `;
@@ -253,10 +235,7 @@ const ScheduleButton = styled.View`
       `;
 
 const Tasks = styled.View`
-      background-color: white;
-      min-height: 100px;
-      border-radius: 6px;
-      border: #548ff7;
+      min-height: 40px;
       padding: 0 20px;
       `;
 

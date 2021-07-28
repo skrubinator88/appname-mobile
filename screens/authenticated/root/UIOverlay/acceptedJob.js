@@ -33,7 +33,7 @@ export default function Screen45({ navigation }) {
     Animated.sequence([
       Animated.timing(pulseAnim, {
         toValue: 3,
-        duration: 100,
+        duration: 400,
         useNativeDriver: false
       }),
       Animated.timing(pulseAnim, {
@@ -42,13 +42,13 @@ export default function Screen45({ navigation }) {
         useNativeDriver: false
       }),
       Animated.timing(pulseAnim, {
-        toValue: 6,
-        duration: 400,
+        toValue: 4,
+        duration: 600,
         useNativeDriver: false
       }),
       Animated.timing(pulseAnim, {
         toValue: 1,
-        duration: 2000,
+        duration: 600,
         useNativeDriver: false
       })
     ]),
@@ -84,7 +84,7 @@ export default function Screen45({ navigation }) {
 
   // get location real time
   useEffect(() => {
-    const subscription = watchPositionAsync({ distanceInterval: 2, timeInterval: 4000 }, (position) => {
+    const subscription = watchPositionAsync({ distanceInterval: 2, timeInterval: 10000 }, (position) => {
       setLocation(position);
       updateLiveLocation(position.coords.longitude, position.coords.latitude)
     });

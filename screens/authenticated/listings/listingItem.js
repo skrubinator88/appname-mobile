@@ -22,6 +22,7 @@ import {
 import { useSelector } from "react-redux";
 import styled from "styled-components/native";
 import GigChaserJobWord from "../../../assets/gig-logo";
+import Confirm from "../../../components/confirm";
 import { GlobalContext } from "../../../components/context";
 import Header from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
@@ -361,6 +362,7 @@ export default function ListingItem({ navigation }) {
 
   async function handleSubmit(form) {
     try {
+
       if (inAppPayment && !payments.defaultMethod) {
         Alert.alert("No default payment method", "You must set your default payment method before creating a job", [
           {
@@ -382,7 +384,28 @@ export default function ListingItem({ navigation }) {
       let result;
 
       const formattedForm = await formatForm(form);
+      if (inAppPayment) {
+        const confirmFee = await new Promise(res => {
+          Confirm({
+            title: "Cost Confirmation",
+            message: `A service fee of $${parseInt(formattedForm.salary) < 50 ? "2.50" : "4.50"} will be charged for this job`,
+            options: ["Continue", "Cancel"],
+            cancelButtonIndex: 1,
+            onPress: (i) => {
+              if (i === 0) {
+                res(true)
+              } else {
+                res(false)
+              }
+            }
+          })
+        })
 
+        if (!confirmFee) {
+          setLoading(false)
+          return
+        }
+      }
       // Sends the job details and associated photos for upload and job creation
       if (params.edit === false) {
         result = await JobsController.postUserJob(authState.userID, formattedForm, authState.userToken, photos);
@@ -392,7 +415,7 @@ export default function ListingItem({ navigation }) {
 
       if (result.success) {
         setListing(result.job)
-        broadcastAvailableJobs(formattedForm.coordinates, result.job.id, selected_job_type)
+        broadcastAvailableJobs({ latitude: formattedForm.coordinates[0], longitude: formattedForm.coordinates[1], }, result.job.id, selected_job_type)
           .catch(e => console.log(e))
         return navigation.navigate('Root');
       }

@@ -9,7 +9,6 @@ import config from "../env";
 export const JOB_CONTEXT = createContext({ preferredSkills: [] });
 
 const JOBS_DB = firestore.collection('jobs');
-const ACTIVE_JOB_DB = firestore.collection('active_jobs');
 
 export const JobContextProvider = (props) => {
     const { authState } = useContext(GlobalContext)
@@ -122,13 +121,16 @@ export const JobContextProvider = (props) => {
     const updateLiveLocation = async (longitude, latitude) => {
         if (current && current.status === 'in progress') {
             try {
-                const doc = ACTIVE_JOB_DB.doc(current.id)
+                const doc = JOBS_DB.doc(current.id)
                 await doc.update({
-                    user: authState.userID,
-                    id: current.id,
-                    longitude,
-                    latitude
+                    active_location: {
+                        user: authState.userID,
+                        id: current.id,
+                        longitude,
+                        latitude
+                    }
                 })
+                console.log("Updating live location")
             } catch (e) {
                 console.log(e.message)
             }
@@ -147,12 +149,12 @@ export const JobContextProvider = (props) => {
         return sortedJob;
     };
 
-    const setPreferredSkills = async () => {
-        if (!preferredSkills || preferredSkills.length !== 3) {
-            throw new Error('You must select 3 preferred skills')
+    const setPreferredSkills = async (preferredSkills) => {
+        if (!preferredSkills || preferredSkills.length > 10) {
+            throw new Error('You can select at most 10 skills')
         }
         if (!authState.userID) {
-            throw new Error('Failed to update preferred skills for user')
+            throw new Error('Failed to update preferred skills')
         }
 
         const apiResponse = await fetch(`${config.API_URL}/users/saveSkills`, {
@@ -166,7 +168,7 @@ export const JobContextProvider = (props) => {
             }),
         });
         if (!apiResponse.ok) {
-            throw new Error((await apiResponse.json()).message || "Failed to send new jobs");
+            throw new Error((await apiResponse.json()).message || "Failed to save skills");
         }
         _setPreferredSkills(preferredSkills)
         return true;

@@ -147,7 +147,7 @@ exports.cancelOffer = async (documentID) => {
 
 exports.approveOffer = async (jobID, deployee, authState) => {
 	if (!deployee) {
-		throw new Error("Deployee identity must be provided");
+		throw new Error("User identity must be provided");
 	}
 
 	const apiResponse = await fetch(`${config.API_URL}/users/acceptOffer`, {
@@ -159,7 +159,7 @@ exports.approveOffer = async (jobID, deployee, authState) => {
 		body: JSON.stringify({ jobID, deployee }),
 	});
 	if (!apiResponse.ok) {
-		throw new Error((await apiResponse.json()).message || "Failed to accept job");
+		throw new Error((await apiResponse.json()).message || "Failed to accept offer");
 	}
 
 	return true;
@@ -172,7 +172,7 @@ exports.counterOffer = async (documentID, offer, wage) => {
 	const doc = GeoFirestore.collection("jobs").doc(documentID);
 	await doc.update({
 		"offer_received.counterOffer": offer,
-		"offer_received.counterWage": wage,
+		"offer_received.counterWage": wage || 'deployment',
 	});
 };
 

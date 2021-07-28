@@ -19,7 +19,7 @@ export function RootScreen({ navigation }) {
   // Constructor
   const { location } = useContext(USER_LOCATION_CONTEXT)
   const { jobs } = useContext(JOB_CONTEXT)
-  const { userLocation } = useContext(LISTING_CONTEXT)
+  const { listing } = useContext(LISTING_CONTEXT)
   const { authState } = useContext(GlobalContext);
 
   // State
@@ -130,8 +130,8 @@ export function RootScreen({ navigation }) {
               />
             </>
           )}
-          {!userLocation && authState?.userData?.role === 'project_manager' && (
-            <CustomMarker coordinates={{ longitude: userLocation?.longitude, latitude: userLocation?.latitude }} id={userLocation?.id} />
+          {(listing && authState?.userData?.role !== 'contractor' && listing.active_location) && (
+            <CustomMarker coordinates={{ longitude: listing.active_location.longitude, latitude: listing.active_location.latitude }} id={listing.id} />
           )}
         </MapView>
 

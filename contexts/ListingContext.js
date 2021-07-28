@@ -8,13 +8,11 @@ import { useDispatch } from 'react-redux';
 export const LISTING_CONTEXT = createContext({ listing: null });
 
 const JOBS_DB = firestore.collection('jobs');
-const ACTIVE_JOB_DB = firestore.collection('active_jobs');
 
 export const ListingContextProvider = (props) => {
     const { authState } = useContext(GlobalContext)
     const [listing, setListing] = useState(null)
     const [ready, setReady] = useState(false);
-    const [userLocation, setUserLocation] = useState()
 
     const dispatch = useDispatch()
 
@@ -48,35 +46,14 @@ export const ListingContextProvider = (props) => {
         }
     }, [authState?.userData?.role])
 
-
     useEffect(() => {
-        let unsubscribe;
-        if (listing && (listing.status === "accepted" || listing.status === "in progress")) {
-            try {
-                unsubscribe = ACTIVE_JOB_DB.where("id", "==", listing.id)
-                    .where("user", "==", listing.executed_by)
-                    .limit(1).onSnapshot((snap) => {
-                        if (!snap.empty) {
-                            snap.docs.forEach(doc => {
-                                const data = doc.data()
-                                setUserLocation(data)
-                                handleCameraCoordinates(data, dispatch);
-                            })
-                        } else {
-                            setUserLocation(null)
-                        }
-                    })
-            } catch (e) {
-                console.log(e.message)
-            }
-            return () => {
-                if (unsubscribe) unsubscribe()
-                setUserLocation(null)
-            }
+        if (listing?._id?.active_location) {
+            handleCameraCoordinates(listing?._id?.active_location, dispatch);
         }
-    }, [listing])
+    }, [listing?._id?.active_location?.longitude, listing?._id?.active_location?.latitude])
 
     const broadcastAvailableJobs = async (location, jobID, jobType) => {
+        console.log(location, 'dsdsd')
         const apiResponse = await fetch(`${config.API_URL}/broadcastAvailableJobs`, {
             method: "POST",
             headers: {
@@ -84,8 +61,8 @@ export const ListingContextProvider = (props) => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                longitude: location?.coords?.longitude,
-                latitude: location?.coords?.latitude,
+                longitude: location?.longitude,
+                latitude: location?.latitude,
                 jobID,
                 jobType
             }),
@@ -97,7 +74,7 @@ export const ListingContextProvider = (props) => {
     }
 
     return (
-        <LISTING_CONTEXT.Provider value={{ listing, setListing, ready, userLocation, broadcastAvailableJobs }}>
+        <LISTING_CONTEXT.Provider value={{ listing, setListing, ready, broadcastAvailableJobs }}>
             {props.children}
         </LISTING_CONTEXT.Provider>
     );

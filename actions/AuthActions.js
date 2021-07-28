@@ -85,23 +85,23 @@ exports.memo = ({ dispatch }) => {
 
       changeRole: async (prevData, newRole) => {
         // Update role in back end database
-       try{
+        try {
           const res = await axios.put(`${Platform.OS == "ios" ? env.API_URL : env.API_URL_AVD}/users/change_role`, {
-          phone_number: prevData.userData.phone_number,
-          role: newRole,
-        });
-        const { success } = res.data;
+            phone_number: prevData.userData.phone_number,
+            role: newRole,
+          });
+          const { success } = res.data;
 
-        if (success) {
-          // Update role in app global store
-          dispatch({ type: "CHANGE_ROLE", newRole });
+          if (success) {
+            // Update role in app global store
+            dispatch({ type: "CHANGE_ROLE", newRole });
 
-          // Update role in local storage
-          await AsyncStorage.setItem("userData", JSON.stringify({ ...prevData, userData: { ...prevData.userData, role: newRole } }));
+            // Update role in local storage
+            await AsyncStorage.setItem("userData", JSON.stringify({ ...prevData, userData: { ...prevData.userData, role: newRole } }));
+          }
+        } catch (e) {
+          Alert.alert("Failed To Change Role", e.message || "An error occurred while trying to change your role")
         }
-      }catch(e){
-        Alert.alert("Failed To Change Role", e.message||"An error occurred while trying to change your role")
-      }
       },
 
       setLoading: (boolean) => {

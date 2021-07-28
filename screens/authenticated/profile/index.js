@@ -25,7 +25,7 @@ export default function ProfileScreen({ navigation }) {
   const global = useContext(GlobalContext);
   const { authActions, authState, } = useContext(GlobalContext);
   const { userData, userID } = authState;
-  
+
   const [role, setRole] = useState(userData.role);
   const [roleSwitch, setRoleSwitch] = useState(role == "contractor" ? false : true);
   const [loading, setLoading] = useState(false);
@@ -230,7 +230,7 @@ export default function ProfileScreen({ navigation }) {
             flex: 1,
             width: 100,
             height: 100,
-            backgroundColor: loading ? "#333" : "#3331",
+            backgroundColor: loading ? "#000" : "#333",
             borderRadius: 50,
             opacity: loading ? 0.3 : 1,
             margin: 10,

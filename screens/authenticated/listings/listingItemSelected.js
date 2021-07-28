@@ -346,7 +346,7 @@ export default function ListingItemSelected({ navigation }) {
 													Suggested Offer
 												</Text>
 												<Text small>
-													${job_data.offer_received.offer}
+													${job_data.offer_received.offer}/{job_data.wage ?? 'deployment'}
 												</Text>
 											</Row>
 											{job_data.offer_received.counterOffer &&
@@ -355,7 +355,7 @@ export default function ListingItemSelected({ navigation }) {
 														Counter Offer
 													</Text>
 													<Text color="teal" small>
-														${job_data.offer_received.counterOffer}
+														${job_data.offer_received.counterOffer}/{job_data.wage ?? 'deployment'}
 													</Text>
 												</Row>
 											}

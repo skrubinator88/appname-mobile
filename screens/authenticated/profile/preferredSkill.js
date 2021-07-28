@@ -10,7 +10,7 @@ import JobSuggestions from "../../../models/fetchedSuggestedItems";
 
 const CheckBoxItem = ({ onPress, disabled, key, item, checked }) => {
 	return (
-		<CheckBox disabled={disabled} key={key} activeOpacity={0.8} title={item} onPress={() => onPress(item)} checked={checked} />
+		<CheckBox disabled={disabled} activeOpacity={0.8} title={item} onPress={() => onPress(item)} checked={checked} />
 	)
 }
 
@@ -33,11 +33,11 @@ export default function ({ visible, onComplete = () => { } }) {
 							<SaveButton activeOpacity={0.8} disabled={saving} onPress={async () => {
 								try {
 									setIsSaving(true)
-									if (selected && selected.length === 3) {
+									if (selected && selected.length <= 10) {
 										await setPreferredSkills(selected)
 										Alert.alert('Updated Successful', `You have successfully updated your preferred skill list`, [{ style: 'default', onPress: onComplete }])
 									} else {
-										throw new Error('You must select 3 skills')
+										throw new Error('You can select at most 10 skills')
 									}
 								} catch (e) {
 									Alert.alert(e.message)
@@ -55,19 +55,14 @@ export default function ({ visible, onComplete = () => { } }) {
 					data={JobSuggestions}
 					contentContainerStyle={{ marginHorizontal: 8 }}
 					style={{ flexGrow: 1, marginVertical: 8 }}
-					ListFooterComponent={() => (
-						<CloseButton activeOpacity={0.8} disabled={saving} onPress={onComplete} >
-							<Text textTransform="uppercase" color="black">Close</Text>
-						</CloseButton>
-					)}
 					renderItem={({ item }) => {
 						const isChecked = !!selected.find(i => item === i)
 						return <CheckBoxItem disabled={saving} key={item} item={item} onPress={(item) => {
 							if (isChecked) {
 								setSelected(selected.filter(i => i !== item))
 							} else {
-								if (selected.length >= 3) {
-									Alert.alert("Maximum Selection Reached", "You can only pick 3 preferred job types")
+								if (selected.length >= 10) {
+									Alert.alert("Maximum Selection Reached", "You can only pick 10 preferred job types")
 									return
 								} else {
 									setSelected([...selected, item])
@@ -78,6 +73,11 @@ export default function ({ visible, onComplete = () => { } }) {
 						/>
 					}}
 				/>
+				<View>
+					<CloseButton activeOpacity={0.8} disabled={saving} onPress={onComplete} >
+						<Text textTransform="uppercase" color="black">Close</Text>
+					</CloseButton>
+				</View>
 			</View>
 		</ReactNativeModal>
 	)
