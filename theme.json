@@ -2,11 +2,13 @@
   "contractor": {
     "primary": "#3869f3",
     "brighter": "#439bf9",
-    "darker": "#0b498c"
+    "darker": "#0b498c",
+    "profile_background": "#3869f3"
   },
   "project_manager": {
     "primary": "#17a525",
     "brighter": "#22c932",
-    "darker": "#0e5915"
+    "darker": "#0e5915",
+    "profile_background": "#7ce916"
   }
 }

@@ -1,14 +1,30 @@
+import * as Notifications from "expo-notifications";
 import firebase from 'firebase';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Alert } from "react-native";
+import { useSelector } from "react-redux";
 import { GlobalContext } from '../components/context';
 import { firestore, GeoFirestore } from '../config/firebase';
+import config from "../env";
 import { distanceBetweenTwoCoordinates, isCurrentJobCreatedByUser, sortJobsByProximity } from "../functions";
 import { USER_LOCATION_CONTEXT } from './userLocation';
-import config from "../env";
 
 export const JOB_CONTEXT = createContext({ preferredSkills: [] });
 
 const JOBS_DB = firestore.collection('jobs');
+
+const useNotificationResponse = () => {
+    const lastNotification = Notifications.useLastNotificationResponse();
+    const [lastNotificationID, setLastNotificationID] = useState(null)
+
+    useEffect(() => {
+        if (lastNotification) {
+            setLastNotificationID(lastNotification?.notification.request.identifier)
+        }
+    }, [lastNotification])
+
+    return { lastNotification: lastNotification?.notification.request.identifier === lastNotificationID ? null : lastNotification }
+}
 
 export const JobContextProvider = (props) => {
     const { authState } = useContext(GlobalContext)
@@ -19,25 +35,8 @@ export const JobContextProvider = (props) => {
     const [viewed, setViewed] = useState([])
     const [ready, setReady] = useState(false);
     const radius = 100; // "Miles". Replace this with the value from user settings
-
-    const fetchSkills = async () => {
-        try {
-            const apiResponse = await fetch(`${config.API_URL}/users/${authState.userID}`, {
-                method: "GET",
-                headers: {
-                    Authorization: `bearer ${authState.userToken}`,
-                    'Content-Type': 'application/json',
-                }
-            });
-            if (!apiResponse.ok) {
-                throw new Error((await apiResponse.json()).message || "Failed to send new jobs");
-            }
-            const userData = await apiResponse.json()
-            _setPreferredSkills(userData.skills)
-        } catch (e) {
-            console.log(e)
-        }
-    }
+    const { lastNotification } = useNotificationResponse();
+    const { hasActiveAccount } = useSelector((state) => state.payment)
 
     useEffect(() => {
         fetchSkills()
@@ -45,7 +44,7 @@ export const JobContextProvider = (props) => {
 
     /**
      * Upon app load, check if there is any active job.
-     * If there is a job, set the current job, else fetch all available jobs.
+     * If there is a job, set the current job, else fetch all available jobs or check notification.
      * 
      * Set this context as ready when done.
      */
@@ -81,6 +80,54 @@ export const JobContextProvider = (props) => {
 
     useEffect(() => {
         let unsubscribe;
+
+        fetchJobsAndNotification()
+            .then(unsub => unsubscribe = unsub)
+
+        return () => {
+            if (unsubscribe) unsubscribe()
+            setJobs([])
+        }
+    }, [location, authState?.userData?.role, ready, current, lastNotification?.notification?.request?.identifier])
+
+
+    const fetchJobsAndNotification = async () => {
+
+        /**
+         * Check if a new notification has been interacted with and get the job
+         */
+        if (authState.userData.role === 'contractor' && lastNotification && (ready && !current)) {
+            const { type, id, sender } = lastNotification.notification.request.content.data
+            console.log(lastNotification, "last notification")
+            await Notifications.dismissAllNotificationsAsync()
+
+            if (lastNotification.actionIdentifier === Notifications.DEFAULT_ACTION_IDENTIFIER && authState.userID !== sender) {
+                switch (type) {
+                    case "jobcreated":
+                        // Update the job only if it has not been matced with another deployee
+                        const doc = JOBS_DB.doc(id);
+                        const snap = await doc.get({ source: 'server' })
+                        const job_found = snap.data()
+                        if (snap.exists && !job_found.executed_by) {
+                            if (job_found?.inAppPayment && !hasActiveAccount) {
+                                Alert.alert("Payment Account Required", "You must setup your account to view this job",
+                                    [{
+                                        text: 'Cancel',
+                                        style: 'cancel',
+                                    }])
+                            } else {
+                                console.log("Selected job based on proximity")
+                                await doc.update({
+                                    status: "in review",
+                                    executed_by: authState.userID,
+                                })
+                            }
+                            return
+                        }
+                        break;
+                }
+            }
+        }
         /**
          * If the logged in user is a contractor and active jobs have already been fetched,
          * subscribe to list of available jobs.
@@ -98,12 +145,15 @@ export const JobContextProvider = (props) => {
 
             // ** Subscribe, add jobs into store and listen for changes **
             // This function returns an unsubscribe function to close this listener
-            unsubscribe = query.onSnapshot((res) => {
+            let unsubscribe = query.onSnapshot((res) => {
                 const jobList = [];
                 res.forEach((snap) => {
                     const data = snap.data();
                     if (isCurrentJobCreatedByUser(data, preferredSkills, authState.userID)) {
                         return;
+                    }
+                    if (viewed.find(item => snap.id === item)) {
+                        return
                     }
                     data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
                     data._id = snap.id;
@@ -111,12 +161,29 @@ export const JobContextProvider = (props) => {
                 })
                 setJobs(jobList)
             });
+
+            return unsubscribe;
         }
-        return () => {
-            if (unsubscribe) unsubscribe()
-            setJobs([])
+    }
+
+    const fetchSkills = async () => {
+        try {
+            const apiResponse = await fetch(`${config.API_URL}/users/${authState.userID}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `bearer ${authState.userToken}`,
+                    'Content-Type': 'application/json',
+                }
+            });
+            if (!apiResponse.ok) {
+                throw new Error((await apiResponse.json()).message || "Failed to send new jobs");
+            }
+            const userData = await apiResponse.json()
+            _setPreferredSkills(userData.skills)
+        } catch (e) {
+            console.log(e)
         }
-    }, [location, authState?.userData?.role, ready, current])
+    }
 
     const updateLiveLocation = async (longitude, latitude) => {
         if (current && current.status === 'in progress') {
@@ -174,11 +241,24 @@ export const JobContextProvider = (props) => {
         return true;
     };
 
+    const getCompletedJobs = async () => {
+        const query = JOBS_DB
+            .where("executed_by", "==", authState.userID)
+            .where("status", "in", ["complete", "disputed"]);
+
+        const jobs = [];
+        const doc = await query.get()
+        doc.forEach((snap) => {
+            jobs.push({ ...snap.data(), id: snap.id, _id: snap.id });
+        });
+        return jobs;
+    };
+
     return (
         <JOB_CONTEXT.Provider value={{
             current, setCurrent, ready, updateLiveLocation,
-            preferredSkills, findFirstJobWithKeyword,
-            setPreferredSkills, jobs, setJobs, setViewed, viewed
+            preferredSkills, findFirstJobWithKeyword, getCompletedJobs,
+            setPreferredSkills, jobs, setJobs, setViewed, viewed,
         }}>
             {props.children}
         </JOB_CONTEXT.Provider>

@@ -1,17 +1,18 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Dimensions, Keyboard, Image, View } from "react-native";
-import MapView, { Circle, Marker } from "react-native-maps";
+import { Dimensions, Image, Keyboard, View } from "react-native";
+import MapView, { Callout, Circle, Marker } from "react-native-maps";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
 import { GlobalContext } from "../../../components/context";
+import Text from "../../../components/text";
 import { JOB_CONTEXT } from "../../../contexts/JobContext";
 import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
 import { USER_LOCATION_CONTEXT } from "../../../contexts/userLocation";
-import JobsControllers from "../../../controllers/JobsControllers";
 import { getPaymentInfo } from "../../../controllers/PaymentController";
 import { CameraInterface } from "../../../interfaces/mapview-interfaces";
 import HandleUIComponents from "./UIOverlay/handleUIComponents";
 
+const markerImage = require("../../../assets/map-marker.png")
 // Miscellaneous
 const { height } = Dimensions.get("screen");
 
@@ -103,7 +104,6 @@ export function RootScreen({ navigation }) {
           minZoomLevel={9} // recommended 9 / min: 1, max: 19
         // customMapStyle={mapStyle}
         >
-          {jobs.map(({ coordinates, _id }) => <CustomMarker key={_id} coordinates={coordinates} id={_id} />)}
           {showCircle && (
             <>
               <Circle
@@ -126,12 +126,13 @@ export function RootScreen({ navigation }) {
                 onLayout={() => setShowCircle(true)}
                 key={"job_found"}
                 coordinate={circleCoordinates}
-                icon={JobsControllers.getJobTagType("user")}
+                icon={markerImage}
               />
             </>
           )}
-          {(listing && authState?.userData?.role !== 'contractor' && listing.active_location) && (
-            <CustomMarker coordinates={{ longitude: listing.active_location.longitude, latitude: listing.active_location.latitude }} id={listing.id} />
+          {jobs.map((job) => <CustomMarker key={job._id} coordinates={job.coordinates} job={job} />)}
+          {(listing && listing.status === 'in progress' && authState?.userData?.role !== 'contractor' && listing.active_location) && (
+            <CustomMarker coordinates={{ longitude: listing.active_location.longitude, latitude: listing.active_location.latitude }} job={listing} />
           )}
         </MapView>
 
@@ -143,18 +144,38 @@ export function RootScreen({ navigation }) {
   }
 }
 
-const CustomMarker = ({ coordinates, id }) => {
+const CustomMarker = ({ coordinates, job }) => {
 
   return (
     <Marker
-      key={id}
+      key={job._id}
       coordinate={{ latitude: coordinates.latitude, longitude: coordinates.longitude }}
-      tracksViewChanges={true}
     >
       <Image
-        source={JobsControllers.getJobTagType("user")}
+        source={markerImage}
         fadeDuration={0}
         style={{ height: 50, width: 50 }} />
+      <Callout alphaHitTest tooltip={true}>
+        <View style={{
+          width: 160,
+          padding: 8,
+          justifyContent: 'space-between',
+          alignItems: 'stretch',
+          borderRadius: 8,
+          backgroundColor: 'white',
+          marginBottom: 8,
+          shadowColor: "black",
+          shadowOpacity: 0.4,
+          shadowRadius: 4,
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          }
+        }}>
+          <Text small light align='center' style={{ marginVertical: 4 }}>{job.job_type}</Text>
+          <Text small align='center' style={{ marginVertical: 4 }}>{job.job_title}</Text>
+        </View>
+      </Callout>
     </Marker>
   )
 }

@@ -13,6 +13,7 @@ import Text from "../../../components/text";
 import { getPaymentInfo, removeMethod, setDefaultMethod } from "../../../controllers/PaymentController";
 import { AccountView, MethodView, PreferredMethodView, TransactionRecord } from "./components";
 import StripeCheckoutScreen from "./stripe";
+import { TransactionDetailsModal, TransactionDetailsView } from "./transactionModal";
 
 const height = Dimensions.get("window").height;
 
@@ -20,7 +21,7 @@ export default function PaymentScreen({ navigation }) {
   const { authState } = useContext(GlobalContext);
   const [refreshing, setRefreshing] = useState(false);
   const [addPaymentMethod, setAddPaymentMethod] = useState(false);
-
+  const [focusedTxn, setFocusedTxn] = useState(null)
 
   const dispatch = useDispatch();
   const payments = useSelector((state) => state.payment);
@@ -204,7 +205,7 @@ export default function PaymentScreen({ navigation }) {
           </SectionTitle>
 
           {payments.transactions && payments.transactions.length > 0 ? (
-            payments.transactions.map((txn) => <TransactionRecord key={txn.id} onPress={() => onMethodClick(txn)} transaction={txn} />)
+            payments.transactions.map((txn) => <TransactionRecord key={txn.id} transaction={txn} onPress={() => setFocusedTxn(txn)} />)
           ) : (
             <View style={{ paddingVertical: 28 }}>
               <Text light small>
@@ -212,6 +213,19 @@ export default function PaymentScreen({ navigation }) {
               </Text>
             </View>
           )}
+
+          <TransactionDetailsModal show={!!focusedTxn} onClose={() => setFocusedTxn(null)}>
+            {focusedTxn ? (
+              <TransactionDetailsView
+                total={focusedTxn?.amount}
+                serviceCharge={focusedTxn?.serviceCharge}
+                mobilizationFee={focusedTxn?.mobilizationFee}
+                inbound={focusedTxn?.inbound}
+                status={focusedTxn?.status}
+                tax={focusedTxn?.tax}
+                deployeeRevenue={focusedTxn?.deployeeRevenue} />
+            ) : <></>}
+          </TransactionDetailsModal>
         </PaymentSection>
       </ScrollView>
     </Container>

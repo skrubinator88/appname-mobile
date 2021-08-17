@@ -1,26 +1,78 @@
-// IMPORT
-import React, { useContext } from "react";
-import { Alert, SafeAreaView, TouchableWithoutFeedback, TouchableOpacity, View } from "react-native";
+import { Entypo, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
-
-// Styling
 import { NavigationContainer } from "@react-navigation/native";
-import { Entypo, FontAwesome, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import React, { createRef, useContext, useEffect } from "react";
+import { ActivityIndicator, Alert, SafeAreaView, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import styled from "styled-components/native";
-import theme from "../../../theme.json";
-
-// Screens
-import { RootScreen } from "./index";
-
-// Components
-import Text from "../../../components/text";
 import GigChaserJobWord from "../../../assets/gig-logo";
-
-// Miscellaneous
 import { GlobalContext } from "../../../components/context";
+import { JobDetails } from "../../../components/JobDetails";
+import Text from "../../../components/text";
+import { JOB_CONTEXT } from "../../../contexts/JobContext";
+import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
 import env from "../../../env";
+import theme from "../../../theme.json";
+import Chat from "../chat/";
+import ListingItem from "../listings/listingItem";
+import JobListings from "../listings/stacks";
+import MessagesScreen from "../messages/";
+import PaymentScreen from "../payment/stack";
+import ProfileScreen from "../profile/stack";
+import Scanner from "../scanner/";
+import SettingsScreen from "../settings";
+import WorkHistory from "../work-history/";
+import { RootScreen } from "./index";
+import CompleteJob from "./UIOverlay/jobFound/completeJob";
+import QRCode from "./UIOverlay/jobFound/qr_code";
+
 
 export const AuthenticatedDrawer = createDrawerNavigator();
+
+export function Drawer() {
+  const { authState } = useContext(GlobalContext)
+  const { ready: deployeeReady } = useContext(JOB_CONTEXT)
+  const { ready: deployerReady } = useContext(LISTING_CONTEXT)
+
+  let ready = authState.userData.role === 'contractor' ? deployeeReady : deployerReady
+
+  if (!ready) {
+    return (
+      <View style={{ justifyContent: "center", alignItems: "center", flex: 1 }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <NavigationContainer independent={true}>
+      <AuthenticatedDrawer.Navigator
+        drawerType="back"
+        // backBehavior="initialRoute"
+        edgeWidth={-100}
+        initialRouteName="Root"
+
+        drawerContent={(props) => <DrawerContent {...props} />}
+      >
+        <AuthenticatedDrawer.Screen name="Root" component={RootScreen} />
+        <AuthenticatedDrawer.Screen name="Profile" component={ProfileScreen} />
+
+        <AuthenticatedDrawer.Screen name="Job Listings" component={JobListings} />
+        <AuthenticatedDrawer.Screen name="Messages" component={MessagesScreen} />
+        <AuthenticatedDrawer.Screen options={{ unmountOnBlur: true }} name="Scanner" component={Scanner} />
+        <AuthenticatedDrawer.Screen options={{ unmountOnBlur: true }} name="Work History" component={WorkHistory} />
+        <AuthenticatedDrawer.Screen name="Payments" component={PaymentScreen} />
+        <AuthenticatedDrawer.Screen name="Help Center" component={RootScreen} />
+        <AuthenticatedDrawer.Screen name="Settings" component={SettingsScreen} />
+        <AuthenticatedDrawer.Screen options={{ unmountOnBlur: true }} name="Listing Item" component={ListingItem} />
+
+        <AuthenticatedDrawer.Screen name="Chat" component={Chat} />
+        <AuthenticatedDrawer.Screen name="QR Code" component={QRCode} />
+        <AuthenticatedDrawer.Screen options={{ unmountOnBlur: true }} name="Complete Job" component={CompleteJob} />
+        <AuthenticatedDrawer.Screen name="Job Details" component={JobDetails} />
+      </AuthenticatedDrawer.Navigator>
+    </NavigationContainer>
+  );
+}
 
 function DrawerContent({ navigation }) {
   const { authActions, authState } = useContext(GlobalContext);
@@ -31,8 +83,8 @@ function DrawerContent({ navigation }) {
       <DrawerHeader
         style={
           authState.userData.role === "contractor"
-            ? { backgroundColor: theme.contractor.primary }
-            : { backgroundColor: theme.project_manager.primary }
+            ? { backgroundColor: theme.contractor.profile_background }
+            : { backgroundColor: theme.project_manager.profile_background }
         }
       >
         <TouchableWithoutFeedback
@@ -204,63 +256,3 @@ const ProfilePicture = styled.Image`
   border-radius: 60px;
 `;
 
-// Components
-import Chat from "../chat/";
-import JobListings from "../listings/stacks";
-import MessagesScreen from "../messages/";
-import PaymentScreen from "../payment/stack";
-import ProfileScreen from "../profile/stack";
-import Scanner from "../scanner/";
-import WorkHistory from "../work-history/";
-import SettingsScreen from "../settings";
-import QRCode from "./UIOverlay/jobFound/qr_code";
-import CompleteJob from "./UIOverlay/jobFound/completeJob";
-import ListingItem from "../listings/listingItem";
-import { JOB_CONTEXT } from "../../../contexts/JobContext";
-import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
-import { ActivityIndicator } from "react-native";
-import { JobDetails } from "../../../components/JobDetails";
-
-export function Drawer() {
-  const { authState } = useContext(GlobalContext)
-  const { ready: deployeeReady } = useContext(JOB_CONTEXT)
-  const { ready: deployerReady } = useContext(LISTING_CONTEXT)
-
-  let ready = authState.userData.role === 'contractor' ? deployeeReady : deployerReady
-
-  if (!ready) {
-    return (
-      <View style={{ justifyContent: "center", alignItems: "center", flex: 1 }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  return (
-    <NavigationContainer independent={true}>
-      <AuthenticatedDrawer.Navigator
-        drawerType="back"
-        // backBehavior="initialRoute"
-        edgeWidth={-100}
-        drawerContent={(props) => <DrawerContent {...props} />}
-      >
-        <AuthenticatedDrawer.Screen name="Root" component={RootScreen} />
-        <AuthenticatedDrawer.Screen name="Profile" component={ProfileScreen} />
-
-        <AuthenticatedDrawer.Screen name="Job Listings" component={JobListings} />
-        <AuthenticatedDrawer.Screen name="Messages" component={MessagesScreen} />
-        <AuthenticatedDrawer.Screen options={{ unmountOnBlur: true }} name="Scanner" component={Scanner} />
-        <AuthenticatedDrawer.Screen name="Work History" component={WorkHistory} />
-        <AuthenticatedDrawer.Screen name="Payments" component={PaymentScreen} />
-        <AuthenticatedDrawer.Screen name="Help Center" component={RootScreen} />
-        <AuthenticatedDrawer.Screen name="Settings" component={SettingsScreen} />
-        <AuthenticatedDrawer.Screen options={{ unmountOnBlur: true }} name="Listing Item" component={ListingItem} />
-
-        <AuthenticatedDrawer.Screen name="Chat" component={Chat} />
-        <AuthenticatedDrawer.Screen name="QR Code" component={QRCode} />
-        <AuthenticatedDrawer.Screen options={{ unmountOnBlur: true }} name="Complete Job" component={CompleteJob} />
-        <AuthenticatedDrawer.Screen name="Job Details" component={JobDetails} />
-      </AuthenticatedDrawer.Navigator>
-    </NavigationContainer>
-  );
-}

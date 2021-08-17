@@ -1,29 +1,21 @@
-// Dependencies
-import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import _ from "lodash";
-import React, { useEffect, useReducer } from "react";
-import { ActivityIndicator, Text, TextInput, View, AppState, LogBox, Platform, An } from "react-native";
+import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import * as ExpoNotif from "expo-notifications";
-// Redux
+import { AndroidImportance, AndroidNotificationVisibility } from "expo-notifications";
+import React, { useEffect, useReducer } from "react";
+import { ActivityIndicator, AppState, LogBox, Platform, Text, TextInput, View } from "react-native";
 import { Provider } from "react-redux";
-// Imported Actions
-import AuthActions from "./actions/AuthActions";
 import AppActions from "./actions/AppActions";
+import AuthActions from "./actions/AuthActions";
 import ErrorActions from "./actions/ErrorActions";
-// Imported Store
 import { GlobalContext } from "./components/context";
+import Prompts from "./components/Prompts";
 import { rootStore } from "./rdx-store/root.store";
-// Reducers
-import AuthReducer from "./reducers/AuthReducer";
 import AppReducer from "./reducers/AppReducer";
+import AuthReducer from "./reducers/AuthReducer";
 import ErrorReducer from "./reducers/ErrorReducer";
 import { AuthenticatedStackScreen } from "./screens/authenticated/root/stack";
 import { NotAuthenticatedStackScreen } from "./screens/not-authenticated/root/stack";
-import Prompts from "./components/Prompts";
-import { default as Example } from "./components/Example";
-import { AndroidImportance, AndroidNotificationVisibility } from "expo-notifications";
-import SVG from "./assets/gig-logo";
 
 // // Disable Font Scaling
 Text.defaultProps = Text.defaultProps || {};
@@ -83,12 +75,6 @@ export default function App() {
   const notificationHandler = React.useRef(async (n) => {
     console.log(n.request, "notification handler");
   });
-  const notificationResponseHandler = React.useRef((res) => {
-    if (res.actionIdentifier === ExpoNotif.DEFAULT_ACTION_IDENTIFIER) {
-      // TODO: decide what to do when notification is received
-    }
-    console.log("response for notification", res);
-  });
 
   // Effect for registering notification handlers
   React.useLayoutEffect(() => {
@@ -96,7 +82,6 @@ export default function App() {
 
     Promise.all([
       ExpoNotif.addNotificationReceivedListener(notificationHandler.current),
-      ExpoNotif.addNotificationResponseReceivedListener(notificationResponseHandler.current),
       async () => {
         if (Platform.OS === "android") {
           await ExpoNotif.setNotificationChannelAsync(`GigChasers-Notification`, {

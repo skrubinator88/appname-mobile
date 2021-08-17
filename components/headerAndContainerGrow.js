@@ -5,7 +5,6 @@ import { getStatusBarHeight } from "react-native-status-bar-height";
 import styled from "styled-components/native";
 
 
-const isIos = Platform.OS === "ios";
 const height = Dimensions.get("window").height;
 const SPACER_SIZE = height / 2; //arbitrary size
 const statusBarHeight = getStatusBarHeight();
@@ -17,7 +16,6 @@ export default function Header({
   // General Settings
   flexible = true,
   headerBackground = "transparent",
-  bottomBackground = "transparent",
   containerBackground = "#f5f5f5",
   loadingContent = false,
   disableContainer = false,

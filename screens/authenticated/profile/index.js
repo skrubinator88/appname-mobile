@@ -198,7 +198,7 @@ export default function ProfileScreen({ navigation }) {
       navigation={navigation}
       // flexible={false}
       titleColor="white"
-      headerBackground={authState.userData.role == "contractor" ? theme.contractor.primary : theme.project_manager.primary}
+      headerBackground={authState.userData.role == "contractor" ? theme.contractor.profile_background : theme.project_manager.profile_background}
       endBackground="white"
       // nextAction={() => {}}
       // nextTitle="Save"
@@ -219,8 +219,8 @@ export default function ProfileScreen({ navigation }) {
       <ProfileSection
         style={
           authState.userData.role == "contractor"
-            ? { backgroundColor: theme.contractor.primary }
-            : { backgroundColor: theme.project_manager.primary }
+            ? { backgroundColor: theme.contractor.profile_background }
+            : { backgroundColor: theme.project_manager.profile_background }
         }
       >
         <View
@@ -446,7 +446,6 @@ const ProfilePicture = styled.Image`
   height: 100px;
   width: 100px;
   border-radius: 50px;
-  margin-bottom: 10px;
 `;
 
 const Row = styled.View`

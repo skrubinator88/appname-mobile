@@ -1,16 +1,8 @@
-// Dependencies
-import axios from "axios";
-import * as firebase from "firebase";
-
-// Config
 import { Platform } from "react-native";
+import { firestore } from "../config/firebase";
 import env from "../env";
-import { firestore, GeoFirestore } from "../config/firebase";
-
-// Functions
-
-// Redux Actions
 import ChatActions from "../rdx-actions/chat.action";
+
 
 exports.initializeChatBetween = (user1, user2, job_id = "") => {
   // Create document unique ID

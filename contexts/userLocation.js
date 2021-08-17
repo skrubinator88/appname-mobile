@@ -46,18 +46,20 @@ export const UserLocationContextProvider = (props) => {
 	}
 
 	const saveLocationToServer = async (location) => {
-		const apiResponse = await fetch(`${config.API_URL}/location`, {
-			method: "POST",
-			headers: {
-				Authorization: `bearer ${authState.userToken}`,
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				location: location?.coords
-			}),
-		});
-		if (!apiResponse.ok) {
-			throw new Error((await apiResponse.json()).message || "Failed to save location");
+		if (location && location.coords) {
+			const apiResponse = await fetch(`${config.API_URL}/location`, {
+				method: "POST",
+				headers: {
+					Authorization: `bearer ${authState.userToken}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					location: location?.coords
+				}),
+			});
+			if (!apiResponse.ok) {
+				throw new Error((await apiResponse.json()).message || "Failed to save location");
+			}
 		}
 		return true;
 	}

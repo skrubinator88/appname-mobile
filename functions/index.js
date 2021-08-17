@@ -130,3 +130,38 @@ export const isCurrentJobCreatedByUser = (job, preferredSkills, userID) => {
     return false
   }
 };
+
+export const getTransactionStatus = (status) => {
+  switch (status) {
+    case 0:
+      return 'pending'
+    case 1:
+      return 'successful'
+    case 2:
+      return 'failed'
+    case 3:
+      return 'declined'
+    case 4:
+      return 'uncaptured'
+    default:
+      return 'unknown'
+  }
+}
+
+export const getTransactionStatusColor = (txn) => {
+  if (txn.inbound && txn.status === 1) return '#29d4ff'
+
+  switch (txn.status) {
+    case 0:
+      return '#ffa500'
+    case 1:
+      return '#4f8c4f'
+    case 2:
+      return '#f08080'
+    case 3:
+    case 4:
+      return '#4682b4'
+    default:
+      return 'white'
+  }
+}

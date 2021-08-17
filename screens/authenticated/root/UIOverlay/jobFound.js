@@ -70,7 +70,7 @@ export default function JobFound({ navigation }) {
 		let reset = false;
 		const unsubscribe = navigation.addListener("beforeRemove", async (e) => {
 			e.preventDefault();
-			if (!data.accepted && job_data.offer_received && job_data.offer_received.deployee === authState.userID) {
+			if (!data.accepted && job_data?.offer_received && job_data.offer_received?.deployee === authState.userID) {
 				return await new Promise((res) => {
 					Confirm({
 						title: "Cancel Job Offer?",
@@ -111,7 +111,7 @@ export default function JobFound({ navigation }) {
 		});
 
 		return () => {
-			if (!reset && !job_data.offer_received && !data.accepted) {
+			if (!reset && !job_data?.offer_received && !data.accepted) {
 				JobsController.changeJobStatus(job_data._id, "available");
 			}
 			if (unsubscribe) {
@@ -126,7 +126,7 @@ export default function JobFound({ navigation }) {
 		// This resets the timer each time an action happens, preventing an exit while loading
 		if (!loading) {
 			decisionTimer.current = setTimeout(() => {
-				if (job_data.offer_received && job_data.offer_received.deployee === authState.userID) {
+				if (job_data?.offer_received && job_data.offer_received.deployee === authState.userID) {
 					return
 				}
 				Alert.alert("Session Timeout", "Review session has timed out and this Gig has returned to the pool",
@@ -384,7 +384,7 @@ export default function JobFound({ navigation }) {
 							<Ionicons name="ios-arrow-forward" size={24} />
 						</CardOptionItem>
 
-						{job_data.offer_received && job_data.offer_received.deployee === authState.userID ? (
+						{job_data?.offer_received && job_data.offer_received.deployee === authState.userID ? (
 							job_data.offer_received.counterOffer ? (
 								<>
 									<Row style={{ paddingHorizontal: 20, paddingTop: 12, borderBottomWidth: 0, justifyContent: "space-between" }}>
@@ -435,7 +435,7 @@ export default function JobFound({ navigation }) {
 								</Button>
 							</Column>
 
-							{job_data.offer_received && job_data.offer_received.deployee === authState.userID ? null : (
+							{job_data?.offer_received && job_data.offer_received.deployee === authState.userID ? null : (
 								<Column>
 									<Button disabled={loading} accept onPress={() => handleJobApprove()}>
 										<Text style={{ color: "white" }} medium>
@@ -473,7 +473,7 @@ export default function JobFound({ navigation }) {
 const NegotiationView = ({ job_data, hasActiveAccount, navigation, deployee, onCancel, onSubmit }) => {
 	const [loading, setLoading] = useState(false);
 	const [salary, setSalary] = useState("");
-	const [unit] = useState(job_data.wage || "deployment");
+	const unit = job_data.wage || "deployment";
 
 	const onSubmitOffer = useCallback(async () => {
 		if (salary) {

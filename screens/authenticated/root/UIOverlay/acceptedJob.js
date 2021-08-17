@@ -9,6 +9,7 @@ import Confirm from "../../../../components/confirm";
 import { GlobalContext, UIOverlayContext } from "../../../../components/context";
 import Text from "../../../../components/text";
 import { JOB_CONTEXT } from "../../../../contexts/JobContext";
+import { USER_LOCATION_CONTEXT } from "../../../../contexts/userLocation";
 import JobsController from "../../../../controllers/JobsControllers";
 import env, { default as config } from "../../../../env";
 import { sendNotification } from "../../../../functions";
@@ -19,6 +20,7 @@ import ReportJob from "./reportJob";
 export default function Screen45({ navigation }) {
   const { authState } = useContext(GlobalContext);
   const { current: job_data, updateLiveLocation } = useContext(JOB_CONTEXT)
+  const { location: currentLocation } = useContext(USER_LOCATION_CONTEXT)
   const { changeRoute } = useContext(UIOverlayContext);
   const [isCanceling, setIsCanceling] = useState(false);
   const [projectManagerInfo, setProjectManager] = useState({});
@@ -84,14 +86,18 @@ export default function Screen45({ navigation }) {
 
   // get location real time
   useEffect(() => {
-    const subscription = watchPositionAsync({ distanceInterval: 2, timeInterval: 10000 }, (position) => {
+    if (currentLocation?.coords) {
+      updateLiveLocation(currentLocation.coords.longitude, currentLocation.coords.latitude)
+    }
+
+    const subscription = watchPositionAsync({ distanceInterval: 0.2, timeInterval: 10000 }, (position) => {
       setLocation(position);
+      console.log("live location", position)
       updateLiveLocation(position.coords.longitude, position.coords.latitude)
     });
 
     return () => {
       if (subscription) {
-        // console.log("removed");
         subscription.then(({ remove }) => remove());
       }
     };
@@ -101,9 +107,6 @@ export default function Screen45({ navigation }) {
     if (location) {
       const userLocation = location.coords;
       const jobLocation = job_data.coordinates;
-
-      // console.log("user", userLocation);
-      // console.log("job", jobLocation);
 
       // get distance between points in miles
       const distance = distanceBetweenTwoCoordinates(userLocation.latitude, userLocation.longitude, jobLocation["U"], jobLocation["k"]);

@@ -114,9 +114,13 @@ exports.sendOffer = async (documentID, deployee, offer, wage = "deployment") => 
 	if (!deployee) {
 		throw new Error("User identity must be provided");
 	}
-	if (!offer || typeof offer == "number" || offer <= 0) {
+	if (!offer) {
 		throw new Error("You must provide a valid offer");
 	}
+	if (parseFloat(offer) < 5) {
+		throw new Error("Offer must be at least $5")
+	}
+
 	const doc = GeoFirestore.collection("jobs").doc(documentID);
 	const offer_received = {
 		deployee,
@@ -169,6 +173,9 @@ exports.counterOffer = async (documentID, offer, wage) => {
 	if (!offer) {
 		throw new Error("Offer must be provided");
 	}
+	if (parseFloat(offer) < 5) {
+		throw new Error("Offer must be at least $5")
+	}
 	const doc = GeoFirestore.collection("jobs").doc(documentID);
 	await doc.update({
 		"offer_received.counterOffer": offer,
@@ -179,6 +186,9 @@ exports.counterOffer = async (documentID, offer, wage) => {
 exports.counterApprove = async (jobID, offer, authState) => {
 	if (!offer) {
 		throw new Error("Offer must be provided");
+	}
+	if (parseFloat(offer) < 5) {
+		throw new Error("Offer must be at least $5")
 	}
 
 	const apiResponse = await fetch(`${config.API_URL}/users/acceptJob`, {
@@ -275,7 +285,10 @@ exports.postUserJob = async (userID, job, token, photos = []) => {
 	};
 
 	const geoCollection = GeoFirestore.collection("jobs"); // Create a GeoCollection reference
-	const { coordinates } = newJob;
+	const { coordinates, salary } = newJob;
+	if (parseFloat(salary) < 5) {
+		throw new Error("Salary must be at least $5")
+	}
 	const GeoPoint = new firebase.firestore.GeoPoint(...coordinates);
 
 	let newJobDoc;
@@ -339,7 +352,10 @@ exports.updateUserJob = async (userID, job, token, photos = []) => {
 	};
 
 	const geoCollection = GeoFirestore.collection("jobs"); // Create a GeoCollection reference
-	const { coordinates } = newJob;
+	const { coordinates, salary } = newJob;
+	if (parseFloat(salary) < 5) {
+		throw new Error("Salary must be at least $5")
+	}
 	const GeoPoint = new firebase.firestore.GeoPoint(...coordinates);
 
 	let newJobDoc;

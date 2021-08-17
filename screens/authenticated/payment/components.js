@@ -13,6 +13,7 @@ import Confirm from "../../../components/confirm";
 import { GlobalContext } from "../../../components/context";
 import Text from "../../../components/text";
 import { fetchDashboardLink, getPaymentInfo, initiateAccount, makePayment, payout } from "../../../controllers/PaymentController";
+import { getTransactionStatus, getTransactionStatusColor } from "../../../functions";
 import AccountModal from "./accountModal";
 
 
@@ -26,37 +27,7 @@ export const CARD_ICON = {
     visa: (props) => <FontAwesome name='cc-visa' {...props} />,
     unknown: (props) => <FontAwesome name='credit-card' {...props} />
 }
-export const getTransactionStatus = (status) => {
-    switch (status) {
-        case 0:
-            return 'pending'
-        case 1:
-            return 'successful'
-        case 2:
-            return 'failed'
-        case 3:
-            return 'declined'
-        case 4:
-            return 'uncaptured'
-        default:
-            return 'unknown'
-    }
-}
-export const getTransactionStatusColor = (status) => {
-    switch (status) {
-        case 0:
-            return '#ffa500'
-        case 1:
-            return '#4f8c4f'
-        case 2:
-            return '#f08080'
-        case 3:
-        case 4:
-            return '#4682b4'
-        default:
-            return 'white'
-    }
-}
+
 export const CurrencyFormatter = Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 export const NumberFormatter = Intl.NumberFormat()
 
@@ -111,10 +82,10 @@ export function ExternalAccountView({ account, onPress }) {
     )
 }
 
-export function TransactionRecord({ transaction: txn, onPress }) {
+export function TransactionRecord({ transaction: txn, onPress = () => { } }) {
     return (
-        <PaymentItemRow key={txn.id} style={{ borderLeftWidth: 8, borderLeftColor: getTransactionStatusColor(txn.status) }} >
-            <PaymentItemRowLink activeOpacity={1}>
+        <PaymentItemRow key={txn.id} style={{ borderLeftWidth: 8, borderLeftColor: getTransactionStatusColor(txn) }} >
+            <PaymentItemRowLink activeOpacity={0.8} onPress={onPress}>
                 <View style={{ flex: 1, justifyContent: 'space-between', alignItems: 'stretch' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -543,7 +514,8 @@ const PaymentItemRow = styled.View`
   flex-direction: row;
   width: 100%;
   justify-content: space-around;
-  border: 1px solid #f5f5f5;
+  border-color: #f5f5f5;
+  border-style: solid;
 `;
 
 const PaymentItemRowLink = styled.TouchableOpacity`

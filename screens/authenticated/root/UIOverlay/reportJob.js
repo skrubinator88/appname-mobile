@@ -8,7 +8,6 @@ import { GlobalContext } from "../../../../components/context";
 import Text from "../../../../components/text";
 import { reportJob } from "../../../../controllers/JobsControllers";
 import { topics } from "../../../../models/report.json";
-import { sendNotification } from "../../../../functions";
 
 // BODY
 export default function ReportJob({ job_data, onCancel: onCancelProp, isVisible, onReportSuccess }) {
@@ -34,6 +33,7 @@ export default function ReportJob({ job_data, onCancel: onCancelProp, isVisible,
       }
 
       await reportJob(job_data._id, authState.userID === job_data.posted_by ? job_data.executed_by : job_data.posted_by, topic.text, details, authState)
+      Alert.alert('Report Successful', "Report has been sent successfully")
       setSuccess(true)
     } catch (e) {
       Alert.alert('Report Failed', e.message || 'There was an error while sending your report')
