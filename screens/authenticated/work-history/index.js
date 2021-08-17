@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
+import { useNavigation, useTheme } from "@react-navigation/native";
 import { default as React, useContext, useEffect, useState } from "react";
 import { KeyboardAvoidingView } from "react-native";
 import { ScrollView } from "react-native";
@@ -71,6 +71,7 @@ export default function WorkHistory({ navigation }) {
 function WorkHistoryItem({ item }) {
   const { authState } = useContext(GlobalContext);
   const [state, setState] = useState({ loading: true, showCounterOffer: false });
+  const navigation = useNavigation();
 
   useEffect(() => {
     (async () => {
@@ -106,7 +107,7 @@ function WorkHistoryItem({ item }) {
     </Item>
   ) : (
     <Item key={item.id}>
-      <JobItemLink activeOpacity={0.6} onPress={() => { }}>
+      <JobItemLink activeOpacity={0.6} onPress={() => navigation.navigate("Job Details", { data: item })}>
         <JobItemRow>
           <Column>
             <Row style={{ marginBottom: 8 }}>
