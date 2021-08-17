@@ -11,6 +11,7 @@ import { USER_LOCATION_CONTEXT } from "../../../contexts/userLocation";
 import { getPaymentInfo } from "../../../controllers/PaymentController";
 import { CameraInterface } from "../../../interfaces/mapview-interfaces";
 import HandleUIComponents from "./UIOverlay/handleUIComponents";
+import GigChaserJobWord from "../../../assets/gig-logo";
 
 const markerImage = require("../../../assets/map-marker.png")
 // Miscellaneous
@@ -172,8 +173,9 @@ const CustomMarker = ({ coordinates, job }) => {
             height: 2,
           }
         }}>
-          <Text small light align='center' style={{ marginVertical: 4 }}>{job.job_type}</Text>
+          <GigChaserJobWord color="#0e5915" width="100%" height="20px" style={{ marginLeft: 8, alignSelf: 'center' }} />
           <Text small align='center' style={{ marginVertical: 4 }}>{job.job_title}</Text>
+          <Text small light align='center' style={{ marginVertical: 4 }}>{job.job_type}</Text>
         </View>
       </Callout>
     </Marker>
