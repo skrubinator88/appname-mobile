@@ -121,7 +121,7 @@ function WorkHistoryItem({ item }) {
               </Row>
             ))}
 
-            <Row style={{ marginVertical: 4, justifyContent: 'space-between' }}>
+            <Row style={{ marginVertical: 4, marginTop: 8, justifyContent: 'space-between' }}>
               <Text light small>
                 Cost
               </Text>
