@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { TextField } from "@ubaids/react-native-material-textfield";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Dimensions, Image, SafeAreaView, ScrollView, View } from "react-native";
@@ -113,6 +114,7 @@ export default function JobListing({ navigation }) {
 const ListItemCompleteDetail = ({ item }) => {
   const { authState } = useContext(GlobalContext);
   const [state, setState] = useState({ loading: true, showCounterOffer: false });
+  const navigation = useNavigation();
 
   useEffect(() => {
     (async () => {
@@ -143,6 +145,7 @@ const ListItemCompleteDetail = ({ item }) => {
   }, [item]);
 
   const onSelect = useCallback(() => {
+    navigation.navigate("Job Details", { data: item })
   }, [state, item]);
 
   return state.loading ? (
