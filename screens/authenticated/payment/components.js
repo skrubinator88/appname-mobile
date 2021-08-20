@@ -31,7 +31,8 @@ export const CARD_ICON = {
 export const CurrencyFormatter = Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 export const NumberFormatter = Intl.NumberFormat()
 
-export function MethodView({ method, onPress, disabled }) {
+export function MethodView({ method, onPress, disabled })
+{
     return (
         <PaymentItemRow key={method.id}>
             <PaymentItemRowLink disabled={disabled} onPress={onPress}>
@@ -46,7 +47,8 @@ export function MethodView({ method, onPress, disabled }) {
     )
 }
 
-export function ExternalAccountView({ account, onPress }) {
+export function ExternalAccountView({ account, onPress })
+{
     return (
         <PaymentItemRow key={account.id} style={{ paddingTop: 0, paddingBottom: 0, paddingLeft: 0, paddingRight: 0, marginVertical: 4, alignItems: 'stretch' }}>
             {account.isBank ?
@@ -82,7 +84,8 @@ export function ExternalAccountView({ account, onPress }) {
     )
 }
 
-export function TransactionRecord({ transaction: txn, onPress = () => { } }) {
+export function TransactionRecord({ transaction: txn, onPress = () => { } })
+{
     return (
         <PaymentItemRow key={txn.id} style={{ borderLeftWidth: 8, borderLeftColor: getTransactionStatusColor(txn) }} >
             <PaymentItemRowLink activeOpacity={0.8} onPress={onPress}>
@@ -96,7 +99,7 @@ export function TransactionRecord({ transaction: txn, onPress = () => { } }) {
                         <Text small weight="600" color="#4a4a4a">EXP: {`${txn.month.padStart(2, '0')}/${txn.year}`}</Text>
                     </View>
                     <View style={{ margin: 12, alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text align='center' title weight="700" color="#444">{CurrencyFormatter.format(txn.amount / 100)}</Text>
+                        <Text align='center' title weight="700" color="#444">{CurrencyFormatter.format(txn.inbound ? (txn.deployeeRevenue + txn.serviceCharge + txn.mobilizationFee) : txn.amount / 100)}</Text>
                         <Text align='center' small weight="500" color="#6a6a6a">{txn.description}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -109,7 +112,8 @@ export function TransactionRecord({ transaction: txn, onPress = () => { } }) {
     )
 }
 
-export function PreferredMethodView({ method }) {
+export function PreferredMethodView({ method })
+{
     return (
         <PaymentSection>
             <SectionTitle>
@@ -131,7 +135,8 @@ export function PreferredMethodView({ method }) {
     )
 }
 
-export function AccountView({ refreshing, visible = true, onSuccess = () => { }, forPaymentsModal = false }) {
+export function AccountView({ refreshing, visible = true, onSuccess = () => { }, forPaymentsModal = false })
+{
     const { authState } = useContext(GlobalContext);
 
     const [showPayout, setShowPayout] = useState(false);
@@ -141,33 +146,42 @@ export function AccountView({ refreshing, visible = true, onSuccess = () => { },
     const dispatch = useDispatch();
     const payments = useSelector((state) => state.payment);
     const { balance, hasActiveAccount } = payments;
-    const refresh = async () => {
-        await getPaymentInfo(authState, dispatch).catch(e => {
+    const refresh = async () =>
+    {
+        await getPaymentInfo(authState, dispatch).catch(e =>
+        {
             // Silently log error
             console.log("Load Failed", "Failed to fetch payment details", e)
         })
     }
 
-    const getDashboardLink = useCallback(async () => {
+    const getDashboardLink = useCallback(async () =>
+    {
         Confirm({
             title: 'Open Stripe Dashboard',
             message: 'You can open your Stripe dashboard to manage settings on your account',
             options: ['Open', 'Cancel'],
             cancelButtonIndex: 1,
-            onPress: async (i) => {
-                if (i === 0) {
+            onPress: async (i) =>
+            {
+                if (i === 0)
+                {
                     setShowSetup(true);
-                    try {
-                        if (!payments.hasActiveAccount) {
+                    try
+                    {
+                        if (!payments.hasActiveAccount)
+                        {
                             await Promise.reject({ message: 'Your account must be setup to continue', code: 418 })
                         }
 
                         const fetchedURI = await fetchDashboardLink(authState);
-                        if (!fetchedURI) {
+                        if (!fetchedURI)
+                        {
                             throw new Error('Failed to fetch dashboard details');
                         }
                         setURI(fetchedURI);
-                    } catch (e) {
+                    } catch (e)
+                    {
                         console.log(e);
                         Alert.alert('Manage Account Failed', e.code === 418 ? e.message : 'There was an error displaying your dashboard', [{
                             onPress: () => setShowSetup(false), style: 'cancel',
@@ -179,36 +193,45 @@ export function AccountView({ refreshing, visible = true, onSuccess = () => { },
 
     }, [uri, authState, payments]);
 
-    const onSuccessfulSession = useCallback(() => {
-        if (!payments.hasActiveAccount) {
+    const onSuccessfulSession = useCallback(() =>
+    {
+        if (!payments.hasActiveAccount)
+        {
             // This will check if the account was not configured earlier, indicating it has been successfully set
             Alert.alert('Acount Setup Complete', 'You account will be available after verification is complete. This usually takes 5 minutes', [{
-                onPress: () => {
+                onPress: () =>
+                {
                     refresh()
                     setShowSetup(false);
                 },
                 style: 'cancel',
             }])
-        } else {
+        } else
+        {
             setShowSetup(false);
         }
         setURI(null);
     }, [payments]);
 
-    const setup = useCallback(async () => {
+    const setup = useCallback(async () =>
+    {
         setShowSetup(true);
-        try {
-            if (payments.hasActiveAccount) {
+        try
+        {
+            if (payments.hasActiveAccount)
+            {
                 // An account already exists. This option should not be available to users.
                 await Promise.reject({ message: 'You already have an account', code: 418 });
             }
 
             const fetchedURI = await initiateAccount(authState);
-            if (!fetchedURI) {
+            if (!fetchedURI)
+            {
                 throw new Error('Failed to fetch account details');
             }
             setURI(fetchedURI);
-        } catch (e) {
+        } catch (e)
+        {
             console.log(e);
             Alert.alert('Account Setup Failed', e.code === 418 ? e.message : 'Failed to setup your account', [{
                 onPress: () => setShowSetup(false), style: 'cancel',
@@ -216,12 +239,15 @@ export function AccountView({ refreshing, visible = true, onSuccess = () => { },
         }
     }, [uri, authState, payments])
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         if (forPaymentsModal) setup()
     }, [forPaymentsModal])
 
-    if (forPaymentsModal) {
-        return <AccountModal setURI={setURI} showSetup={showSetup && visible} setShowSetup={setShowSetup} onSuccessfulSession={() => {
+    if (forPaymentsModal)
+    {
+        return <AccountModal setURI={setURI} showSetup={showSetup && visible} setShowSetup={setShowSetup} onSuccessfulSession={() =>
+        {
             refresh();
             setShowSetup(false);
             onSuccess()
@@ -248,10 +274,13 @@ export function AccountView({ refreshing, visible = true, onSuccess = () => { },
                 </View>
                 :
                 <TouchableOpacity style={{ backgroundColor: '#3869f3', marginBottom: 12, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' }}
-                    onPress={() => {
-                        if (hasActiveAccount) {
+                    onPress={() =>
+                    {
+                        if (hasActiveAccount)
+                        {
                             setShowPayout(true);
-                        } else {
+                        } else
+                        {
                             setup();
                         }
                     }}>
@@ -264,7 +293,8 @@ export function AccountView({ refreshing, visible = true, onSuccess = () => { },
     );
 }
 
-export function PaymentMethodSelector({ jobID, recipient, description, onClose, onSuccess }) {
+export function PaymentMethodSelector({ jobID, recipient, description, onClose, onSuccess })
+{
     const { authState } = useContext(GlobalContext);
     const [selectMethod, setSelectMethod] = useState(false);
     const [amount, setAmount] = useState('');
@@ -273,19 +303,24 @@ export function PaymentMethodSelector({ jobID, recipient, description, onClose, 
     const dispatch = useDispatch();
     const payments = useSelector((state) => state.payment);
 
-    const onSubmit = useCallback(async () => {
+    const onSubmit = useCallback(async () =>
+    {
         Confirm({
             title: 'Confirm payment',
             message: 'Do you want to continue with payment?',
             options: ['Yes', 'No'],
             destructiveButtonIndex: 1,
-            onPress: async (i) => {
-                switch (i) {
+            onPress: async (i) =>
+            {
+                switch (i)
+                {
                     case 0:
-                        try {
+                        try
+                        {
                             setLoading(true)
                             const value = parseInt(amount, 10)
-                            if (Number.isNaN(value) || !value || value <= 0) {
+                            if (Number.isNaN(value) || !value || value <= 0)
+                            {
                                 throw new Error('Invalid payment amount specified')
                             }
 
@@ -300,7 +335,8 @@ export function PaymentMethodSelector({ jobID, recipient, description, onClose, 
                             setLoading(false)
                             onSuccess(value)
                             Alert.alert('Payment Successful', 'Your money is on its way!')
-                        } catch (e) {
+                        } catch (e)
+                        {
                             console.log(e)
                             setLoading(false)
                             Alert.alert('Payment Failed', e.message)
@@ -346,7 +382,8 @@ export function PaymentMethodSelector({ jobID, recipient, description, onClose, 
                                             placeholder="0.00"
                                             labelTextStyle={{ color: "grey", fontWeight: "700" }}
                                             keyboardType="numeric"
-                                            onChangeText={(text) => {
+                                            onChangeText={(text) =>
+                                            {
                                                 setAmount(text);
                                             }}
                                             value={amount}
@@ -368,7 +405,8 @@ export function PaymentMethodSelector({ jobID, recipient, description, onClose, 
     )
 }
 
-export const PayoutSelector = ({ show, onCancel: onCancelProp, onSubmit: onSubmitProp }) => {
+export const PayoutSelector = ({ show, onCancel: onCancelProp, onSubmit: onSubmitProp }) =>
+{
     const [loading, setLoading] = useState(false);
     const [amount, setAmount] = useState("");
     const [selectAccount, setSelectAccount] = useState(false)
@@ -376,45 +414,57 @@ export const PayoutSelector = ({ show, onCancel: onCancelProp, onSubmit: onSubmi
 
     const payments = useSelector((state) => state.payment)
 
-    const onCancel = useCallback(() => {
-        if (loading) {
+    const onCancel = useCallback(() =>
+    {
+        if (loading)
+        {
             return Alert.alert('Payout Processing', 'Cannot dismiss while payout request is being processed')
         }
         setSelectAccount(false)
         setAmount('')
         onCancelProp()
     }, [])
-    const onSubmit = useMemo(() => () => {
+    const onSubmit = useMemo(() => () =>
+    {
         setSelectAccount(false)
         setAmount('')
         onSubmitProp()
     }, [])
 
-    const onSubmitPayout = useCallback(async () => {
-        if (amount) {
-            if (!selectAccount) {
+    const onSubmitPayout = useCallback(async () =>
+    {
+        if (amount)
+        {
+            if (!selectAccount)
+            {
                 Alert.alert('Payout Failed', 'Invalid account specified')
                 return;
             }
 
             const payoutAmount = parseFloat(amount).toFixed(2);
-            if (Number.isNaN(payoutAmount) || isNaN(payoutAmount)) {
+            if (Number.isNaN(payoutAmount) || isNaN(payoutAmount))
+            {
                 Alert.alert('Payout Failed', 'Invalid amount specified')
                 return;
             }
-            await new Promise((res) => {
+            await new Promise((res) =>
+            {
                 Confirm({
                     title: "Confirm Payout",
                     message: `Send $${payoutAmount} to your selected account?`,
                     options: ["Yes", "No"],
                     cancelButtonIndex: 1,
-                    onPress: async (number) => {
-                        if (number === 0) {
+                    onPress: async (number) =>
+                    {
+                        if (number === 0)
+                        {
                             setLoading(true);
-                            try {
+                            try
+                            {
                                 await payout({ destination: selectAccount.id, amount: payoutAmount * 100 }, authState);
                                 Alert.alert('Payout Successful', 'Payout was initiated successfully', [{ style: 'cancel', onPress: onSubmit }]);
-                            } catch (e) {
+                            } catch (e)
+                            {
                                 Alert.alert('Payout Failed', e.message || "Failed to initiate payout", [{ style: 'cancel', onPress: onCancel }]);
                             }
                         }
@@ -462,7 +512,8 @@ export const PayoutSelector = ({ show, onCancel: onCancelProp, onSubmit: onSubmi
                                     placeholder="0.00"
                                     labelTextStyle={{ color: "grey", fontWeight: "700" }}
                                     keyboardType="numeric"
-                                    onChangeText={(text) => {
+                                    onChangeText={(text) =>
+                                    {
                                         setAmount(text);
                                     }}
                                     value={amount}
@@ -540,7 +591,8 @@ const PrefferedPaymentItemRow = styled.View`
 
 const Column = styled.View`
   padding: 10px;
-  ${({ creditCardIcon, creditCardIconDescription }) => {
+  ${({ creditCardIcon, creditCardIconDescription }) =>
+    {
         if (creditCardIcon) return "flex: 1";
         if (creditCardIconDescription) return "flex: 3";
     }}

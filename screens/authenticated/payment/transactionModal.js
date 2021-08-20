@@ -1,3 +1,4 @@
+import moment from "moment";
 import React from "react";
 import { View } from "react-native";
 import Modal from 'react-native-modal';
@@ -7,7 +8,8 @@ import { CurrencyFormatter } from "./components";
 
 
 
-export const TransactionDetailsView = ({ status, total, serviceCharge, mobilizationFee, tax, inbound, deployeeRevenue }) => {
+export const TransactionDetailsView = ({ status, total, dateCreated, serviceCharge, mobilizationFee, tax, inbound, deployeeRevenue }) =>
+{
     return (
         <View style={{ justifyContent: 'center', alignItems: 'stretch', padding: 8, backgroundColor: 'white', }}>
             <View style={{ justifyContent: 'center', margin: 12 }}>
@@ -15,9 +17,29 @@ export const TransactionDetailsView = ({ status, total, serviceCharge, mobilizat
             </View>
             <Text color={getTransactionStatusColor({ status, inbound })} textTransform='uppercase' align='center' title bold>{getTransactionStatus(status)}</Text>
             <View style={{ paddingHorizontal: 4, paddingVertical: 12 }}>
+                {inbound && (
+                    <View style={{ flexDirection: 'row', marginVertical: 4, justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text textTransform='uppercase' light>revenue</Text>
+                        <Text textTransform='uppercase'>{CurrencyFormatter.format((deployeeRevenue + serviceCharge + mobilizationFee) / 100)}</Text>
+                    </View>
+                )}
+                <View style={{ flexDirection: 'row', marginVertical: 4, justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text textTransform='uppercase' light>{inbound ? 'mobilization' : 'demobilization'} fee</Text>
+                    <Text textTransform='uppercase'>{inbound ? '-' : '+'}{CurrencyFormatter.format(mobilizationFee / 100)}</Text>
+                </View>
+                <View style={{ flexDirection: 'row', marginVertical: 4, justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text textTransform='uppercase' light>service charge</Text>
+                    <Text textTransform='uppercase'>{inbound ? '-' : '+'}{CurrencyFormatter.format(serviceCharge / 100)}</Text>
+                </View>
+                {!inbound && (
+                    <View style={{ flexDirection: 'row', marginVertical: 4, justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text textTransform='uppercase' light>tax</Text>
+                        <Text textTransform='uppercase'>+{CurrencyFormatter.format(tax / 100)}</Text>
+                    </View>
+                )}
                 {inbound ? (
                     <View style={{ flexDirection: 'row', marginVertical: 4, justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text textTransform='uppercase' >Revenue</Text>
+                        <Text textTransform='uppercase' >Profit</Text>
                         <Text textTransform='uppercase' medium>{CurrencyFormatter.format(deployeeRevenue / 100)}</Text>
                     </View>
                 ) : (
@@ -26,32 +48,20 @@ export const TransactionDetailsView = ({ status, total, serviceCharge, mobilizat
                         <Text textTransform='uppercase' medium>{CurrencyFormatter.format(total / 100)}</Text>
                     </View>
                 )}
-                <View style={{ flexDirection: 'row', marginVertical: 4, justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text textTransform='uppercase' light>mobilization fee</Text>
-                    <Text textTransform='uppercase'>{CurrencyFormatter.format(mobilizationFee / 100)}</Text>
-                </View>
-                <View style={{ flexDirection: 'row', marginVertical: 4, justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text textTransform='uppercase' light>service charge</Text>
-                    <Text textTransform='uppercase'>{CurrencyFormatter.format(serviceCharge / 100)}</Text>
-                </View>
-                {!inbound && (
-                    <View style={{ flexDirection: 'row', marginVertical: 4, justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text textTransform='uppercase' light>tax</Text>
-                        <Text textTransform='uppercase'>{CurrencyFormatter.format(tax / 100)}</Text>
-                    </View>
-                )}
             </View>
+            <Text textTransform='uppercase' align='center' small light>{moment(dateCreated).calendar()}</Text>
         </View>
     )
 }
 
-export const TransactionDetailsModal = ({ show, onClose, children = <></> }) => {
+export const TransactionDetailsModal = ({ show, onClose, children = <></> }) =>
+{
     return (
         <Modal
             avoidKeyboard
             statusBarTranslucent
             isVisible={show}
-            swipeDirection={['down','up','left','right']}
+            swipeDirection={['down', 'up', 'left', 'right']}
             onSwipeComplete={onClose}
             onBackdropPress={onClose}
             onBackButtonPress={onClose}

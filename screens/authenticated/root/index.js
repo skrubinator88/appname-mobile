@@ -3,7 +3,7 @@ import { Dimensions, Image, Keyboard, View } from "react-native";
 import MapView, { Callout, Circle, Marker } from "react-native-maps";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
-import { GlobalContext } from "../../../components/context";
+import { GlobalContext, UIOverlayContext } from "../../../components/context";
 import Text from "../../../components/text";
 import { JOB_CONTEXT } from "../../../contexts/JobContext";
 import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
@@ -17,7 +17,8 @@ const markerImage = require("../../../assets/map-marker.png")
 // Miscellaneous
 const { height } = Dimensions.get("screen");
 
-export function RootScreen({ navigation }) {
+export function RootScreen({ navigation })
+{
   // Constructor
   const { location } = useContext(USER_LOCATION_CONTEXT)
   const { jobs } = useContext(JOB_CONTEXT)
@@ -39,16 +40,20 @@ export function RootScreen({ navigation }) {
   const dispatch = useDispatch();
 
   // Move Camera
-  useEffect(() => {
-    if (!_map.current) {
+  useEffect(() =>
+  {
+    if (!_map.current)
+    {
       // If there is no map object, do not proceed!
       return
     }
-    if (camera != null && camera.reset == false) {
+    if (camera != null && camera.reset == false)
+    {
       setCircleCoordinates({ latitude: camera.coordinates[0], longitude: camera.coordinates[1] });
       setShowCircle(true);
       _map.current.animateCamera(camera.settings, { duration: 2000 });
-    } else if (camera != null && camera.reset == true) {
+    } else if (camera != null && camera.reset == true)
+    {
       setShowCircle(false);
       const verticalAlignment = 80;
       const zoom = 16;
@@ -63,8 +68,10 @@ export function RootScreen({ navigation }) {
   }, [camera]);
 
   // Check if user contractor got closer to job
-  useEffect(() => {
-    if (location != null) {
+  useEffect(() =>
+  {
+    if (location != null)
+    {
       const zoom = 15; // Change the zoom between 2 and 20
       const verticalAlignment = 80; // Change this number to set the position of the GPS Icon (Vertically only) between -200 and 200 Default: -100
       setCameraSettings(new CameraInterface({
@@ -78,14 +85,17 @@ export function RootScreen({ navigation }) {
     }
   }, [location])
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     getPaymentInfo(authState, dispatch).catch(e => console.log(e))
-    return () => {
+    return () =>
+    {
       setShowCircle(false);
     };
   }, [])
 
-  if (location != null && jobs != undefined) {
+  if (location != null && jobs != undefined)
+  {
     return (
       <Container>
         <MapView
@@ -140,12 +150,15 @@ export function RootScreen({ navigation }) {
         <HandleUIComponents navigation={navigation} />
       </Container>
     );
-  } else {
+  } else
+  {
     return <View></View>;
   }
 }
 
-const CustomMarker = ({ coordinates, job }) => {
+const CustomMarker = ({ coordinates, job }) =>
+{
+  const { changeRoute } = useContext(UIOverlayContext);
 
   return (
     <Marker
@@ -156,7 +169,7 @@ const CustomMarker = ({ coordinates, job }) => {
         source={markerImage}
         fadeDuration={0}
         style={{ height: 50, width: 50 }} />
-      <Callout alphaHitTest tooltip={true}>
+      <Callout alphaHitTest onPress={() => changeRoute({ name: 'searching', props: { keyword: job.job_type } })} tooltip={true}>
         <View style={{
           width: 160,
           padding: 8,
