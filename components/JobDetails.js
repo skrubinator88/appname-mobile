@@ -12,6 +12,7 @@ import env from "../env";
 import PhotoItem from "../screens/authenticated/listings/listItemImage";
 import { CurrencyFormatter } from "../screens/authenticated/payment/components";
 import { StatusBar } from "react-native";
+import { getJobStatusColor } from "../functions";
 
 export const getPriorityColor = (priority) => {
   switch (priority) {
@@ -197,6 +198,14 @@ export function JobDetails() {
               </Text>
             </InputTitle>
           </Item>
+
+          {params?.data.status === 'disputed' && (
+            <Item>
+              <InputTitle style={{ justifyContent: "center", alignItems: 'center', borderColor: getJobStatusColor(params?.data), borderWidth: 2, paddingVertical: 8, }}>
+                <Text title bold style={{ color: getJobStatusColor(params?.data), textAlign: "center", textTransform: "uppercase" }}>Disputed</Text>
+              </InputTitle>
+            </Item>
+          )}
         </Fields >
       </Container>
     </>

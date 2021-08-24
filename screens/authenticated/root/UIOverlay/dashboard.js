@@ -12,12 +12,7 @@ import { clearTemporalCirclesAndTags } from "../../../../controllers/MapControll
 import fetchedSuggestedItems from "../../../../models/fetchedSuggestedItems"; // Simulating an API
 
 
-
-
 const height = Dimensions.get("screen").height;
-const width = Dimensions.get("screen").width;
-const statusBarHeight = getStatusBarHeight();
-
 
 export default function Dashboard({ navigation, onUIChange, willUnmountSignal, showCard })
 {
@@ -85,7 +80,7 @@ export default function Dashboard({ navigation, onUIChange, willUnmountSignal, s
           <SuggestionScrollView
             keyboardShouldPersistTaps="always"
             data={suggestedItems}
-            keyExtractor={(item, index) => index.toString()}
+            keyExtractor={(_, index) => index.toString()}
             renderItem={({ item }) =>
             {
               return (

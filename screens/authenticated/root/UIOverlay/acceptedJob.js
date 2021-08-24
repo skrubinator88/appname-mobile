@@ -1,5 +1,8 @@
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { watchPositionAsync } from "expo-location";
+import moment from "moment";
+import { unix } from "moment";
+import { duration } from "moment";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Animated, StyleSheet, TouchableOpacity, View } from "react-native";
 import { colors } from "react-native-elements";
@@ -12,14 +15,14 @@ import { JOB_CONTEXT } from "../../../../contexts/JobContext";
 import { USER_LOCATION_CONTEXT } from "../../../../contexts/userLocation";
 import JobsController from "../../../../controllers/JobsControllers";
 import env, { default as config } from "../../../../env";
-import { sendNotification } from "../../../../functions";
+import { getPriorityMinutes, sendNotification } from "../../../../functions";
 import { distanceBetweenTwoCoordinates } from "../../../../functions/";
 import ReportJob from "./reportJob";
 
 // BODY
 export default function Screen45({ navigation }) {
   const { authState } = useContext(GlobalContext);
-  const { current: job_data, updateLiveLocation } = useContext(JOB_CONTEXT)
+  const { current: job_data, updateLiveLocation: _updateLiveLocation } = useContext(JOB_CONTEXT)
   const { location: currentLocation } = useContext(USER_LOCATION_CONTEXT)
   const { changeRoute } = useContext(UIOverlayContext);
   const [isCanceling, setIsCanceling] = useState(false);
@@ -28,6 +31,12 @@ export default function Screen45({ navigation }) {
   const [location, setLocation] = useState(null);
   const [showReport, setShowReport] = useState(false)
   const [loading, setLoading] = useState(true);
+  const debounceTimer = useRef();
+
+  const updateLiveLocation = (...props) => {
+    clearTimeout(debounceTimer.current)
+    debounceTimer.current = setTimeout(() => _updateLiveLocation(...props), 5000)
+  }
 
   const isInProgress = job_data?.status === 'in progress';
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -90,9 +99,8 @@ export default function Screen45({ navigation }) {
       updateLiveLocation(currentLocation.coords.longitude, currentLocation.coords.latitude)
     }
 
-    const subscription = watchPositionAsync({ distanceInterval: 0.2, timeInterval: 10000 }, (position) => {
+    const subscription = watchPositionAsync({ distanceInterval: 1, timeInterval: 10000 }, (position) => {
       setLocation(position);
-      console.log("live location", position)
       updateLiveLocation(position.coords.longitude, position.coords.latitude)
     });
 
@@ -101,7 +109,7 @@ export default function Screen45({ navigation }) {
         subscription.then(({ remove }) => remove());
       }
     };
-  }, []);
+  }, [currentLocation, isInProgress]);
 
   useEffect(() => {
     if (location) {
@@ -123,9 +131,12 @@ export default function Screen45({ navigation }) {
   }, [location]);
 
   const cancelJob = useCallback(() => {
+    const acceptedTime = unix((job_data.date_accepted.toMillis()) / 1000)
+    const now = new Date()
+    const timeDifference = moment(now).diff(acceptedTime, 'minutes')
     Confirm({
       title: "Are you sure you want to cancel the job ?",
-      message: `Cancelling a job outside the cancellation window will attract a penalty`,
+      message: job_data.priority && timeDifference > getPriorityMinutes(job_data.priority) ? `You have ${timeDifference} more minutes to cancel without attracting a penalty` : `Cancelling a job outside the cancellation window may attract a penalty`,
       options: ["Cancel Job", "Never Mind"],
       cancelButtonIndex: 1,
       destructiveButtonIndex: 0,
@@ -152,7 +163,7 @@ export default function Screen45({ navigation }) {
       {!loading && job_data ?
         <>
           <View>
-            <View style={{
+            <TouchableOpacity onPress={() => navigation.navigate("ProfilePage", { userData: projectManagerInfo })} style={{
               shadowColor: "black",
               shadowOpacity: 0.4,
               shadowRadius: 7,
@@ -178,7 +189,7 @@ export default function Screen45({ navigation }) {
                   borderWidth: pulseAnim,
                 }}
               />
-            </View>
+            </TouchableOpacity>
             <Row first>
               <Column style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                 <Text title align='center' bold marginBottom="5px">

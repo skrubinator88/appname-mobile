@@ -12,6 +12,7 @@ import Header from "../../../components/headerAndContainerGrow";
 import Text from "../../../components/text";
 import { JOB_CONTEXT } from "../../../contexts/JobContext";
 import config from "../../../env";
+import { getJobStatusColor } from "../../../functions";
 import { CurrencyFormatter } from "../payment/components";
 
 
@@ -106,7 +107,10 @@ function WorkHistoryItem({ item }) {
       <ActivityIndicator color="darkgrey" />
     </Item>
   ) : (
-    <Item key={item.id}>
+    <Item key={item.id} style={{
+      borderLeftColor: getJobStatusColor(item),
+      borderLeftWidth: 5,
+    }}>
       <JobItemLink activeOpacity={0.6} onPress={() => navigation.navigate("Job Details", { data: item })}>
         <JobItemRow>
           <Column>
@@ -127,7 +131,7 @@ function WorkHistoryItem({ item }) {
                 Cost
               </Text>
               <Text small>
-                {CurrencyFormatter.format(item.salary ?? 0)}/{item.wage ?? 'deployment'}
+                {CurrencyFormatter.format((item.offer_received?.approved ? item.offer_received?.offer : item.salary) ?? 0)}/{item.wage ?? 'deployment'}
               </Text>
             </Row>
 

@@ -9,14 +9,11 @@ import styled from "styled-components/native";
 import { GlobalContext } from "../../../components/context";
 import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
-import { JOB_CONTEXT } from "../../../contexts/JobContext";
 import JobController from "../../../controllers/JobsControllers";
 import env from "../../../env";
 import theme from "../../../theme.json";
 import { JobCamera } from "../listings/listingItem";
 import PreferredSkill from "./preferredSkill";
-
-
 
 
 const width = Dimensions.get("window").width; //arbitrary size
@@ -198,7 +195,7 @@ export default function ProfileScreen({ navigation }) {
       navigation={navigation}
       // flexible={false}
       titleColor="white"
-      headerBackground={authState.userData.role == "contractor" ? theme.contractor.profile_background : theme.project_manager.profile_background}
+      headerBackground={authState.userData.role === "contractor" ? theme.contractor.profile_background : theme.project_manager.profile_background}
       endBackground="white"
       // nextAction={() => {}}
       // nextTitle="Save"
@@ -218,7 +215,7 @@ export default function ProfileScreen({ navigation }) {
 
       <ProfileSection
         style={
-          authState.userData.role == "contractor"
+          authState.userData.role === "contractor"
             ? { backgroundColor: theme.contractor.profile_background }
             : { backgroundColor: theme.project_manager.profile_background }
         }

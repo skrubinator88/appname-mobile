@@ -3,6 +3,7 @@
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { TextField } from "@ubaids/react-native-material-textfield";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { TouchableOpacity } from "react-native";
 import { ActivityIndicator, Alert, FlatList, SafeAreaView, View } from "react-native";
 import Modal from "react-native-modal";
 import StarRating from "react-native-star-rating";
@@ -285,7 +286,7 @@ export default function JobFound({ navigation }) {
 			<Card ref={cardRef}>
 				{!loading && job_data ?
 					<View>
-						<View style={{
+						<TouchableOpacity onPress={() => navigation.navigate("ProfilePage", { userData: projectManager })} style={{
 							shadowColor: "black",
 							shadowOpacity: 0.4,
 							shadowRadius: 7,
@@ -300,7 +301,7 @@ export default function JobFound({ navigation }) {
 								}}
 								style={{ backgroundColor: '#dadada' }}
 							/>
-						</View>
+						</TouchableOpacity>
 						<Row first style={{ alignItems: 'center', justifyContent: 'center' }}>
 							<Column>
 								<Text title bold marginBottom="5px">

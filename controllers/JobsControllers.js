@@ -7,9 +7,10 @@ import ListingsActions from "../rdx-actions/listings.action";
 const Actions = { JobsStoreActions, ListingsActions };
 
 exports.currentUserCompletedJobs = (userID, dispatch) => {
-	const query = GeoFirestore.collection("jobs")
+	const query = firestore.collection("jobs")
 		.where("posted_by", "==", userID)
-		.where("status", "in", ["complete", "disputed"]);
+		.where("status", "in", ["complete", "disputed"])
+		.orderBy("date_created", "desc");
 
 	const unsubscribe = query.onSnapshot((res) => {
 		const jobs = [];

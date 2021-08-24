@@ -244,7 +244,8 @@ export const JobContextProvider = (props) => {
     const getCompletedJobs = async () => {
         const query = JOBS_DB
             .where("executed_by", "==", authState.userID)
-            .where("status", "in", ["complete", "disputed"]);
+            .where("status", "in", ["complete", "disputed"])
+            .orderBy("date_created", "desc");
 
         const jobs = [];
         const doc = await query.get()

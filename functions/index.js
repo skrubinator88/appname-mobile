@@ -149,7 +149,7 @@ export const getTransactionStatus = (status) => {
 }
 
 export const getTransactionStatusColor = (txn) => {
-  if (txn.inbound && txn.status === 1) return '#29d4ff'
+  if (txn.inbound && txn.status === 1) return 'greenyellow'
 
   switch (txn.status) {
     case 0:
@@ -165,3 +165,25 @@ export const getTransactionStatusColor = (txn) => {
       return 'white'
   }
 }
+
+export const getJobStatusColor = (job) => {
+  switch (job.status) {
+    case 'complete':
+      return '#4f8c4f'
+    default:
+      return '#f08080'
+  }
+}
+
+export const getPriorityMinutes = (priority) => {
+  switch (priority) {
+    case "high0":
+      return 15;
+    case "medium0":
+      return 60;
+    case "low0":
+      return 90;
+    default:
+      return Number.MAX_SAFE_INTEGER;
+  }
+};

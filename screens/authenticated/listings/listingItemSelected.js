@@ -228,7 +228,7 @@ export default function ListingItemSelected({ navigation }) {
 					<View>
 						{job_data.executed_by ? (
 							<>
-								<View style={{
+								<TouchableOpacity onPress={() => navigation.navigate("ProfilePage", { userData: deployeeInfo })} style={{
 									shadowColor: "black",
 									shadowOpacity: 0.4,
 									shadowRadius: 7,
@@ -254,7 +254,7 @@ export default function ListingItemSelected({ navigation }) {
 											borderWidth: pulseAnim,
 										}}
 									/>
-								</View>
+								</TouchableOpacity>
 								<Row style={{ flex: 1, justifyContent: 'center', alignItems: 'stretch', borderBottomWidth: 0 }} first>
 									<Column style={{ justifyContent: "center", alignItems: "center" }}>
 										<Text title align='center' bold marginBottom="5px">

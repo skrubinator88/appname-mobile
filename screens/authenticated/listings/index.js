@@ -14,7 +14,7 @@ import Container from "../../../components/headerAndContainer";
 import Text from "../../../components/text";
 import JobsControllers from "../../../controllers/JobsControllers";
 import config from "../../../env";
-import { sendNotification } from "../../../functions";
+import { getJobStatusColor, getTransactionStatusColor, sendNotification } from "../../../functions";
 import { CurrencyFormatter } from "../payment/components";
 
 
@@ -153,8 +153,11 @@ const ListItemCompleteDetail = ({ item }) => {
       <ActivityIndicator color="darkgrey" />
     </Item>
   ) : (
-    <Item key={item.id}>
-      <JobItemLink activeOpacity={0.6} onPress={onSelect}>
+    <Item key={item.id} style={{
+      borderLeftColor: getJobStatusColor(item),
+      borderLeftWidth: 5,
+    }}>
+      <JobItemLink activeOpacity={0.6} onPress={onSelect} >
         <JobItemRow>
           <Column>
             <Row style={{ marginBottom: 8 }}>
@@ -174,7 +177,7 @@ const ListItemCompleteDetail = ({ item }) => {
                 Cost
               </Text>
               <Text small>
-                {CurrencyFormatter.format(item.salary ?? 0)}/{item.wage ?? 'deployment'}
+                {CurrencyFormatter.format((item.offer_received?.approved ? item.offer_received?.offer : item.salary) ?? 0)}/{item.wage ?? 'deployment'}
               </Text>
             </Row>
 
@@ -293,7 +296,6 @@ export const CounterOfferView = ({ job_data, authState, deployee, onComplete }) 
   }, [loading, deployee, job_data, salary, wage]);
 
   if (!job_data) {
-    console.log('dsdsds')
     return <></>
   }
 

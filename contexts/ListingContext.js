@@ -53,7 +53,6 @@ export const ListingContextProvider = (props) => {
     }, [listing?._id?.active_location?.longitude, listing?._id?.active_location?.latitude])
 
     const broadcastAvailableJobs = async (location, jobID, jobType) => {
-        console.log(location, 'dsdsd')
         const apiResponse = await fetch(`${config.API_URL}/broadcastAvailableJobs`, {
             method: "POST",
             headers: {

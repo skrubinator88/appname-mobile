@@ -17,6 +17,7 @@ import ListingItem from "../listings/listingItem";
 import JobListings from "../listings/stacks";
 import MessagesScreen from "../messages/";
 import PaymentScreen from "../payment/stack";
+import { ProfilePage } from "../profile/profilePage";
 import ProfileScreen from "../profile/stack";
 import Scanner from "../scanner/";
 import SettingsScreen from "../settings";
@@ -54,7 +55,9 @@ export function Drawer() {
         drawerContent={(props) => <DrawerContent {...props} />}
       >
         <AuthenticatedDrawer.Screen name="Root" component={RootScreen} />
+
         <AuthenticatedDrawer.Screen name="Profile" component={ProfileScreen} />
+        <AuthenticatedDrawer.Screen name="ProfilePage" component={ProfilePage} />
 
         <AuthenticatedDrawer.Screen name="Job Listings" component={JobListings} />
         <AuthenticatedDrawer.Screen name="Messages" component={MessagesScreen} />
@@ -133,12 +136,12 @@ function DrawerContent({ navigation }) {
               onPress={() => navigation.navigate("Job Listings", { screen: "Root" })}
               icon={() => <Entypo name="megaphone" size={24} color="black" />}
             /> */}
-            <DrawerItem
+            {/* <DrawerItem
               labelStyle={{ fontSize: 20 }}
               label="Messages"
               onPress={() => navigation.navigate("Messages")}
               icon={() => <MaterialIcons name="chat" size={24} color="black" />}
-            />
+            /> */}
             {/* <DrawerItem
               labelStyle={{ fontSize: 20 }}
               label="Scan QR Code"
