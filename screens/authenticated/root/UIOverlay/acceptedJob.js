@@ -2,7 +2,6 @@ import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { watchPositionAsync } from "expo-location";
 import moment from "moment";
 import { unix } from "moment";
-import { duration } from "moment";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Animated, StyleSheet, TouchableOpacity, View } from "react-native";
 import { colors } from "react-native-elements";
@@ -14,6 +13,7 @@ import Text from "../../../../components/text";
 import { JOB_CONTEXT } from "../../../../contexts/JobContext";
 import { USER_LOCATION_CONTEXT } from "../../../../contexts/userLocation";
 import JobsController from "../../../../controllers/JobsControllers";
+import ChatsController from "../../../../controllers/ChatsController";
 import env, { default as config } from "../../../../env";
 import { getPriorityMinutes, sendNotification } from "../../../../functions";
 import { distanceBetweenTwoCoordinates } from "../../../../functions/";
@@ -23,8 +23,9 @@ import ReportJob from "./reportJob";
 export default function Screen45({ navigation }) {
   const { authState } = useContext(GlobalContext);
   const { current: job_data, updateLiveLocation: _updateLiveLocation } = useContext(JOB_CONTEXT)
-  const { location: currentLocation } = useContext(USER_LOCATION_CONTEXT)
+  const { location: currentLocation, setLocation: setCurrentLocation } = useContext(USER_LOCATION_CONTEXT)
   const { changeRoute } = useContext(UIOverlayContext);
+  const [chat, setChat] = useState(null);
   const [isCanceling, setIsCanceling] = useState(false);
   const [projectManagerInfo, setProjectManager] = useState({});
   const [onSite, setOnSite] = useState(false);
@@ -35,10 +36,11 @@ export default function Screen45({ navigation }) {
 
   const updateLiveLocation = (...props) => {
     clearTimeout(debounceTimer.current)
-    debounceTimer.current = setTimeout(() => _updateLiveLocation(...props), 5000)
+    debounceTimer.current = setTimeout(() => _updateLiveLocation(...props), 2000)
   }
 
   const isInProgress = job_data?.status === 'in progress';
+  const hasUnreadChat = chat?.initialized && chat?.hasUnreadChat?.[authState.userID]
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const animation = Animated.loop(
     Animated.sequence([
@@ -64,6 +66,20 @@ export default function Screen45({ navigation }) {
       })
     ]),
   );
+
+  useEffect(() => {
+    let unsubscribe;
+
+    if (job_data) {
+      unsubscribe = ChatsController.getActiveUserChats(authState.userID, job_data.posted_by, setChat)
+    }
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe()
+      }
+    }
+  }, [job_data])
 
   useEffect(() => {
     if (isInProgress) {
@@ -95,21 +111,25 @@ export default function Screen45({ navigation }) {
 
   // get location real time
   useEffect(() => {
-    if (currentLocation?.coords) {
-      updateLiveLocation(currentLocation.coords.longitude, currentLocation.coords.latitude)
+    let subscription;
+
+    if (job_data && isInProgress) {
+      if (currentLocation?.coords) {
+        updateLiveLocation(job_data.id, currentLocation.coords.longitude, currentLocation.coords.latitude)
+      }
+
+      subscription = watchPositionAsync({ distanceInterval: 1, timeInterval: 10000 }, (position) => {
+        setLocation(position);
+        setCurrentLocation(position)
+        updateLiveLocation(job_data.id, position.coords.longitude, position.coords.latitude)
+      });
     }
-
-    const subscription = watchPositionAsync({ distanceInterval: 1, timeInterval: 10000 }, (position) => {
-      setLocation(position);
-      updateLiveLocation(position.coords.longitude, position.coords.latitude)
-    });
-
     return () => {
       if (subscription) {
         subscription.then(({ remove }) => remove());
       }
     };
-  }, [currentLocation, isInProgress]);
+  }, [job_data.id, isInProgress]);
 
   useEffect(() => {
     if (location) {
@@ -163,7 +183,7 @@ export default function Screen45({ navigation }) {
       {!loading && job_data ?
         <>
           <View>
-            <TouchableOpacity onPress={() => navigation.navigate("ProfilePage", { userData: projectManagerInfo })} style={{
+            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("ProfilePage", { userData: projectManagerInfo })} style={{
               shadowColor: "black",
               shadowOpacity: 0.4,
               shadowRadius: 7,
@@ -240,12 +260,18 @@ export default function Screen45({ navigation }) {
                 <Text small>{job_data.location.address}</Text>
               </Column> */}
 
-                  <Column style={{ justifyContent: "center" }}>
-                    <Button disabled={isCanceling} accept onPress={() => navigation.navigate("Chat", { receiver: job_data.posted_by })}>
+                  <Column style={{ justifyContent: "center", position: "relative" }}>
+                    <Button disabled={isCanceling} accept onPress={() => navigation.navigate("Chat", { receiver: job_data.posted_by, hasUnreadChat })}>
                       <Text style={{ color: "white" }} medium>
                         Message
                       </Text>
                     </Button>
+                    {hasUnreadChat &&
+                      <FontAwesome name='asterisk' color='red' size={16} style={{
+                        position: 'absolute',
+                        right: -6,
+                        top: -8,
+                      }} />}
                   </Column>
                 </View>
               </Column>

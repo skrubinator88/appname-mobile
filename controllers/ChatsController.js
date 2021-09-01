@@ -4,12 +4,12 @@ import env from "../env";
 import ChatActions from "../rdx-actions/chat.action";
 
 
-exports.initializeChatBetween = (user1, user2, job_id = "") => {
+exports.initializeChatBetween = (user1, user2) => {
   // Create document unique ID
   const chat_id = user1 > user2 ? user1 + user2 : user2 + user1;
-  const document = firestore.collection("chats").doc(chat_id);
 
-  document.set({ users: [user1, user2], initialized: false });
+  // const document = firestore.collection("chats").doc(chat_id);
+  // document.set({ users: [user1, user2], initialized: false });
 
   // return chat session id
   return chat_id;
@@ -27,10 +27,13 @@ exports.getReceiverData = async (receiver, token) => {
   return data;
 };
 
-exports.sendMessage = async (chat_id, message, dispatch) => {
+exports.sendMessage = async (recipientID, chat_id, message, dispatch) => {
   const reduxMessage = { ...message, pending: true };
   const cloudMessage = { ...message, sent: true };
 
+  if (!message.text?.trim() && !message.content) {
+    throw new Error("Cannot send empty message")
+  }
   // Send to REDUX to faster feel
   dispatch(ChatActions.add(chat_id, reduxMessage));
 
@@ -38,11 +41,24 @@ exports.sendMessage = async (chat_id, message, dispatch) => {
   const document = firestore.collection("chats").doc(chat_id);
   const newMessageDoc = document.collection("messages").doc();
   await firestore.runTransaction(async (t) => {
-    t.set(document, { last_message: { text: message.text, createdAt: message.createdAt, read: false }, initialized: true }, { merge: true })
+    t.update(document, {
+      [`hasUnreadChat.${recipientID}`]: true,
+      last_message: {
+        text: message.text,
+        createdAt: message.createdAt,
+        read: false,
+      },
+      initialized: true,
+    })
       .set(newMessageDoc, cloudMessage)
   })
+};
 
-  // Send push notification
+exports.markAsRead = async (user, chat_id) => {
+  return await firestore
+    .collection("chats")
+    .doc(chat_id)
+    .update({ [`hasUnreadChat.${user}`]: false })
 };
 
 exports.getUserChats = (user_id, setChats) => {
@@ -108,6 +124,27 @@ exports.getMessages = (chat_id, dispatch) => {
             break;
         }
       });
+    });
+
+  return unsubscribe;
+};
+
+exports.getActiveUserChats = (user1, user2, setChat) => {
+  if (!user1 || !user2) {
+    return
+  }
+  const chat_id = user1 > user2 ? user1 + user2 : user2 + user1;
+
+  const unsubscribe = firestore
+    .collection("chats")
+    .doc(chat_id)
+    .onSnapshot((snap) => {
+      if (snap.exists) {
+        const document = snap.data()
+        setChat({ id: snap.id, ...document })
+      } else {
+        setChat(null)
+      }
     });
 
   return unsubscribe;

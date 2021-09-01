@@ -1,5 +1,3 @@
-// IMPORT
-// Expo
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { TextField } from "@ubaids/react-native-material-textfield";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -13,8 +11,8 @@ import Card from "../../../../components/card_animated";
 import Confirm from "../../../../components/confirm";
 import { GlobalContext } from "../../../../components/context";
 import Text from "../../../../components/text";
+import { Countdown } from "../../../../components/timer";
 import { JOB_CONTEXT } from "../../../../contexts/JobContext";
-// Controllers
 import AnimationsController from "../../../../controllers/AnimationsControllers";
 import JobsController from "../../../../controllers/JobsControllers";
 import { getPaymentInfo } from "../../../../controllers/PaymentController";
@@ -36,6 +34,8 @@ export default function JobFound({ navigation }) {
 
 	const cardRef = useRef(null);
 	const decisionTimer = useRef(undefined);
+	const decisionTimerAmount = useRef(3 * 60 * 1000);
+
 	// Tracks when the job is accepted
 	let data = useMemo(() => ({ accepted: false }), [navigation]);
 	const dispatch = useDispatch();
@@ -137,7 +137,7 @@ export default function JobFound({ navigation }) {
 						},
 						style: 'default'
 					}])
-			}, 15 * 60 * 1000)
+			}, decisionTimerAmount.current)
 		}
 		return () => {
 			clearTimeout(decisionTimer.current)
@@ -286,7 +286,7 @@ export default function JobFound({ navigation }) {
 			<Card ref={cardRef}>
 				{!loading && job_data ?
 					<View>
-						<TouchableOpacity onPress={() => navigation.navigate("ProfilePage", { userData: projectManager })} style={{
+						<TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("ProfilePage", { userData: projectManager })} style={{
 							shadowColor: "black",
 							shadowOpacity: 0.4,
 							shadowRadius: 7,
@@ -308,13 +308,24 @@ export default function JobFound({ navigation }) {
 									{name}
 								</Text>
 								<View style={{ flexDirection: "row", justifyContent: 'center', alignItems: "center" }}>
-									<Text bold marginBottom="5px">
+									<Text bold>
 										<FontAwesome name="map-marker" size={16} color="red" />
 									</Text>
 									<Text style={{ marginLeft: 4 }} bold>
-										13 min
+										13 mins
 									</Text>
 								</View>
+
+								{!job_data?.offer_received && (
+									<View style={{ flexDirection: "row", justifyContent: 'center', alignItems: "center" }}>
+										<Text bold>
+											<FontAwesome name="clock-o" size={16} color="red" />
+										</Text>
+										<Text style={{ marginLeft: 4 }} bold>
+											expires in <Countdown durationInMinutes={decisionTimerAmount.current / 60000} />
+										</Text>
+									</View>
+								)}
 							</Column>
 						</Row>
 

@@ -15,6 +15,7 @@ import env, { default as config } from "../../../env";
 import { sendNotification } from "../../../functions";
 import ReportJob from "../root/UIOverlay/reportJob";
 import { CounterOfferView } from "./index";
+import ChatsController from "../../../controllers/ChatsController";
 
 
 export default function ListingItemSelected({ navigation }) {
@@ -24,11 +25,14 @@ export default function ListingItemSelected({ navigation }) {
 	const [isCanceling, setIsCanceling] = useState(false);
 	const [deployeeInfo, setDeployeeInfo] = useState({});
 	const [showReport, setShowReport] = useState(false)
+	const [chat, setChat] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [state, setState] = useState({ showCounterOffer: false, hasPendingOffer: false });
 
 	const { hasPendingOffer } = state
+	const hasUnreadChat = chat?.initialized && chat?.hasUnreadChat?.[authState.userID]
 	const isInProgress = job_data?.status === 'in progress';
+	const shouldShowDeployee = (job_data?.status !== 'available' || (job_data?.status === 'available' && job_data?.offer_received)) && job_data?.executed_by
 	const pulseAnim = useRef(new Animated.Value(1)).current;
 	const animation = Animated.loop(
 		Animated.sequence([
@@ -54,6 +58,20 @@ export default function ListingItemSelected({ navigation }) {
 			})
 		]),
 	);
+
+	useEffect(() => {
+		let unsubscribe;
+
+		if (job_data?.executed_by) {
+			unsubscribe = ChatsController.getActiveUserChats(authState.userID, job_data.executed_by, setChat)
+		}
+
+		return () => {
+			if (unsubscribe) {
+				unsubscribe()
+			}
+		}
+	}, [job_data.executed_by])
 
 	useEffect(() => {
 		if (isInProgress) {
@@ -226,9 +244,9 @@ export default function ListingItemSelected({ navigation }) {
 			{!loading && job_data ?
 				<>
 					<View>
-						{job_data.executed_by ? (
+						{shouldShowDeployee ? (
 							<>
-								<TouchableOpacity onPress={() => navigation.navigate("ProfilePage", { userData: deployeeInfo })} style={{
+								<TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("ProfilePage", { userData: deployeeInfo })} style={{
 									shadowColor: "black",
 									shadowOpacity: 0.4,
 									shadowRadius: 7,
@@ -277,12 +295,18 @@ export default function ListingItemSelected({ navigation }) {
 								{(job_data.status !== 'available' && job_data.status !== 'in review') &&
 									<>
 										<Row style={{ justifyContent: 'center' }}>
-											<Column>
-												<Button disabled={isCanceling || loading} accept onPress={() => navigation.navigate("Chat", { receiver: job_data.executed_by })}>
+											<Column style={{ justifyContent: "center", position: "relative" }}>
+												<Button disabled={isCanceling || loading} accept onPress={() => navigation.navigate("Chat", { receiver: job_data.executed_by, hasUnreadChat })}>
 													<Text style={{ color: "white" }} medium>
 														Message
 													</Text>
 												</Button>
+												{hasUnreadChat &&
+													<FontAwesome name='asterisk' color='red' size={16} style={{
+														position: 'absolute',
+														right: -6,
+														top: -8,
+													}} />}
 											</Column>
 										</Row>
 										{!isInProgress && <CardOptionItem disabled={isCanceling || loading} row onPress={() => navigation.navigate("Scanner", { job_data, deployee: job_data.executed_by })}>
@@ -306,11 +330,6 @@ export default function ListingItemSelected({ navigation }) {
 									<Text small>View Job Description</Text>
 									<Ionicons name="ios-arrow-forward" size={24} />
 								</CardOptionItem>
-
-								{/* <CardOptionItem row>
-					<Text small>View Profile</Text>
-					<Ionicons name="ios-arrow-forward" size={24} />
-				</CardOptionItem> */}
 
 								<CardOptionItem disabled={isCanceling || loading} onPress={() => setShowReport(true)} row>
 									<Text small>Report {deployeeInfo.first_name} {deployeeInfo.last_name}</Text>

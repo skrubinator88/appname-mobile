@@ -16,6 +16,9 @@
   - Indicate when a job is in progress
   - Show payment account setup modal before viewing job
   - Notification per message
+- September/2021
+  - Update message button when new message is unread
+  - Fix payment bug
 
 
 

@@ -1,6 +1,7 @@
 import { AntDesign } from "@expo/vector-icons";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, View } from "react-native";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import { GiftedChat } from "react-native-gifted-chat";
 import { getStatusBarHeight } from "react-native-status-bar-height";
@@ -16,24 +17,18 @@ import { JOB_CONTEXT } from "../../../contexts/JobContext";
 import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
 import { Alert } from "react-native";
 
-
 const statusBarHeight = getStatusBarHeight();
-
-
-
-
-
-
 
 export default function Chat({ route, navigation }) {
   const { authState } = useContext(GlobalContext);
   const { current } = useContext(JOB_CONTEXT)
   const { listing } = useContext(LISTING_CONTEXT)
-  const { receiver } = route.params;
+  const { receiver, hasUnreadChat } = useRoute().params || {};
 
   const [chatID, setChatID] = useState("");
   const [receiverName, setReceiverName] = useState("");
   const notificationTimer = useRef();
+  const giftedChatRef = useRef()
 
   const chats = useSelector((state) => state.chats);
   const dispatch = useDispatch();
@@ -68,6 +63,10 @@ export default function Chat({ route, navigation }) {
   }, []);
 
   useEffect(() => {
+    giftedChatRef.current?.scrollToBottom();
+  }, [chats.length])
+
+  useEffect(() => {
     if (receiver) {
       (async () => {
         const retrieveReceiverInfo = await ChatController.getReceiverData(receiver, authState.userToken);
@@ -76,10 +75,23 @@ export default function Chat({ route, navigation }) {
     }
   }, [receiver]);
 
+
+  useFocusEffect(useCallback(() => {
+    if (!chatID || !hasUnreadChat) {
+      return
+    }
+    // This will indicate that there is no unread message
+    ChatController.markAsRead(authState.userID, chatID)
+      .catch(err => {
+        console.log("Failed to mark chat as read", err)
+      })
+
+  }, [chatID, hasUnreadChat]))
+
   const onSend = async (message) => {
     if (chatID.length !== 0) {
       try {
-        await ChatController.sendMessage(chatID, message, dispatch);
+        await ChatController.sendMessage(receiver, chatID, message, dispatch);
         notifyRecipient(message)
       } catch (e) {
         console.log(e)
@@ -115,6 +127,7 @@ export default function Chat({ route, navigation }) {
             contentContainerStyle: { flexGrow: 1, justifyContent: 'center' },
             bounces: false
           }}
+          ref={giftedChatRef}
           placeholder='Type a message'
           alwaysShowSend
           inverted={false}

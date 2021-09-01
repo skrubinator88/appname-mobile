@@ -185,22 +185,20 @@ export const JobContextProvider = (props) => {
         }
     }
 
-    const updateLiveLocation = async (longitude, latitude) => {
-        if (current && current.status === 'in progress') {
-            try {
-                const doc = JOBS_DB.doc(current.id)
-                await doc.update({
-                    active_location: {
-                        user: authState.userID,
-                        id: current.id,
-                        longitude,
-                        latitude
-                    }
-                })
-                console.log("Updating live location")
-            } catch (e) {
-                console.log(e.message)
-            }
+    const updateLiveLocation = async (jobID, longitude, latitude) => {
+        try {
+            const doc = JOBS_DB.doc(jobID)
+            await doc.update({
+                active_location: {
+                    user: authState.userID,
+                    id: current.id,
+                    longitude,
+                    latitude
+                }
+            })
+            console.log("Updating live location")
+        } catch (e) {
+            console.log(e.message)
         }
     }
 
