@@ -96,7 +96,7 @@ export function TransactionRecord({ transaction: txn, onPress = () => { } }) {
                         <Text small weight="600" color="#4a4a4a">EXP: {`${txn.month.padStart(2, '0')}/${txn.year}`}</Text>
                     </View>
                     <View style={{ margin: 12, alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text align='center' title weight="700" color="#444">{CurrencyFormatter.format(txn.inbound ? (txn.deployeeRevenue + txn.serviceCharge + txn.mobilizationFee) : txn.amount / 100)}</Text>
+                        <Text align='center' title weight="700" color="#444">{CurrencyFormatter.format(txn.inbound ? (txn.deployeeRevenue + txn.serviceCharge + txn.mobilizationFee) / 100 : txn.amount / 100)}</Text>
                         <Text align='center' small weight="500" color="#6a6a6a">{txn.description}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
