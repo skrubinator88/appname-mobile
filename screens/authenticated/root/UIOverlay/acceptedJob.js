@@ -182,13 +182,18 @@ export default function Screen45({ navigation }) {
 
   const openMap = async () => {
     const jobLocation = job_data.coordinates;
+    const address = job_data?.location?.address;
+    const placeId = job_data?.location?.place_id;
 
     await showLocation({
       latitude: jobLocation["U"],
       longitude: jobLocation["k"],
       sourceLatitude: currentLocation?.coords?.latitude,
       sourceLongitude: currentLocation?.coords?.longitude,
-      googleForceLatLon: true,
+      googleForceLatLon: !(address && placeId),
+      alwaysIncludeGoogle: true,
+      title: address,
+      googlePlaceId: placeId,
       dialogTitle: "Open External Map",
       dialogMessage: 'Navigate to your destination using your preferred map application',
       cancelText: 'Never Mind',
@@ -199,11 +204,6 @@ export default function Screen45({ navigation }) {
     <Card>
       {!loading && job_data ?
         <>
-          <View style={{ position: 'absolute', zIndex: -1, right: 16, top: -120 }}>
-            <OverlayButton disabled={loading || !job_data} activeOpacity={0.6} style={{ backgroundColor: 'white', borderRadius: 50, padding: 20 }} onPress={openMap}>
-              <MaterialIcons name='gps-fixed' backgroundColor="white" color="#444" size={30} />
-            </OverlayButton>
-          </View>
           <View>
             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("ProfilePage", { userData: projectManagerInfo })} style={{
               shadowColor: "black",
@@ -306,7 +306,10 @@ export default function Screen45({ navigation }) {
                 <Ionicons name="ios-arrow-forward" size={24} />
               </CardOptionItem>
             }
-
+            <CardOptionItem disabled={isCanceling || loading} row onPress={openMap}>
+              <Text small bold color={onSite ? colors.primary : "grey"}>Open Directions</Text>
+              <Ionicons name="map-outline" size={24} />
+            </CardOptionItem>
             <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("Job Details", { data: job_data })}>
               <Text small>View Job Description</Text>
               <Ionicons name="ios-arrow-forward" size={24} />
