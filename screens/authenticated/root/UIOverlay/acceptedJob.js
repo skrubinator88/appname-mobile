@@ -1,10 +1,10 @@
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { watchPositionAsync } from "expo-location";
-import moment from "moment";
-import { unix } from "moment";
+import moment, { unix } from "moment";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Animated, StyleSheet, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Animated, Linking, Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import { colors } from "react-native-elements";
+import { showLocation } from "react-native-map-link";
 import styled from "styled-components/native";
 import GigChaserJobWord from "../../../../assets/gig-logo";
 import Confirm from "../../../../components/confirm";
@@ -12,8 +12,8 @@ import { GlobalContext, UIOverlayContext } from "../../../../components/context"
 import Text from "../../../../components/text";
 import { JOB_CONTEXT } from "../../../../contexts/JobContext";
 import { USER_LOCATION_CONTEXT } from "../../../../contexts/userLocation";
-import JobsController from "../../../../controllers/JobsControllers";
 import ChatsController from "../../../../controllers/ChatsController";
+import JobsController from "../../../../controllers/JobsControllers";
 import env, { default as config } from "../../../../env";
 import { getPriorityMinutes, sendNotification } from "../../../../functions";
 import { distanceBetweenTwoCoordinates } from "../../../../functions/";
@@ -33,6 +33,7 @@ export default function Screen45({ navigation }) {
   const [showReport, setShowReport] = useState(false)
   const [loading, setLoading] = useState(true);
   const debounceTimer = useRef();
+  const [distance, setDistance] = useState(0)
 
   const updateLiveLocation = (...props) => {
     clearTimeout(debounceTimer.current)
@@ -129,11 +130,11 @@ export default function Screen45({ navigation }) {
         subscription.then(({ remove }) => remove());
       }
     };
-  }, [job_data.id, isInProgress]);
+  }, [job_data?.id, isInProgress]);
 
   useEffect(() => {
     if (location) {
-      const userLocation = location.coords;
+      const userLocation = currentLocation.coords;
       const jobLocation = job_data.coordinates;
 
       // get distance between points in miles
@@ -147,8 +148,9 @@ export default function Screen45({ navigation }) {
       } else {
         setOnSite(false); // Outside
       }
+      setDistance(distance.toFixed(2))
     }
-  }, [location]);
+  }, [currentLocation?.coords?.latitude, currentLocation?.coords?.longitude]);
 
   const cancelJob = useCallback(() => {
     const acceptedTime = unix((job_data.date_accepted.toMillis()) / 1000)
@@ -178,10 +180,30 @@ export default function Screen45({ navigation }) {
     });
   }, [authState]);
 
+  const openMap = async () => {
+    const jobLocation = job_data.coordinates;
+
+    await showLocation({
+      latitude: jobLocation["U"],
+      longitude: jobLocation["k"],
+      sourceLatitude: currentLocation?.coords?.latitude,
+      sourceLongitude: currentLocation?.coords?.longitude,
+      googleForceLatLon: true,
+      dialogTitle: "Open External Map",
+      dialogMessage: 'Navigate to your destination using your preferred map application',
+      cancelText: 'Never Mind',
+    })
+  }
+
   return (
     <Card>
       {!loading && job_data ?
         <>
+          <View style={{ position: 'absolute', zIndex: -1, right: 16, top: -120 }}>
+            <OverlayButton disabled={loading || !job_data} activeOpacity={0.6} style={{ backgroundColor: 'white', borderRadius: 50, padding: 20 }} onPress={openMap}>
+              <MaterialIcons name='gps-fixed' backgroundColor="white" color="#444" size={30} />
+            </OverlayButton>
+          </View>
           <View>
             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("ProfilePage", { userData: projectManagerInfo })} style={{
               shadowColor: "black",
@@ -238,7 +260,7 @@ export default function Screen45({ navigation }) {
                   <FontAwesome name="map-marker" size={24} color="red" />
 
                   <Column style={{ paddingLeft: 2, justifyContent: "center" }}>
-                    <Text bold>15 min.</Text>
+                    <Text bold>{`${distance}`} miles</Text>
                   </Column>
                 </View>
               </Column>
@@ -411,4 +433,8 @@ const Button = styled.TouchableOpacity`
         `;
     }
   }};
+`;
+
+const OverlayButton = styled.TouchableOpacity`
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
 `;

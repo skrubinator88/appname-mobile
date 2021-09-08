@@ -13,17 +13,19 @@ import { GlobalContext } from "../../../../components/context";
 import Text from "../../../../components/text";
 import { Countdown } from "../../../../components/timer";
 import { JOB_CONTEXT } from "../../../../contexts/JobContext";
+import { USER_LOCATION_CONTEXT } from "../../../../contexts/userLocation";
 import AnimationsController from "../../../../controllers/AnimationsControllers";
 import JobsController from "../../../../controllers/JobsControllers";
 import { getPaymentInfo } from "../../../../controllers/PaymentController";
 import { default as config } from "../../../../env";
-import { sendNotification } from "../../../../functions";
+import { sendNotification, distanceBetweenTwoCoordinates } from "../../../../functions";
 import { getPriorityColor, priorityMap } from "../../listings/listingItem";
 import PhotoItem from "../../listings/listItemImage";
 
 export default function JobFound({ navigation }) {
 	const { authState } = useContext(GlobalContext);
 	const { current: job_data } = useContext(JOB_CONTEXT)
+	const { location } = useContext(USER_LOCATION_CONTEXT)
 
 	const [projectManager, setProjectManager] = useState({});
 	const [name, setName] = useState("");
@@ -31,6 +33,7 @@ export default function JobFound({ navigation }) {
 	const [starRate, setStarRate] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [enableNegotiation, setEnableNegotiation] = useState(false);
+	const [distance, setDistance] = useState(0)
 
 	const cardRef = useRef(null);
 	const decisionTimer = useRef(undefined);
@@ -40,6 +43,17 @@ export default function JobFound({ navigation }) {
 	let data = useMemo(() => ({ accepted: false }), [navigation]);
 	const dispatch = useDispatch();
 	const { hasActiveAccount } = useSelector((state) => state.payment)
+
+	useEffect(() => {
+		if (location) {
+			const userLocation = location.coords;
+			const jobLocation = job_data.coordinates;
+
+			// get distance between points in miles
+			const distance = distanceBetweenTwoCoordinates(userLocation.latitude, userLocation.longitude, jobLocation["U"], jobLocation["k"]);
+			setDistance(distance.toFixed(2))
+		}
+	}, [location?.coords?.latitude, location?.coords?.longitude]);
 
 	useEffect(() => {
 		getPaymentInfo(authState, dispatch).catch(e => {
@@ -307,25 +321,28 @@ export default function JobFound({ navigation }) {
 								<Text title bold marginBottom="5px">
 									{name}
 								</Text>
-								<View style={{ flexDirection: "row", justifyContent: 'center', alignItems: "center" }}>
-									<Text bold>
-										<FontAwesome name="map-marker" size={16} color="red" />
-									</Text>
-									<Text style={{ marginLeft: 4 }} bold>
-										13 mins
-									</Text>
+								<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+									{!!distance && (
+										<View style={{ flexDirection: "row", justifyContent: 'center', alignItems: "center", marginVertical: 4 }}>
+											<Text bold>
+												<FontAwesome name="map-marker" size={16} color="red" />
+											</Text>
+											<Text style={{ marginLeft: 4 }} bold>
+												<Text bold>{`${distance}`} miles</Text>
+											</Text>
+										</View>
+									)}
+									{!job_data?.offer_received && (
+										<View style={{ flexDirection: "row", justifyContent: 'center', alignItems: "center" }}>
+											<Text bold>
+												<FontAwesome name="clock-o" size={16} color="red" />
+											</Text>
+											<Text style={{ marginLeft: 4 }} bold>
+												<Countdown durationInMinutes={decisionTimerAmount.current / 60000} />
+											</Text>
+										</View>
+									)}
 								</View>
-
-								{!job_data?.offer_received && (
-									<View style={{ flexDirection: "row", justifyContent: 'center', alignItems: "center" }}>
-										<Text bold>
-											<FontAwesome name="clock-o" size={16} color="red" />
-										</Text>
-										<Text style={{ marginLeft: 4 }} bold>
-											expires in <Countdown durationInMinutes={decisionTimerAmount.current / 60000} />
-										</Text>
-									</View>
-								)}
 							</Column>
 						</Row>
 

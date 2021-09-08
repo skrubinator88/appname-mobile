@@ -150,15 +150,15 @@ export function ProfilePage({ navigation }) {
           </DetailItemRowLink>
         </DetailItemRow>
 
-        <DetailItemRow> 
-          {/* onPress={() => navigation.navigate("Background Check")}> */}
+        {/* <DetailItemRow> 
+          onPress={() => navigation.navigate("Background Check")}>
           <DetailItemRowLink>
             <Text small weight="700" color="#4a4a4a">
               PERFORM A BACKGROUND CHECK
             </Text>
             <Ionicons name="ios-arrow-forward" size={20} />
           </DetailItemRowLink>
-        </DetailItemRow>
+        </DetailItemRow> */}
       </DetailSection>
 
       {/* Comments Section */}

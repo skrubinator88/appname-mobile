@@ -88,7 +88,7 @@ export const JobContextProvider = (props) => {
             if (unsubscribe) unsubscribe()
             setJobs([])
         }
-    }, [location, authState?.userData?.role, ready, current, lastNotification?.notification?.request?.identifier])
+    }, [location, authState?.userData?.role, ready, current?.status, lastNotification?.notification?.request?.identifier])
 
 
     const fetchJobsAndNotification = async () => {

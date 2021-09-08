@@ -20,7 +20,7 @@ const { height } = Dimensions.get("screen");
 export function RootScreen({ navigation }) {
   // Constructor
   const { location } = useContext(USER_LOCATION_CONTEXT)
-  const { jobs } = useContext(JOB_CONTEXT)
+  const { jobs, current } = useContext(JOB_CONTEXT)
   const { listing } = useContext(LISTING_CONTEXT)
   const { authState } = useContext(GlobalContext);
   const { changeRoute } = {};
@@ -89,7 +89,7 @@ export function RootScreen({ navigation }) {
         zoom: 16,
       }, { duration: 2000 });
     }
-  }, [listing && listing.status === 'in progress', authState?.userData?.role])
+  }, [listing?.status, listing?.active_location, authState?.userData?.role])
 
   useEffect(() => {
     getPaymentInfo(authState, dispatch).catch(e => console.log(e))
@@ -145,6 +145,9 @@ export function RootScreen({ navigation }) {
             </>
           )}
           {jobs.map((job) => <CustomMarker key={job._id} changeRoute={changeRoute} coordinates={job.coordinates} job={job} />)}
+          {/* {(current && authState?.userData?.role === 'contractor') && (
+            <CustomMarker coordinates={current.coordinates} job={current} />
+          )} */}
           {(listing && listing.status === 'in progress' && authState?.userData?.role !== 'contractor' && listing.active_location) && (
             <CustomMarker changeRoute={changeRoute} coordinates={{ longitude: listing.active_location.longitude, latitude: listing.active_location.latitude }} job={listing} />
           )}
