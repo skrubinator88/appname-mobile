@@ -17,7 +17,7 @@ export function Countdown({ durationInMinutes }) {
                 return
             }
             setCurrentTime(currentTime - 1)
-        }, 60000)
+        }, 58000)
         return () => clearInterval(timerRef.current)
     }, [])
 

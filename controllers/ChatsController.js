@@ -4,12 +4,14 @@ import env from "../env";
 import ChatActions from "../rdx-actions/chat.action";
 
 
-exports.initializeChatBetween = (user1, user2) => {
+exports.initializeChatBetween = async (user1, user2) => {
   // Create document unique ID
   const chat_id = user1 > user2 ? user1 + user2 : user2 + user1;
 
-  // const document = firestore.collection("chats").doc(chat_id);
-  // document.set({ users: [user1, user2], initialized: false });
+  const document = firestore.collection("chats").doc(chat_id);
+  if (!(await document.get()).exists) {
+    document.set({ users: [user1, user2], initialized: false });
+  }
 
   // return chat session id
   return chat_id;
@@ -39,7 +41,6 @@ exports.sendMessage = async (recipientID, chat_id, message, dispatch) => {
 
   // Send to firebase
   const document = firestore.collection("chats").doc(chat_id);
-  const newMessageDoc = document.collection("messages").doc();
   await firestore.runTransaction(async (t) => {
     t.update(document, {
       [`hasUnreadChat.${recipientID}`]: true,
@@ -50,7 +51,9 @@ exports.sendMessage = async (recipientID, chat_id, message, dispatch) => {
       },
       initialized: true,
     })
-      .set(newMessageDoc, cloudMessage)
+
+    const newMessageDoc = document.collection("messages").doc();
+    t.set(newMessageDoc, cloudMessage)
   })
 };
 

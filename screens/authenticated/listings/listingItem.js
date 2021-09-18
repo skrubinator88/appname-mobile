@@ -388,7 +388,7 @@ export default function ListingItem({ navigation }) {
         const confirmFee = await new Promise(res => {
           Confirm({
             title: "Cost Confirmation",
-            message: `A mobilization fee of $${parseInt(formattedForm.salary) < 50 ? "2.50" : "4.50"} and a service charge of $${parseInt(formattedForm.salary) * 0.125} will be charged for this job`,
+            message: `A mobilization fee of $${parseInt(formattedForm.salary) < 50 ? "2.50" : "4.50"} and a service fee of $${parseInt(formattedForm.salary) * 0.125} will be charged for this job`,
             options: ["Continue", "Cancel"],
             cancelButtonIndex: 1,
             onPress: (i) => {

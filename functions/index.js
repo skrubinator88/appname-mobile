@@ -149,7 +149,7 @@ export const getTransactionStatus = (status) => {
 }
 
 export const getTransactionStatusColor = (txn) => {
-  if (txn.inbound && txn.status === 1) return 'greenyellow'
+  if (txn.inbound && txn.status === 1) return 'green'
 
   switch (txn.status) {
     case 0:

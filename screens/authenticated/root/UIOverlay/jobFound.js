@@ -48,9 +48,10 @@ export default function JobFound({ navigation }) {
 		if (location) {
 			const userLocation = location.coords;
 			const jobLocation = job_data.coordinates;
-
+			console.log({ userLocation, jobLocation })
 			// get distance between points in miles
-			const distance = distanceBetweenTwoCoordinates(userLocation.latitude, userLocation.longitude, jobLocation["U"], jobLocation["k"]);
+			const distance = distanceBetweenTwoCoordinates(jobLocation.latitude, jobLocation.longitude, userLocation.latitude, userLocation.longitude);
+
 			setDistance(distance.toFixed(2))
 		}
 	}, [location?.coords?.latitude, location?.coords?.longitude]);
@@ -318,12 +319,15 @@ export default function JobFound({ navigation }) {
 						</TouchableOpacity>
 						<Row first style={{ alignItems: 'center', justifyContent: 'center' }}>
 							<Column>
-								<Text title bold marginBottom="5px">
+								<Text title bold>
 									{name}
 								</Text>
+								<View style={{ paddingVertical: 8 }}>
+									<Text small light align='center'>{job_data?.job_type}</Text>
+								</View>
 								<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 									{!!distance && (
-										<View style={{ flexDirection: "row", justifyContent: 'center', alignItems: "center", marginVertical: 4 }}>
+										<View style={{ flexDirection: "row", justifyContent: 'center', alignItems: "center" }}>
 											<Text bold>
 												<FontAwesome name="map-marker" size={16} color="red" />
 											</Text>
@@ -333,7 +337,7 @@ export default function JobFound({ navigation }) {
 										</View>
 									)}
 									{!job_data?.offer_received && (
-										<View style={{ flexDirection: "row", justifyContent: 'center', alignItems: "center" }}>
+										<View style={{ marginLeft: 4, flexDirection: "row", justifyContent: 'center', alignItems: "center" }}>
 											<Text bold>
 												<FontAwesome name="clock-o" size={16} color="red" />
 											</Text>
@@ -349,17 +353,16 @@ export default function JobFound({ navigation }) {
 						<Row>
 							<JobDescriptionRow>
 								<JobDescription>
-									<Text small light marginBottom="5px">
-										Job Description
-									</Text>
-									<Text small marginBottom="5px">
-										${job_data.salary}/{job_data.wage || 'deployment'}
-									</Text>
+									<View>
+										<Text small light marginBottom="5px">Job Title</Text>
+										<Text>{job_data.job_title}</Text>
+									</View>
+									<View style={{ justifyContent: 'center', alignItems: 'stretch' }}>
+										<Text small marginBottom="5px">
+											${job_data.salary}/{job_data.wage || 'deployment'}
+										</Text>
+									</View>
 								</JobDescription>
-
-								{description.map((item) => {
-									return <Text key={item.id}>{item.text}</Text>;
-								})}
 
 
 								{!!job_data.priority && (
@@ -562,10 +565,10 @@ const NegotiationView = ({ job_data, hasActiveAccount, navigation, deployee, onC
 	return (
 		<Modal coverScreen avoidKeyboard swipeDirection="down" onSwipeComplete={onCancel} onBackButtonPress={onCancel} isVisible>
 			<SafeAreaView style={{ backgroundColor: "#fff", borderRadius: 40, paddingVertical: 16 }}>
-				<Row>
+				<Row style={{ borderBottomWidth: 0 }}>
 					<JobDescriptionRow>
 						<JobDescription>
-							<Text small light marginBottom="5px">
+							<Text textTransform='uppercase' small light marginBottom="5px">
 								Current Offer
 							</Text>
 							<Text small marginBottom="5px">
@@ -611,7 +614,7 @@ const NegotiationView = ({ job_data, hasActiveAccount, navigation, deployee, onC
 						<Button disabled={loading} style={{ flexDirection: "row" }} accept onPress={onSubmitOffer}>
 							{loading ? <ActivityIndicator animating style={{ marginEnd: 4 }} color="white" /> : null}
 							<Text style={{ color: "white" }} medium>
-								Save
+								Send
 							</Text>
 						</Button>
 					</View>

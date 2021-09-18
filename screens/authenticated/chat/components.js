@@ -1,7 +1,7 @@
 import { default as React } from "react";
-import { getStatusBarHeight } from "react-native-status-bar-height";
-import { GiftedChat, IMessage, InputToolbar as GiftedInputToolbar, Composer, Send, Actions, LoadEarlier, utils, Bubble } from 'react-native-gifted-chat';
 import { StyleSheet } from "react-native";
+import { Composer, InputToolbar as GiftedInputToolbar } from 'react-native-gifted-chat';
+import { getStatusBarHeight } from "react-native-status-bar-height";
 
 
 const statusBarHeight = getStatusBarHeight();

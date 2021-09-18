@@ -84,7 +84,7 @@ export function ExternalAccountView({ account, onPress }) {
 
 export function TransactionRecord({ transaction: txn, onPress = () => { } }) {
     return (
-        <PaymentItemRow key={txn.id} style={[{ borderLeftWidth: 5, borderRightWidth: 5, borderColor: 'transparent' }, txn.inbound ? { borderRightColor: getTransactionStatusColor(txn), } : { borderLeftColor: getTransactionStatusColor(txn), }]} >
+        <PaymentItemRow key={txn.id} style={[{ borderLeftWidth: 5, borderRightWidth: 5, marginVertical: 4, borderColor: 'transparent' }, txn.inbound ? { borderRightColor: getTransactionStatusColor(txn), } : { borderLeftColor: getTransactionStatusColor(txn), }]} >
             <PaymentItemRowLink activeOpacity={0.8} onPress={onPress}>
                 <View style={{ flex: 1, justifyContent: 'space-between', alignItems: 'stretch' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>

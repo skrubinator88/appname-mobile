@@ -19,7 +19,7 @@ import { Alert } from "react-native";
 
 const statusBarHeight = getStatusBarHeight();
 
-export default function Chat({ route, navigation }) {
+export default function Chat({ navigation }) {
   const { authState } = useContext(GlobalContext);
   const { current } = useContext(JOB_CONTEXT)
   const { listing } = useContext(LISTING_CONTEXT)
@@ -53,11 +53,16 @@ export default function Chat({ route, navigation }) {
   }
 
   useEffect(() => {
-    const retrievedChatID = ChatController.initializeChatBetween(authState.userID, receiver);
-    setChatID(retrievedChatID);
+    let retrievedChatID;
+    let unsubscribe;
+    new Promise(async (res) => {
+      retrievedChatID = await ChatController.initializeChatBetween(authState.userID, receiver);
+      setChatID(retrievedChatID);
 
-    // Subscribe to messages channel
-    const unsubscribe = ChatController.getMessages(retrievedChatID, dispatch);
+      // Subscribe to messages channel
+      unsubscribe = ChatController.getMessages(retrievedChatID, dispatch);
+      res()
+    })
 
     return () => ChatController.clean(retrievedChatID, unsubscribe, dispatch);
   }, []);
@@ -117,10 +122,7 @@ export default function Chat({ route, navigation }) {
 
         <End></End>
       </NavBar>
-      <KeyboardAvoidingView
-        behavior='padding'
-        style={{ flex: 1 }}
-      >
+      <KeyboardAvoidingView behavior='padding' style={{ flex: 1 }}>
         <GiftedChat
           listViewProps={{
             style: { flex: 1, flexShrink: 0 },
@@ -150,8 +152,7 @@ export default function Chat({ route, navigation }) {
             <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', transform: [{ rotateX: 160 }] }}>
               <Text align='center' light small>No Message sent yet</Text>
             </View>
-          )}
-        />
+          )} />
       </KeyboardAvoidingView>
     </View>
   );
@@ -159,7 +160,7 @@ export default function Chat({ route, navigation }) {
 
 const NavBar = styled.SafeAreaView`
   height: 90px;
-  margin-top: ${Platform.OS == "android" ? `${statusBarHeight}px` : "0px"};
+  margin-top: ${Platform.OS === "android" ? `${statusBarHeight}px` : "0px"};
   flex-direction: row;
   /* justify-content: space-around; */
   align-items: center;

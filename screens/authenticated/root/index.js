@@ -3,15 +3,16 @@ import { Dimensions, Image, Keyboard, View } from "react-native";
 import MapView, { Callout, Circle, Marker } from "react-native-maps";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components/native";
+import GigChaserJobWord from "../../../assets/gig-logo";
 import { GlobalContext } from "../../../components/context";
 import Text from "../../../components/text";
 import { JOB_CONTEXT } from "../../../contexts/JobContext";
 import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
 import { USER_LOCATION_CONTEXT } from "../../../contexts/userLocation";
+import JobsController from "../../../controllers/JobsControllers";
 import { getPaymentInfo } from "../../../controllers/PaymentController";
 import { CameraInterface } from "../../../interfaces/mapview-interfaces";
 import HandleUIComponents from "./UIOverlay/handleUIComponents";
-import GigChaserJobWord from "../../../assets/gig-logo";
 
 const markerImage = require("../../../assets/map-marker.png")
 // Miscellaneous
@@ -144,12 +145,12 @@ export function RootScreen({ navigation }) {
               />
             </>
           )}
-          {jobs.map((job) => <CustomMarker key={job._id} changeRoute={changeRoute} coordinates={job.coordinates} job={job} />)}
+          {jobs.map((job) => <CustomMarker key={job._id} authState={authState} coordinates={job.coordinates} job={job} />)}
           {/* {(current && authState?.userData?.role === 'contractor') && (
             <CustomMarker coordinates={current.coordinates} job={current} />
           )} */}
           {(listing && listing.status === 'in progress' && authState?.userData?.role !== 'contractor' && listing.active_location) && (
-            <CustomMarker changeRoute={changeRoute} coordinates={{ longitude: listing.active_location.longitude, latitude: listing.active_location.latitude }} job={listing} />
+            <CustomMarker authState={authState} coordinates={{ longitude: listing.active_location.longitude, latitude: listing.active_location.latitude }} job={listing} />
           )}
         </MapView>
 
@@ -161,7 +162,8 @@ export function RootScreen({ navigation }) {
   }
 }
 
-const CustomMarker = ({ coordinates, changeRoute, job }) => {
+const CustomMarker = ({ coordinates, authState, job }) => {
+
   return (
     <Marker
       key={job._id}
@@ -171,7 +173,7 @@ const CustomMarker = ({ coordinates, changeRoute, job }) => {
         source={markerImage}
         fadeDuration={0}
         style={{ height: 50, width: 50 }} />
-      <Callout onPress={() => { }} tooltip={true}>
+      <Callout onPress={async () => { await JobsController.changeJobStatus(job._id, "in review", authState.userID); }} tooltip={true}>
         <View style={{
           width: 160,
           padding: 8,

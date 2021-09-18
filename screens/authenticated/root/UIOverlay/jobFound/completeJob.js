@@ -57,32 +57,12 @@ export default function CompleteJob({ navigation }) {
       nextProvider="Entypo"
     >
       <View style={{ justifyContent: 'space-between', flexGrow: 1 }}>
-        <View style={{ justifyContent: 'center', flex: 1 }}>
-          <SectionTitle>Confirm the gig completion by taking a picture of the finished work</SectionTitle>
-        </View>
-
-        <View style={{ flex: 3, paddingHorizontal: 12, paddingVertical: 20 }}>
-          {(!!image || capture) &&
-            <View style={{ flex: 1, justifyContent: 'flex-start' }}>
-              <CaptureScreen image={image} capture={capture} onCapture={onCapture} />
-              <RetakeButton disabled={loading} onPress={() => setCapturing(true)} activeOpacity={0.8}><Text style={{ color: '#888', fontSize: 16, fontWeight: 'bold' }}>Retake Picture</Text></RetakeButton>
-            </View>
-          }
-          {!image &&
-            <View style={{ flex: 1, justifyContent: 'flex-start', paddingHorizontal: 12, paddingVertical: 20 }}>
-              <CompleteButton disabled={loading} onPress={() => setCapturing(true)} activeOpacity={0.8}>
-                <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Take Photo</Text>
-              </CompleteButton>
-            </View>
-          }
-        </View>
-
-        {!!image &&
-          <View style={{ flex: 1, paddingVertical: 16, justifyContent: 'center' }}>
+        {!job_data.scanQR &&
+          <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 12, paddingVertical: 20 }}>
             <CompleteButton disabled={loading} onPress={async () => {
               try {
                 setLoading(true)
-                await completeJob(job_data._id, authState, image)
+                await completeJob(job_data._id, authState, false)
                 Alert.alert('Completed Gig Successfully!', 'Thank you for using Gigchasers', [{ style: 'default', onPress: () => navigation.navigate('Root', { screen: 'dashboard', data: 'completedJob' }), text: 'Continue' }])
               } catch (e) {
                 Alert.alert('Failed To Complete Gig', e.message || 'There was an error while completing gig')
@@ -101,8 +81,57 @@ export default function CompleteJob({ navigation }) {
             </CompleteButton>
           </View>
         }
+
+        {!!job_data.scanQR && (
+          <>
+            <View style={{ justifyContent: 'center', flex: 1 }}>
+              <SectionTitle>Confirm the gig completion by taking a picture of the finished work</SectionTitle>
+            </View>
+
+            <View style={{ flex: 3, paddingHorizontal: 12, paddingVertical: 20 }}>
+              {(!!image || capture) &&
+                <View style={{ flex: 1, justifyContent: 'flex-start' }}>
+                  <CaptureScreen image={image} capture={capture} onCapture={onCapture} />
+                  <RetakeButton disabled={loading} onPress={() => setCapturing(true)} activeOpacity={0.8}><Text style={{ color: '#888', fontSize: 16, fontWeight: 'bold' }}>Retake Picture</Text></RetakeButton>
+                </View>
+              }
+              {!image &&
+                <View style={{ flex: 1, justifyContent: 'flex-start', paddingHorizontal: 12, paddingVertical: 20 }}>
+                  <CompleteButton disabled={loading} onPress={() => setCapturing(true)} activeOpacity={0.8}>
+                    <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Take Photo</Text>
+                  </CompleteButton>
+                </View>
+              }
+            </View>
+
+            {!!image &&
+              <View style={{ flex: 1, paddingVertical: 16, justifyContent: 'center' }}>
+                <CompleteButton disabled={loading} onPress={async () => {
+                  try {
+                    setLoading(true)
+                    await completeJob(job_data._id, authState, image)
+                    Alert.alert('Completed Gig Successfully!', 'Thank you for using Gigchasers', [{ style: 'default', onPress: () => navigation.navigate('Root', { screen: 'dashboard', data: 'completedJob' }), text: 'Continue' }])
+                  } catch (e) {
+                    Alert.alert('Failed To Complete Gig', e.message || 'There was an error while completing gig')
+                  } finally {
+                    setLoading(false)
+                  }
+                }} activeOpacity={0.8}>
+                  {loading ?
+                    <ActivityIndicator size='small' color='white' />
+                    :
+                    <>
+                      <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>Complete</Text>
+                      <GigChaserJobWord color="white" width="60px" height="18" style={{ marginHorizontal: 0 }} />
+                    </>
+                  }
+                </CompleteButton>
+              </View>
+            }
+          </>
+        )}
       </View>
-    </Container>
+    </Container >
   );
 }
 

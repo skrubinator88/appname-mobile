@@ -39,7 +39,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
             // if job has a future schedule, skip entry
             return;
           }
-          data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
+          data.distance = distanceBetweenTwoCoordinates(data.coordinates.latitude, data.coordinates.longitude, latitude, longitude);
           return dispatch(JobsStoreActions.add(document.id, data));
         }
         case "modified": {
@@ -48,7 +48,7 @@ exports.getJobsAndSubscribeJobsChannel = (state, dispatch) => {
             // if not current job, skip entry
             return;
           }
-          data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
+          data.distance = distanceBetweenTwoCoordinates(data.coordinates.latitude, data.coordinates.longitude, latitude, longitude);
           return dispatch(JobsStoreActions.update(document.id, data));
         }
         case "removed": {

@@ -155,7 +155,7 @@ export const JobContextProvider = (props) => {
                     if (viewed.find(item => snap.id === item)) {
                         return
                     }
-                    data.distance = distanceBetweenTwoCoordinates(data.coordinates["U"], data.coordinates["k"], latitude, longitude);
+                    data.distance = distanceBetweenTwoCoordinates(data.coordinates.latitude, data.coordinates.longitude, latitude, longitude);
                     data._id = snap.id;
                     jobList.push(data)
                 })

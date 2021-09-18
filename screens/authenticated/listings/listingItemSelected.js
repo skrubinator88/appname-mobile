@@ -12,7 +12,7 @@ import Text from "../../../components/text";
 import { LISTING_CONTEXT } from "../../../contexts/ListingContext";
 import JobsController from "../../../controllers/JobsControllers";
 import env, { default as config } from "../../../env";
-import { sendNotification } from "../../../functions";
+import { distanceBetweenTwoCoordinates, sendNotification } from "../../../functions";
 import ReportJob from "../root/UIOverlay/reportJob";
 import { CounterOfferView } from "./index";
 import ChatsController from "../../../controllers/ChatsController";
@@ -28,6 +28,7 @@ export default function ListingItemSelected({ navigation }) {
 	const [chat, setChat] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [state, setState] = useState({ showCounterOffer: false, hasPendingOffer: false });
+	const [distance, setDistance] = useState(0)
 
 	const { hasPendingOffer } = state
 	const hasUnreadChat = chat?.initialized && chat?.hasUnreadChat?.[authState.userID]
@@ -72,6 +73,16 @@ export default function ListingItemSelected({ navigation }) {
 			}
 		}
 	}, [job_data.executed_by])
+
+	useEffect(() => {
+		if (location) {
+			const userLocation = job_data.active_location;
+			const jobLocation = job_data.coordinates;
+			// get distance between points in miles
+			const distance = distanceBetweenTwoCoordinates(jobLocation.latitude, jobLocation.longitude, userLocation.latitude, userLocation.longitude);
+			setDistance(distance.toFixed(2))
+		}
+	}, [currentLocation?.coords?.latitude, currentLocation?.coords?.longitude]);
 
 	useEffect(() => {
 		if (isInProgress) {
@@ -283,9 +294,8 @@ export default function ListingItemSelected({ navigation }) {
 										</Text>
 										<View style={{ flexDirection: "row", justifyContent: 'center' }}>
 											<FontAwesome name="map-marker" size={24} color="red" />
-
 											<Column style={{ paddingLeft: 2, justifyContent: "center" }}>
-												<Text bold>15 min.</Text>
+												<Text bold>{`${distance}`} miles</Text>
 											</Column>
 										</View>
 									</Column>

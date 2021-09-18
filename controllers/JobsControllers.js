@@ -228,12 +228,14 @@ exports.currentUserJobsHistory = (user) => { };
 
 exports.completeJob = async (jobID, authState, image) => {
 	const body = new FormData();
-	const uriSplit = image.uri.split("/");
-	body.append('photo', {
-		uri: image.uri,
-		type: image.type,
-		name: uriSplit[uriSplit.length - 1],
-	})
+	if (image) {
+		const uriSplit = image.uri.split("/");
+		body.append('photo', {
+			uri: image.uri,
+			type: image.type,
+			name: uriSplit[uriSplit.length - 1],
+		})
+	}
 
 	const apiResponse = await fetch(`${config.API_URL}/users/completeJob`, {
 		method: "POST",

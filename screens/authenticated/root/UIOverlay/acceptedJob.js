@@ -1,9 +1,8 @@
-import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { watchPositionAsync } from "expo-location";
 import moment, { unix } from "moment";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Animated, Linking, Platform, StyleSheet, TouchableOpacity, View } from "react-native";
-import { colors } from "react-native-elements";
+import { ActivityIndicator, Alert, Animated, StyleSheet, TouchableOpacity, View } from "react-native";
 import { showLocation } from "react-native-map-link";
 import styled from "styled-components/native";
 import GigChaserJobWord from "../../../../assets/gig-logo";
@@ -138,7 +137,7 @@ export default function Screen45({ navigation }) {
       const jobLocation = job_data.coordinates;
 
       // get distance between points in miles
-      const distance = distanceBetweenTwoCoordinates(userLocation.latitude, userLocation.longitude, jobLocation["U"], jobLocation["k"]);
+      const distance = distanceBetweenTwoCoordinates(jobLocation.latitude, jobLocation.longitude, userLocation.latitude, userLocation.longitude);
 
       // console.log("distance", `${distance} in miles`);
 
@@ -192,6 +191,7 @@ export default function Screen45({ navigation }) {
       sourceLongitude: currentLocation?.coords?.longitude,
       googleForceLatLon: !(address && placeId),
       alwaysIncludeGoogle: true,
+      appsWhiteList: ['google-maps', 'apple-maps', 'waze', 'osmand',],
       title: address,
       googlePlaceId: placeId,
       dialogTitle: "Open External Map",
@@ -298,17 +298,17 @@ export default function Screen45({ navigation }) {
                 </View>
               </Column>
             </Row>
-            {!isInProgress &&
+            {(!isInProgress && job_data.scanQR) &&
               <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("QR Code", { job_data })}>
-                <Text small bold color={onSite ? colors.primary : "grey"}>
+                <Text small>
                   QR Code {onSite && " - Proceed"}
                 </Text>
                 <Ionicons name="ios-arrow-forward" size={24} />
               </CardOptionItem>
             }
             <CardOptionItem disabled={isCanceling || loading} row onPress={openMap}>
-              <Text small bold color={onSite ? colors.primary : "grey"}>Open Directions</Text>
-              <Ionicons name="map-outline" size={24} />
+              <Text small>Open Directions</Text>
+              <Ionicons name="ios-arrow-forward" size={24} />
             </CardOptionItem>
             <CardOptionItem disabled={isCanceling} row onPress={() => navigation.navigate("Job Details", { data: job_data })}>
               <Text small>View Job Description</Text>
